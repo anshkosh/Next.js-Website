@@ -1,0 +1,38 @@
+interface SendEmailParams {
+  to: string;
+  subject: string;
+  html: string;
+  text?: string;
+}
+
+export async function sendEmail(params: SendEmailParams): Promise<void> {
+  const apiKey = process.env.BREVO_API_KEY;
+  const fromEmail = process.env.EMAIL_FROM || "noreply@anshkosh.com";
+
+  if (!apiKey) {
+    throw new Error("BREVO_API_KEY is not configured in environment variables.");
+  }
+
+  const response = await fetch("https://api.brevo.com/v3/smtp/email", {
+    method: "POST",
+    headers: {
+      "api-key": apiKey,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      sender: { name: "anshkosh", email: fromEmail },
+      to: [{ email: params.to }],
+      subject: params.subject,
+      htmlContent: params.html,
+      textContent: params.text,
+    }),
+  });
+
+  if (!response.ok) {
+    const text = await response.text();
+    throw new Error(`Brevo API error: ${response.status} - ${text}`);
+  }
+
+  const result = await response.json().catch(() => ({}));
+  console.log(`[Brevo] Email sent successfully to ${params.to}. MessageId:`, result.messageId || "ok");
+}

@@ -1,0 +1,229 @@
+import { db } from "@/lib/db";
+import { Metadata } from "next";
+import Link from "next/link";
+import JournalCard from "@/components/landing/JournalCard";
+import { BookOpen } from "lucide-react";
+
+const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://anshkosh.com";
+const PER_PAGE = 12;
+
+export const metadata: Metadata = {
+  title: "Journal | Anshkosh — Startup Insights & Founder Stories",
+  description: "Explore articles, founder stories, industry trends, and startup insights from the Anshkosh team.",
+  openGraph: {
+    title: "Journal | Anshkosh",
+    description: "Startup insights, founder stories, and industry trends.",
+    url: `${BASE_URL}/journal`,
+    type: "website",
+    siteName: "Anshkosh",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Journal | Anshkosh",
+    description: "Startup insights, founder stories, and industry trends.",
+  },
+};
+
+export default async function JournalPage(props: {
+  searchParams: Promise<{ category?: string; page?: string }>;
+}) {
+  const searchParams = await props.searchParams;
+  const categorySlug = searchParams.category ?? "";
+  const page = Math.max(1, parseInt(searchParams.page ?? "1"));
+  const skip = (page - 1) * PER_PAGE;
+
+  const categoryFilter = categorySlug
+    ? { category: { slug: categorySlug } }
+    : {};
+
+  const [posts, totalCount, categories, featuredPost] = await Promise.all([
+    db.journalPost.findMany({
+      where: { status: "PUBLISHED", ...categoryFilter },
+      orderBy: [{ isFeatured: "desc" }, { publishedAt: "desc" }],
+      skip,
+      take: PER_PAGE,
+      select: {
+        id: true,
+        slug: true,
+        title: true,
+        excerpt: true,
+        coverImageUrl: true,
+        authorName: true,
+        readingTimeMinutes: true,
+        isFeatured: true,
+        publishedAt: true,
+        tags: true,
+        category: { select: { name: true, slug: true } },
+      },
+    }),
+    db.journalPost.count({ where: { status: "PUBLISHED", ...categoryFilter } }),
+    db.journalCategory.findMany({ orderBy: { sortOrder: "asc" }, select: { name: true, slug: true } }),
+    // Featured post for hero (only on first page, no category filter)
+    !categorySlug && page === 1
+      ? db.journalPost.findFirst({
+          where: { status: "PUBLISHED", isFeatured: true },
+          orderBy: { publishedAt: "desc" },
+          select: {
+            slug: true, title: true, excerpt: true, coverImageUrl: true,
+            authorName: true, readingTimeMinutes: true, publishedAt: true,
+            category: { select: { name: true, slug: true } },
+          },
+        })
+      : Promise.resolve(null),
+  ]);
+
+  const totalPages = Math.ceil(totalCount / PER_PAGE);
+
+  const buildPageUrl = (p: number) => {
+    const params = new URLSearchParams();
+    if (categorySlug) params.set("category", categorySlug);
+    if (p > 1) params.set("page", String(p));
+    const qs = params.toString();
+    return `/journal${qs ? `?${qs}` : ""}`;
+  };
+
+  return (
+    <div className="min-h-screen bg-gray-50/50">
+      {/* Header */}
+      <section className="bg-white border-b border-gray-200 py-14">
+        <div className="container mx-auto px-4 max-w-6xl text-center">
+          <div className="inline-flex items-center gap-2 bg-coral-50 text-coral-600 text-sm font-semibold px-4 py-1.5 rounded-full mb-4">
+            <BookOpen size={15} /> Anshkosh Journal
+          </div>
+          <h1 className="text-4xl md:text-5xl font-bold font-heading text-gray-900 mb-4">
+            Stories, insights & ideas
+          </h1>
+          <p className="text-lg text-gray-500 max-w-2xl mx-auto">
+            Founder stories, industry trends, and practical startup insights from the Anshkosh team.
+          </p>
+        </div>
+      </section>
+
+      {/* Category Filter Tabs */}
+      {categories.length > 0 && (
+        <section className="bg-white border-b border-gray-100 sticky top-16 z-30">
+          <div className="container mx-auto px-4 max-w-6xl">
+            <nav className="flex gap-1 overflow-x-auto py-3 scrollbar-hide">
+              <Link
+                href="/journal"
+                className={`shrink-0 px-4 py-1.5 rounded-full text-sm font-medium transition-colors ${
+                  !categorySlug
+                    ? "bg-coral-500 text-white"
+                    : "text-gray-600 hover:bg-gray-100"
+                }`}
+              >
+                All
+              </Link>
+              {categories.map(cat => (
+                <Link
+                  key={cat.slug}
+                  href={`/journal?category=${cat.slug}`}
+                  className={`shrink-0 px-4 py-1.5 rounded-full text-sm font-medium transition-colors ${
+                    categorySlug === cat.slug
+                      ? "bg-coral-500 text-white"
+                      : "text-gray-600 hover:bg-gray-100"
+                  }`}
+                >
+                  {cat.name}
+                </Link>
+              ))}
+            </nav>
+          </div>
+        </section>
+      )}
+
+      <div className="container mx-auto px-4 max-w-6xl py-12">
+        {/* Featured post hero — only on first unfiltered page */}
+        {featuredPost && (
+          <div className="mb-12">
+            <Link
+              href={`/journal/${featuredPost.slug}`}
+              className="group block bg-white border border-gray-200 rounded-2xl overflow-hidden hover:shadow-lg transition-shadow"
+            >
+              <div className="grid md:grid-cols-2 gap-0">
+                <div className="relative aspect-video md:aspect-auto md:min-h-[320px] bg-gradient-to-br from-coral-50 to-orange-100">
+                  {featuredPost.coverImageUrl ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={featuredPost.coverImageUrl}
+                      alt={featuredPost.title}
+                      className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    />
+                  ) : (
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <BookOpen size={64} className="text-coral-200" />
+                    </div>
+                  )}
+                </div>
+                <div className="p-8 flex flex-col justify-center gap-4">
+                  <div className="flex items-center gap-3">
+                    <span className="bg-coral-500 text-white text-xs font-bold px-3 py-1 rounded-full">✦ Featured</span>
+                    {featuredPost.category && (
+                      <span className="text-sm text-gray-500">{featuredPost.category.name}</span>
+                    )}
+                  </div>
+                  <h2 className="text-2xl md:text-3xl font-bold font-heading text-gray-900 leading-snug group-hover:text-coral-600 transition-colors">
+                    {featuredPost.title}
+                  </h2>
+                  {featuredPost.excerpt && (
+                    <p className="text-gray-500 leading-relaxed line-clamp-3">{featuredPost.excerpt}</p>
+                  )}
+                  <div className="flex items-center gap-4 text-sm text-gray-400">
+                    <span className="font-medium text-gray-600">{featuredPost.authorName}</span>
+                    {featuredPost.publishedAt && (
+                      <span>{featuredPost.publishedAt.toLocaleDateString("en-IN", { day: "numeric", month: "long", year: "numeric" })}</span>
+                    )}
+                    <span>{featuredPost.readingTimeMinutes}m read</span>
+                  </div>
+                </div>
+              </div>
+            </Link>
+          </div>
+        )}
+
+        {/* Post Grid */}
+        {posts.length === 0 ? (
+          <div className="text-center py-24 text-gray-400">
+            <BookOpen size={48} className="mx-auto mb-4 opacity-30" />
+            <p className="text-lg">No posts yet in this category.</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {posts.map(post => (
+              <JournalCard key={post.id} post={post} />
+            ))}
+          </div>
+        )}
+
+        {/* Pagination */}
+        {totalPages > 1 && (
+          <div className="flex justify-center gap-2 mt-12">
+            {page > 1 && (
+              <Link href={buildPageUrl(page - 1)} className="px-4 py-2 border border-gray-200 rounded-lg text-sm text-gray-600 hover:bg-white transition-colors">
+                ← Previous
+              </Link>
+            )}
+            {Array.from({ length: totalPages }).map((_, i) => (
+              <Link
+                key={i}
+                href={buildPageUrl(i + 1)}
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                  page === i + 1
+                    ? "bg-coral-500 text-white"
+                    : "border border-gray-200 text-gray-700 hover:bg-white"
+                }`}
+              >
+                {i + 1}
+              </Link>
+            ))}
+            {page < totalPages && (
+              <Link href={buildPageUrl(page + 1)} className="px-4 py-2 border border-gray-200 rounded-lg text-sm text-gray-600 hover:bg-white transition-colors">
+                Next →
+              </Link>
+            )}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}

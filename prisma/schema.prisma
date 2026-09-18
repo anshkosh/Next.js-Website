@@ -1,0 +1,288 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String    @id @default(cuid())
+  name          String
+  email         String    @unique
+  emailVerified Boolean   @default(false)
+  image         String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  role          String    @default("user")
+  banned        Boolean   @default(false)
+  banReason     String?
+  banExpires    DateTime?
+
+  sessions      Session[]
+  accounts      Account[]
+  startups      Startup[]
+  journalPosts  JournalPost[]
+}
+
+model Session {
+  id        String   @id
+  expiresAt DateTime
+  token     String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  ipAddress String?
+  userAgent String?
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Account {
+  id                    String    @id @default(cuid())
+  accountId             String
+  providerId            String
+  userId                String
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  accessToken           String?
+  refreshToken          String?
+  idToken               String?
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  password              String?
+  issuer                String?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+}
+
+model Verification {
+  id         String   @id @default(cuid())
+  identifier String
+  value      String
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+enum StartupStatus {
+  DRAFT
+  PENDING_REVIEW
+  LIVE
+  REJECTED
+  SUSPENDED
+}
+
+model Startup {
+  id            String        @id @default(cuid())
+  founderId     String
+  founder       User          @relation(fields: [founderId], references: [id])
+  name          String
+  slug          String        @unique
+  tagline       String        @db.VarChar(120)
+  description   String
+  websiteUrl    String
+  videoUrl      String?
+  logoUrl       String?
+  galleryImages String[]
+  founderName   String
+  categoryId    String
+  category      Category      @relation(fields: [categoryId], references: [id])
+  status        StartupStatus @default(DRAFT)
+  metadata      Json?
+  upvoteCount   Int           @default(0)
+  updateCount   Int           @default(0)
+  adminNotes    String?
+  reviewedBy    String?
+  reviewedAt    DateTime?
+  publishedAt   DateTime?
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  // Founder contact
+  startupPhone      String?
+
+  // Core Proposition
+  problemStatement  String?
+  solutionStatement String?
+  targetAudience    String?
+  prototypeStatus   String?
+  tractionEvidence  String?
+
+  searchVector  Unsupported("tsvector")?
+
+  upvotes       Upvote[]
+  slugRedirects SlugRedirect[]
+  founders      StartupFounder[]
+  featuredEntry FeaturedStartup?
+  updates       StartupUpdate[]
+  comments      Comment[]
+
+  @@index([founderId])
+  @@index([categoryId])
+  @@index([status])
+  @@index([upvoteCount(sort: Desc)])
+  @@index([searchVector], type: Gin)
+}
+
+model StartupFounder {
+  id          String  @id @default(cuid())
+  startupId   String
+  startup     Startup @relation(fields: [startupId], references: [id], onDelete: Cascade)
+  name        String
+  role        String?
+  photoUrl    String?
+  linkedinUrl String?
+  twitterUrl  String?
+  sortOrder   Int     @default(0)
+  
+  @@index([startupId])
+}
+
+model Category {
+  id          String    @id @default(cuid())
+  name        String    @unique
+  slug        String    @unique
+  description String?
+  iconName    String?
+  sortOrder   Int       @default(0)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  startups    Startup[]
+}
+
+model Upvote {
+  id              String   @id @default(cuid())
+  startupId       String
+  startup         Startup  @relation(fields: [startupId], references: [id], onDelete: Cascade)
+  fingerprintHash String
+  cookieId        String?
+  createdAt       DateTime @default(now())
+
+  @@unique([startupId, fingerprintHash])
+  @@unique([startupId, cookieId])
+  @@index([startupId])
+}
+
+model SlugRedirect {
+  id        String  @id @default(cuid())
+  oldSlug   String  @unique
+  startupId String
+  startup   Startup @relation(fields: [startupId], references: [id], onDelete: Cascade)
+}
+
+model AppSetting {
+  id        String   @id @default(cuid())
+  key       String   @unique
+  value     String
+  updatedAt DateTime @updatedAt
+}
+
+model FeaturedStartup {
+  id        String   @id @default(cuid())
+  startupId String
+  startup   Startup  @relation(fields: [startupId], references: [id], onDelete: Cascade)
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+
+  @@unique([startupId])
+  @@index([sortOrder])
+}
+
+enum JournalPostStatus {
+  DRAFT
+  PUBLISHED
+}
+
+model JournalCategory {
+  id          String         @id @default(cuid())
+  name        String         @unique
+  slug        String         @unique
+  description String?
+  sortOrder   Int            @default(0)
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+
+  posts       JournalPost[]
+}
+
+model JournalPost {
+  id                 String            @id @default(cuid())
+  title              String
+  slug               String            @unique
+  excerpt            String?           // Optional manual excerpt; if null, auto-generated at read time
+  authorName         String            @default("Anshkosh Team")
+  coverImageUrl      String?           // Featured/cover image stored in R2
+  contentJson        Json?             // Quill Delta JSON for editor re-hydration
+  contentHtml        String?           // Rendered HTML for fast public display
+  status             JournalPostStatus @default(DRAFT)
+  isFeatured         Boolean           @default(false)
+  tags               String[]          // Free-form tags
+  readingTimeMinutes Int               @default(1)
+
+  // SEO fields
+  metaTitle          String?
+  metaDescription    String?
+  metaKeywords       String[]
+  canonicalUrl       String?
+
+  // Category
+  categoryId         String?
+  category           JournalCategory?  @relation(fields: [categoryId], references: [id])
+
+  // Author (linked to admin user for display, but name is free-text)
+  authorId           String?
+  author             User?             @relation(fields: [authorId], references: [id])
+
+  publishedAt        DateTime?
+  createdAt          DateTime          @default(now())
+  updatedAt          DateTime          @updatedAt
+
+  @@index([status])
+  @@index([categoryId])
+  @@index([isFeatured])
+  @@index([publishedAt(sort: Desc)])
+}
+
+model StartupUpdate {
+  id        String   @id @default(cuid())
+  startupId String
+  startup   Startup  @relation(fields: [startupId], references: [id], onDelete: Cascade)
+  title     String   @db.VarChar(200)
+  body      String
+  imageUrl  String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([startupId])
+  @@index([createdAt(sort: Desc)])
+}
+
+enum CommentStatus {
+  PENDING   // awaiting admin approval
+  APPROVED  // visible publicly
+  REJECTED  // hidden
+}
+
+model Comment {
+  id          String        @id @default(cuid())
+  startupId   String
+  startup     Startup       @relation(fields: [startupId], references: [id], onDelete: Cascade)
+
+  // Public commenter (anonymous)
+  authorName  String
+  authorEmail String        // stored privately, never shown publicly
+  body        String        @db.VarChar(2000)
+  status      CommentStatus @default(PENDING)
+
+  // Founder reply (one level deep, posted from authenticated dashboard)
+  reply       String?       @db.VarChar(2000)
+  repliedAt   DateTime?
+  repliedBy   String?       // display name shown on reply card (e.g. "Priya · Founder")
+
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  @@index([startupId, createdAt(sort: Desc)])
+  @@index([status])
+}

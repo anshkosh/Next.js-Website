@@ -1,0 +1,148 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+@plugin "@tailwindcss/typography";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --color-coral-50: #fff1ee;
+  --color-coral-100: #ffe1d5;
+  --color-coral-200: #ffc4ab;
+  --color-coral-300: #ffa17a;
+  --color-coral-400: #ff7642;
+  --color-coral-500: #E8521E;
+  --color-coral-600: #c84112;
+  --color-coral-700: #a23510;
+  --color-coral-800: #852d11;
+  --color-coral-900: #6d2711;
+
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-inter), sans-serif;
+  --font-heading: var(--font-oswald), sans-serif;
+  --font-oswald: var(--font-oswald), sans-serif;
+  --font-jakarta: var(--font-oswald), sans-serif;
+  
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-success: var(--success);
+  --color-success-foreground: var(--success-foreground);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-full: 9999px;
+  
+  --shadow-soft: 0 1px 3px rgba(0,0,0,0.08), 0 4px 12px rgba(0,0,0,0.04);
+}
+
+:root {
+  --background: #FAFAFA;
+  --foreground: #1A1A2E;
+  --card: #FFFFFF;
+  --card-foreground: #1A1A2E;
+  --popover: #FFFFFF;
+  --popover-foreground: #1A1A2E;
+  --primary: #E8521E;
+  --primary-foreground: #FFFFFF;
+  --secondary: #FFC947;
+  --secondary-foreground: #1A1A2E;
+  --muted: #F3F4F6;
+  --muted-foreground: #6B7280;
+  --accent: #6366F1;
+  --accent-foreground: #FFFFFF;
+  --destructive: #EF4444;
+  --destructive-foreground: #FFFFFF;
+  --success: #22C55E;
+  --success-foreground: #FFFFFF;
+  --border: #E5E7EB;
+  --input: #E5E7EB;
+  --ring: #E8521E;
+  --radius: 0.75rem;
+}
+
+.dark {
+  --background: #1A1A2E;
+  --foreground: #FAFAFA;
+  --card: #161625;
+  --card-foreground: #FAFAFA;
+  --popover: #161625;
+  --popover-foreground: #FAFAFA;
+  --primary: #E8521E;
+  --primary-foreground: #FFFFFF;
+  --secondary: #FFC947;
+  --secondary-foreground: #1A1A2E;
+  --muted: #2D2D42;
+  --muted-foreground: #9CA3AF;
+  --accent: #6366F1;
+  --accent-foreground: #FFFFFF;
+  --destructive: #F87171;
+  --destructive-foreground: #1A1A2E;
+  --success: #4ADE80;
+  --success-foreground: #1A1A2E;
+  --border: #2D2D42;
+  --input: #2D2D42;
+  --ring: #E8521E;
+}
+
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+  html {
+    @apply font-sans;
+  }
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-oswald), sans-serif;
+  }
+}
+
+/* Utility: hide scrollbar while allowing scroll */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+/* Journal article Quill-rendered content */
+.journal-content h2 { font-size: 1.5rem; font-weight: 700; margin: 2rem 0 0.75rem; font-family: var(--font-oswald), sans-serif; color: #111827; }
+.journal-content h3 { font-size: 1.25rem; font-weight: 600; margin: 1.5rem 0 0.5rem; font-family: var(--font-oswald), sans-serif; color: #111827; }
+.journal-content h4 { font-size: 1.1rem; font-weight: 600; margin: 1.25rem 0 0.5rem; color: #111827; }
+.journal-content p { margin-bottom: 1rem; line-height: 1.8; color: #374151; }
+.journal-content ul, .journal-content ol { margin: 1rem 0 1rem 1.5rem; color: #374151; }
+.journal-content li { margin-bottom: 0.4rem; line-height: 1.7; }
+.journal-content ul { list-style-type: disc; }
+.journal-content ol { list-style-type: decimal; }
+.journal-content blockquote { border-left: 4px solid #E8521E; margin: 1.5rem 0; padding: 0.75rem 1.25rem; color: #6b7280; font-style: italic; background: #fff7f5; border-radius: 0 8px 8px 0; }
+.journal-content pre { background: #1e293b; color: #e2e8f0; border-radius: 8px; padding: 1rem 1.25rem; overflow-x: auto; margin: 1.5rem 0; font-size: 0.875rem; line-height: 1.7; }
+.journal-content code { background: #f1f5f9; color: #e8521e; padding: 0.15rem 0.4rem; border-radius: 4px; font-size: 0.875em; }
+.journal-content pre code { background: transparent; color: inherit; padding: 0; }
+.journal-content a { color: #E8521E; text-decoration: underline; }
+.journal-content a:hover { color: #c84112; }
+.journal-content img { max-width: 100%; border-radius: 12px; margin: 1.5rem 0; box-shadow: 0 4px 16px rgba(0,0,0,0.08); }
+.journal-content iframe { max-width: 100%; border-radius: 8px; margin: 1.5rem 0; }
+.journal-content strong { color: #111827; }
+.journal-content hr { border: none; border-top: 1px solid #e5e7eb; margin: 2rem 0; }
+
