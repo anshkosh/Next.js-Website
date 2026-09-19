@@ -1,8 +1,19 @@
 import { PrismaClient } from "@prisma/client";
+import { randomBytes, scrypt as scryptCallback } from "crypto";
+import { promisify } from "util";
 
 //use: npx tsx scripts/set-admin-password.ts --email someone@example.com --password SomePass@99
 
 const prisma = new PrismaClient();
+const scrypt = promisify(scryptCallback);
+
+// Replicates oslo/password Scrypt hash format: "hex(salt):hex(derivedKey)"
+// Parameters match oslo defaults: N=16384, r=16, p=1, keylen=64
+async function hashPassword(password: string): Promise<string> {
+  const salt = randomBytes(16);
+  const key = (await scrypt(password, salt, 64, { N: 16384, r: 16, p: 1 })) as Buffer;
+  return salt.toString("hex") + ":" + key.toString("hex");
+}
 
 async function main() {
   const args = process.argv.slice(2);
@@ -22,9 +33,7 @@ async function main() {
       ? args[passwordFlag + 1]
       : "Admin@12345678"; // default temporary password
 
-  const { Scrypt } = await import("oslo/password");
-  const scrypt = new Scrypt();
-  const hashedPassword = await scrypt.hash(plainPassword);
+  const hashedPassword = await hashPassword(plainPassword);
 
   const user = await prisma.user.findUnique({ where: { email } });
   if (!user) {
