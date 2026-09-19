@@ -11,7 +11,12 @@ const scrypt = promisify(scryptCallback);
 // Parameters match oslo defaults: N=16384, r=16, p=1, keylen=64
 async function hashPassword(password: string): Promise<string> {
   const salt = randomBytes(16);
-  const key = (await scrypt(password, salt, 64, { N: 16384, r: 16, p: 1 })) as Buffer;
+  const key = (await scrypt(password, salt, 64, {
+    N: 16384,
+    r: 16,
+    p: 1,
+    maxmem: 128 * 1024 * 1024, // 128MB — oslo's params need ~100MB
+  })) as Buffer;
   return salt.toString("hex") + ":" + key.toString("hex");
 }
 
