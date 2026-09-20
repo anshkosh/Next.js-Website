@@ -1,10 +1,10 @@
-import { Metadata } from "next";
+import { seoMetadata } from "@/lib/seo";
 
-export const metadata: Metadata = {
+export const metadata = seoMetadata({
   title: "Trust & Safety — Anshkosh",
-  description:
-    "How Anshkosh keeps public validation and campaigns accountable.",
-};
+  description: "How Anshkosh keeps public validation and campaigns accountable.",
+  path: "/trust-safety",
+});
 
 export default function TrustSafetyPage() {
   return (
@@ -20,8 +20,8 @@ export default function TrustSafetyPage() {
         <p className="text-xl text-gray-500 mb-4">
           How Anshkosh keeps public validation and campaigns accountable.
         </p>
-        <p className="text-sm text-gray-400 mb-8 block">
-          Reference: https://www.anshkosh.com/
+        <p className="text-sm text-gray-600 mb-8 block">
+          Effective date: September 20, 2026 · Operator: Anshkosh
         </p>
 
         {/* Sections */}
@@ -136,8 +136,8 @@ export default function TrustSafetyPage() {
         </div>
 
         {/* Footer Disclaimer */}
-        <p className="text-sm text-gray-400 italic mt-12 pt-6 border-t border-gray-100">
-          This documentation does not replace jurisdiction-specific legal advice.
+        <p className="text-sm text-gray-600 mt-12 pt-6 border-t border-gray-100">
+          Questions about trust and safety can be sent to <a className="text-coral-600 underline" href="mailto:hello@anshkosh.com">hello@anshkosh.com</a>.
         </p>
       </div>
     </section>

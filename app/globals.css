@@ -3,6 +3,15 @@
 @import "shadcn/tailwind.css";
 @plugin "@tailwindcss/typography";
 
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 3px solid var(--color-coral-500, #E8521E);
+  outline-offset: 3px;
+}
+
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
@@ -115,6 +124,46 @@
   h1, h2, h3, h4, h5, h6 {
     font-family: var(--font-oswald), sans-serif;
   }
+
+  button:not(:disabled), a {
+    transition-property: color, background-color, border-color, box-shadow, transform;
+    transition-duration: 150ms;
+    transition-timing-function: ease-out;
+  }
+
+  button:not(:disabled):active {
+    transform: translateY(1px);
+  }
+}
+
+/* Keep the existing editorial utility classes legible when the theme changes. */
+html.dark body { background-color: #111827; color: #f9fafb; }
+html.dark [class~="bg-white"], html.dark [class*="bg-white/"] { background-color: #171717; }
+html.dark [class~="bg-gray-50"], html.dark [class*="bg-gray-50/"] { background-color: #111827; }
+html.dark [class~="bg-gray-100"] { background-color: #1f2937; }
+html.dark [class~="text-gray-900"] { color: #f9fafb; }
+html.dark [class~="text-gray-700"] { color: #d1d5db; }
+html.dark [class~="text-gray-600"] { color: #cbd5e1; }
+html.dark [class~="text-gray-500"], html.dark [class~="text-gray-400"] { color: #94a3b8; }
+html.dark [class~="border-gray-100"], html.dark [class~="border-gray-200"], html.dark [class~="border-gray-300"] { border-color: #374151; }
+html.dark [class*="bg-[#FAF8F5]"] { background-color: #111827; }
+html.dark [class*="bg-[#F7F1E7]"] { background-color: #1f2937; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+@media print {
+  @page { margin: 0.7in; }
+  header, footer, [data-print-hide="true"], .print\:hidden { display: none !important; }
+  body, main, article { background: #fff !important; color: #000 !important; }
+  .journal-content, .journal-content p, .journal-content li, .journal-content h2, .journal-content h3, .journal-content h4 { color: #000 !important; }
+  .journal-content a { color: #000 !important; text-decoration: underline; }
 }
 
 /* Utility: hide scrollbar while allowing scroll */

@@ -4,7 +4,6 @@ import Image from "next/image";
 import UpvoteButton from "@/components/upvote/UpvoteButton";
 import Link from "next/link";
 import { cookies } from "next/headers";
-import { getOgImageUrl } from "@/lib/utils/og-image";
 import FoundersSection from "@/components/startup/FoundersSection";
 import MediaGallery from "@/components/startup/MediaGallery";
 import KeyFeaturesSection from "@/components/startup/KeyFeaturesSection";
@@ -15,7 +14,59 @@ import CorePropositionSection from "@/components/startup/CorePropositionSection"
 
 export const revalidate = 60;
 
+type StartupFeature = {
+  icon: string;
+  title: string;
+  description: string;
+};
+
+type StartupMetadata = {
+  city?: string;
+  foundedYear?: string | number;
+  twitterUrl?: string;
+  linkedinUrl?: string;
+  features?: StartupFeature[];
+};
+
+function readStartupMetadata(value: unknown): StartupMetadata {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return {};
+
+  const record = value as Record<string, unknown>;
+  const features = Array.isArray(record.features)
+    ? record.features.filter((feature): feature is StartupFeature => {
+        if (!feature || typeof feature !== "object" || Array.isArray(feature)) {
+          return false;
+        }
+
+        const item = feature as Record<string, unknown>;
+        return (
+          typeof item.icon === "string" &&
+          typeof item.title === "string" &&
+          typeof item.description === "string"
+        );
+      })
+    : undefined;
+
+  return {
+    city: typeof record.city === "string" ? record.city : undefined,
+    foundedYear:
+      typeof record.foundedYear === "string" ||
+      typeof record.foundedYear === "number"
+        ? record.foundedYear
+        : undefined,
+    twitterUrl:
+      typeof record.twitterUrl === "string" ? record.twitterUrl : undefined,
+    linkedinUrl:
+      typeof record.linkedinUrl === "string"
+        ? record.linkedinUrl
+        : undefined,
+    features,
+  };
+}
+
 export async function generateStaticParams() {
+  if (!process.env.DATABASE_URL) return [];
+
   const startups = await db.startup.findMany({
     where: { status: "LIVE" },
     select: { slug: true },
@@ -30,6 +81,8 @@ export async function generateMetadata(props: {
   params: Promise<{ slug: string }>;
 }) {
   const params = await props.params;
+  if (!process.env.DATABASE_URL) return { title: "Startup — Anshkosh" };
+
   const startup = await db.startup.findUnique({
     where: { slug: params.slug, status: "LIVE" },
     include: { category: true },
@@ -41,7 +94,7 @@ export async function generateMetadata(props: {
   const url = `${baseUrl}/startups/${startup.slug}`;
 
   return {
-    title: `${startup.name} — ${startup.tagline} | anshkosh`,
+    title: `${startup.name} — ${startup.tagline} | Anshkosh`,
     description: startup.description.slice(0, 160),
     openGraph: {
       title: startup.name,
@@ -65,6 +118,8 @@ export default async function StartupDetailPage(props: {
   params: Promise<{ slug: string }>;
 }) {
   const params = await props.params;
+  if (!process.env.DATABASE_URL) notFound();
+
   const cookieStore = await cookies();
   const cookieId = cookieStore.get("anshkosh_vid")?.value;
 
@@ -129,12 +184,13 @@ export default async function StartupDetailPage(props: {
     ? initialComments[initialComments.length - 1]?.id ?? null
     : null;
 
-  const { city, foundedYear, twitterUrl, linkedinUrl } =
-    (startup.metadata as any) || {};
+  const { city, foundedYear, twitterUrl, linkedinUrl, features } =
+    readStartupMetadata(startup.metadata);
   const hasUpvoted = startup.upvotes && startup.upvotes.length > 0;
-  
-  const metadata = (startup.metadata as any) || {};
-  const features = metadata.features || [];
+  const updates = startup.updates.map((update) => ({
+    ...update,
+    createdAt: update.createdAt.toISOString(),
+  }));
 
   const ratingValue = Math.min(5, (startup.upvoteCount / 100) * 5).toFixed(1);
 
@@ -266,7 +322,7 @@ export default async function StartupDetailPage(props: {
 
         {/* ── Updates Section ── */}
         <div id="section-updates" className="scroll-mt-32">
-          <UpdatesSection updates={startup.updates as any} />
+          <UpdatesSection updates={updates} />
         </div>
 
         {/* ── Questions / Discussion Section ── */}

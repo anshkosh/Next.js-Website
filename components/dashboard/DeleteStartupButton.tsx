@@ -46,14 +46,14 @@ export default function DeleteStartupButton({
       </button>
 
       {showConfirm && (
-        <div className="fixed inset-0 bg-black/60 flex items-center justify-center p-4 z-[100] overflow-y-auto">
-          <div className="bg-white rounded-2xl max-w-md w-full overflow-hidden shadow-xl animate-in fade-in zoom-in-95 duration-200 relative">
+        <div className="fixed inset-0 bg-black/60 flex items-center justify-center p-4 z-[100] overflow-y-auto" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget && !isDeleting) setShowConfirm(false); }}>
+          <div role="dialog" aria-modal="true" aria-labelledby="delete-startup-title" className="bg-white rounded-2xl max-w-md w-full overflow-hidden shadow-xl animate-in fade-in zoom-in-95 duration-200 relative">
             <div className="p-6">
               <div className="w-12 h-12 rounded-full bg-red-100 flex items-center justify-center text-red-600 mb-4 mx-auto">
                 <AlertCircle size={24} />
               </div>
               
-              <h3 className="text-xl font-bold text-center text-gray-900 mb-2">
+              <h3 id="delete-startup-title" className="text-xl font-bold text-center text-gray-900 mb-2">
                 Delete Startup
               </h3>
               

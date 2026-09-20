@@ -5,6 +5,7 @@ import { authClient } from "@/lib/auth-client";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Loader2, Mail } from "lucide-react";
+import PasswordField from "@/components/auth/PasswordField";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -20,7 +21,7 @@ export default function LoginPage() {
     setError("");
 
     try {
-      const { data, error } = await authClient.signIn.email({
+      const { error } = await authClient.signIn.email({
         email,
         password,
       });
@@ -30,8 +31,8 @@ export default function LoginPage() {
       } else {
         router.push("/dashboard");
       }
-    } catch (err: any) {
-      setError(err.message || "An unexpected error occurred");
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "An unexpected error occurred");
     } finally {
       setLoading(false);
     }
@@ -45,8 +46,8 @@ export default function LoginPage() {
         provider: "google",
         callbackURL: "/dashboard",
       });
-    } catch (err: any) {
-      setError(err.message || "Failed to initialize Google login");
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Failed to initialize Google login");
       setGoogleLoading(false);
     }
   };
@@ -60,9 +61,9 @@ export default function LoginPage() {
         <Link href="/" className="flex justify-center mb-6">
           <div className="w-12 h-12 bg-coral-500 rounded-xl flex items-center justify-center text-white font-bold text-3xl shadow-sm">a</div>
         </Link>
-        <h2 className="text-center text-3xl font-extrabold text-gray-900 font-heading tracking-tight">
+        <h1 className="text-center text-3xl font-extrabold text-gray-900 font-heading tracking-tight">
           Welcome back
-        </h2>
+        </h1>
         <p className="mt-2 text-center text-sm text-gray-600">
           Sign in to manage your startup profile
         </p>
@@ -108,13 +109,16 @@ export default function LoginPage() {
             )}
             
             <div>
-              <label className="block text-sm font-medium text-gray-700">Email address</label>
+              <label htmlFor="login-email" className="block text-sm font-medium text-gray-700">Email address</label>
               <div className="mt-1 relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                   <Mail className="h-5 w-5 text-gray-400" />
                 </div>
                 <input
+                  id="login-email"
+                  name="email"
                   type="email"
+                  autoComplete="email"
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
@@ -126,14 +130,17 @@ export default function LoginPage() {
 
             <div>
               <div className="flex items-center justify-between">
-                <label className="block text-sm font-medium text-gray-700">Password</label>
-                <Link href="#" className="text-sm font-medium text-coral-600 hover:text-coral-500">
+                <label htmlFor="login-password" className="block text-sm font-medium text-gray-700">Password</label>
+                <Link href="/forgot-password" className="text-sm font-medium text-coral-600 hover:text-coral-500">
                   Forgot password?
                 </Link>
               </div>
               <div className="mt-1">
-                <input
-                  type="password"
+                <PasswordField
+                  id="login-password"
+                  name="password"
+                  label="Password"
+                  autoComplete="current-password"
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
@@ -153,7 +160,7 @@ export default function LoginPage() {
           </form>
           
           <div className="mt-8 text-center text-sm">
-            <span className="text-gray-500">Don't have an account? </span>
+            <span className="text-gray-500">Don&apos;t have an account? </span>
             <Link href="/register" className="font-medium text-coral-600 hover:text-coral-500">
               Register here
             </Link>

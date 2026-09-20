@@ -4,6 +4,7 @@ import Image from "next/image";
 import { Play } from "lucide-react";
 
 export default function MediaGallery({ videoUrl, images }: { videoUrl?: string | null; images?: string[] }) {
+  const [activeIndex, setActiveIndex] = useState(0);
   const hasVideo = !!videoUrl;
   const hasImages = images && images.length > 0;
   
@@ -43,7 +44,6 @@ export default function MediaGallery({ videoUrl, images }: { videoUrl?: string |
     images.forEach((img) => mediaItems.push({ type: "image", url: img }));
   }
 
-  const [activeIndex, setActiveIndex] = useState(0);
   const activeMedia = mediaItems[activeIndex];
 
   if (!activeMedia) return null;
@@ -62,7 +62,7 @@ export default function MediaGallery({ videoUrl, images }: { videoUrl?: string |
             allowFullScreen
           ></iframe>
         ) : (
-          <Image src={activeMedia.url} alt="Media" fill className="object-cover" />
+          <Image src={activeMedia.url} alt={`Startup media ${activeIndex + 1}`} fill className="object-cover" />
         )}
       </div>
 
@@ -84,7 +84,7 @@ export default function MediaGallery({ videoUrl, images }: { videoUrl?: string |
                   <Play className="w-6 h-6 text-white" fill="white" />
                 </div>
               ) : (
-                <Image src={item.url} alt={`Thumbnail ${idx}`} fill className="object-cover" />
+                <Image src={item.url} alt={`Startup media thumbnail ${idx + 1}`} fill className="object-cover" />
               )}
             </button>
           ))}

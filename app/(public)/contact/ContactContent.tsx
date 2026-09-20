@@ -140,11 +140,14 @@ function SubjectChips({
   onChange: (v: ContactSubject) => void;
 }) {
   return (
-    <div className="flex flex-wrap gap-2">
+    <div role="radiogroup" aria-labelledby="contact-subject-label" className="flex flex-wrap gap-2">
       {CONTACT_SUBJECTS.map((s) => (
         <button
           key={s}
           type="button"
+          role="radio"
+          aria-checked={value === s}
+          aria-label={`Subject: ${s}`}
           onClick={() => onChange(s)}
           className={`px-4 py-1.5 rounded-full text-sm font-medium border transition-all duration-150 ${
             value === s
@@ -331,9 +334,9 @@ export default function ContactContent() {
 
                   {/* Subject chips */}
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <p id="contact-subject-label" className="block text-sm font-medium text-gray-700 mb-2">
                       Subject <span className="text-coral-500">*</span>
-                    </label>
+                    </p>
                     <SubjectChips
                       value={form.subject}
                       onChange={(v) => setField("subject", v)}

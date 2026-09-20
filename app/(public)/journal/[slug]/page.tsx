@@ -5,6 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { Clock, Calendar, ArrowLeft, Tag } from "lucide-react";
 import JournalCard from "@/components/landing/JournalCard";
+import CopyButton from "@/components/content/CopyButton";
 
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://anshkosh.com";
 
@@ -80,6 +81,7 @@ export default async function JournalArticlePage({ params }: Props) {
           readingTimeMinutes: true,
           isFeatured: true,
           publishedAt: true,
+          updatedAt: true,
           tags: true,
           category: { select: { name: true, slug: true } },
         },
@@ -174,6 +176,10 @@ export default async function JournalArticlePage({ params }: Props) {
                   <Clock size={14} />
                   {post.readingTimeMinutes} min read
                 </span>
+                {post.updatedAt && post.publishedAt && post.updatedAt.getTime() > post.publishedAt.getTime() && (
+                  <span>Updated {post.updatedAt.toLocaleDateString("en-IN", { day: "numeric", month: "long", year: "numeric" })}</span>
+                )}
+                <CopyButton value={`${BASE_URL}/journal/${post.slug}`} label="Copy article link" />
               </div>
             </div>
           </div>

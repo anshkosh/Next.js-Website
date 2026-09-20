@@ -2,16 +2,35 @@ import { db } from "@/lib/db";
 import { notFound } from "next/navigation";
 import StartupCard from "@/components/startup/StartupCard";
 import { cookies } from "next/headers";
+import Link from "next/link";
+import CategoryIcon from "@/components/category/CategoryIcon";
+import { seoMetadata } from "@/lib/seo";
 
 export const revalidate = 60;
 
+export async function generateMetadata(props: { params: Promise<{ slug: string }> }) {
+  if (!process.env.DATABASE_URL) return seoMetadata({ title: "Startup Category — Anshkosh", description: "Explore Indian startup categories on Anshkosh.", path: "/category/preview" });
+  const { slug } = await props.params;
+  const category = await db.category.findUnique({ where: { slug }, select: { name: true, description: true } });
+  if (!category) return seoMetadata({ title: "Category not found — Anshkosh", description: "The requested startup category could not be found.", path: `/category/${slug}` });
+  return seoMetadata({
+    title: `${category.name} Startups — Anshkosh`,
+    description: category.description || `Explore ${category.name} startups on Anshkosh.`,
+    path: `/category/${slug}`,
+  });
+}
+
 export async function generateStaticParams() {
+  if (!process.env.DATABASE_URL) return [];
   const categories = await db.category.findMany({ select: { slug: true } });
   return categories.map((cat) => ({ slug: cat.slug }));
 }
 
 export default async function CategoryPage(props: { params: Promise<{ slug: string }> }) {
   const params = await props.params;
+  if (!process.env.DATABASE_URL) {
+    return <div className="container mx-auto px-4 py-24 max-w-2xl text-center"><h1 className="text-3xl font-bold text-gray-900 mb-3">Category preview</h1><p className="text-gray-600 mb-6">Startup categories will be available when the pilot directory is connected.</p><Link href="/register" className="inline-flex rounded-lg bg-coral-500 px-5 py-3 font-semibold text-white hover:bg-coral-600">Register as a founder</Link></div>;
+  }
   const cookieStore = await cookies();
   const cookieId = cookieStore.get("anshkosh_vid")?.value;
 
@@ -44,7 +63,7 @@ export default async function CategoryPage(props: { params: Promise<{ slug: stri
   return (
     <div className="container mx-auto px-4 py-12 max-w-5xl">
       <div className="bg-white p-8 rounded-2xl border border-gray-100 shadow-sm mb-8 text-center">
-        <div className="text-5xl mb-4">{category.iconName}</div>
+        <div className="mb-4 flex justify-center text-coral-500"><CategoryIcon name={category.iconName} className="h-12 w-12" aria-hidden="true" /></div>
         <h1 className="text-3xl font-bold mb-2">{category.name}</h1>
         {category.description && (
           <p className="text-gray-600 max-w-2xl mx-auto mb-4">{category.description}</p>
@@ -61,7 +80,8 @@ export default async function CategoryPage(props: { params: Promise<{ slug: stri
           ))
         ) : (
           <div className="text-center py-12 bg-white rounded-xl border border-gray-100">
-            <p className="text-gray-500">No startups found in this category yet.</p>
+            <p className="text-gray-500 mb-4">No startups found in this category yet.</p>
+            <Link href="/register" className="text-coral-600 font-semibold hover:text-coral-700">Submit a startup for this category →</Link>
           </div>
         )}
       </div>

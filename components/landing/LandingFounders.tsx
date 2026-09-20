@@ -71,16 +71,16 @@ export default function LandingFounders() {
                 </div>
 
                 <p className="text-sm text-gray-600 leading-relaxed">
-                  "{founder.tagline}"
+                  &quot;{founder.tagline}&quot;
                 </p>
               </div>
 
               <div className="pt-4 border-t border-gray-200/60">
                 <Link
-                  href="/discover"
+                  href="/register"
                   className="text-xs font-bold text-coral-500 hover:text-coral-600 transition-colors inline-flex items-center gap-1 group"
                 >
-                  <span>View Progress</span>
+                  <span>Submit your startup</span>
                   <span className="group-hover:translate-x-1 transition-transform">→</span>
                 </Link>
               </div>
@@ -96,7 +96,7 @@ export default function LandingFounders() {
           className="text-center pt-4"
         >
           <Link
-            href="/login"
+            href="/register"
             className="text-coral-500 hover:text-coral-600 font-semibold text-base inline-flex items-center gap-1.5 transition-colors group"
           >
             <span>Apply as a Founder</span>

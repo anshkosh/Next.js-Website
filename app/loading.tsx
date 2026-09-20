@@ -1,15 +1,7 @@
 export default function Loading() {
   return (
-    <div className="container mx-auto px-4 py-12 max-w-5xl">
-      <div className="space-y-8 animate-pulse">
-        <div className="h-10 w-1/3 bg-gray-200 rounded-lg"></div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {[1, 2, 3].map(i => (
-            <div key={i} className="h-32 bg-gray-200 rounded-2xl"></div>
-          ))}
-        </div>
-        <div className="h-64 bg-gray-200 rounded-2xl"></div>
-      </div>
+    <div className="flex min-h-[40vh] items-center justify-center bg-gray-50/50" role="status" aria-label="Loading">
+      <div className="flex items-center gap-3 text-sm font-medium text-gray-500"><span className="h-3 w-3 animate-pulse rounded-full bg-coral-500" /><span>Loading Anshkosh…</span></div>
     </div>
   );
 }

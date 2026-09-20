@@ -1,4 +1,4 @@
-import { Metadata } from "next";
+import { seoMetadata } from "@/lib/seo";
 
 import LandingHero from "@/components/landing/LandingHero";
 import LandingMission from "@/components/landing/LandingMission";
@@ -12,11 +12,11 @@ import LandingParticipation from "@/components/landing/LandingParticipation";
 import LandingFAQTeaser from "@/components/landing/LandingFAQTeaser";
 import LandingCTA from "@/components/landing/LandingCTA";
 
-export const metadata: Metadata = {
+export const metadata = seoMetadata({
   title: "Anshkosh | Discover Indian Startups Before Launch",
-  description:
-    "Discover Indian startups before launch, examine what they can prove, and follow the teams turning early demand into measurable traction.",
-};
+  description: "Anshkosh helps you discover Indian startups before launch, examine what they can prove, and follow founder progress.",
+  path: "/",
+});
 
 export default async function HomePage() {
   return (

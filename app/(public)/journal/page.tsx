@@ -1,28 +1,17 @@
 import { db } from "@/lib/db";
-import { Metadata } from "next";
+import { seoMetadata } from "@/lib/seo";
 import Link from "next/link";
+import Image from "next/image";
 import JournalCard from "@/components/landing/JournalCard";
 import { BookOpen } from "lucide-react";
 
-const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://anshkosh.com";
 const PER_PAGE = 12;
 
-export const metadata: Metadata = {
+export const metadata = seoMetadata({
   title: "Journal | Anshkosh — Startup Insights & Founder Stories",
   description: "Explore articles, founder stories, industry trends, and startup insights from the Anshkosh team.",
-  openGraph: {
-    title: "Journal | Anshkosh",
-    description: "Startup insights, founder stories, and industry trends.",
-    url: `${BASE_URL}/journal`,
-    type: "website",
-    siteName: "Anshkosh",
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: "Journal | Anshkosh",
-    description: "Startup insights, founder stories, and industry trends.",
-  },
-};
+  path: "/journal",
+});
 
 export default async function JournalPage(props: {
   searchParams: Promise<{ category?: string; page?: string }>;
@@ -31,6 +20,21 @@ export default async function JournalPage(props: {
   const categorySlug = searchParams.category ?? "";
   const page = Math.max(1, parseInt(searchParams.page ?? "1"));
   const skip = (page - 1) * PER_PAGE;
+
+  if (!process.env.DATABASE_URL) {
+    return (
+      <div className="min-h-screen bg-gray-50/50">
+        <section className="bg-white border-b border-gray-200 py-14">
+          <div className="container mx-auto px-4 max-w-6xl text-center">
+            <div className="inline-flex items-center gap-2 bg-coral-50 text-coral-600 text-sm font-semibold px-4 py-1.5 rounded-full mb-4"><BookOpen size={15} /> Anshkosh Journal</div>
+            <h1 className="text-4xl md:text-5xl font-bold font-heading text-gray-900 mb-4">Stories, insights & ideas</h1>
+            <p className="text-lg text-gray-500 max-w-2xl mx-auto">The Journal is being prepared for the pilot. Check back soon for founder stories and startup insights.</p>
+          </div>
+        </section>
+        <div className="container mx-auto px-4 max-w-3xl py-12 text-center"><Link href="/contact" className="text-coral-600 font-semibold hover:text-coral-700">Suggest a story or topic →</Link></div>
+      </div>
+    );
+  }
 
   const categoryFilter = categorySlug
     ? { category: { slug: categorySlug } }
@@ -52,6 +56,7 @@ export default async function JournalPage(props: {
         readingTimeMinutes: true,
         isFeatured: true,
         publishedAt: true,
+        updatedAt: true,
         tags: true,
         category: { select: { name: true, slug: true } },
       },
@@ -66,6 +71,7 @@ export default async function JournalPage(props: {
           select: {
             slug: true, title: true, excerpt: true, coverImageUrl: true,
             authorName: true, readingTimeMinutes: true, publishedAt: true,
+            updatedAt: true,
             category: { select: { name: true, slug: true } },
           },
         })
@@ -143,11 +149,13 @@ export default async function JournalPage(props: {
               <div className="grid md:grid-cols-2 gap-0">
                 <div className="relative aspect-video md:aspect-auto md:min-h-[320px] bg-gradient-to-br from-coral-50 to-orange-100">
                   {featuredPost.coverImageUrl ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img
+                    <Image
                       src={featuredPost.coverImageUrl}
                       alt={featuredPost.title}
-                      className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                      fill
+                      priority
+                      sizes="(min-width: 768px) 50vw, 100vw"
+                      className="object-cover group-hover:scale-105 transition-transform duration-500"
                     />
                   ) : (
                     <div className="absolute inset-0 flex items-center justify-center">

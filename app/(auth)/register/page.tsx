@@ -2,12 +2,11 @@
 
 import { useState } from "react";
 import { authClient } from "@/lib/auth-client";
-import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Loader2, Mail, User, CheckCircle2 } from "lucide-react";
+import PasswordField from "@/components/auth/PasswordField";
 
 export default function RegisterPage() {
-  const router = useRouter();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -38,7 +37,7 @@ export default function RegisterPage() {
     setError("");
 
     try {
-      const { data, error } = await authClient.signUp.email({
+      const { error } = await authClient.signUp.email({
         name,
         email,
         password,
@@ -49,8 +48,8 @@ export default function RegisterPage() {
       } else {
         setSuccess(true);
       }
-    } catch (err: any) {
-      setError(err.message || "An unexpected error occurred");
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "An unexpected error occurred");
     } finally {
       setLoading(false);
     }
@@ -64,11 +63,11 @@ export default function RegisterPage() {
             <div className="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-green-100 mb-6">
               <CheckCircle2 className="h-8 w-8 text-green-600" />
             </div>
-            <h2 className="text-2xl font-bold text-gray-900 mb-2 font-heading">
+            <h1 className="text-2xl font-bold text-gray-900 mb-2 font-heading">
               Check your email
-            </h2>
+            </h1>
             <p className="text-gray-600 mb-8">
-              We've sent a verification link to{" "}
+              We&apos;ve sent a verification link to{" "}
               <span className="font-medium text-gray-900">{email}</span>. Please
               verify your email to continue.
             </p>
@@ -94,9 +93,9 @@ export default function RegisterPage() {
             a
           </div>
         </Link>
-        <h2 className="text-center text-3xl font-extrabold text-gray-900 font-heading tracking-tight">
+        <h1 className="text-center text-3xl font-extrabold text-gray-900 font-heading tracking-tight">
           Create your account
-        </h2>
+        </h1>
         <p className="mt-2 text-center text-sm text-gray-600">
           Join Anshkosh to showcase your startup
         </p>
@@ -112,7 +111,7 @@ export default function RegisterPage() {
             )}
 
             <div>
-              <label className="block text-sm font-medium text-gray-700">
+              <label htmlFor="register-name" className="block text-sm font-medium text-gray-700">
                 Full Name
               </label>
               <div className="mt-1 relative">
@@ -120,7 +119,10 @@ export default function RegisterPage() {
                   <User className="h-5 w-5 text-gray-400" />
                 </div>
                 <input
+                  id="register-name"
+                  name="name"
                   type="text"
+                  autoComplete="name"
                   required
                   value={name}
                   onChange={(e) => setName(e.target.value)}
@@ -131,7 +133,7 @@ export default function RegisterPage() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700">
+              <label htmlFor="register-email" className="block text-sm font-medium text-gray-700">
                 Email address
               </label>
               <div className="mt-1 relative">
@@ -139,7 +141,10 @@ export default function RegisterPage() {
                   <Mail className="h-5 w-5 text-gray-400" />
                 </div>
                 <input
+                  id="register-email"
+                  name="email"
                   type="email"
+                  autoComplete="email"
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
@@ -150,18 +155,25 @@ export default function RegisterPage() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700">
+              <label htmlFor="register-password" className="block text-sm font-medium text-gray-700">
                 Password
               </label>
               <div className="mt-1">
-                <input
-                  type="password"
+                <PasswordField
+                  id="register-password"
+                  name="password"
+                  label="Password"
+                  autoComplete="new-password"
+                  minLength={8}
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   className="appearance-none block w-full px-3 py-2.5 border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-coral-500 focus:border-coral-500 sm:text-sm transition-colors"
                 />
               </div>
+              <p id="password-requirements" className="mt-2 text-xs text-gray-500">
+                Use at least 8 characters, including one uppercase letter and one number.
+              </p>
               {/* Password Strength Indicator */}
               {password.length > 0 && (
                 <div className="mt-2 flex items-center gap-2">
@@ -199,14 +211,14 @@ export default function RegisterPage() {
                 <label htmlFor="terms" className="text-gray-600">
                   I agree to the{" "}
                   <Link
-                    href="#"
+                    href="/terms"
                     className="font-medium text-coral-600 hover:text-coral-500"
                   >
                     Terms of Service
                   </Link>{" "}
                   and{" "}
                   <Link
-                    href="#"
+                    href="/privacy"
                     className="font-medium text-coral-600 hover:text-coral-500"
                   >
                     Privacy Policy
@@ -218,7 +230,7 @@ export default function RegisterPage() {
 
             <button
               type="submit"
-              disabled={loading || password.length < 6}
+              disabled={loading || password.length < 8}
               className="w-full flex justify-center items-center gap-2 py-2.5 px-4 border border-transparent rounded-lg shadow-sm text-sm font-semibold text-white bg-coral-500 hover:bg-coral-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-coral-500 disabled:opacity-70 transition-colors"
             >
               {loading && <Loader2 size={16} className="animate-spin" />}

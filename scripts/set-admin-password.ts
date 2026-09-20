@@ -1,22 +1,27 @@
 import { PrismaClient } from "@prisma/client";
 import { randomBytes, scrypt as scryptCallback } from "crypto";
-import { promisify } from "util";
 
 //use: npx tsx scripts/set-admin-password.ts --email someone@example.com --password SomePass@99
 
 const prisma = new PrismaClient();
-const scrypt = promisify(scryptCallback);
+const scrypt = (password: string, salt: Buffer, keyLength: number, options: object) =>
+  new Promise<Buffer>((resolve, reject) => {
+    scryptCallback(password, salt, keyLength, options, (error, derivedKey) => {
+      if (error) reject(error);
+      else resolve(derivedKey);
+    });
+  });
 
 // Replicates oslo/password Scrypt hash format: "hex(salt):hex(derivedKey)"
 // Parameters match oslo defaults: N=16384, r=16, p=1, keylen=64
 async function hashPassword(password: string): Promise<string> {
   const salt = randomBytes(16);
-  const key = (await scrypt(password, salt, 64, {
+  const key = await scrypt(password, salt, 64, {
     N: 16384,
     r: 16,
     p: 1,
     maxmem: 128 * 1024 * 1024, // 128MB — oslo's params need ~100MB
-  })) as Buffer;
+  });
   return salt.toString("hex") + ":" + key.toString("hex");
 }
 

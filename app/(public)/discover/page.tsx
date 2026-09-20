@@ -4,15 +4,15 @@ import StartupCard from "@/components/startup/StartupCard";
 import SearchBar from "@/components/search/SearchBar";
 import { cookies } from "next/headers";
 import Link from "next/link";
-import { Metadata } from "next";
+import { seoMetadata } from "@/lib/seo";
 
 export const dynamic = "force-dynamic";
 
-export const metadata: Metadata = {
+export const metadata = seoMetadata({
   title: "Discover Startups — Anshkosh",
-  description:
-    "Browse and discover Indian startups on Anshkosh. Search by category, explore evidence, and follow founder progress.",
-};
+  description: "Browse and discover Indian startups on Anshkosh. Search by category, explore evidence, and follow founder progress.",
+  path: "/discover",
+});
 
 export default async function DiscoverPage(props: {
   searchParams?: Promise<{
@@ -26,6 +26,26 @@ export default async function DiscoverPage(props: {
   const query = searchParams?.q;
   const page = parseInt(searchParams?.page || "1", 10);
   const pageSize = 20;
+
+  if (!process.env.DATABASE_URL) {
+    return (
+      <div className="w-full">
+        <section className="bg-white py-16 md:py-24 border-b border-gray-100">
+          <div className="container mx-auto px-4 text-center max-w-5xl">
+            <h1 className="text-4xl md:text-6xl font-extrabold text-gray-900 tracking-tight mb-6 font-heading">Discover <span className="text-coral-500">Startups</span></h1>
+            <p className="text-xl text-gray-600 max-w-2xl mx-auto">The local preview is ready for startup data. Connect PostgreSQL and seed the pilot dataset to populate discovery.</p>
+          </div>
+        </section>
+        <section className="container mx-auto px-4 py-12 max-w-3xl">
+          <div className="rounded-2xl border border-coral-100 bg-coral-50 p-8 text-center">
+            <h2 className="text-xl font-bold text-gray-900 mb-2">The pilot directory is being prepared</h2>
+            <p className="text-gray-600 mb-6">Founders can register now and share a startup when the pilot opens.</p>
+            <Link href="/register" className="inline-flex rounded-lg bg-coral-500 px-5 py-3 font-semibold text-white hover:bg-coral-600">Register as a founder</Link>
+          </div>
+        </section>
+      </div>
+    );
+  }
 
   const cookieStore = await cookies();
   const cookieId = cookieStore.get("anshkosh_vid")?.value;

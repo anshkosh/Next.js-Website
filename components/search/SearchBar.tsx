@@ -54,6 +54,7 @@ export default function SearchBar({ categories = [] }: SearchBarProps) {
 
   // Synchronize internal state when URL searchParams change externally (e.g. "Clear all filters")
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setText(urlQuery);
     setCategory(urlCategory);
   }, [urlQuery, urlCategory]);
@@ -81,7 +82,9 @@ export default function SearchBar({ categories = [] }: SearchBarProps) {
     <div className="relative w-full max-w-3xl mx-auto flex items-center bg-white border border-gray-200 rounded-full shadow-sm overflow-hidden focus-within:ring-2 focus-within:ring-coral-500 focus-within:border-transparent transition-all">
       {categories.length > 0 && (
         <div className="relative flex-shrink-0 border-r border-gray-200 bg-gray-50/50">
+          <label htmlFor="startup-category" className="sr-only">Filter by category</label>
           <select
+            id="startup-category"
             value={category}
             onChange={(e) => handleCategoryChange(e.target.value)}
             className="appearance-none bg-transparent pl-4 pr-8 py-4 text-sm font-medium text-gray-700 outline-none cursor-pointer hover:bg-gray-100 transition-colors"
@@ -105,15 +108,21 @@ export default function SearchBar({ categories = [] }: SearchBarProps) {
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
           </svg>
         </div>
+        <label htmlFor="startup-search" className="sr-only">Search startups</label>
         <input
+          id="startup-search"
+          name="q"
           type="text"
-          className="block w-full pl-11 pr-10 py-4 bg-transparent text-gray-900 placeholder-gray-500 outline-none"
+          autoComplete="off"
+          className="block min-w-0 w-full pl-11 pr-10 py-4 bg-transparent text-gray-900 placeholder-gray-500 outline-none"
           placeholder="Search startups, categories, or locations..."
           value={text}
           onChange={(e) => setText(e.target.value)}
         />
         {text && (
-          <button 
+          <button
+            type="button"
+            aria-label="Clear search"
             onClick={handleClearText}
             className="absolute inset-y-0 right-0 pr-4 flex items-center text-gray-400 hover:text-gray-600"
           >

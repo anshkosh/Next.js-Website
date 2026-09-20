@@ -1,6 +1,6 @@
 import { betterAuth } from "better-auth";
 import { prismaAdapter } from "@better-auth/prisma-adapter";
-import { admin } from "better-auth/plugins";
+import { admin, type Role } from "better-auth/plugins";
 import { db } from "./db";
 
 const statements = {
@@ -17,6 +17,14 @@ export const auth = betterAuth({
   emailAndPassword: {
     enabled: true,
     requireEmailVerification: true,
+    sendResetPassword: async ({ user, url }) => {
+      const { sendEmail } = await import("./email/adapter");
+      await sendEmail({
+        to: user.email,
+        subject: "Reset your Anshkosh password",
+        html: `<p>Hi ${user.name || "there"},</p><p>Use the link below to choose a new Anshkosh password:</p><p><a href="${url}">Reset your password</a></p><p>If you did not request this, you can ignore this email.</p>`,
+      });
+    },
   },
   emailVerification: {
     sendVerificationEmail: async ({ user, url }) => {
@@ -57,7 +65,7 @@ export const auth = betterAuth({
           settings: ["read", "update"],
           admin: ["create", "read", "delete"],
         },
-      } as any,
+      } as unknown as Record<string, Role>,
     }),
   ],
 });

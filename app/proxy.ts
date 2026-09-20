@@ -2,6 +2,13 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 
 export async function middleware(request: NextRequest) {
+  const forwardedProto = request.headers.get("x-forwarded-proto");
+  if (process.env.NODE_ENV === "production" && (forwardedProto === "http" || request.nextUrl.protocol === "http:")) {
+    const secureUrl = request.nextUrl.clone();
+    secureUrl.protocol = "https:";
+    return NextResponse.redirect(secureUrl, 308);
+  }
+
   // Better Auth provides a way to get session from headers in Next.js middleware
   const session = await auth.api.getSession({
     headers: request.headers,
@@ -14,7 +21,8 @@ export async function middleware(request: NextRequest) {
 
   if (isFounderRoute) {
     if (!session) {
-      return NextResponse.redirect(new URL("/login", request.url));
+      const destination = path === "/startup/new" ? "/register" : "/login";
+      return NextResponse.redirect(new URL(destination, request.url));
     }
   }
 

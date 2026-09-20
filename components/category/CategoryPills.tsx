@@ -20,7 +20,7 @@ export default function CategoryPills({ categories }: { categories: Category[] }
     <div className="relative w-full overflow-hidden">
       <div className="flex items-center gap-3 overflow-x-auto pb-4 pt-2 px-1 snap-x scrollbar-hide">
         <Link 
-          href="/" 
+          href="/discover"
           scroll={false}
           className={`flex-shrink-0 px-4 py-2 rounded-full text-sm font-medium transition-colors snap-start ${
             activeCategory === "all" 
@@ -33,7 +33,7 @@ export default function CategoryPills({ categories }: { categories: Category[] }
         {categories.map((cat) => (
           <Link
             key={cat.id}
-            href={`/?category=${cat.slug}`}
+            href={`/discover?category=${cat.slug}`}
             scroll={false}
             className={`flex-shrink-0 px-4 py-2 rounded-full text-sm font-medium transition-colors snap-start flex items-center gap-1.5 ${
               activeCategory === cat.slug 

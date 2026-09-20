@@ -12,6 +12,7 @@ interface JournalCardProps {
     readingTimeMinutes: number;
     isFeatured: boolean;
     publishedAt?: Date | null;
+    updatedAt?: Date | null;
     category?: { name: string; slug: string } | null;
     tags: string[];
   };
@@ -89,7 +90,7 @@ export default function JournalCard({ post }: JournalCardProps) {
         <div className="flex items-center justify-between text-xs text-gray-400 pt-1 border-t border-gray-100 mt-auto">
           <span className="font-medium text-gray-500">{post.authorName}</span>
           <div className="flex items-center gap-3">
-            {post.publishedAt && <span>{formatDate(post.publishedAt)}</span>}
+            {post.updatedAt ? <span>Updated {formatDate(post.updatedAt)}</span> : post.publishedAt && <span>{formatDate(post.publishedAt)}</span>}
             <span className="flex items-center gap-1">
               <Clock size={12} /> {post.readingTimeMinutes}m read
             </span>

@@ -3,6 +3,8 @@ import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import FounderTopbar from "./FounderTopbar";
 
+export const dynamic = "force-dynamic";
+
 export default async function FounderLayout({ children }: { children: React.ReactNode }) {
   const session = await auth.api.getSession({
     headers: await headers(),

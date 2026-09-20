@@ -1,10 +1,10 @@
-import { Metadata } from "next";
+import { seoMetadata } from "@/lib/seo";
 
-export const metadata: Metadata = {
+export const metadata = seoMetadata({
   title: "Privacy Notice — Anshkosh",
-  description:
-    "How Anshkosh handles information during the early-access pilot.",
-};
+  description: "How Anshkosh handles information during the early-access pilot.",
+  path: "/privacy",
+});
 
 export default function PrivacyPage() {
   return (
@@ -17,13 +17,13 @@ export default function PrivacyPage() {
         <h1 className="text-4xl md:text-5xl font-bold font-heading text-gray-900 mb-4 tracking-tight">
           Privacy Notice
         </h1>
-        <p className="text-sm text-gray-400 mb-8 block">
-          Reference: https://www.anshkosh.com/privacy
+        <p className="text-sm text-gray-600 mb-8 block">
+          Effective date: September 20, 2026 · Operator: Anshkosh
         </p>
 
         {/* Intro */}
         <p className="text-gray-600 text-base leading-relaxed mb-8">
-          This notice describes information handled by the current Anshkosh early-access website and the planned public-validation model. It is a working product reference and should receive legal review before publication.
+          This notice describes information handled by the current Anshkosh early-access website and public-validation model.
         </p>
 
         {/* Sections */}
@@ -131,9 +131,8 @@ export default function PrivacyPage() {
           </div>
         </div>
 
-        {/* Footer Disclaimer */}
-        <p className="text-sm text-gray-400 italic mt-12 pt-6 border-t border-gray-100">
-          This documentation does not replace jurisdiction-specific legal advice.
+        <p className="text-sm text-gray-600 mt-12 pt-6 border-t border-gray-100">
+          Questions about this notice can be sent to <a href="mailto:hello@anshkosh.com" className="text-coral-600 underline">hello@anshkosh.com</a>.
         </p>
       </div>
     </section>

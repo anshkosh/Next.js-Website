@@ -1,40 +1,16 @@
 "use client";
 
-import { useRef } from "react";
 import Link from "next/link";
-import Image from "next/image";
-import { motion, useScroll, useTransform } from "framer-motion";
+import { motion } from "framer-motion";
 import { ArrowRight, Sparkles } from "lucide-react";
+import HeroArtwork from "./HeroArtwork";
 
 export default function LandingHero() {
-  const targetRef = useRef<HTMLDivElement>(null);
-  const { scrollYProgress } = useScroll({
-    target: targetRef,
-    offset: ["start start", "end start"],
-  });
-
-  const backgroundY = useTransform(scrollYProgress, [0, 1], ["0%", "15%"]);
-
   return (
     <section
-      ref={targetRef}
-      className="relative w-full min-h-[85vh] lg:min-h-[92vh] flex flex-col items-center justify-start overflow-hidden bg-[#FAF8F5] text-gray-900 pt-6 sm:pt-10 lg:pt-12 pb-64 sm:pb-80 lg:pb-[26rem]"
+      className="relative w-full min-h-[720px] lg:min-h-[92vh] flex flex-col items-center justify-start overflow-hidden bg-[#F7F1E7] text-gray-900 pt-6 sm:pt-10 lg:pt-12 pb-64 sm:pb-80 lg:pb-[26rem]"
     >
-      {/* Clear Parallax Background Image */}
-      <motion.div
-        style={{ y: backgroundY }}
-        className="absolute inset-0 w-full h-[115%] -top-[5%] pointer-events-none"
-      >
-        <Image
-          src="/images/hero-pomegranate-v2.webp"
-          alt="Anshkosh Hero Background"
-          fill
-          priority
-          className="object-cover object-bottom"
-        />
-        {/* Soft subtle top blend for header legibility without dimming the artwork */}
-        <div className="absolute inset-0 bg-gradient-to-b from-[#FAF8F5]/80 via-[#FAF8F5]/20 to-transparent pointer-events-none" />
-      </motion.div>
+      <HeroArtwork />
 
       {/* Decorative Glow Orb */}
       <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[300px] bg-coral-500/10 rounded-full blur-[120px] pointer-events-none" />
@@ -59,6 +35,9 @@ export default function LandingHero() {
           transition={{ duration: 0.6, delay: 0.1 }}
           className="text-4xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight leading-[1.1] font-heading text-gray-900"
         >
+          <span className="mb-2 block text-lg font-semibold tracking-normal text-coral-600 sm:text-xl">
+            Anshkosh
+          </span>
           Back the next thing <br className="hidden sm:inline" />
           <span className="bg-gradient-to-r from-coral-600 via-coral-500 to-orange-500 bg-clip-text text-transparent">
             before it launches.
@@ -84,10 +63,10 @@ export default function LandingHero() {
           className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-2"
         >
           <Link
-            href="/login"
+            href="/register"
             className="w-full sm:w-auto inline-flex items-center justify-center gap-2.5 px-8 py-3.5 rounded-xl bg-coral-500 hover:bg-coral-600 text-white font-extrabold text-base shadow-lg shadow-coral-500/25 hover:shadow-coral-500/35 transition-all transform hover:-translate-y-0.5"
           >
-            <span>I'm a Founder</span>
+            <span>I&apos;m a Founder</span>
             <ArrowRight className="w-5 h-5" />
           </Link>
           <Link

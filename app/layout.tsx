@@ -1,6 +1,10 @@
 import type { Metadata } from "next";
 import { Inter, Oswald } from "next/font/google";
 import "./globals.css";
+import { SiteEnhancements } from "@/components/site/SiteEnhancements";
+import { SITE_URL } from "@/lib/seo";
+
+const BASE_URL = SITE_URL;
 
 const inter = Inter({
   variable: "--font-inter",
@@ -15,19 +19,23 @@ const oswald = Oswald({
 
 export const metadata: Metadata = {
   title: "Anshkosh | Discover Indian Startups Before Launch",
-  description: "Discover Indian startups before launch, examine what they can prove, and follow the teams turning early demand into measurable traction.",
+  description: "Anshkosh helps you discover Indian startups before launch, examine what they can prove, and follow founder progress.",
+  metadataBase: new URL(BASE_URL),
+  alternates: { canonical: "/" },
+  robots: { index: true, follow: true },
   openGraph: {
     title: "Anshkosh | Discover Indian Startups Before Launch",
-    description: "Explore startup evidence, launch plans, and founder progress before backing opens.",
+    description: "Explore Anshkosh startup evidence, launch plans, and founder progress before backing opens.",
     type: "website",
-    url: "https://www.anshkosh.com/",
+    url: BASE_URL,
+    images: [{ url: "/images/hero-pomegranate-v2.webp", alt: "Anshkosh startup discovery" }],
     siteName: "Anshkosh",
     locale: "en_IN",
   },
   twitter: {
     card: "summary_large_image",
     title: "Anshkosh | Discover Indian Startups Before Launch",
-    description: "Explore startup evidence, launch plans, and founder progress before backing opens.",
+    description: "Explore Anshkosh startup evidence, launch plans, and founder progress before backing opens.",
   },
 };
 
@@ -42,7 +50,15 @@ export default function RootLayout({
       className={`${inter.variable} ${oswald.variable} h-full antialiased`}
       suppressHydrationWarning
     >
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="min-h-full flex flex-col">
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `try{var t=localStorage.getItem("anshkosh-theme");if(t==="dark"||(!t&&window.matchMedia("(prefers-color-scheme: dark)").matches))document.documentElement.classList.add("dark")}catch(e){}`,
+          }}
+        />
+        {children}
+        <SiteEnhancements />
+      </body>
     </html>
   );
 }

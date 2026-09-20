@@ -1,17 +1,11 @@
-import { Metadata } from "next";
+import { seoMetadata } from "@/lib/seo";
 import ContactContent from "./ContactContent";
 
-export const metadata: Metadata = {
+export const metadata = seoMetadata({
   title: "Contact Us — Anshkosh",
-  description:
-    "Get in touch with the Anshkosh team. Whether you have a question, a partnership idea, or feedback, we'd love to hear from you.",
-  openGraph: {
-    title: "Contact Us — Anshkosh",
-    description:
-      "Reach out to the Anshkosh team with any questions, partnership ideas, or feedback.",
-    url: "https://www.anshkosh.com/contact",
-  },
-};
+  description: "Get in touch with the Anshkosh team about questions, partnership ideas, or feedback.",
+  path: "/contact",
+});
 
 export default function ContactPage() {
   return <ContactContent />;

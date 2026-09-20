@@ -1,0 +1,97 @@
+.artwork {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  background: rgb(247 241 231);
+}
+
+.frame {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  width: 610px;
+  height: 340px;
+  transform: translateX(-50%);
+  transform-origin: bottom;
+}
+
+.window {
+  position: absolute;
+  inset: 0;
+  perspective: 1100px;
+  perspective-origin: 50% 75%;
+  -webkit-mask-image: linear-gradient(transparent, #000 45%, #000 96%, transparent), linear-gradient(90deg, transparent, #000 5%, #000 95%, transparent);
+  mask-image: linear-gradient(transparent, #000 45%, #000 96%, transparent), linear-gradient(90deg, transparent, #000 5%, #000 95%, transparent);
+  -webkit-mask-composite: source-in;
+  mask-composite: intersect;
+}
+
+.tilt,
+.float {
+  width: 100%;
+  height: 100%;
+}
+
+.base {
+  display: block;
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  object-fit: cover;
+  object-position: bottom;
+}
+
+.hand,
+.fruit {
+  position: absolute;
+  pointer-events: none;
+  will-change: transform;
+}
+
+.hand {
+  z-index: 2;
+  top: 34%;
+  left: 44.5%;
+  width: 55%;
+  transform-origin: 78% 58%;
+}
+
+.handImage,
+.fruitImage {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-width: none;
+}
+
+.fruit {
+  z-index: 3;
+  top: 67%;
+  left: 45.5%;
+  width: 9%;
+  transform-origin: 50% 75%;
+}
+
+.fade {
+  position: absolute;
+  inset: 0 0 auto;
+  height: 62%;
+  pointer-events: none;
+  background: linear-gradient(rgb(247 241 231), rgb(247 241 231 / 0.95), transparent);
+}
+
+@media (min-width: 640px) {
+  .frame { width: 712px; height: 400px; }
+}
+
+@media (min-width: 768px) {
+  .frame { width: max(100%, 820px); height: auto; aspect-ratio: 820 / 460; }
+}
+
+@media (min-width: 1024px) {
+  .frame { left: 0; width: 100%; height: auto; aspect-ratio: 1670 / 941; transform: scaleY(0.9); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hand { transform: translate3d(8%, -10%, 0) rotateZ(4deg) !important; }
+}

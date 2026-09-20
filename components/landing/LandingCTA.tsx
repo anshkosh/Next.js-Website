@@ -54,7 +54,7 @@ export default function LandingCTA() {
             transition={{ duration: 0.6, delay: 0.2, ease: "easeOut" }}
             className="text-gray-600 text-base sm:text-lg lg:text-xl font-medium max-w-xl leading-relaxed"
           >
-            Join India's first public validation platform for startups. Question the plan, follow real progress, and build evidence before launch.
+            Join a public validation platform for startups. Question the plan, follow real progress, and build evidence before launch.
           </motion.p>
 
           {/* Action Buttons */}
@@ -65,7 +65,7 @@ export default function LandingCTA() {
             className="flex flex-col sm:flex-row items-center md:items-start justify-center md:justify-start gap-4 pt-4"
           >
             <Link
-              href="/login"
+              href="/register"
               className="w-full sm:w-auto inline-flex items-center justify-center gap-2.5 px-8 py-4 rounded-xl bg-coral-500 hover:bg-coral-600 text-white font-extrabold text-base shadow-lg shadow-coral-500/25 hover:shadow-coral-500/35 transition-all transform hover:-translate-y-0.5"
             >
               <Rocket className="w-5 h-5 text-white" />

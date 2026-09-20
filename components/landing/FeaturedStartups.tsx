@@ -5,6 +5,13 @@ import Link from "next/link";
 import { ArrowRight, Sparkles } from "lucide-react";
 
 export default async function FeaturedStartups() {
+  // Keep the public landing page usable in a fresh local checkout before
+  // PostgreSQL has been configured. The section will appear automatically
+  // once DATABASE_URL is provided and featured startups are seeded.
+  if (!process.env.DATABASE_URL) {
+    return null;
+  }
+
   const cookieStore = await cookies();
   const cookieId = cookieStore.get("anshkosh_vid")?.value;
 

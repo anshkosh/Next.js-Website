@@ -286,3 +286,9 @@ model Comment {
   @@index([startupId, createdAt(sort: Desc)])
   @@index([status])
 }
+
+model NewsletterSubscriber {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  subscribedAt DateTime @default(now())
+}

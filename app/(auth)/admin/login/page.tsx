@@ -5,6 +5,7 @@ import { authClient } from "@/lib/auth-client";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Loader2, Mail, Shield } from "lucide-react";
+import PasswordField from "@/components/auth/PasswordField";
 
 export default function AdminLoginPage() {
   const router = useRouter();
@@ -19,7 +20,7 @@ export default function AdminLoginPage() {
     setError("");
 
     try {
-      const { data, error } = await authClient.signIn.email({
+      const { error } = await authClient.signIn.email({
         email,
         password,
       });
@@ -29,8 +30,8 @@ export default function AdminLoginPage() {
       } else {
         router.push("/admin/dashboard");
       }
-    } catch (err: any) {
-      setError(err.message || "An unexpected error occurred");
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "An unexpected error occurred");
     } finally {
       setLoading(false);
     }
@@ -47,9 +48,9 @@ export default function AdminLoginPage() {
             <Shield size={24} />
           </div>
         </div>
-        <h2 className="text-center text-3xl font-extrabold text-white font-heading tracking-tight">
+        <h1 className="text-center text-3xl font-extrabold text-white font-heading tracking-tight">
           Admin Access
-        </h2>
+        </h1>
         <p className="mt-2 text-center text-sm text-gray-400">
           Secure login for Anshkosh staff
         </p>
@@ -82,10 +83,11 @@ export default function AdminLoginPage() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-300">Password</label>
+              <label htmlFor="admin-password" className="block text-sm font-medium text-gray-300">Password</label>
               <div className="mt-1">
-                <input
-                  type="password"
+                <PasswordField
+                  id="admin-password"
+                  label="Admin password"
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
