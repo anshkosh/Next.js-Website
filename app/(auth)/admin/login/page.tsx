@@ -4,7 +4,8 @@ import { useState } from "react";
 import { authClient } from "@/lib/auth-client";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { Loader2, Mail, Shield } from "lucide-react";
+import { Loader2, Mail } from "lucide-react";
+import AuthHomeIcon from "@/components/auth/AuthHomeIcon";
 import PasswordField from "@/components/auth/PasswordField";
 
 export default function AdminLoginPage() {
@@ -43,11 +44,7 @@ export default function AdminLoginPage() {
       <div className="absolute inset-0 -z-10 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-indigo-900/40 via-gray-900 to-gray-900"></div>
       
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
-        <div className="flex justify-center mb-6">
-          <div className="w-12 h-12 bg-indigo-600 rounded-xl flex items-center justify-center text-white shadow-lg shadow-indigo-900/50">
-            <Shield size={24} />
-          </div>
-        </div>
+        <AuthHomeIcon onDark />
         <h1 className="text-center text-3xl font-extrabold text-white font-heading tracking-tight">
           Admin Access
         </h1>

@@ -4,6 +4,7 @@ import Link from "next/link";
 import { FormEvent, useState } from "react";
 import { authClient } from "@/lib/auth-client";
 import { Loader2 } from "lucide-react";
+import AuthHomeIcon from "@/components/auth/AuthHomeIcon";
 import PasswordField from "@/components/auth/PasswordField";
 
 export default function ResetPasswordPage() {
@@ -31,7 +32,7 @@ export default function ResetPasswordPage() {
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col justify-center px-4 py-12">
       <div className="mx-auto w-full max-w-md rounded-2xl border border-gray-100 bg-white p-8 shadow-xl shadow-gray-200/50">
-        <Link href="/" className="mx-auto mb-6 flex h-12 w-12 items-center justify-center rounded-xl bg-coral-500 text-3xl font-bold text-white" aria-label="Anshkosh home">a</Link>
+        <AuthHomeIcon />
         {success ? (
           <div className="space-y-4 text-center"><h1 className="text-3xl font-extrabold tracking-tight text-gray-900 font-heading">Password updated</h1><p className="text-gray-600">Your password has been changed successfully.</p><Link href="/login" className="inline-flex font-medium text-coral-600 hover:text-coral-500">Continue to login</Link></div>
         ) : (

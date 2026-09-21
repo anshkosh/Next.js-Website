@@ -35,9 +35,6 @@ export default function LandingHero() {
           transition={{ duration: 0.6, delay: 0.1 }}
           className="text-4xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight leading-[1.1] font-heading text-gray-900"
         >
-          <span className="mb-2 block text-lg font-semibold tracking-normal text-coral-600 sm:text-xl">
-            Anshkosh
-          </span>
           Back the next thing <br className="hidden sm:inline" />
           <span className="bg-gradient-to-r from-coral-600 via-coral-500 to-orange-500 bg-clip-text text-transparent">
             before it launches.

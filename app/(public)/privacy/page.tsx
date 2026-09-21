@@ -131,9 +131,6 @@ export default function PrivacyPage() {
           </div>
         </div>
 
-        <p className="text-sm text-gray-600 mt-12 pt-6 border-t border-gray-100">
-          Questions about this notice can be sent to <a href="mailto:hello@anshkosh.com" className="text-coral-600 underline">hello@anshkosh.com</a>.
-        </p>
       </div>
     </section>
   );

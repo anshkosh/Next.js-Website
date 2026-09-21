@@ -4,6 +4,7 @@ import Link from "next/link";
 import { FormEvent, useState } from "react";
 import { authClient } from "@/lib/auth-client";
 import { Loader2, Mail } from "lucide-react";
+import AuthHomeIcon from "@/components/auth/AuthHomeIcon";
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState("");
@@ -32,7 +33,7 @@ export default function ForgotPasswordPage() {
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col justify-center px-4 py-12">
       <div className="mx-auto w-full max-w-md rounded-2xl border border-gray-100 bg-white p-8 shadow-xl shadow-gray-200/50">
-        <Link href="/" className="mx-auto mb-6 flex h-12 w-12 items-center justify-center rounded-xl bg-coral-500 text-3xl font-bold text-white" aria-label="Anshkosh home">a</Link>
+        <AuthHomeIcon />
         <h1 className="text-center text-3xl font-extrabold tracking-tight text-gray-900 font-heading">Reset your password</h1>
         {sent ? (
           <div className="mt-6 space-y-4 text-center">

@@ -1,0 +1,52 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-100 -100 200 200" role="img" aria-label="Anshkosh">
+  <defs>
+    <path id="diamond" d="M 42,0 L 70.5,-28.5 L 99,0 L 70.5,28.5 Z"/>
+    <path id="petalOrange" d="M 2,0 A 42.91,42.91 0 0,1 85,0 A 42.91,42.91 0 0,1 2,0 Z"/>
+    <path id="petalCream" d="M 1,0 A 36.63,36.63 0 0,1 69,0 A 36.63,36.63 0 0,1 1,0 Z"/>
+  </defs>
+  <g fill="#E8521E">
+    <use href="#petalOrange" transform="rotate(45)"/>
+    <use href="#petalOrange" transform="rotate(135)"/>
+    <use href="#petalOrange" transform="rotate(225)"/>
+    <use href="#petalOrange" transform="rotate(315)"/>
+    <use href="#diamond" transform="rotate(0)"/>
+    <use href="#diamond" transform="rotate(90)"/>
+    <use href="#diamond" transform="rotate(180)"/>
+    <use href="#diamond" transform="rotate(270)"/>
+  </g>
+  <g fill="none" stroke="#000" stroke-width="2.2" stroke-linejoin="round">
+    <use href="#petalOrange" transform="rotate(45)"/>
+    <use href="#petalOrange" transform="rotate(135)"/>
+    <use href="#petalOrange" transform="rotate(225)"/>
+    <use href="#petalOrange" transform="rotate(315)"/>
+  </g>
+  <g fill="#F6F0E2" stroke="#fff" stroke-width="4.2" stroke-linejoin="round">
+    <use href="#petalCream" transform="rotate(0)"/>
+    <use href="#petalCream" transform="rotate(45)"/>
+    <use href="#petalCream" transform="rotate(90)"/>
+    <use href="#petalCream" transform="rotate(135)"/>
+    <use href="#petalCream" transform="rotate(180)"/>
+    <use href="#petalCream" transform="rotate(225)"/>
+    <use href="#petalCream" transform="rotate(270)"/>
+    <use href="#petalCream" transform="rotate(315)"/>
+  </g>
+  <g fill="none" stroke="#000" stroke-width="2.2" stroke-linejoin="round">
+    <use href="#petalCream" transform="rotate(0)"/>
+    <use href="#petalCream" transform="rotate(45)"/>
+    <use href="#petalCream" transform="rotate(90)"/>
+    <use href="#petalCream" transform="rotate(135)"/>
+    <use href="#petalCream" transform="rotate(180)"/>
+    <use href="#petalCream" transform="rotate(225)"/>
+    <use href="#petalCream" transform="rotate(270)"/>
+    <use href="#petalCream" transform="rotate(315)"/>
+  </g>
+  <circle r="28" fill="#F6F0E2" stroke="#fff" stroke-width="4.2"/>
+  <g fill="#E8521E">
+    <circle cx="19" cy="0" r="5"/>
+    <circle cx="0" cy="19" r="5"/>
+    <circle cx="-19" cy="0" r="5"/>
+    <circle cx="0" cy="-19" r="5"/>
+    <circle r="5.2"/>
+  </g>
+  <circle r="12.5" fill="none" stroke="#E8521E" stroke-width="3.6"/>
+</svg>

@@ -4,6 +4,7 @@ import { useState } from "react";
 import { authClient } from "@/lib/auth-client";
 import Link from "next/link";
 import { Loader2, Mail, User, CheckCircle2 } from "lucide-react";
+import AuthHomeIcon from "@/components/auth/AuthHomeIcon";
 import PasswordField from "@/components/auth/PasswordField";
 
 export default function RegisterPage() {
@@ -88,11 +89,7 @@ export default function RegisterPage() {
       <div className="absolute inset-0 -z-10 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-coral-100/40 via-gray-50 to-gray-50"></div>
 
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
-        <Link href="/" className="flex justify-center mb-6">
-          <div className="w-12 h-12 bg-coral-500 rounded-xl flex items-center justify-center text-white font-bold text-3xl shadow-sm">
-            a
-          </div>
-        </Link>
+        <AuthHomeIcon />
         <h1 className="text-center text-3xl font-extrabold text-gray-900 font-heading tracking-tight">
           Create your account
         </h1>

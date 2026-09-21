@@ -120,12 +120,12 @@ export function SiteEnhancements() {
 
       {cookiesVisible && (
         <div role="dialog" aria-label="Cookie notice" className="fixed inset-x-4 bottom-4 z-[70] mx-auto max-w-2xl rounded-2xl border border-gray-200 bg-white p-4 shadow-2xl sm:flex sm:items-center sm:gap-5 dark:border-gray-700 dark:bg-gray-900 print:hidden">
-          <p className="flex-1 text-sm leading-relaxed text-gray-600 dark:text-gray-300">We use essential cookies for sessions, security, and preferences. <a href="/privacy" className="font-medium text-coral-600 underline">Read our privacy notice.</a></p>
+          <p className="flex-1 pr-10 text-sm leading-relaxed text-gray-600 sm:pr-0 dark:text-gray-300">We use essential cookies for sessions, security, and preferences. <a href="/privacy" className="font-medium text-coral-600 underline">Read our privacy notice.</a></p>
           <div className="mt-3 flex shrink-0 gap-2 sm:mt-0">
             <button type="button" onClick={() => saveConsent("declined")} className="rounded-lg border border-gray-300 px-3 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-100 dark:border-gray-600 dark:text-gray-200 dark:hover:bg-gray-800">Decline</button>
             <button type="button" onClick={() => saveConsent("accepted")} className="rounded-lg bg-gray-900 px-3 py-2 text-sm font-semibold text-white transition-colors hover:bg-gray-700 dark:bg-coral-500 dark:hover:bg-coral-600">Accept</button>
           </div>
-          <button type="button" onClick={() => saveConsent("declined")} aria-label="Close cookie notice" className="absolute right-2 top-2 rounded-md p-1 text-gray-400 hover:text-gray-700 dark:hover:text-white"><X size={15} aria-hidden="true" /></button>
+          <button type="button" onClick={() => saveConsent("declined")} aria-label="Close cookie notice" className="absolute right-2 top-2 flex h-9 w-9 shrink-0 items-center justify-center rounded-md text-gray-400 hover:text-gray-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-coral-500 sm:static dark:hover:text-white"><X size={18} aria-hidden="true" /></button>
         </div>
       )}
     </>

@@ -56,6 +56,7 @@ anshkosh/
 - PostgreSQL 15+
 - Redis 7+
 - npm
+- Docker with Compose (optional, for local PostgreSQL and Redis)
 
 ---
 
@@ -71,11 +72,7 @@ npm install
 
 ### 2. Configure environment variables
 
-```bash
-cp .env.example .env
-```
-
-Edit `.env` with your values:
+Create a local `.env` file and set your values:
 
 | Variable | Description |
 |:---|:---|
@@ -88,7 +85,29 @@ Edit `.env` with your values:
 | `BREVO_API_KEY` / `EMAIL_FROM` | Brevo email sender |
 | `NEXT_PUBLIC_TURNSTILE_SITE_KEY` / `TURNSTILE_SECRET_KEY` | Cloudflare Turnstile CAPTCHA |
 
-### 3. Set up the database
+### 3. Start local PostgreSQL and Redis (optional)
+
+If you do not already have these services, run them in Docker:
+
+```bash
+cp compose.env.example compose.env
+# Set POSTGRES_PASSWORD in compose.env before continuing.
+docker compose --env-file compose.env up -d
+docker compose --env-file compose.env ps
+```
+
+The containers use persistent Docker volumes and expose PostgreSQL and Redis only on localhost. In `.env`, point the app at these services (substitute the password you set in `compose.env`; URL-encode any special characters in it):
+
+```dotenv
+DATABASE_URL="postgresql://anshkosh:<your-password>@localhost:5432/anshkosh?schema=public"
+REDIS_HOST=localhost
+REDIS_PORT=6379
+REDIS_PASSWORD=
+```
+
+If either host port is occupied, change `POSTGRES_PORT` or `REDIS_PORT` in `compose.env` and use the same port in the app's `.env`. Run `docker compose --env-file compose.env down` to stop the services; the volumes remain intact. This Compose file is for local development, not the VPS production deployment.
+
+### 4. Set up the database
 
 ```bash
 npx prisma migrate dev
@@ -101,7 +120,7 @@ To seed an admin user:
 npx tsx prisma/seed.ts --create-admin <user_email>
 ```
 
-### 4. Run the development server
+### 5. Run the development server
 
 ```bash
 npm run dev
