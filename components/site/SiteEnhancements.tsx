@@ -12,8 +12,8 @@ export function ThemeToggle() {
 
   useEffect(() => {
     const saved = window.localStorage.getItem("anshkosh-theme");
-    const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-    const nextDark = saved ? saved === "dark" : prefersDark;
+    // Light mode is the site default; dark mode is opt-in through the toggle.
+    const nextDark = saved === "dark";
     // The value comes from browser-only storage after hydration.
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setDark(nextDark);

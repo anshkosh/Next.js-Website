@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter, Oswald } from "next/font/google";
 import "./globals.css";
 import { SiteEnhancements } from "@/components/site/SiteEnhancements";
+import { UnderConstructionBanner } from "@/components/site/UnderConstructionBanner";
 import { SITE_URL } from "@/lib/seo";
 
 const BASE_URL = SITE_URL;
@@ -53,9 +54,10 @@ export default function RootLayout({
       <body className="min-h-full flex flex-col">
         <script
           dangerouslySetInnerHTML={{
-            __html: `try{var t=localStorage.getItem("anshkosh-theme");if(t==="dark"||(!t&&window.matchMedia("(prefers-color-scheme: dark)").matches))document.documentElement.classList.add("dark")}catch(e){}`,
+            __html: `try{if(localStorage.getItem("anshkosh-theme")==="dark")document.documentElement.classList.add("dark")}catch(e){}`,
           }}
         />
+        <UnderConstructionBanner />
         {children}
         <SiteEnhancements />
       </body>
