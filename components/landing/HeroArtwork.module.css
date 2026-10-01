@@ -56,14 +56,16 @@
   max-width: none;
 }
 
-/* Continue the cropped sleeve off-canvas during the leftward reach. */
+/* Repeat the fabric, but not its alpha edge: one stretched mask avoids saw teeth. */
 .sleeveTail {
   position: absolute;
-  left: 100%;
+  left: calc(100% - 1px);
   top: 0;
   width: 70%;
   height: 100%;
-  background: url("/images/hero-scroll-sleeve-tail.webp") repeat-x left top / auto 100%;
+  background: #17171b url("/images/hero-scroll-sleeve-tail.webp") repeat-x left top / auto 100%;
+  -webkit-mask: url("/images/hero-scroll-sleeve-tail.webp") left top / 100% 100% no-repeat;
+  mask: url("/images/hero-scroll-sleeve-tail.webp") left top / 100% 100% no-repeat;
 }
 
 .layerImage {
@@ -101,41 +103,6 @@
   background: linear-gradient(#f7f1e7, #f7f1e7ee, transparent);
 }
 
-.motionControls {
-  position: absolute;
-  z-index: 20;
-  bottom: 1rem;
-  left: 50%;
-  transform: translateX(-50%);
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  align-items: center;
-  gap: 0.3rem 0.75rem;
-  width: max-content;
-  max-width: calc(100% - 2rem);
-  padding: 0.4rem 0.75rem;
-  border-radius: 0.5rem;
-  background: #faf8f5ed;
-  color: #433c36;
-  font-size: 0.72rem;
-  text-align: center;
-}
-
-.motionControls button {
-  min-height: 32px;
-  padding: 0.2rem 0.4rem;
-  color: #873719;
-  text-decoration: underline;
-  text-underline-offset: 3px;
-  cursor: pointer;
-}
-
-.motionControls button:focus-visible {
-  outline: 2px solid #873719;
-  outline-offset: 3px;
-}
-
 @media (min-width: 640px) {
   .frame { width: 712px; height: 400px; }
 }
@@ -149,6 +116,5 @@
 }
 
 @media print {
-  .motionControls { display: none; }
   .openHand { transform: translate3d(8%, -10%, 0) rotate(4deg); }
 }

@@ -6,7 +6,6 @@ export function PreEntryCurtain() {
   const [entered, setEntered] = useState(false);
   const [opening, setOpening] = useState(false);
   const enterButtonRef = useRef<HTMLButtonElement>(null);
-  const skipButtonRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
     if (entered) return;
@@ -30,10 +29,8 @@ export function PreEntryCurtain() {
         if (!main.hasAttribute("tabindex")) main.setAttribute("tabindex", "-1");
         main.focus({ preventScroll: true });
       }
-    } else if (opening) {
-      skipButtonRef.current?.focus({ preventScroll: true });
     }
-  }, [entered, opening]);
+  }, [entered]);
 
   const enterSite = () => {
     if (opening) return;
@@ -53,7 +50,7 @@ export function PreEntryCurtain() {
       onKeyDown={(event) => {
         if (event.key === "Tab") {
           event.preventDefault();
-          (opening ? skipButtonRef : enterButtonRef).current?.focus();
+          enterButtonRef.current?.focus();
         }
       }}
     >
@@ -80,11 +77,6 @@ export function PreEntryCurtain() {
         </button>
         <p className="curtain-note">Preview build · expect a few rough edges</p>
       </div>
-      {opening && (
-        <button ref={skipButtonRef} type="button" className="curtain-skip-button" onClick={() => setEntered(true)}>
-          Skip animation
-        </button>
-      )}
     </div>
   );
 }

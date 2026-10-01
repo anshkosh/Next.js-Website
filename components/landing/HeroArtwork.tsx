@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useRef, useState, useSyncExternalStore } from "react";
+import { useEffect, useRef, useSyncExternalStore } from "react";
 import { getHeroMotion, getHeroScrollProgress } from "@/lib/hero-motion";
 import styles from "./HeroArtwork.module.css";
 
@@ -20,8 +20,7 @@ function prefersReducedMotion() {
 export default function HeroArtwork() {
   const artworkRef = useRef<HTMLDivElement>(null);
   const reducedMotion = useSyncExternalStore(subscribeToMotionPreference, prefersReducedMotion, () => true);
-  const [motionOverride, setMotionOverride] = useState<boolean | null>(null);
-  const motionEnabled = motionOverride ?? !reducedMotion;
+  const motionEnabled = !reducedMotion;
 
   useEffect(() => {
     const artwork = artworkRef.current;
@@ -89,12 +88,6 @@ export default function HeroArtwork() {
           </div>
         </div>
         <div className={styles.fade} />
-      </div>
-      <div className={styles.motionControls}>
-        <span>{motionEnabled ? "Scroll to bring the hand to the pomegranate" : "Illustration motion is paused"}</span>
-        <button type="button" aria-pressed={motionEnabled} onClick={() => setMotionOverride(!motionEnabled)}>
-          {motionEnabled ? "Pause animation" : "Enable scroll animation"}
-        </button>
       </div>
     </>
   );
