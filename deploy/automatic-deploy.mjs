@@ -117,7 +117,7 @@ async function main() {
   process.env.NODE_OPTIONS = "--max-old-space-size=1536";
   // npm ci must include build/test dependencies even in production mode.
   run("npm", ["ci", "--include=dev"]);
-  run("npm", ["test", "--", "--maxWorkers=2"]);
+  run("npm", ["test", "--", "--maxWorkers=2"], { env: { ...process.env, NODE_ENV: "test" } });
   await migrateSafely();
   fs.mkdirSync(`${release}/public/.well-known`, { recursive: true });
   fs.writeFileSync(`${release}/public/.well-known/release.json`, JSON.stringify({ commit, builtAt: new Date().toISOString() }));
