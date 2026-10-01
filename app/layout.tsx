@@ -59,9 +59,11 @@ export default function RootLayout({
           }}
         />
         <PreEntryCurtain />
-        <UnderConstructionBanner />
-        {children}
-        <SiteEnhancements />
+        <div id="site-content" className="flex min-h-full flex-1 flex-col">
+          <UnderConstructionBanner />
+          {children}
+          <SiteEnhancements />
+        </div>
       </body>
     </html>
   );

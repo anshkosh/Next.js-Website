@@ -2,34 +2,39 @@
 
 import { useEffect, useRef, useState } from "react";
 
-const ENTRY_STORAGE_KEY = "anshkosh-preview-entered";
-const OPENING_DURATION = 2500;
-
 export function PreEntryCurtain() {
   const [entered, setEntered] = useState(false);
   const [opening, setOpening] = useState(false);
   const enterButtonRef = useRef<HTMLButtonElement>(null);
+  const skipButtonRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
-    const hasEntered = window.sessionStorage.getItem(ENTRY_STORAGE_KEY) === "true";
+    if (entered) return;
 
-    // The value comes from browser-only storage after hydration.
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setEntered(hasEntered);
-    if (!hasEntered) enterButtonRef.current?.focus();
-  }, []);
+    const content = document.getElementById("site-content");
+    const previousOverflow = document.body.style.overflow;
+    if (content) content.inert = true;
+    document.body.style.overflow = "hidden";
+    enterButtonRef.current?.focus({ preventScroll: true });
+
+    return () => {
+      if (content) content.inert = false;
+      document.body.style.overflow = previousOverflow;
+      const main = document.getElementById("main-content");
+      if (main) {
+        if (!main.hasAttribute("tabindex")) main.setAttribute("tabindex", "-1");
+        main.focus({ preventScroll: true });
+      }
+    };
+  }, [entered]);
+
+  useEffect(() => {
+    if (opening) skipButtonRef.current?.focus({ preventScroll: true });
+  }, [opening]);
 
   const enterSite = () => {
-    window.sessionStorage.setItem(ENTRY_STORAGE_KEY, "true");
+    if (opening) return;
     setOpening(true);
-
-    const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    if (prefersReducedMotion) {
-      setEntered(true);
-      return;
-    }
-
-    window.setTimeout(() => setEntered(true), OPENING_DURATION);
   };
 
   if (entered) return null;
@@ -41,22 +46,42 @@ export function PreEntryCurtain() {
       aria-modal="true"
       aria-labelledby="curtain-title"
       aria-describedby="curtain-description"
+      data-print-hide="true"
+      onKeyDown={(event) => {
+        if (event.key === "Tab") {
+          event.preventDefault();
+          (opening ? skipButtonRef : enterButtonRef).current?.focus();
+        }
+      }}
     >
       <div className="curtain-panel curtain-panel--left" aria-hidden="true" />
-      <div className="curtain-panel curtain-panel--right" aria-hidden="true" />
+      <div
+        className="curtain-panel curtain-panel--right"
+        aria-hidden="true"
+        onTransitionEnd={(event) => {
+          if (opening && event.target === event.currentTarget && event.propertyName === "transform") {
+            setEntered(true);
+          }
+        }}
+      />
       <div className="curtain-seam" aria-hidden="true" />
 
       <div className="curtain-copy">
         <p className="curtain-kicker">Anshkosh · early access pilot</p>
-        <h1 id="curtain-title">We’re pulling back the curtain.</h1>
+        <h2 id="curtain-title">Anshkosh is under construction.</h2>
         <p id="curtain-description">
-          Anshkosh is under construction. Take a sneak peek at the place where India’s next startups come into view.
+          We’re getting things ready. Take a sneak peek behind the curtains and explore what we’re building.
         </p>
-        <button ref={enterButtonRef} type="button" onClick={enterSite} className="curtain-entry-button">
-          Enter the preview
+        <button ref={enterButtonRef} type="button" onClick={enterSite} aria-disabled={opening} className="curtain-entry-button">
+          Sneak peek
         </button>
         <p className="curtain-note">Preview build · expect a few rough edges</p>
       </div>
+      {opening && (
+        <button ref={skipButtonRef} type="button" className="curtain-skip-button" onClick={() => setEntered(true)}>
+          Skip animation
+        </button>
+      )}
     </div>
   );
 }
