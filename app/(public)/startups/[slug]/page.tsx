@@ -11,6 +11,7 @@ import UpdatesSection from "@/components/startup/UpdatesSection";
 import DiscussionSection from "@/components/startup/DiscussionSection";
 import StartupTabNav from "@/components/startup/StartupTabNav";
 import CorePropositionSection from "@/components/startup/CorePropositionSection";
+import { SITE_URL, absoluteUrl } from "@/lib/seo";
 
 export const revalidate = 60;
 
@@ -81,16 +82,25 @@ export async function generateMetadata(props: {
   params: Promise<{ slug: string }>;
 }) {
   const params = await props.params;
-  if (!process.env.DATABASE_URL) return { title: "Startup — Anshkosh" };
+  if (!process.env.DATABASE_URL) notFound();
 
   const startup = await db.startup.findUnique({
     where: { slug: params.slug, status: "LIVE" },
     include: { category: true },
   });
 
-  if (!startup) return { title: "Not Found" };
+  if (!startup) {
+    const redirect = await db.slugRedirect.findUnique({
+      where: { oldSlug: params.slug },
+      include: { startup: true },
+    });
+    if (redirect?.startup?.status === "LIVE") {
+      permanentRedirect(`/startups/${redirect.startup.slug}`);
+    }
+    notFound();
+  }
 
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "https://anshkosh.com";
+  const baseUrl = SITE_URL;
   const url = `${baseUrl}/startups/${startup.slug}`;
 
   return {
@@ -107,6 +117,9 @@ export async function generateMetadata(props: {
     },
     twitter: {
       card: "summary_large_image",
+      title: startup.name,
+      description: startup.tagline,
+      images: [absoluteUrl(`/api/og/${startup.slug}`)],
     },
     alternates: {
       canonical: url,
@@ -147,7 +160,7 @@ export default async function StartupDetailPage(props: {
       where: { oldSlug: params.slug },
       include: { startup: true },
     });
-    if (redirect && redirect.startup) {
+    if (redirect?.startup?.status === "LIVE") {
       permanentRedirect(`/startups/${redirect.startup.slug}`);
     }
     notFound();
@@ -353,7 +366,7 @@ export default async function StartupDetailPage(props: {
             url: startup.websiteUrl,
             image:
               startup.logoUrl ||
-              `${process.env.NEXT_PUBLIC_BASE_URL || "https://anshkosh.com"}/api/og/${startup.slug}`,
+              absoluteUrl(`/api/og/${startup.slug}`),
             applicationCategory: startup.category.name,
             author: {
               "@type": "Organization",

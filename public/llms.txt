@@ -4,13 +4,13 @@
 
 ## Key pages
 
-- [Home](https://anshkosh.com/): Overview of the public validation platform.
-- [Discover startups](https://anshkosh.com/discover): Browse live startup profiles and evidence.
-- [Categories](https://anshkosh.com/categories): Explore startups by industry category.
-- [Journal](https://anshkosh.com/journal): Founder stories, startup insights, and validation guidance.
-- [FAQ](https://anshkosh.com/faq): Questions about validation, campaigns, and participation.
-- [Trust & Safety](https://anshkosh.com/trust-safety): Platform standards and accountability practices.
-- [Contact](https://anshkosh.com/contact): Contact the Anshkosh team.
+- [Home](https://www.anshkosh.com/): Overview of the public validation platform.
+- [Discover startups](https://www.anshkosh.com/discover): Browse startup profiles and evidence as the pilot opens.
+- [Categories](https://www.anshkosh.com/categories): Explore startups by industry category.
+- [Journal](https://www.anshkosh.com/journal): Founder stories, startup insights, and validation guidance.
+- [FAQ](https://www.anshkosh.com/faq): Questions about validation, campaigns, and participation.
+- [Trust & Safety](https://www.anshkosh.com/trust-safety): Platform standards and accountability practices.
+- [Contact](https://www.anshkosh.com/contact): Contact the Anshkosh team.
 
 ## Editorial and product context
 
@@ -18,5 +18,5 @@ Anshkosh is currently an early-access pilot. Public validation, applications, ac
 
 ## Machine-readable resources
 
-- Sitemap: https://anshkosh.com/sitemap.xml
-- Robots: https://anshkosh.com/robots.txt
+- Sitemap: https://www.anshkosh.com/sitemap.xml
+- Robots: https://www.anshkosh.com/robots.txt

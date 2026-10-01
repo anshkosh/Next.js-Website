@@ -7,7 +7,7 @@ export const revalidate = 21600; // 6 hours
 
 export const metadata = seoMetadata({
   title: "Startup Categories — Anshkosh",
-  description: "Browse Indian startups by category on Anshkosh.",
+  description: "Explore Indian startups by industry on Anshkosh. Discover founder progress, startup evidence, and opportunities to participate in public validation.",
   path: "/categories",
 });
 
@@ -16,7 +16,8 @@ export default async function CategoriesPage() {
     return (
       <div className="container mx-auto px-4 py-16 max-w-3xl text-center">
         <h1 className="text-4xl md:text-5xl font-extrabold text-gray-900 tracking-tight mb-4 font-heading">Browse by <span className="text-coral-500">Category</span></h1>
-        <p className="text-xl text-gray-600 mb-8">Category pages will appear as the pilot directory is seeded.</p>
+        <p className="text-xl text-gray-600 mb-8">Explore Indian startups by industry as the Anshkosh pilot grows. We’re preparing the first category listings alongside our public startup profiles.</p>
+        <p className="text-gray-600 mb-8">Visit <Link href="/discover" className="text-coral-600 underline">startup discovery</Link> or learn <Link href="/faq" className="text-coral-600 underline">how founders can participate</Link>.</p>
         <Link href="/register" className="inline-flex rounded-lg bg-coral-500 px-5 py-3 font-semibold text-white hover:bg-coral-600">Register as a founder</Link>
       </div>
     );

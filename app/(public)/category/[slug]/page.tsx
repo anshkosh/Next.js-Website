@@ -9,10 +9,10 @@ import { seoMetadata } from "@/lib/seo";
 export const revalidate = 60;
 
 export async function generateMetadata(props: { params: Promise<{ slug: string }> }) {
-  if (!process.env.DATABASE_URL) return seoMetadata({ title: "Startup Category — Anshkosh", description: "Explore Indian startup categories on Anshkosh.", path: "/category/preview" });
+  if (!process.env.DATABASE_URL) notFound();
   const { slug } = await props.params;
   const category = await db.category.findUnique({ where: { slug }, select: { name: true, description: true } });
-  if (!category) return seoMetadata({ title: "Category not found — Anshkosh", description: "The requested startup category could not be found.", path: `/category/${slug}` });
+  if (!category) notFound();
   return seoMetadata({
     title: `${category.name} Startups — Anshkosh`,
     description: category.description || `Explore ${category.name} startups on Anshkosh.`,
@@ -28,9 +28,7 @@ export async function generateStaticParams() {
 
 export default async function CategoryPage(props: { params: Promise<{ slug: string }> }) {
   const params = await props.params;
-  if (!process.env.DATABASE_URL) {
-    return <div className="container mx-auto px-4 py-24 max-w-2xl text-center"><h1 className="text-3xl font-bold text-gray-900 mb-3">Category preview</h1><p className="text-gray-600 mb-6">Startup categories will be available when the pilot directory is connected.</p><Link href="/register" className="inline-flex rounded-lg bg-coral-500 px-5 py-3 font-semibold text-white hover:bg-coral-600">Register as a founder</Link></div>;
-  }
+  if (!process.env.DATABASE_URL) notFound();
   const cookieStore = await cookies();
   const cookieId = cookieStore.get("anshkosh_vid")?.value;
 

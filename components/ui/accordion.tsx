@@ -26,10 +26,11 @@ function AccordionItem({ className, ...props }: AccordionPrimitive.Item.Props) {
 function AccordionTrigger({
   className,
   children,
+  headingLevel = 3,
   ...props
-}: AccordionPrimitive.Trigger.Props) {
+}: AccordionPrimitive.Trigger.Props & { headingLevel?: 2 | 3 | 4 }) {
   return (
-    <AccordionPrimitive.Header className="flex">
+    <AccordionPrimitive.Header className="flex" render={headingLevel === 2 ? <h2 /> : headingLevel === 4 ? <h4 /> : <h3 />}>
       <AccordionPrimitive.Trigger
         data-slot="accordion-trigger"
         className={cn(

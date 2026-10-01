@@ -1,9 +1,27 @@
 import type { Metadata } from "next";
 
-export const SITE_URL = (process.env.NEXT_PUBLIC_BASE_URL || "https://anshkosh.com").replace(/\/$/, "");
+export function resolveSiteUrl(configuredUrl = "https://www.anshkosh.com") {
+  const url = new URL(configuredUrl);
+  if (url.hostname === "anshkosh.com" || url.hostname === "www.anshkosh.com") {
+    url.hostname = "www.anshkosh.com";
+    url.protocol = "https:";
+    url.port = "";
+  }
+  return url.origin;
+}
+
+export const SITE_URL = resolveSiteUrl(process.env.NEXT_PUBLIC_BASE_URL || undefined);
+export const DEFAULT_SOCIAL_IMAGE = "/images/hero-pomegranate-v2.webp";
 
 export function absoluteUrl(path = "/") {
-  return new URL(path, `${SITE_URL}/`).toString();
+  const url = new URL(path, `${SITE_URL}/`);
+  // Migrate legacy first-party URLs without changing external editorial canonicals.
+  if (url.hostname === "anshkosh.com" || url.hostname === "www.anshkosh.com") {
+    url.hostname = "www.anshkosh.com";
+    url.protocol = "https:";
+    url.port = "";
+  }
+  return url.toString();
 }
 
 export function seoMetadata({
@@ -21,9 +39,12 @@ export function seoMetadata({
   return {
     title,
     description,
-    alternates: { canonical: path },
-    openGraph: { title, description, url, type, siteName: "Anshkosh", locale: "en_IN" },
-    twitter: { card: "summary_large_image", title, description },
+    alternates: { canonical: url },
+    openGraph: {
+      title, description, url, type, siteName: "Anshkosh", locale: "en_IN",
+      images: [{ url: absoluteUrl(DEFAULT_SOCIAL_IMAGE), alt: "Anshkosh startup discovery" }],
+    },
+    twitter: { card: "summary_large_image", title, description, images: [absoluteUrl(DEFAULT_SOCIAL_IMAGE)] },
   };
 }
 

@@ -4,7 +4,7 @@ import "./globals.css";
 import { SiteEnhancements } from "@/components/site/SiteEnhancements";
 import { UnderConstructionBanner } from "@/components/site/UnderConstructionBanner";
 import { PreEntryCurtain } from "@/components/site/PreEntryCurtain";
-import { SITE_URL } from "@/lib/seo";
+import { DEFAULT_SOCIAL_IMAGE, SITE_URL, absoluteUrl } from "@/lib/seo";
 
 const BASE_URL = SITE_URL;
 
@@ -30,12 +30,13 @@ export const metadata: Metadata = {
     description: "Explore Anshkosh startup evidence, launch plans, and founder progress before backing opens.",
     type: "website",
     url: BASE_URL,
-    images: [{ url: "/images/hero-pomegranate-v2.webp", alt: "Anshkosh startup discovery" }],
+    images: [{ url: absoluteUrl(DEFAULT_SOCIAL_IMAGE), alt: "Anshkosh startup discovery" }],
     siteName: "Anshkosh",
     locale: "en_IN",
   },
   twitter: {
     card: "summary_large_image",
+    images: [absoluteUrl(DEFAULT_SOCIAL_IMAGE)],
     title: "Anshkosh | Discover Indian Startups Before Launch",
     description: "Explore Anshkosh startup evidence, launch plans, and founder progress before backing opens.",
   },

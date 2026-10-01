@@ -6,30 +6,33 @@ import Link from "next/link";
 import { Clock, Calendar, ArrowLeft, Tag } from "lucide-react";
 import JournalCard from "@/components/landing/JournalCard";
 import CopyButton from "@/components/content/CopyButton";
+import { cache } from "react";
+import { DEFAULT_SOCIAL_IMAGE, SITE_URL, absoluteUrl } from "@/lib/seo";
 
-const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://anshkosh.com";
+const BASE_URL = SITE_URL;
 
 interface Props {
   params: Promise<{ slug: string }>;
 }
 
-async function getPost(slug: string) {
+const getPost = cache(async (slug: string) => {
+  if (!process.env.DATABASE_URL) return null;
   return db.journalPost.findFirst({
     where: { slug, status: "PUBLISHED" },
     include: { category: { select: { name: true, slug: true } } },
   });
-}
+});
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
   const post = await getPost(slug);
 
-  if (!post) return { title: "Post Not Found | Anshkosh" };
+  if (!post) notFound();
 
   const title = post.metaTitle || post.title;
   const description = post.metaDescription || post.excerpt || `Read "${post.title}" on the Anshkosh Journal.`;
-  const ogImage = post.coverImageUrl || `${BASE_URL}/og-default.png`;
-  const canonical = post.canonicalUrl || `${BASE_URL}/journal/${post.slug}`;
+  const ogImage = absoluteUrl(post.coverImageUrl || DEFAULT_SOCIAL_IMAGE);
+  const canonical = absoluteUrl(post.canonicalUrl || `/journal/${post.slug}`);
 
   return {
     title: `${title} | Anshkosh Journal`,
@@ -45,7 +48,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       modifiedTime: post.updatedAt.toISOString(),
       authors: [post.authorName],
       siteName: "Anshkosh",
-      images: [{ url: ogImage, width: 1200, height: 630, alt: post.title }],
+      images: [{ url: ogImage, alt: post.title }],
     },
     twitter: {
       card: "summary_large_image",
@@ -93,7 +96,7 @@ export default async function JournalArticlePage({ params }: Props) {
     "@type": "Article",
     headline: post.title,
     description: post.metaDescription || post.excerpt || "",
-    image: post.coverImageUrl ? [post.coverImageUrl] : [],
+    image: [absoluteUrl(post.coverImageUrl || DEFAULT_SOCIAL_IMAGE)],
     author: { "@type": "Person", name: post.authorName },
     publisher: {
       "@type": "Organization",
@@ -102,7 +105,7 @@ export default async function JournalArticlePage({ params }: Props) {
     },
     datePublished: post.publishedAt?.toISOString(),
     dateModified: post.updatedAt.toISOString(),
-    mainEntityOfPage: { "@type": "WebPage", "@id": `${BASE_URL}/journal/${post.slug}` },
+    mainEntityOfPage: { "@type": "WebPage", "@id": absoluteUrl(post.canonicalUrl || `/journal/${post.slug}`) },
     keywords: [...post.tags, ...post.metaKeywords].join(", "),
   };
 
