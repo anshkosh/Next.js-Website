@@ -2,8 +2,6 @@ import { ImageResponse } from 'next/og';
 import { db } from '@/lib/db';
 import { NextRequest } from 'next/server';
 
-export const runtime = 'edge';
-
 export async function GET(req: NextRequest, props: { params: Promise<{ slug: string }> }) {
   const params = await props.params;
   const startup = await db.startup.findUnique({
