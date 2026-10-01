@@ -7,9 +7,11 @@ import FullSiteSearch from "./FullSiteSearch";
 import { ThemeToggle } from "@/components/site/SiteEnhancements";
 
 export default async function Header() {
-  const session = await auth.api.getSession({
-    headers: await headers(),
-  });
+  const session = process.env.DATABASE_URL
+    ? await auth.api.getSession({
+        headers: await headers(),
+      })
+    : null;
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-gray-200/60 bg-[#FAF8F5]/90 backdrop-blur-md dark:border-gray-700/60 dark:bg-gray-950/90">
