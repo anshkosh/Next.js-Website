@@ -66,6 +66,20 @@ async function publicAssets(origin) {
   console.log(`PASS ${assets.length} public page assets`);
 }
 
+function makeStaticPublic(directory) {
+  // Incoming archives/builds use a private umask; only browser assets become public.
+  assert.ok(fs.lstatSync(directory).isDirectory(), "Static path is a real directory");
+  fs.chmodSync(directory, 0o755);
+  for (const entry of fs.readdirSync(directory, { withFileTypes: true })) {
+    const filename = path.join(directory, entry.name);
+    if (entry.isDirectory()) makeStaticPublic(filename);
+    else {
+      assert.ok(entry.isFile(), "Static links/special files are not permitted");
+      fs.chmodSync(filename, 0o644);
+    }
+  }
+}
+
 async function migrateSafely() {
   const requireRelease = createRequire(`${release}/package.json`);
   const { PrismaClient } = requireRelease("@prisma/client");
@@ -124,6 +138,7 @@ async function main() {
   run("node", ["scripts/verify-seo.mjs", `http://127.0.0.1:${port}`]);
   await publicAssets(`http://127.0.0.1:${port}`);
   fs.cpSync(`${release}/.next/static`, `${shared}/static`, { recursive: true });
+  makeStaticPublic(`${shared}/static`);
   route(port);
   routed = true;
   workersChanged = true;
