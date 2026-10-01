@@ -166,6 +166,169 @@ html.dark [class*="bg-[#F7F1E7]"] { background-color: #1f2937; }
   .journal-content a { color: #000 !important; text-decoration: underline; }
 }
 
+/* Pre-entry preview curtain */
+.curtain-stage {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  isolation: isolate;
+  background: rgba(20, 18, 25, 0.42);
+}
+
+.curtain-stage::before {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: radial-gradient(circle at center, rgba(255, 201, 71, 0.12), transparent 42%);
+  content: "";
+}
+
+.curtain-panel {
+  position: absolute;
+  top: -2%;
+  bottom: -2%;
+  z-index: 1;
+  width: 40%;
+  background-color: #a9361d;
+  background-image:
+    repeating-linear-gradient(90deg, rgba(255, 209, 153, 0.1) 0, rgba(255, 209, 153, 0.1) 2px, transparent 2px, transparent 28px),
+    linear-gradient(90deg, rgba(69, 16, 19, 0.36), transparent 18%, rgba(255, 143, 68, 0.16) 50%, transparent 82%, rgba(69, 16, 19, 0.36));
+  box-shadow: 0 0 42px rgba(22, 12, 20, 0.28);
+  transition: transform 780ms cubic-bezier(0.76, 0, 0.24, 1);
+}
+
+.curtain-panel--left {
+  left: 0;
+  border-right: 1px solid rgba(255, 230, 197, 0.22);
+  transform-origin: left center;
+}
+
+.curtain-panel--right {
+  right: 0;
+  border-left: 1px solid rgba(255, 230, 197, 0.22);
+  transform-origin: right center;
+}
+
+.curtain-stage--opening .curtain-panel--left {
+  transform: translateX(-108%);
+}
+
+.curtain-stage--opening .curtain-panel--right {
+  transform: translateX(108%);
+}
+
+.curtain-seam {
+  position: absolute;
+  top: 8%;
+  bottom: 8%;
+  left: 50%;
+  z-index: 2;
+  width: 1px;
+  background: linear-gradient(transparent, rgba(255, 239, 207, 0.5) 18%, rgba(255, 239, 207, 0.5) 82%, transparent);
+  box-shadow: 0 0 24px rgba(255, 201, 71, 0.42);
+  opacity: 0.75;
+  transition: opacity 320ms ease;
+}
+
+.curtain-stage--opening .curtain-seam {
+  opacity: 0;
+}
+
+.curtain-copy {
+  position: relative;
+  z-index: 3;
+  width: min(32rem, calc(100% - 2rem));
+  padding: 2.5rem 2.25rem;
+  border: 1px solid rgba(255, 255, 255, 0.7);
+  background: rgba(250, 248, 245, 0.96);
+  color: #1a1a2e;
+  box-shadow: 0 24px 80px rgba(22, 12, 20, 0.3);
+  text-align: center;
+  transition: opacity 280ms ease, transform 500ms ease;
+}
+
+.curtain-stage--opening .curtain-copy {
+  opacity: 0;
+  transform: translateY(1.5rem) scale(0.98);
+}
+
+.curtain-kicker {
+  margin: 0 0 1rem;
+  color: #a9361d;
+  font-family: var(--font-inter), sans-serif;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.curtain-copy h1 {
+  margin: 0;
+  font-family: var(--font-oswald), sans-serif;
+  font-size: clamp(2rem, 6vw, 3.5rem);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 0.98;
+}
+
+.curtain-copy > p:not(.curtain-kicker):not(.curtain-note) {
+  margin: 1.25rem auto 0;
+  max-width: 27rem;
+  color: #4b5563;
+  font-size: 0.98rem;
+  line-height: 1.65;
+}
+
+.curtain-entry-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  margin-top: 1.6rem;
+  min-height: 3rem;
+  padding: 0.75rem 1.15rem;
+  border: 1px solid #e8521e;
+  border-radius: 999px;
+  background: #e8521e;
+  color: white;
+  font-size: 0.9rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background-color 150ms ease, box-shadow 150ms ease, transform 150ms ease;
+}
+
+.curtain-entry-button:hover {
+  background: #c84112;
+  box-shadow: 0 10px 24px rgba(232, 82, 30, 0.25);
+  transform: translateY(-2px);
+}
+
+.curtain-entry-button:focus-visible {
+  outline: 3px solid #ffc947;
+  outline-offset: 4px;
+}
+
+.curtain-note {
+  margin: 1rem 0 0;
+  color: #6b7280;
+  font-size: 0.72rem;
+  letter-spacing: 0.04em;
+}
+
+@media (max-width: 640px) {
+  .curtain-panel { width: 29%; }
+  .curtain-copy { padding: 2rem 1.25rem; }
+  .curtain-copy h1 { font-size: clamp(2rem, 11vw, 3rem); }
+  .curtain-copy > p:not(.curtain-kicker):not(.curtain-note) { font-size: 0.9rem; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .curtain-panel, .curtain-copy, .curtain-seam { transition-duration: 0.01ms; }
+}
+
 /* Utility: hide scrollbar while allowing scroll */
 .scrollbar-hide {
   -ms-overflow-style: none;

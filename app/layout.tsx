@@ -3,6 +3,7 @@ import { Inter, Oswald } from "next/font/google";
 import "./globals.css";
 import { SiteEnhancements } from "@/components/site/SiteEnhancements";
 import { UnderConstructionBanner } from "@/components/site/UnderConstructionBanner";
+import { PreEntryCurtain } from "@/components/site/PreEntryCurtain";
 import { SITE_URL } from "@/lib/seo";
 
 const BASE_URL = SITE_URL;
@@ -57,6 +58,7 @@ export default function RootLayout({
             __html: `try{if(localStorage.getItem("anshkosh-theme")==="dark")document.documentElement.classList.add("dark")}catch(e){}`,
           }}
         />
+        <PreEntryCurtain />
         <UnderConstructionBanner />
         {children}
         <SiteEnhancements />
