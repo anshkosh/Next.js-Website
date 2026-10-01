@@ -20,17 +20,20 @@ export function PreEntryCurtain() {
     return () => {
       if (content) content.inert = false;
       document.body.style.overflow = previousOverflow;
+    };
+  }, [entered]);
+
+  useEffect(() => {
+    if (entered) {
       const main = document.getElementById("main-content");
       if (main) {
         if (!main.hasAttribute("tabindex")) main.setAttribute("tabindex", "-1");
         main.focus({ preventScroll: true });
       }
-    };
-  }, [entered]);
-
-  useEffect(() => {
-    if (opening) skipButtonRef.current?.focus({ preventScroll: true });
-  }, [opening]);
+    } else if (opening) {
+      skipButtonRef.current?.focus({ preventScroll: true });
+    }
+  }, [entered, opening]);
 
   const enterSite = () => {
     if (opening) return;
