@@ -331,7 +331,11 @@ html.dark [class*="bg-[#F7F1E7]"] { background-color: #1f2937; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .curtain-panel, .curtain-stage { transition-duration: 0.01ms !important; transition-delay: 0ms; }
+  /* Only the visitor-triggered preview overrides reduced motion; no autoplay. */
+  .curtain-stage--opening, .curtain-stage--opening .curtain-panel {
+    transition-duration: 3000ms !important;
+    transition-delay: 200ms;
+  }
   .curtain-copy, .curtain-seam { transition-duration: 0.01ms; }
   .curtain-stage--opening .curtain-copy { transform: none; }
 }

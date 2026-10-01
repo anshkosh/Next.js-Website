@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { useEffect, useRef, useSyncExternalStore } from "react";
 import { getHeroMotion, getHeroScrollProgress } from "@/lib/hero-motion";
+import { previewMotionRequested, subscribeToPreviewMotion } from "@/lib/preview-motion";
 import styles from "./HeroArtwork.module.css";
 
 const motionQuery = "(prefers-reduced-motion: reduce)";
@@ -20,7 +21,8 @@ function prefersReducedMotion() {
 export default function HeroArtwork() {
   const artworkRef = useRef<HTMLDivElement>(null);
   const reducedMotion = useSyncExternalStore(subscribeToMotionPreference, prefersReducedMotion, () => true);
-  const motionEnabled = !reducedMotion;
+  const previewMotion = useSyncExternalStore(subscribeToPreviewMotion, previewMotionRequested, () => false);
+  const motionEnabled = previewMotion || !reducedMotion;
 
   useEffect(() => {
     const artwork = artworkRef.current;

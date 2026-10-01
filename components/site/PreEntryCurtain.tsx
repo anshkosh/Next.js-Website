@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { requestPreviewMotion } from "@/lib/preview-motion";
 
 export function PreEntryCurtain() {
   const [entered, setEntered] = useState(false);
@@ -34,6 +35,7 @@ export function PreEntryCurtain() {
 
   const enterSite = () => {
     if (opening) return;
+    requestPreviewMotion();
     setOpening(true);
   };
 

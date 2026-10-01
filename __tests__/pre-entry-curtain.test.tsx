@@ -2,6 +2,7 @@ import { act } from "react";
 import { createRoot } from "react-dom/client";
 import { expect, it, vi } from "vitest";
 import { PreEntryCurtain } from "../components/site/PreEntryCurtain";
+import { previewMotionRequested } from "../lib/preview-motion";
 
 it("opens with Sneak peek, has no skip button, and unlocks only after the reveal", async () => {
   vi.stubGlobal("IS_REACT_ACT_ENVIRONMENT", true);
@@ -19,7 +20,9 @@ it("opens with Sneak peek, has no skip button, and unlocks only after the reveal
     expect(content.inert).toBe(true);
     const enter = container.querySelector("button")!;
     expect(enter.textContent).toBe("Sneak peek");
+    expect(previewMotionRequested()).toBe(false);
     await act(async () => enter.click());
+    expect(previewMotionRequested()).toBe(true);
     expect(container.querySelector(".curtain-stage--opening")).not.toBeNull();
     expect(container.textContent).not.toContain("Skip animation");
     expect(container.querySelectorAll("button")).toHaveLength(1);
