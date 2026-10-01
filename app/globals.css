@@ -197,7 +197,7 @@ html.dark [class*="bg-[#F7F1E7]"] { background-color: #1f2937; }
     repeating-linear-gradient(90deg, rgba(255, 209, 153, 0.1) 0, rgba(255, 209, 153, 0.1) 2px, transparent 2px, transparent 28px),
     linear-gradient(90deg, rgba(69, 16, 19, 0.36), transparent 18%, rgba(255, 143, 68, 0.16) 50%, transparent 82%, rgba(69, 16, 19, 0.36));
   box-shadow: 0 0 42px rgba(22, 12, 20, 0.28);
-  transition: transform 780ms cubic-bezier(0.76, 0, 0.24, 1);
+  transition: transform 2400ms cubic-bezier(0.33, 1, 0.68, 1) 760ms;
 }
 
 .curtain-panel--left {
@@ -218,6 +218,91 @@ html.dark [class*="bg-[#F7F1E7]"] { background-color: #1f2937; }
 
 .curtain-stage--opening .curtain-panel--right {
   transform: translateX(108%);
+}
+
+.curtain-rope {
+  position: absolute;
+  top: 12%;
+  bottom: 12%;
+  left: 14%;
+  width: 30px;
+  transition: opacity 500ms ease 1800ms;
+}
+
+.curtain-panel--right .curtain-rope {
+  right: 14%;
+  left: auto;
+}
+
+.curtain-rope__line {
+  position: absolute;
+  top: 0;
+  bottom: 18%;
+  left: 50%;
+  width: 3px;
+  border-radius: 999px;
+  background: repeating-linear-gradient(135deg, #f7d48a 0 3px, #a76d28 3px 6px);
+  box-shadow: 0 0 0 1px rgba(66, 24, 20, 0.2), 2px 0 10px rgba(45, 13, 17, 0.24);
+  transform: translateX(-50%);
+  transform-origin: top center;
+}
+
+.curtain-rope__grip {
+  position: absolute;
+  top: 51%;
+  left: 50%;
+  width: 24px;
+  height: 58px;
+  border: 2px solid #7d401f;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #c37a2d, #ffda7a 48%, #a95b20);
+  box-shadow: 0 5px 12px rgba(45, 13, 17, 0.3);
+  transform: translateX(-50%);
+  transform-origin: center top;
+}
+
+.curtain-rope__tassel {
+  position: absolute;
+  top: calc(51% + 54px);
+  left: 50%;
+  width: 16px;
+  height: 23px;
+  border-radius: 2px 2px 8px 8px;
+  background: repeating-linear-gradient(90deg, #a95b20 0 2px, #ffda7a 2px 4px);
+  box-shadow: 0 4px 9px rgba(45, 13, 17, 0.24);
+  transform: translateX(-50%);
+}
+
+.curtain-stage--opening .curtain-rope {
+  opacity: 0;
+}
+
+.curtain-stage--opening .curtain-rope__line {
+  animation: curtain-rope-tension 1200ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.curtain-stage--opening .curtain-rope__grip {
+  animation: curtain-rope-pull 1250ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.curtain-panel--right .curtain-rope__grip,
+.curtain-panel--right .curtain-rope__line {
+  animation-delay: 110ms;
+}
+
+@keyframes curtain-rope-tension {
+  0%, 14% { transform: translateX(-50%) scaleY(1); }
+  42% { transform: translateX(-50%) scaleY(0.82); }
+  72% { transform: translateX(-50%) scaleY(1.04); }
+  100% { transform: translateX(-50%) scaleY(0.96); }
+}
+
+@keyframes curtain-rope-pull {
+  0% { transform: translateX(-50%) translateY(0) rotate(0deg); }
+  18% { transform: translateX(-50%) translateY(8px) rotate(1deg); }
+  48% { transform: translateX(-50%) translateY(82px) rotate(-1deg); }
+  68% { transform: translateX(-50%) translateY(68px) rotate(0deg); }
+  100% { transform: translateX(-50%) translateY(92px) rotate(0deg); }
 }
 
 .curtain-seam {
@@ -326,7 +411,8 @@ html.dark [class*="bg-[#F7F1E7]"] { background-color: #1f2937; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .curtain-panel, .curtain-copy, .curtain-seam { transition-duration: 0.01ms; }
+  .curtain-panel, .curtain-copy, .curtain-seam, .curtain-rope { transition-duration: 0.01ms; }
+  .curtain-rope__line, .curtain-rope__grip { animation-duration: 0.01ms !important; }
 }
 
 /* Utility: hide scrollbar while allowing scroll */
