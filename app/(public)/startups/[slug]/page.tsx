@@ -13,7 +13,8 @@ import StartupTabNav from "@/components/startup/StartupTabNav";
 import CorePropositionSection from "@/components/startup/CorePropositionSection";
 import { SITE_URL, absoluteUrl } from "@/lib/seo";
 
-export const revalidate = 60;
+// Visitor-specific cookies must be read at request time, including for new slugs.
+export const dynamic = "force-dynamic";
 
 type StartupFeature = {
   icon: string;

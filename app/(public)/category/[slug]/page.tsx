@@ -6,7 +6,8 @@ import Link from "next/link";
 import CategoryIcon from "@/components/category/CategoryIcon";
 import { seoMetadata } from "@/lib/seo";
 
-export const revalidate = 60;
+// Visitor-specific cookies must be read at request time, including for new slugs.
+export const dynamic = "force-dynamic";
 
 export async function generateMetadata(props: { params: Promise<{ slug: string }> }) {
   if (!process.env.DATABASE_URL) notFound();
