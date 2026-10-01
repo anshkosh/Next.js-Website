@@ -1,8 +1,12 @@
 .artwork {
+  --hand-x: 8%;
+  --hand-y: -10%;
+  --hand-rotation: 4deg;
   position: absolute;
   inset: 0;
   overflow: hidden;
-  background: rgb(247 241 231);
+  pointer-events: none;
+  background: #f7f1e7;
 }
 
 .frame {
@@ -18,46 +22,51 @@
 .window {
   position: absolute;
   inset: 0;
-  perspective: 1100px;
-  perspective-origin: 50% 75%;
+  overflow: hidden;
   -webkit-mask-image: linear-gradient(transparent, #000 45%, #000 96%, transparent), linear-gradient(90deg, transparent, #000 5%, #000 95%, transparent);
   mask-image: linear-gradient(transparent, #000 45%, #000 96%, transparent), linear-gradient(90deg, transparent, #000 5%, #000 95%, transparent);
   -webkit-mask-composite: source-in;
   mask-composite: intersect;
 }
 
-.tilt,
-.float {
-  width: 100%;
-  height: 100%;
-}
-
 .base {
   display: block;
   width: 100%;
   height: 100%;
-  max-width: none;
-  object-fit: cover;
-  object-position: bottom;
 }
 
-.hand,
-.fruit {
+.openHand {
   position: absolute;
-  pointer-events: none;
+  z-index: 2;
+  left: 52.7%;
+  top: 34.1%;
+  width: 47.4%;
+  transform-origin: 78% 58%;
+  transform: translate3d(var(--hand-x), var(--hand-y), 0) rotate(var(--hand-rotation));
   will-change: transform;
 }
 
-.hand {
+/* Cropped assets share the original 1672 x 941 coordinate system. */
+.handImage {
+  position: relative;
   z-index: 2;
-  top: 34%;
-  left: 44.5%;
-  width: 55%;
-  transform-origin: 78% 58%;
+  display: block;
+  width: 100%;
+  height: auto;
+  max-width: none;
 }
 
-.handImage,
-.fruitImage {
+/* Continue the cropped sleeve off-canvas during the leftward reach. */
+.sleeveTail {
+  position: absolute;
+  left: 100%;
+  top: 0;
+  width: 70%;
+  height: 100%;
+  background: url("/images/hero-scroll-sleeve-tail.webp") repeat-x left top / auto 100%;
+}
+
+.layerImage {
   display: block;
   width: 100%;
   height: auto;
@@ -65,19 +74,66 @@
 }
 
 .fruit {
+  position: absolute;
   z-index: 3;
-  top: 67%;
-  left: 45.5%;
-  width: 9%;
-  transform-origin: 50% 75%;
+  left: 45.75%;
+  top: 66.65%;
+  width: 7.8%;
+}
+
+.shadow {
+  position: absolute;
+  z-index: 1;
+  left: 45.9%;
+  top: 81.3%;
+  width: 7.5%;
+  height: 1.6%;
+  border-radius: 50%;
+  background: #30251d;
+  filter: blur(5px);
+  opacity: 0.28;
 }
 
 .fade {
   position: absolute;
   inset: 0 0 auto;
   height: 62%;
-  pointer-events: none;
-  background: linear-gradient(rgb(247 241 231), rgb(247 241 231 / 0.95), transparent);
+  background: linear-gradient(#f7f1e7, #f7f1e7ee, transparent);
+}
+
+.motionControls {
+  position: absolute;
+  z-index: 20;
+  bottom: 1rem;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 0.3rem 0.75rem;
+  width: max-content;
+  max-width: calc(100% - 2rem);
+  padding: 0.4rem 0.75rem;
+  border-radius: 0.5rem;
+  background: #faf8f5ed;
+  color: #433c36;
+  font-size: 0.72rem;
+  text-align: center;
+}
+
+.motionControls button {
+  min-height: 32px;
+  padding: 0.2rem 0.4rem;
+  color: #873719;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+
+.motionControls button:focus-visible {
+  outline: 2px solid #873719;
+  outline-offset: 3px;
 }
 
 @media (min-width: 640px) {
@@ -89,9 +145,10 @@
 }
 
 @media (min-width: 1024px) {
-  .frame { left: 0; width: 100%; height: auto; aspect-ratio: 1670 / 941; transform: scaleY(0.9); }
+  .frame { left: 0; width: 100%; height: auto; aspect-ratio: 1672 / 941; transform: scaleY(0.9); }
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .hand { transform: translate3d(8%, -10%, 0) rotateZ(4deg) !important; }
+@media print {
+  .motionControls { display: none; }
+  .openHand { transform: translate3d(8%, -10%, 0) rotate(4deg); }
 }
