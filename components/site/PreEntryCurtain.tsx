@@ -1,10 +1,9 @@
 "use client";
 
-import { ArrowRight } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
 const ENTRY_STORAGE_KEY = "anshkosh-preview-entered";
-const OPENING_DURATION = 3350;
+const OPENING_DURATION = 2500;
 
 export function PreEntryCurtain() {
   const [entered, setEntered] = useState(false);
@@ -43,20 +42,8 @@ export function PreEntryCurtain() {
       aria-labelledby="curtain-title"
       aria-describedby="curtain-description"
     >
-      <div className="curtain-panel curtain-panel--left" aria-hidden="true">
-        <div className="curtain-rope">
-          <span className="curtain-rope__line" />
-          <span className="curtain-rope__grip" />
-          <span className="curtain-rope__tassel" />
-        </div>
-      </div>
-      <div className="curtain-panel curtain-panel--right" aria-hidden="true">
-        <div className="curtain-rope">
-          <span className="curtain-rope__line" />
-          <span className="curtain-rope__grip" />
-          <span className="curtain-rope__tassel" />
-        </div>
-      </div>
+      <div className="curtain-panel curtain-panel--left" aria-hidden="true" />
+      <div className="curtain-panel curtain-panel--right" aria-hidden="true" />
       <div className="curtain-seam" aria-hidden="true" />
 
       <div className="curtain-copy">
@@ -66,8 +53,7 @@ export function PreEntryCurtain() {
           Anshkosh is under construction. Take a sneak peek at the place where India’s next startups come into view.
         </p>
         <button ref={enterButtonRef} type="button" onClick={enterSite} className="curtain-entry-button">
-          Pull the ropes to enter
-          <ArrowRight size={18} aria-hidden="true" />
+          Enter the preview
         </button>
         <p className="curtain-note">Preview build · expect a few rough edges</p>
       </div>
