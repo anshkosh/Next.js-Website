@@ -27,6 +27,15 @@ or the production environment file. The existing root-owned receiver, database,
 Redis, Nginx and PM2 configuration stay in place; changing the GitHub source does
 not migrate data or require Vercel.
 
+The deployment key was created for this repository on 2026-10-02 and installed
+with `restrict,command="/usr/local/libexec/anshkosh-receive"`. Its public-key
+fingerprint is `SHA256:nLxQEeRGrQPcoEFvrvWuS6vURFpzzHlG1RaNMrsw/+E`.
+The private key is stored in the shared repository's `VPS_SSH_KEY` Actions secret;
+the VPS host keys are pinned in `VPS_KNOWN_HOSTS`. A successful `check` and a
+rejected unrestricted command verify the credential's intended access boundary.
+The old deployment variable is disabled; its credentials are retained for
+explicit recovery, not for a second active deployment pipeline.
+
 ## Safety and server layout
 
 - GitHub-hosted runners test the exact commit. Actions are pinned to commit SHAs.
