@@ -2,6 +2,7 @@ import { betterAuth } from "better-auth";
 import { prismaAdapter } from "@better-auth/prisma-adapter";
 import { admin, type Role } from "better-auth/plugins";
 import { db } from "./db";
+import { getTrustedAuthOrigins } from "./auth-origins";
 
 const statements = {
   startup: ["create", "read", "update", "delete", "moderate"],
@@ -11,6 +12,7 @@ const statements = {
 } as const;
 
 export const auth = betterAuth({
+  trustedOrigins: getTrustedAuthOrigins,
   database: prismaAdapter(db, {
     provider: "postgresql",
   }),
