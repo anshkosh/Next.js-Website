@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState, useId } from "react";
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { cropGeometry, drawPhoto, initialAdjustment, type ImageAdjustment } from "@/lib/image-editor";
+import { boundedPhotoSize, cropGeometry, drawPhoto, initialAdjustment, type ImageAdjustment } from "@/lib/image-editor";
 
 export default function PhotoEditor({ file, square, onCancel, onApply }: {
   file: File; square: boolean; onCancel: () => void; onApply: (file: File) => Promise<void>;
@@ -33,8 +33,7 @@ export default function PhotoEditor({ file, square, onCancel, onApply }: {
 
   const ratio = aspect === "square" ? 1 : aspect === "landscape" ? 16 / 9 : image ? image.naturalWidth / image.naturalHeight : 16 / 9;
   // Limit preview and output dimensions, including very tall or panoramic photos.
-  const width = Math.max(1, Math.round(600 * Math.min(1, ratio)));
-  const height = Math.max(1, Math.round(width / ratio));
+  const { width, height } = boundedPhotoSize(ratio, 600);
   useEffect(() => {
     if (image && canvasRef.current) drawPhoto(canvasRef.current, image, adjustment);
   }, [image, adjustment, width, height]);
@@ -45,8 +44,9 @@ export default function PhotoEditor({ file, square, onCancel, onApply }: {
     try {
       const output = document.createElement("canvas");
       const max = square ? 512 : 1280;
-      output.width = Math.max(1, Math.round(max * Math.min(1, ratio)));
-      output.height = Math.max(1, Math.round(output.width / ratio));
+      const dimensions = boundedPhotoSize(ratio, max);
+      output.width = dimensions.width;
+      output.height = dimensions.height;
       drawPhoto(output, image, adjustment);
       const blob = await new Promise<Blob>((resolve, reject) => output.toBlob(
         value => value ? resolve(value) : reject(new Error("The edited photo could not be saved.")),

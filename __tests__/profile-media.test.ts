@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { cropGeometry, initialAdjustment } from "../lib/image-editor";
+import { boundedPhotoSize, cropGeometry, initialAdjustment } from "../lib/image-editor";
 import { mergeStartupMetadata } from "../lib/startup-metadata";
 import { MAX_PITCH_DECK_BYTES, ownsPitchDeck, pitchDeckUrlSchema, validatePitchDeck } from "../lib/validators/pitch-deck.schema";
 
@@ -36,6 +36,12 @@ describe("profile metadata", () => {
   it("handles profiles without metadata", () => expect(mergeStartupMetadata(null, { city: "Hyderabad" })).toEqual({ city: "Hyderabad" }));
 });
 describe("photo crop geometry", () => {
+  it.each([1e-8, 1e8, 1, 16 / 9, 9 / 16])("bounds even unusually narrow and panoramic crops (%s)", ratio => {
+    const size = boundedPhotoSize(ratio, 1280);
+    expect(size.width).toBeGreaterThanOrEqual(1); expect(size.height).toBeGreaterThanOrEqual(1);
+    expect(size.width).toBeLessThanOrEqual(1280); expect(size.height).toBeLessThanOrEqual(1280);
+  });
+  it.each([0, -1, NaN, Infinity])("rejects invalid photo ratios (%s)", ratio => expect(() => boundedPhotoSize(ratio, 1280)).toThrow());
   it("center-crops landscape photos to square", () => {
     expect(cropGeometry(1200, 800, 512, 512, initialAdjustment)).toMatchObject({ scale: 0.64, x: 0, y: 0, yLimit: 0 });
   });

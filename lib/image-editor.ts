@@ -1,6 +1,14 @@
 export type ImageAdjustment = { zoom: number; rotation: number; x: number; y: number };
 export const initialAdjustment: ImageAdjustment = { zoom: 1, rotation: 0, x: 0, y: 0 };
 
+export function boundedPhotoSize(ratio: number, max: number) {
+  if (!Number.isFinite(ratio) || ratio <= 0 || !Number.isInteger(max) || max <= 0) throw new Error("Invalid photo dimensions");
+  return {
+    width: ratio >= 1 ? max : Math.max(1, Math.round(max * ratio)),
+    height: ratio < 1 ? max : Math.max(1, Math.round(max / ratio)),
+  };
+}
+
 export function cropGeometry(width: number, height: number, cropWidth: number, cropHeight: number, adjustment: ImageAdjustment) {
   const angle = adjustment.rotation * Math.PI / 180;
   const cos = Math.cos(angle), sin = Math.sin(angle);
