@@ -2,7 +2,10 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { UploadCloud, Loader2, X, Check, Image as ImageIcon, Plus, AlertCircle, Zap } from "lucide-react";
+import { X, Plus, AlertCircle, Zap } from "lucide-react";
+import EditableImageUpload from "@/components/startup/EditableImageUpload";
+import GalleryImageEditor from "@/components/startup/GalleryImageEditor";
+import PitchDeckUpload from "@/components/startup/PitchDeckUpload";
 import FounderManager from "@/components/startup/FounderManager";
 import IconSelect from "@/components/startup/IconSelect";
 import { updateStartup } from "@/app/actions/startup.actions";
@@ -17,10 +20,9 @@ const availableIcons = [
 export default function EditStartupForm({ initialData }: { initialData: any }) {
   const router = useRouter();
   const [isSaving, setIsSaving] = useState(false);
-  const [isUploadingLogo, setIsUploadingLogo] = useState(false);
-  const [isDragging, setIsDragging] = useState(false);
-  const [logoPreviewUrl, setLogoPreviewUrl] = useState<string>("");
-  const [imageError, setImageError] = useState(false);
+  const [mediaBusy, setMediaBusy] = useState<Record<string, boolean>>({});
+  const isMediaBusy = Object.values(mediaBusy).some(Boolean);
+  const setUploadBusy = (key: string, busy: boolean) => setMediaBusy(previous => previous[key] === busy ? previous : { ...previous, [key]: busy });
   const [errors, setErrors] = useState<Record<string, string[]>>({});
   const [categories, setCategories] = useState<
     { id: string; name: string; iconName: string | null }[]
@@ -84,6 +86,7 @@ export default function EditStartupForm({ initialData }: { initialData: any }) {
     city: metadata.city || "",
     foundedYear: metadata.foundedYear ? metadata.foundedYear.toString() : "",
     videoUrl: initialData.videoUrl || "",
+    pitchDeckUrl: metadata.pitchDeckUrl || "",
     galleryImages: (initialData.galleryImages || []) as string[],
     features: (metadata.features || []) as { icon: string; title: string; description: string }[],
     // Founder contact
@@ -111,51 +114,9 @@ export default function EditStartupForm({ initialData }: { initialData: any }) {
     }
   };
 
-  const uploadLogoFile = async (file: File) => {
-    if (!file) return;
-
-    if (!file.type.startsWith("image/")) {
-      alert("Please upload a valid image file (PNG, JPG, SVG, WebP, etc.)");
-      return;
-    }
-
-    const localPreview = URL.createObjectURL(file);
-    setLogoPreviewUrl(localPreview);
-    setImageError(false);
-
-    setIsUploadingLogo(true);
-    const data = new FormData();
-    data.append("file", file);
-
-    try {
-      const res = await fetch("/api/uploads/logo", {
-        method: "POST",
-        body: data,
-      });
-
-      if (res.ok) {
-        const result = await res.json();
-        setFormData((prev) => ({ ...prev, logoUrl: result.url }));
-      } else {
-        alert("Upload failed. Please try again.");
-      }
-    } catch (err) {
-      console.error(err);
-      alert("Upload error. Please try again.");
-    } finally {
-      setIsUploadingLogo(false);
-    }
-  };
-
-  const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      await uploadLogoFile(file);
-    }
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (isMediaBusy) return;
     setIsSaving(true);
 
     const dataToValidate = {
@@ -195,6 +156,7 @@ export default function EditStartupForm({ initialData }: { initialData: any }) {
       metadata: {
         twitterUrl: dataToValidate.twitterUrl || undefined,
         linkedinUrl: dataToValidate.linkedinUrl || undefined,
+        pitchDeckUrl: formData.pitchDeckUrl,
         city: dataToValidate.city || undefined,
         foundedYear: dataToValidate.foundedYear,
       },
@@ -226,9 +188,12 @@ export default function EditStartupForm({ initialData }: { initialData: any }) {
     const data = new FormData();
     Object.entries(formData).forEach(([key, value]) => {
       if (key === "galleryImages") {
+        if (!(value as string[]).length) data.append("galleryImages", "");
         (value as string[]).forEach((img) => data.append("galleryImages", img));
       } else if (key === "features") {
         data.append("features", JSON.stringify(value));
+      } else if (key === "pitchDeckUrl" || key === "logoUrl") {
+        data.append(key, value as string);
       } else if (value) {
         data.append(key, value as string);
       }
@@ -360,84 +325,7 @@ export default function EditStartupForm({ initialData }: { initialData: any }) {
           Startup Logo
         </label>
 
-        {formData.logoUrl || logoPreviewUrl ? (
-          <div className="flex items-center justify-between p-4 border border-gray-200 rounded-xl bg-gray-50/80">
-            <div className="flex items-center space-x-4">
-              {!imageError ? (
-                <img
-                  src={logoPreviewUrl || formData.logoUrl}
-                  alt="Logo Preview"
-                  onError={() => setImageError(true)}
-                  className="w-16 h-16 object-contain rounded-lg border bg-white p-1 shadow-sm"
-                />
-              ) : (
-                <div className="w-16 h-16 flex items-center justify-center rounded-lg border bg-gray-100 text-gray-400">
-                  <ImageIcon className="w-8 h-8" />
-                </div>
-              )}
-              <div>
-                <p className="text-sm font-medium text-gray-900 flex items-center gap-1.5">
-                  <Check className="w-4 h-4 text-green-500" /> Logo uploaded successfully
-                </p>
-                <p className="text-xs text-gray-500 mt-0.5">Click remove to upload a different logo</p>
-              </div>
-            </div>
-            <button
-              type="button"
-              onClick={() => {
-                setFormData((prev) => ({ ...prev, logoUrl: "" }));
-                setLogoPreviewUrl("");
-                setImageError(false);
-              }}
-              className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
-              title="Remove logo"
-            >
-              <X className="w-5 h-5" />
-            </button>
-          </div>
-        ) : isUploadingLogo ? (
-          <div className="flex flex-col items-center justify-center border-2 border-dashed border-coral-200 rounded-xl p-8 bg-coral-50/20">
-            <Loader2 className="w-8 h-8 text-coral-500 animate-spin mb-2" />
-            <p className="text-sm font-medium text-gray-700">Uploading logo...</p>
-            <p className="text-xs text-gray-400 mt-1">Please wait a moment</p>
-          </div>
-        ) : (
-          <label
-            onDragOver={(e) => {
-              e.preventDefault();
-              setIsDragging(true);
-            }}
-            onDragLeave={(e) => {
-              e.preventDefault();
-              setIsDragging(false);
-            }}
-            onDrop={(e) => {
-              e.preventDefault();
-              setIsDragging(false);
-              const file = e.dataTransfer.files?.[0];
-              if (file) uploadLogoFile(file);
-            }}
-            className={`flex flex-col items-center justify-center border-2 border-dashed rounded-xl p-6 text-center cursor-pointer transition-all duration-200 ${
-              isDragging
-                ? "border-coral-500 bg-coral-50/50 scale-[1.01]"
-                : "border-gray-300 hover:border-coral-400 hover:bg-gray-50/80 bg-white"
-            }`}
-          >
-            <input
-              type="file"
-              accept="image/*"
-              onChange={handleLogoUpload}
-              className="hidden"
-            />
-            <div className="w-12 h-12 rounded-full bg-coral-50 flex items-center justify-center mb-3 text-coral-500">
-              <UploadCloud className="w-6 h-6" />
-            </div>
-            <p className="text-sm font-semibold text-gray-700">
-              Click to upload logo <span className="font-normal text-gray-500">or drag & drop</span>
-            </p>
-            <p className="text-xs text-gray-400 mt-1">PNG, JPG, SVG or WebP (recommended square, max 5MB)</p>
-          </label>
-        )}
+        <EditableImageUpload kind="logo" label="Startup logo" value={formData.logoUrl} onChange={url => setFormData(previous => ({ ...previous, logoUrl: url }))} onBusyChange={busy => setUploadBusy("logo", busy)} />
         {errors.logoUrl && (
           <p className="text-red-500 text-xs mt-2 text-center">{errors.logoUrl[0]}</p>
         )}
@@ -692,59 +580,8 @@ export default function EditStartupForm({ initialData }: { initialData: any }) {
         )}
       </div>
 
-      {/* Gallery Uploader */}
-      <div className="pt-6 border-t border-gray-100">
-        <div className="flex items-center justify-between mb-2">
-          <label className="block text-sm font-medium text-gray-700">
-            Gallery Images (Optional, max 4)
-          </label>
-          <span className="text-xs text-gray-500">{formData.galleryImages.length}/4 uploaded</span>
-        </div>
-        
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          {formData.galleryImages.map((img, idx) => (
-            <div key={idx} className="relative aspect-video bg-gray-100 rounded-lg overflow-hidden border shadow-sm group">
-              <img src={img} alt={`Gallery ${idx}`} className="w-full h-full object-cover" />
-              <button
-                type="button"
-                onClick={() => setFormData(p => ({ ...p, galleryImages: p.galleryImages.filter((_, i) => i !== idx) }))}
-                className="absolute top-2 right-2 p-1.5 bg-white/90 text-red-500 rounded-md opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-50"
-              >
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-          ))}
-          
-          {formData.galleryImages.length < 4 && (
-            <label className="flex flex-col items-center justify-center aspect-video border-2 border-dashed border-gray-300 hover:border-coral-400 rounded-lg bg-gray-50 hover:bg-white cursor-pointer transition-colors">
-              <input
-                type="file"
-                accept="image/*"
-                className="hidden"
-                onChange={async (e) => {
-                  const file = e.target.files?.[0];
-                  if (file) {
-                    const data = new FormData();
-                    data.append("file", file);
-                    try {
-                      const res = await fetch("/api/uploads/gallery", { method: "POST", body: data });
-                      if (res.ok) {
-                        const result = await res.json();
-                        setFormData(p => ({ ...p, galleryImages: [...p.galleryImages, result.url] }));
-                      }
-                    } catch(err) {
-                      alert("Gallery upload failed");
-                    }
-                  }
-                }}
-              />
-              <UploadCloud className="w-6 h-6 text-gray-400 mb-1" />
-              <span className="text-xs text-gray-500 font-medium">Add Image</span>
-            </label>
-          )}
-        </div>
-      </div>
-
+      <GalleryImageEditor images={formData.galleryImages} onChange={images => setFormData(previous => ({ ...previous, galleryImages: images }))} onBusyChange={busy => setUploadBusy("gallery", busy)} />
+      <PitchDeckUpload value={formData.pitchDeckUrl} onChange={url => setFormData(previous => ({ ...previous, pitchDeckUrl: url }))} onBusyChange={busy => setUploadBusy("deck", busy)} />
       {/* Key Features Builder */}
       <div className="pt-6 border-t border-gray-100">
         <div className="flex items-center justify-between mb-4">
@@ -824,7 +661,7 @@ export default function EditStartupForm({ initialData }: { initialData: any }) {
       {/* Founders Manager */}
       <div className="pt-6 border-t border-gray-100">
         <h3 className="text-lg font-semibold text-gray-900 mb-4">Founders & Team</h3>
-        <FounderManager startupId={formData.id} />
+        <FounderManager startupId={formData.id} onBusyChange={busy => setUploadBusy("founders", busy)} />
       </div>
 
       {/* Updates are now managed from the dedicated Updates page */}
@@ -876,7 +713,7 @@ export default function EditStartupForm({ initialData }: { initialData: any }) {
       <div className="flex justify-end pt-6">
         <button
           type="submit"
-          disabled={isSaving}
+          disabled={isSaving || isMediaBusy}
           className="px-6 py-2 bg-coral-500 text-white rounded-md hover:bg-coral-600 disabled:opacity-50 font-medium"
         >
           {isSaving ? "Saving..." : "Save Changes"}

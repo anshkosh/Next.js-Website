@@ -1,4 +1,6 @@
 "use server";
+import { ownsPitchDeck } from "@/lib/validators/pitch-deck.schema";
+import { mergeStartupMetadata } from "@/lib/startup-metadata";
 import { logger } from "@/lib/logger";
 
 import { db } from "@/lib/db";
@@ -53,7 +55,7 @@ export async function createStartup(formData: FormData) {
       founderName: formData.get("founderName") || session.user.name,
       logoUrl: formData.get("logoUrl") || undefined,
       videoUrl: formData.get("videoUrl") || undefined,
-      galleryImages: formData.getAll("galleryImages"),
+      galleryImages: formData.getAll("galleryImages").filter(Boolean),
       // Founder contact
       startupPhone: formData.get("startupPhone") || undefined,
       // Core Proposition
@@ -66,6 +68,7 @@ export async function createStartup(formData: FormData) {
         twitterUrl: formData.get("twitterUrl") || undefined,
         linkedinUrl: formData.get("linkedinUrl") || undefined,
         city: formData.get("city") || undefined,
+        pitchDeckUrl: formData.has("pitchDeckUrl") ? formData.get("pitchDeckUrl") : undefined,
         foundedYear: formData.get("foundedYear")
           ? parseInt(formData.get("foundedYear") as string, 10)
           : undefined,
@@ -93,6 +96,9 @@ export async function createStartup(formData: FormData) {
     }
 
     const { data } = validatedData;
+    if (data.metadata?.pitchDeckUrl && !ownsPitchDeck(data.metadata.pitchDeckUrl, session.user.id)) {
+      return { error: "Please upload your own PDF pitch deck." };
+    }
     const slug = await generateUniqueSlug(data.name, async (candidate) => {
       const existing = await db.startup.findUnique({
         where: { slug: candidate },
@@ -136,10 +142,10 @@ export async function updateStartup(formData: FormData) {
       websiteUrl: formData.get("websiteUrl") || undefined,
       categoryId: formData.get("categoryId") || undefined,
       founderName: formData.get("founderName") || undefined,
-      logoUrl: formData.get("logoUrl") || undefined,
+      logoUrl: formData.has("logoUrl") ? formData.get("logoUrl") : undefined,
       videoUrl: formData.get("videoUrl") || undefined,
       galleryImages: formData.has("galleryImages")
-        ? formData.getAll("galleryImages")
+        ? formData.getAll("galleryImages").filter(Boolean)
         : undefined,
       // Founder contact
       startupPhone: formData.get("startupPhone") || undefined,
@@ -153,6 +159,7 @@ export async function updateStartup(formData: FormData) {
         twitterUrl: formData.get("twitterUrl") || undefined,
         linkedinUrl: formData.get("linkedinUrl") || undefined,
         city: formData.get("city") || undefined,
+        pitchDeckUrl: formData.has("pitchDeckUrl") ? formData.get("pitchDeckUrl") : undefined,
         foundedYear: formData.get("foundedYear")
           ? parseInt(formData.get("foundedYear") as string, 10)
           : undefined,
@@ -186,6 +193,9 @@ export async function updateStartup(formData: FormData) {
     }
 
     const { data } = validatedData;
+    if (data.metadata?.pitchDeckUrl && !ownsPitchDeck(data.metadata.pitchDeckUrl, session.user.id)) {
+      return { error: "Please upload your own PDF pitch deck." };
+    }
 
     const existingStartup = await db.startup.findUnique({
       where: { id: data.id },
@@ -213,6 +223,7 @@ export async function updateStartup(formData: FormData) {
       where: { id },
       data: {
         ...updateData,
+        metadata: mergeStartupMetadata(existingStartup.metadata, updateData.metadata),
         status: isSubmitting ? "PENDING_REVIEW" : existingStartup.status,
       },
       include: { founder: true, category: true },

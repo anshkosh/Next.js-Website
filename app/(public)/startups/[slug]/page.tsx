@@ -12,6 +12,7 @@ import DiscussionSection from "@/components/startup/DiscussionSection";
 import StartupTabNav from "@/components/startup/StartupTabNav";
 import CorePropositionSection from "@/components/startup/CorePropositionSection";
 import { SITE_URL, absoluteUrl } from "@/lib/seo";
+import { pitchDeckUrlSchema } from "@/lib/validators/pitch-deck.schema";
 
 // Visitor-specific cookies must be read at request time, including for new slugs.
 export const dynamic = "force-dynamic";
@@ -28,6 +29,7 @@ type StartupMetadata = {
   twitterUrl?: string;
   linkedinUrl?: string;
   features?: StartupFeature[];
+  pitchDeckUrl?: string;
 };
 
 function readStartupMetadata(value: unknown): StartupMetadata {
@@ -63,6 +65,7 @@ function readStartupMetadata(value: unknown): StartupMetadata {
         ? record.linkedinUrl
         : undefined,
     features,
+    pitchDeckUrl: typeof record.pitchDeckUrl === "string" && pitchDeckUrlSchema.safeParse(record.pitchDeckUrl).success ? record.pitchDeckUrl : undefined,
   };
 }
 
@@ -198,7 +201,7 @@ export default async function StartupDetailPage(props: {
     ? initialComments[initialComments.length - 1]?.id ?? null
     : null;
 
-  const { city, foundedYear, twitterUrl, linkedinUrl, features } =
+  const { city, foundedYear, twitterUrl, linkedinUrl, features, pitchDeckUrl } =
     readStartupMetadata(startup.metadata);
   const hasUpvoted = startup.upvotes && startup.upvotes.length > 0;
   const updates = startup.updates.map((update) => ({
@@ -308,6 +311,10 @@ export default async function StartupDetailPage(props: {
         {/* ── Overview Section ── */}
         <div id="section-overview" className="space-y-12 scroll-mt-32">
           <MediaGallery videoUrl={startup.videoUrl} images={startup.galleryImages} />
+          {pitchDeckUrl && <section className="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
+            <h2 className="mb-2 text-xl font-bold">Pitch deck</h2>
+            <a href={pitchDeckUrl} className="font-medium text-coral-600 underline">Download {startup.name}’s pitch deck (PDF)</a>
+          </section>}
 
           <div className="bg-white p-8 rounded-2xl border border-gray-100 shadow-sm">
             <h2 className="text-2xl font-bold text-gray-900 mb-6 font-heading">

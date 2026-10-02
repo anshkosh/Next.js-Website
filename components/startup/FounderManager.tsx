@@ -1,7 +1,9 @@
 "use client";
 
+import EditableImageUpload from "./EditableImageUpload";
+import { useUploadActivity } from "./useUploadActivity";
 import { useState, useEffect } from "react";
-import { Loader2, Plus, Trash2, UploadCloud, X, Check, Image as ImageIcon } from "lucide-react";
+import { Loader2, Plus, Trash2 } from "lucide-react";
 import { getFounders, createFounder, updateFounder, deleteFounder } from "@/app/actions/founder.actions";
 
 type Founder = {
@@ -13,9 +15,9 @@ type Founder = {
   twitterUrl: string | null;
 };
 
-export default function FounderManager({ startupId }: { startupId: string }) {
+export default function FounderManager({ startupId, onBusyChange }: { startupId: string; onBusyChange?: (busy: boolean) => void }) {
   const [founders, setFounders] = useState<Founder[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(Boolean(startupId));
   const [isEditing, setIsEditing] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
 
@@ -27,64 +29,22 @@ export default function FounderManager({ startupId }: { startupId: string }) {
     twitterUrl: "",
     photoUrl: "",
   });
-  const [photoPreview, setPhotoPreview] = useState("");
   const [isUploading, setIsUploading] = useState(false);
-  const [imageError, setImageError] = useState(false);
+  useUploadActivity(isUploading || isSaving, onBusyChange);
 
   useEffect(() => {
-    if (startupId) {
-      loadFounders();
-    } else {
+    if (!startupId) return;
+    let alive = true;
+    getFounders(startupId).then(res => {
+      if (!alive) return;
+      if (res.data) setFounders(res.data);
       setIsLoading(false);
-    }
+    }).catch(() => { if (alive) setIsLoading(false); });
+    return () => { alive = false; };
   }, [startupId]);
-
-  const loadFounders = async () => {
-    setIsLoading(true);
-    const res = await getFounders(startupId);
-    if (res.data) {
-      setFounders(res.data);
-    }
-    setIsLoading(false);
-  };
-
-  const uploadPhoto = async (file: File) => {
-    if (!file) return;
-    if (!file.type.startsWith("image/")) {
-      alert("Please upload a valid image file");
-      return;
-    }
-
-    setPhotoPreview(URL.createObjectURL(file));
-    setImageError(false);
-    setIsUploading(true);
-
-    const data = new FormData();
-    data.append("file", file);
-
-    try {
-      const res = await fetch("/api/uploads/founder-photo", {
-        method: "POST",
-        body: data,
-      });
-
-      if (res.ok) {
-        const result = await res.json();
-        setFormData((prev) => ({ ...prev, photoUrl: result.url }));
-      } else {
-        alert("Upload failed.");
-      }
-    } catch (err) {
-      console.error(err);
-      alert("Upload error.");
-    } finally {
-      setIsUploading(false);
-    }
-  };
 
   const startAdd = () => {
     setFormData({ name: "", role: "", linkedinUrl: "", twitterUrl: "", photoUrl: "" });
-    setPhotoPreview("");
     setIsEditing("new");
   };
 
@@ -96,11 +56,11 @@ export default function FounderManager({ startupId }: { startupId: string }) {
       twitterUrl: founder.twitterUrl || "",
       photoUrl: founder.photoUrl || "",
     });
-    setPhotoPreview("");
     setIsEditing(founder.id);
   };
 
   const handleSave = async () => {
+    if (isUploading || isSaving) return;
     if (!formData.name.trim()) {
       alert("Name is required");
       return;
@@ -166,10 +126,10 @@ export default function FounderManager({ startupId }: { startupId: string }) {
                 </div>
               </div>
               <div className="flex items-center gap-2">
-                <button onClick={() => startEdit(founder)} className="px-3 py-1.5 text-sm font-medium text-gray-600 hover:text-gray-900 bg-white border border-gray-200 rounded-md shadow-sm hover:bg-gray-50">
+                <button type="button" onClick={() => startEdit(founder)} className="px-3 py-1.5 text-sm font-medium text-gray-600 hover:text-gray-900 bg-white border border-gray-200 rounded-md shadow-sm hover:bg-gray-50">
                   Edit
                 </button>
-                <button onClick={() => handleDelete(founder.id)} className="p-1.5 text-red-500 hover:bg-red-50 rounded-md transition-colors">
+                <button type="button" onClick={() => handleDelete(founder.id)} className="p-1.5 text-red-500 hover:bg-red-50 rounded-md transition-colors">
                   <Trash2 className="w-4 h-4" />
                 </button>
               </div>
@@ -205,48 +165,19 @@ export default function FounderManager({ startupId }: { startupId: string }) {
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">Photo</label>
-            {formData.photoUrl || photoPreview ? (
-              <div className="flex items-center space-x-4 p-4 border border-gray-200 rounded-xl bg-white">
-                {!imageError ? (
-                  <img src={photoPreview || formData.photoUrl} alt="Preview" onError={() => setImageError(true)} className="w-16 h-16 object-cover rounded-full border shadow-sm" />
-                ) : (
-                  <div className="w-16 h-16 flex items-center justify-center rounded-full border bg-gray-100 text-gray-400">
-                    <ImageIcon className="w-8 h-8" />
-                  </div>
-                )}
-                <div className="flex-1">
-                  <p className="text-sm font-medium text-gray-900 flex items-center gap-1.5">
-                    <Check className="w-4 h-4 text-green-500" /> Photo uploaded
-                  </p>
-                </div>
-                <button type="button" onClick={() => { setFormData({...formData, photoUrl: ""}); setPhotoPreview(""); setImageError(false); }} className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg">
-                  <X className="w-5 h-5" />
-                </button>
-              </div>
-            ) : isUploading ? (
-              <div className="flex flex-col items-center justify-center border-2 border-dashed border-gray-300 rounded-xl p-6 bg-white">
-                <Loader2 className="w-6 h-6 text-coral-500 animate-spin mb-2" />
-                <p className="text-sm text-gray-500">Uploading...</p>
-              </div>
-            ) : (
-              <label className="flex flex-col items-center justify-center border-2 border-dashed border-gray-300 hover:border-coral-400 rounded-xl p-6 bg-white cursor-pointer transition-colors">
-                <input type="file" accept="image/*" onChange={(e) => e.target.files?.[0] && uploadPhoto(e.target.files[0])} className="hidden" />
-                <UploadCloud className="w-6 h-6 text-gray-400 mb-2" />
-                <p className="text-sm font-medium text-gray-700">Click to upload photo</p>
-              </label>
-            )}
+            <EditableImageUpload kind="founder-photo" label="Founder photo" value={formData.photoUrl} onChange={url => setFormData(previous => ({ ...previous, photoUrl: url }))} onBusyChange={setIsUploading} />
           </div>
 
           <div className="flex justify-end gap-3 pt-4 border-t border-gray-200 mt-6">
-            <button onClick={() => setIsEditing(null)} disabled={isSaving} className="px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 disabled:opacity-50">Cancel</button>
-            <button onClick={handleSave} disabled={isSaving || isUploading} className="px-4 py-2 text-sm font-medium bg-gray-900 text-white rounded-md hover:bg-gray-800 disabled:opacity-50">
+            <button type="button" onClick={() => setIsEditing(null)} disabled={isSaving} className="px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 disabled:opacity-50">Cancel</button>
+            <button type="button" onClick={handleSave} disabled={isSaving || isUploading} className="px-4 py-2 text-sm font-medium bg-gray-900 text-white rounded-md hover:bg-gray-800 disabled:opacity-50">
               {isSaving ? "Saving..." : "Save Founder"}
             </button>
           </div>
         </div>
       ) : (
         founders.length < 3 && (
-          <button onClick={startAdd} className="w-full py-4 border-2 border-dashed border-gray-200 hover:border-coral-400 rounded-xl flex items-center justify-center gap-2 text-gray-500 hover:text-coral-500 hover:bg-coral-50/50 transition-all">
+          <button type="button" onClick={startAdd} className="w-full py-4 border-2 border-dashed border-gray-200 hover:border-coral-400 rounded-xl flex items-center justify-center gap-2 text-gray-500 hover:text-coral-500 hover:bg-coral-50/50 transition-all">
             <Plus className="w-5 h-5" />
             <span className="font-medium">Add another founder</span>
           </button>

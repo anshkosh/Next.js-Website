@@ -37,6 +37,14 @@ Failures are reported in GitHub Actions; they must be investigated, not force-pu
 
 Root-owned helpers are deliberately not overwritten by uploaded application code.
 Changes to the deployment helpers require a reviewed server installation.
+The optional profile photo editor and PDF pitch-deck upload use existing R2
+storage and startup JSON metadata; no database migration or new key is needed.
+PDFs are public on published profiles, limited to 5 MB, and served as downloads.
+Nginx must allow multipart requests up to 6 MB. On this VPS, after checking the
+active configuration, root can run `python3 deploy/set-upload-limit.py` from the
+new release directory. This manually backs up and changes only
+`/etc/nginx/conf.d/anshkosh.conf`, tests Nginx and reloads it, restoring the old
+file on failure. The restricted deployment key cannot run this privileged step.
 Node is installed at `/home/deploy/.nvm/versions/node/v22.23.2/bin` on this VPS;
 update the receiver path when upgrading that runtime.
 

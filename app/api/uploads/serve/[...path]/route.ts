@@ -9,6 +9,7 @@ export async function GET(
   try {
     const resolvedParams = await params;
     const key = resolvedParams.path.join("/");
+    const isPitchDeck = key.startsWith("pitch-decks/");
 
     const command = new GetObjectCommand({
       Bucket: process.env.R2_BUCKET_NAME,
@@ -25,6 +26,12 @@ export async function GET(
       headers: {
         "Content-Type": response.ContentType || "image/png",
         "Cache-Control": "public, max-age=31536000, immutable",
+        ...(isPitchDeck ? {
+          "Content-Type": "application/pdf",
+          "Content-Disposition": 'attachment; filename="pitch-deck.pdf"',
+          "Content-Security-Policy": "sandbox",
+          "X-Content-Type-Options": "nosniff",
+        } : {}),
       },
     });
   } catch (error) {

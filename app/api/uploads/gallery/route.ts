@@ -17,9 +17,9 @@ export async function POST(req: NextRequest) {
     }
 
     const formData = await req.formData();
-    const file = formData.get("file") as File;
+    const file = formData.get("file");
 
-    if (!file) {
+    if (!(file instanceof File)) {
       return NextResponse.json({ error: "No file provided" }, { status: 400 });
     }
 
@@ -37,7 +37,7 @@ export async function POST(req: NextRequest) {
     const originalBuffer = Buffer.from(await file.arrayBuffer());
     
     // Compress image
-    const compressedBuffer = await sharp(originalBuffer)
+    const compressedBuffer = await sharp(originalBuffer, { limitInputPixels: 40_000_000 }).rotate()
       .resize({ width: 1280, withoutEnlargement: true })
       .webp({ quality: 80 })
       .toBuffer();

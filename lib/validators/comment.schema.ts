@@ -1,7 +1,8 @@
 import { z } from "zod";
+import { startupIdSchema, commentIdSchema } from "./id.schema";
 
 export const submitCommentSchema = z.object({
-  startupId: z.string().cuid("Invalid startup ID"),
+  startupId: startupIdSchema,
   authorName: z
     .string()
     .min(2, "Name must be at least 2 characters")
@@ -22,7 +23,7 @@ export const submitCommentSchema = z.object({
 });
 
 export const replyToCommentSchema = z.object({
-  commentId: z.string().cuid("Invalid comment ID"),
+  commentId: commentIdSchema,
   reply: z
     .string()
     .min(5, "Reply must be at least 5 characters")

@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { startupIdSchema } from "./id.schema";
 
 const imageUrlSchema = z
   .string()
@@ -10,7 +11,7 @@ const imageUrlSchema = z
   .or(z.literal(""));
 
 export const createUpdateSchema = z.object({
-  startupId: z.string().cuid(),
+  startupId: startupIdSchema,
   title: z.string().min(3, "Title must be at least 3 characters").max(200, "Title cannot exceed 200 characters"),
   body: z.string().min(10, "Body must be at least 10 characters").max(5000, "Body cannot exceed 5000 characters"),
   imageUrl: imageUrlSchema,

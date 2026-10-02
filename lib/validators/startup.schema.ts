@@ -1,4 +1,6 @@
 import { z } from "zod";
+import { startupIdSchema } from "./id.schema";
+import { pitchDeckUrlSchema } from "./pitch-deck.schema";
 
 export const createStartupSchema = z.object({
   name: z.string().min(2).max(100),
@@ -7,7 +9,7 @@ export const createStartupSchema = z.object({
   websiteUrl: z.string().url(),
   categoryId: z.string().cuid(),
   founderName: z.string().min(2).max(100).optional(),
-  logoUrl: z.string().min(1, "Logo is required").refine((val) => val.startsWith("http") || val.startsWith("/"), { message: "Please upload a valid logo" }).optional(),
+  logoUrl: z.string().min(1, "Logo is required").refine((val) => val.startsWith("http") || val.startsWith("/"), { message: "Please upload a valid logo" }).or(z.literal("")).optional(),
   videoUrl: z.string().url().optional().or(z.literal("")),
   galleryImages: z.array(z.string()).max(4).optional(),
   // Founder contact
@@ -57,6 +59,7 @@ export const createStartupSchema = z.object({
       linkedinUrl: z.string().url().optional(),
       city: z.string().optional(),
       foundedYear: z.number().int().optional(),
+      pitchDeckUrl: pitchDeckUrlSchema.optional(),
       features: z.array(
         z.object({
           icon: z.string(),
@@ -69,9 +72,9 @@ export const createStartupSchema = z.object({
 });
 
 export const updateStartupSchema = createStartupSchema.partial().extend({
-  id: z.string().cuid(),
+  id: startupIdSchema,
 });
 
 export const submitForReviewSchema = z.object({
-  id: z.string().cuid(),
+  id: startupIdSchema,
 });

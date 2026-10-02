@@ -3,6 +3,7 @@ import { r2 } from "@/lib/storage/r2";
 import { PutObjectCommand } from "@aws-sdk/client-s3";
 import { auth } from "@/lib/auth";
 import crypto from "crypto";
+import sharp from "sharp";
 import { headers } from "next/headers";
 
 export async function POST(req: NextRequest) {
@@ -16,9 +17,9 @@ export async function POST(req: NextRequest) {
     }
 
     const formData = await req.formData();
-    const file = formData.get("file") as File;
+    const file = formData.get("file");
 
-    if (!file) {
+    if (!(file instanceof File)) {
       return NextResponse.json({ error: "No file provided" }, { status: 400 });
     }
 
@@ -33,8 +34,9 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "File size exceeds 2MB limit." }, { status: 400 });
     }
 
-    const buffer = Buffer.from(await file.arrayBuffer());
-    const fileExtension = file.type.split("/")[1];
+    const original = Buffer.from(await file.arrayBuffer());
+    const buffer = await sharp(original, { limitInputPixels: 40_000_000 }).rotate().resize({ width: 512, height: 512, fit: "inside", withoutEnlargement: true }).webp({ quality: 88 }).toBuffer();
+    const fileExtension = "webp";
     const uniqueFileName = `${crypto.randomUUID()}.${fileExtension}`;
     const key = `founders/${uniqueFileName}`;
 
@@ -42,7 +44,7 @@ export async function POST(req: NextRequest) {
       Bucket: process.env.R2_BUCKET_NAME,
       Key: key,
       Body: buffer,
-      ContentType: file.type,
+      ContentType: "image/webp",
     });
 
     await r2.send(command);
