@@ -66,6 +66,8 @@ explicit recovery, not for a second active deployment pipeline.
 
 Repository variables: `VPS_HOST`, `VPS_USER`, `VPS_DEPLOY_ENABLED=true`.
 Repository secrets: `VPS_SSH_KEY`, `VPS_KNOWN_HOSTS`.
+GitHub Actions must also be enabled from the repository's Actions tab. A copied
+workflow and valid secrets alone do not enable automatic push-triggered runs.
 Set `VPS_DEPLOY_ENABLED=false` to pause future deployments without stopping the site.
 Failures are reported in GitHub Actions; they must be investigated, not force-published.
 
