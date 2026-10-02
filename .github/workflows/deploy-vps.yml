@@ -32,7 +32,7 @@ jobs:
 
   deploy:
     needs: test
-    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request' && vars.VPS_DEPLOY_ENABLED == 'true'
+    if: github.repository == 'anshkosh/Next.js-Website' && github.ref == 'refs/heads/main' && github.event_name != 'pull_request' && vars.VPS_DEPLOY_ENABLED == 'true'
     runs-on: ubuntu-24.04
     timeout-minutes: 30
     steps:

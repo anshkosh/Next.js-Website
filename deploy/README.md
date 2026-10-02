@@ -2,9 +2,30 @@
 
 Production is https://www.anshkosh.com, served by the VPS, not Vercel.
 
-Push to `l3ad3r1/Anshkosh` **main** to publish. Local edits or pushes to other
+Push to `anshkosh/Next.js-Website` **main** to publish. Local edits or pushes to other
 branches do not publish. Pull requests run tests but cannot access deployment secrets.
 The workflow can also be run manually from GitHub Actions, on main.
+
+## Shared workflow for Rinu and Arush
+
+The shared repository is https://github.com/anshkosh/Next.js-Website.
+Both contributors should clone this repository, pull the latest `main`, and work
+on separate branches. Open a pull request targeting `main`; review the change and
+its test results before merging. Each push or merge to `main` runs tests and then
+publishes the exact tested commit to the VPS. Changes on `Anshkosh-Website/Rinu`
+or another feature branch stay off production until merged into `main`.
+
+`l3ad3r1/Anshkosh` is now a historical copy, not a production deployment source.
+Its `VPS_DEPLOY_ENABLED` variable is disabled. The shared deployment workflow also
+checks its repository identity to prevent copied workflows deploying by accident.
+Do not enable deployment in both repositories. GitHub secrets and repository
+settings are not copied by Git; configure these only in the shared repository.
+
+The shared repository uses its own dedicated, restricted deployment SSH key.
+It cannot open a server shell or forward connections. Never commit private keys
+or the production environment file. The existing root-owned receiver, database,
+Redis, Nginx and PM2 configuration stay in place; changing the GitHub source does
+not migrate data or require Vercel.
 
 ## Safety and server layout
 
