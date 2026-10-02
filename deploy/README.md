@@ -27,6 +27,10 @@ or the production environment file. The existing root-owned receiver, database,
 Redis, Nginx and PM2 configuration stay in place; changing the GitHub source does
 not migrate data or require Vercel.
 
+For a new local checkout, run `git clone https://github.com/anshkosh/Next.js-Website.git`.
+The existing Rinu checkout now uses this shared repository as `origin`; the
+previous personal repository remains available as the `personal` remote.
+
 The deployment key was created for this repository on 2026-10-02 and installed
 with `restrict,command="/usr/local/libexec/anshkosh-receive"`. Its public-key
 fingerprint is `SHA256:nLxQEeRGrQPcoEFvrvWuS6vURFpzzHlG1RaNMrsw/+E`.
