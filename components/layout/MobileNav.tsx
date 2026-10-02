@@ -4,7 +4,6 @@ import Link from "next/link";
 import { Menu, X } from "lucide-react";
 import { useState } from "react";
 import FullSiteSearch from "./FullSiteSearch";
-import { ThemeToggle } from "@/components/site/SiteEnhancements";
 
 const links = [
   ["Discover", "/discover"],
@@ -42,7 +41,6 @@ export default function MobileNav({ authenticated }: { authenticated: boolean })
             </Link>
             <div className="mt-3 flex items-center justify-between border-t border-gray-200 pt-3 dark:border-gray-700">
               <FullSiteSearch />
-              <ThemeToggle />
             </div>
           </div>
         </nav>

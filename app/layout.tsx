@@ -51,14 +51,10 @@ export default function RootLayout({
     <html
       lang="en"
       className={`${inter.variable} ${oswald.variable} h-full antialiased`}
+      style={{ colorScheme: "light" }}
       suppressHydrationWarning
     >
       <body className="min-h-full flex flex-col">
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `try{if(localStorage.getItem("anshkosh-theme")==="dark")document.documentElement.classList.add("dark")}catch(e){}`,
-          }}
-        />
         <PreEntryCurtain />
         <div id="site-content" className="flex min-h-full flex-1 flex-col">
           <UnderConstructionBanner />

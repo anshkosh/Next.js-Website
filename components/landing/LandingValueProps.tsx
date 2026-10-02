@@ -3,6 +3,7 @@
 import { useRef } from "react";
 import { motion, useInView } from "framer-motion";
 import { Rocket, Users, Check } from "lucide-react";
+import LaunchSupportTeaser from "./LaunchSupportTeaser";
 
 export default function LandingValueProps() {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -10,6 +11,7 @@ export default function LandingValueProps() {
 
   const cards = [
     {
+      id: "founder-benefits",
       title: "For Founders",
       description:
         "Test your solution, publish evidence and risks, collect structured public signals, and share what you learn before deciding whether to launch.",
@@ -21,6 +23,7 @@ export default function LandingValueProps() {
       ],
     },
     {
+      id: "backer-benefits",
       title: "For Backers",
       description:
         "Discover startups before launch, examine what they can prove, and follow the teams turning early demand into measurable traction.",
@@ -53,8 +56,9 @@ export default function LandingValueProps() {
           {cards.map((card, idx) => {
             const Icon = card.icon;
             return (
-              <motion.div
+              <motion.article
                 key={card.title}
+                aria-labelledby={`${card.id}-title`}
                 initial={{ opacity: 0, y: 40 }}
                 animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 40 }}
                 transition={{ duration: 0.6, delay: 0.2 * idx, ease: "easeOut" }}
@@ -66,7 +70,7 @@ export default function LandingValueProps() {
                     <div className="w-12 h-12 rounded-xl bg-coral-50 text-coral-500 flex items-center justify-center shrink-0 border border-coral-100">
                       <Icon className="w-6 h-6" />
                     </div>
-                    <h3 className="text-xl font-bold text-gray-900 font-heading">
+                    <h3 id={`${card.id}-title`} className="text-xl font-bold text-gray-900 font-heading">
                       {card.title}
                     </h3>
                   </div>
@@ -86,9 +90,10 @@ export default function LandingValueProps() {
                         <span>{bullet}</span>
                       </li>
                     ))}
+                    {card.id === "founder-benefits" && <LaunchSupportTeaser />}
                   </ul>
                 </div>
-              </motion.div>
+              </motion.article>
             );
           })}
         </div>

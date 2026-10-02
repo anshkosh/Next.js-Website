@@ -11,6 +11,10 @@
 - [FAQ](https://www.anshkosh.com/faq): Questions about validation, campaigns, and participation.
 - [Trust & Safety](https://www.anshkosh.com/trust-safety): Platform standards and accountability practices.
 - [Contact](https://www.anshkosh.com/contact): Contact the Anshkosh team.
+- [Free launch support](https://www.anshkosh.com/launch-support): Free early-access startup listings and support requests. Automated directory submissions and backlink packages are not currently available.
+- [Directory catalogue](https://www.anshkosh.com/launch-support/directories): Source-backed starter list with audience, eligibility and cost notes. External fees may apply.
+- [Launch checklist](https://www.anshkosh.com/launch-support/checklist): Free preparation checklist; progress is saved only in the visitor's browser.
+- [Launch kit](https://www.anshkosh.com/launch-support/kit): Free editable launch-copy template. Owners can prefill from their saved startup through the authenticated dashboard. No automated submissions.
 
 ## Editorial and product context
 

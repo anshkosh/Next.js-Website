@@ -206,11 +206,11 @@ function SuccessState({
 
 // ── Main form ─────────────────────────────────────────────────────────────────
 
-export default function ContactContent() {
+export default function ContactContent({ initialSubject = "" }: { initialSubject?: ContactSubject | "" }) {
   const [form, setForm] = useState<FormState>({
     name: "",
     email: "",
-    subject: "",
+    subject: initialSubject,
     message: "",
     token: "",
   });
@@ -267,7 +267,7 @@ export default function ContactContent() {
   };
 
   const handleReset = () => {
-    setForm({ name: "", email: "", subject: "", message: "", token: "" });
+    setForm({ name: "", email: "", subject: initialSubject, message: "", token: "" });
     setError(null);
     setSuccess(false);
   };

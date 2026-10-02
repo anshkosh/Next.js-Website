@@ -294,6 +294,9 @@ export default async function DashboardPage() {
 
                   {/* Card Footer — Status-aware actions */}
                   <div className="p-4">
+                    <Link href={`/startup/${startup.id}/launch-kit`} className="mb-3 flex items-center justify-center rounded-xl border border-coral-200 bg-coral-50 px-4 py-2.5 text-sm font-semibold text-coral-700 hover:bg-coral-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-coral-500">
+                      Open free launch kit
+                    </Link>
                     {/* LIVE */}
                     {startup.status === "LIVE" && (
                       <div className="space-y-2.5">

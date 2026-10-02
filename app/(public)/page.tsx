@@ -11,6 +11,7 @@ import FeaturedStartups from "@/components/landing/FeaturedStartups";
 import LandingParticipation from "@/components/landing/LandingParticipation";
 import LandingFAQTeaser from "@/components/landing/LandingFAQTeaser";
 import LandingCTA from "@/components/landing/LandingCTA";
+import LandingFeaturedOn from "@/components/landing/LandingFeaturedOn";
 
 export const metadata = seoMetadata({
   title: "Anshkosh | Discover Indian Startups Before Launch",
@@ -32,6 +33,7 @@ export default async function HomePage() {
       <LandingParticipation />
       <LandingFAQTeaser />
       <LandingCTA />
+      <LandingFeaturedOn />
     </div>
   );
 }

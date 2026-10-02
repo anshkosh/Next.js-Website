@@ -1,5 +1,6 @@
 import { seoMetadata } from "@/lib/seo";
 import ContactContent from "./ContactContent";
+import { CONTACT_SUBJECTS, type ContactSubject } from "@/lib/validators/contact.schema";
 
 export const metadata = seoMetadata({
   title: "Contact Us — Anshkosh",
@@ -7,6 +8,15 @@ export const metadata = seoMetadata({
   path: "/contact",
 });
 
-export default function ContactPage() {
-  return <ContactContent />;
+export default async function ContactPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ subject?: string | string[] }>;
+}) {
+  const { subject } = await searchParams;
+  const initialSubject = typeof subject === "string" &&
+    CONTACT_SUBJECTS.includes(subject as ContactSubject)
+    ? subject as ContactSubject
+    : "";
+  return <ContactContent key={initialSubject} initialSubject={initialSubject} />;
 }

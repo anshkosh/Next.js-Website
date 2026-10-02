@@ -7,45 +7,16 @@ const UTM_KEYS = ["utm_source", "utm_medium", "utm_campaign", "utm_term", "utm_c
 const UTM_STORAGE_KEY = "anshkosh-utm-context";
 const COOKIE_STORAGE_KEY = "anshkosh-cookie-consent";
 
-export function ThemeToggle() {
-  const [dark, setDark] = useState(false);
-
-  useEffect(() => {
-    const saved = window.localStorage.getItem("anshkosh-theme");
-    // Light mode is the site default; dark mode is opt-in through the toggle.
-    const nextDark = saved === "dark";
-    // The value comes from browser-only storage after hydration.
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setDark(nextDark);
-    document.documentElement.classList.toggle("dark", nextDark);
-  }, []);
-
-  const toggle = () => {
-    const nextDark = !dark;
-    setDark(nextDark);
-    document.documentElement.classList.toggle("dark", nextDark);
-    window.localStorage.setItem("anshkosh-theme", nextDark ? "dark" : "light");
-  };
-
-  return (
-    <button
-      type="button"
-      onClick={toggle}
-      aria-label={dark ? "Switch to light mode" : "Switch to dark mode"}
-      title={dark ? "Switch to light mode" : "Switch to dark mode"}
-      className="rounded-md p-2 text-gray-600 transition-colors hover:bg-gray-100 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-gray-800 dark:hover:text-white"
-    >
-      <span aria-hidden="true" className="text-base">{dark ? "☀" : "☾"}</span>
-    </button>
-  );
-}
-
 export function SiteEnhancements() {
   const [showTop, setShowTop] = useState(false);
   const [progress, setProgress] = useState(0);
   const [cookiesVisible, setCookiesVisible] = useState(false);
 
   useEffect(() => {
+    // The site is light-only. Clear the former opt-in without touching other preferences.
+    document.documentElement.classList.remove("dark");
+    try { window.localStorage.removeItem("anshkosh-theme"); } catch { /* Storage may be unavailable. */ }
+
     const updateScroll = () => {
       const max = document.documentElement.scrollHeight - window.innerHeight;
       setProgress(max > 0 ? (window.scrollY / max) * 100 : 0);

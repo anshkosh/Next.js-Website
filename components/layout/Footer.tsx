@@ -52,6 +52,7 @@ export default function Footer() {
               <li><Link href="/categories" className="hover:text-gray-900 transition-colors">Categories</Link></li>
               <li><Link href="/journal" className="hover:text-gray-900 transition-colors">Journal</Link></li>
               <li><Link href="/register" className="hover:text-gray-900 transition-colors">Submit a Startup</Link></li>
+              <li><Link href="/launch-support" className="hover:text-gray-900 transition-colors">Free Launch Support</Link></li>
             </ul>
           </div>
 

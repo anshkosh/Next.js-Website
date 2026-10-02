@@ -4,7 +4,6 @@ import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import MobileNav from "./MobileNav";
 import FullSiteSearch from "./FullSiteSearch";
-import { ThemeToggle } from "@/components/site/SiteEnhancements";
 
 export default async function Header() {
   const session = process.env.DATABASE_URL
@@ -30,7 +29,6 @@ export default async function Header() {
           <Link href="/faq" className="text-gray-600 hover:text-gray-900 font-medium">FAQ</Link>
           <Link href="/contact" className="text-gray-600 hover:text-gray-900 font-medium">Contact</Link>
           <FullSiteSearch />
-          <ThemeToggle />
           {session ? (
             <Link href="/dashboard" className="px-4 py-2 bg-coral-500 text-white rounded-md font-medium hover:bg-coral-600 transition-colors">
               Dashboard

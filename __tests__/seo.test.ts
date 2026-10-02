@@ -39,7 +39,12 @@ describe("canonical URL policy", () => {
     const { default: sitemap } = await import("../app/sitemap");
     const { default: robots } = await import("../app/robots");
     const entries = await sitemap();
-    expect(entries).toHaveLength(9);
+    expect(entries).toHaveLength(13);
+    expect(entries.some(entry => entry.url === absoluteUrl("/launch-support"))).toBe(true);
+    for (const tool of ["directories", "checklist", "kit"]) {
+      expect(entries.some(entry => entry.url === absoluteUrl(`/launch-support/${tool}`))).toBe(true);
+    }
+    expect(entries.some(entry => entry.url.includes("/startup/"))).toBe(false);
     expect(entries.every(entry => entry.url.startsWith("https://www.anshkosh.com/"))).toBe(true);
     expect(robots().sitemap).toBe(absoluteUrl("/sitemap.xml"));
     expect(organizationSchema.url).toBe("https://www.anshkosh.com");
@@ -56,7 +61,7 @@ describe("canonical URL policy", () => {
     queries.journalPost.mockResolvedValue([{ slug: "published-story", updatedAt }]);
     const { default: sitemap } = await import("../app/sitemap");
     const entries = await sitemap();
-    expect(entries).toHaveLength(12);
+    expect(entries).toHaveLength(16);
     expect(queries.startup).toHaveBeenCalledWith(expect.objectContaining({ where: { status: "LIVE" } }));
     expect(queries.journalPost).toHaveBeenCalledWith(expect.objectContaining({ where: { status: "PUBLISHED" } }));
     expect(entries.find(entry => entry.url.endsWith("/journal/published-story"))?.lastModified).toEqual(updatedAt);

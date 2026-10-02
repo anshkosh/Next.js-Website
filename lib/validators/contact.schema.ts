@@ -2,6 +2,7 @@ import { z } from "zod";
 
 export const CONTACT_SUBJECTS = [
   "General",
+  "Free launch support",
   "Partnership",
   "Press",
   "Bug Report",
