@@ -18,30 +18,6 @@ export default function Footer() {
             <p className="text-sm text-gray-500">
               Discover Indian startups before launch.
             </p>
-            <div className="pt-2">
-              <p className="mb-2 text-[0.65rem] font-semibold uppercase tracking-[0.16em] text-gray-500">
-                Featured on
-              </p>
-              <a
-                href="https://techbasedirectory.com/product/anshkosh?utm_source=featured_embed"
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label="View Anshkosh on TechBaseDirectory"
-                className="inline-flex rounded-md transition-opacity hover:opacity-80 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-coral-500"
-              >
-                <img
-                  src="https://techbasedirectory.com/api/featured-embed"
-                  alt="Anshkosh | Techbasedirectory.com"
-                  width="200"
-                  height="60"
-                  loading="lazy"
-                  decoding="async"
-                />
-              </a>
-            </div>
-            <p className="text-xs text-gray-600">
-              © 2026 Anshkosh. All rights reserved.
-            </p>
           </div>
 
           {/* Column 2: Platform */}
@@ -87,8 +63,11 @@ export default function Footer() {
         </div>
 
         {/* Bottom Bar */}
-        <div className="pt-6 text-center text-xs text-gray-600">
-          This platform is an early-access pilot. Payments and reward orders are not currently open.
+        <div className="pt-6 space-y-3 text-center text-xs text-gray-600">
+          <p>
+            This platform is an early-access pilot. Payments and reward orders are not currently open.
+          </p>
+          <p>© 2026 Anshkosh. All rights reserved.</p>
         </div>
       </div>
     </footer>
