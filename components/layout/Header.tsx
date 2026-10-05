@@ -22,9 +22,9 @@ export default async function Header() {
             <span className="text-coral-500">KOSH</span>
           </span>
         </Link>
-        <nav aria-label="Primary navigation" className="hidden md:flex items-center gap-6">
+        <nav aria-label="Primary navigation" className="hidden lg:flex items-center gap-6">
           <Link href="/discover" className="text-gray-600 hover:text-gray-900 font-medium">Discover</Link>
-          <Link href="/categories" className="text-gray-600 hover:text-gray-900 font-medium">Categories</Link>
+          <Link href="/launch-support" className="text-gray-600 hover:text-gray-900 font-medium">Startup Support</Link>
           <Link href="/journal" className="text-gray-600 hover:text-gray-900 font-medium">Journal</Link>
           <Link href="/faq" className="text-gray-600 hover:text-gray-900 font-medium">FAQ</Link>
           <Link href="/contact" className="text-gray-600 hover:text-gray-900 font-medium">Contact</Link>

@@ -7,7 +7,7 @@ import FullSiteSearch from "./FullSiteSearch";
 
 const links = [
   ["Discover", "/discover"],
-  ["Categories", "/categories"],
+  ["Startup Support", "/launch-support"],
   ["Journal", "/journal"],
   ["FAQ", "/faq"],
   ["Contact", "/contact"],
@@ -17,7 +17,7 @@ export default function MobileNav({ authenticated }: { authenticated: boolean })
   const [open, setOpen] = useState(false);
 
   return (
-    <div className="md:hidden">
+    <div className="lg:hidden">
       <button
         type="button"
         aria-expanded={open}
