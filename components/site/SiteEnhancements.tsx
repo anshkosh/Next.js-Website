@@ -76,7 +76,7 @@ export function SiteEnhancements() {
         <div className="h-full bg-coral-500 transition-[width] duration-150" style={{ width: `${progress}%` }} />
       </div>
 
-      <div className="fixed bottom-5 left-5 z-40 flex flex-col gap-3 print:hidden">
+      <div className="fixed bottom-5 right-5 z-40 flex flex-col gap-3 print:hidden">
         <a href="/contact" aria-label="Contact Anshkosh" className="group flex items-center gap-2 rounded-full bg-coral-500 px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-coral-500/25 transition-all hover:-translate-y-1 hover:bg-coral-600">
           <MessageCircle size={18} aria-hidden="true" />
           <span className="hidden sm:inline">Contact us</span>
@@ -84,7 +84,7 @@ export function SiteEnhancements() {
       </div>
 
       {showTop && (
-        <button type="button" onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })} aria-label="Scroll back to top" className="fixed bottom-5 right-5 z-40 rounded-full border border-gray-200 bg-white p-3 text-gray-700 shadow-lg transition-all hover:-translate-y-1 hover:border-coral-300 hover:text-coral-600 print:hidden dark:border-gray-700 dark:bg-gray-900 dark:text-gray-200">
+        <button type="button" onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })} aria-label="Scroll back to top" className="fixed bottom-20 right-5 z-40 rounded-full border border-gray-200 bg-white p-3 text-gray-700 shadow-lg transition-all hover:-translate-y-1 hover:border-coral-300 hover:text-coral-600 print:hidden dark:border-gray-700 dark:bg-gray-900 dark:text-gray-200">
           <ArrowUp size={19} aria-hidden="true" />
         </button>
       )}
