@@ -232,6 +232,8 @@ export default async function StartupDetailPage(props: {
                   src={startup.logoUrl}
                   alt={startup.name}
                   fill
+                  sizes="96px"
+                  preload
                   className="object-cover"
                 />
               ) : (
