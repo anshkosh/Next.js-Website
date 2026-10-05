@@ -4,7 +4,7 @@ import { seoMetadata } from "@/lib/seo";
 import { FOUNDER_TOOLS } from "@/lib/founder-toolkit";
 
 export const metadata = seoMetadata({
-  title: "Anshkosh — Free Founder Toolkit & Startup Support",
+  title: "Launch Support & Free Founder Toolkit — Anshkosh",
   description: "Free tools to test an idea, plan your MVP, build a pitch, make launch graphics and prepare your startup launch. No account needed for the toolkit.",
   path: "/launch-support",
 });
@@ -48,7 +48,7 @@ export default function LaunchSupportPage() {
       <section className="border-b border-gray-200">
         <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6 md:py-24">
           <p className="mb-5 text-sm font-semibold uppercase tracking-wider text-coral-700">
-            Free during early access
+            Launch Support · Free during early access
           </p>
           <h1 className="max-w-3xl font-heading text-4xl font-bold leading-tight tracking-tight sm:text-5xl md:text-6xl">
             Your next step,<br />

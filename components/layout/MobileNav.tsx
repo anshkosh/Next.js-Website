@@ -7,7 +7,7 @@ import FullSiteSearch from "./FullSiteSearch";
 
 const links = [
   ["Discover", "/discover"],
-  ["Startup Support", "/launch-support"],
+  ["Launch Support", "/launch-support"],
   ["Journal", "/journal"],
   ["FAQ", "/faq"],
   ["Contact", "/contact"],
