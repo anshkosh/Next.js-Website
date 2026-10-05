@@ -1,10 +1,11 @@
 import Link from "next/link";
 import { ArrowRight, Check, FileText, MessageSquare, Users } from "lucide-react";
 import { seoMetadata } from "@/lib/seo";
+import { FOUNDER_TOOLS } from "@/lib/founder-toolkit";
 
 export const metadata = seoMetadata({
-  title: "Anshkosh — Free Startup Launch Support",
-  description: "List your startup on Anshkosh for free and request early-access profile and founder-story support. No payment or guaranteed search rankings.",
+  title: "Anshkosh — Free Founder Toolkit & Startup Support",
+  description: "Free tools to test an idea, plan your MVP, build a pitch, make launch graphics and prepare your startup launch. No account needed for the toolkit.",
   path: "/launch-support",
 });
 
@@ -50,20 +51,19 @@ export default function LaunchSupportPage() {
             Free during early access
           </p>
           <h1 className="max-w-3xl font-heading text-4xl font-bold leading-tight tracking-tight sm:text-5xl md:text-6xl">
-            Anshkosh launch support.<br />
-            Build your case. Share your story.
+            Your next step,<br />
+            with Anshkosh.
           </h1>
           <p className="mt-6 max-w-2xl text-lg leading-relaxed text-gray-600">
-            You are building a startup, not a marketing department. List on
-            Anshkosh for free and ask for help presenting your idea clearly.
-            There are no paid packages or checkout during this pilot.
+            Test your idea. Decide what to build. Make your launch materials.
+            A free founder toolkit to help you move from a rough idea to a clear next step.
           </p>
           <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-            <Link href="/startup/new" className="inline-flex items-center justify-center gap-2 rounded-xl bg-coral-600 px-6 py-3 font-semibold text-white transition-colors hover:bg-coral-700">
-              List your startup for free <ArrowRight aria-hidden="true" className="h-4 w-4" />
+            <Link href="#tools-heading" className="inline-flex items-center justify-center gap-2 rounded-xl bg-coral-600 px-6 py-3 font-semibold text-white transition-colors hover:bg-coral-700">
+              Explore the free tools <ArrowRight aria-hidden="true" className="h-4 w-4" />
             </Link>
-            <Link href="/contact?subject=Free%20launch%20support" className="inline-flex items-center justify-center rounded-xl border border-gray-300 px-6 py-3 font-semibold transition-colors hover:border-coral-600 hover:text-coral-700">
-              Ask for launch support
+            <Link href="/startup/new" className="inline-flex items-center justify-center rounded-xl border border-gray-300 px-6 py-3 font-semibold transition-colors hover:border-coral-600 hover:text-coral-700">
+              List your startup for free
             </Link>
           </div>
           <p className="mt-4 text-sm text-gray-600">No payment details. No automatic paid subscription.</p>
@@ -72,14 +72,14 @@ export default function LaunchSupportPage() {
 
       <section aria-labelledby="tools-heading" className="mx-auto max-w-6xl px-4 py-14 sm:px-6 md:py-20">
         <p className="mb-3 text-sm font-semibold text-coral-700">Free founder tools · Available now</p>
-        <h2 id="tools-heading" className="font-heading text-3xl font-bold">Prepare once. Share with care.</h2>
-        <div className="mt-8 grid gap-6 md:grid-cols-3">
-          {[
-            { title: "Directory catalogue", description: "Find relevant directories, eligibility notes, cost labels and official submission links. External fees may apply.", href: "/launch-support/directories" },
-            { title: "Launch checklist", description: "Prepare your evidence, website and materials. Tick off tasks with progress saved in this browser.", href: "/launch-support/checklist" },
-            { title: "Reusable launch kit", description: "Prepare copyable pitches, descriptions and team introductions. Open your saved startup's kit from the dashboard to prefill it.", href: "/launch-support/kit" },
-          ].map(tool => <article key={tool.href} className="flex flex-col rounded-2xl border border-gray-200 bg-white p-6"><h3 className="font-heading text-2xl font-bold">{tool.title}</h3><p className="mb-6 mt-3 text-sm leading-relaxed text-gray-600">{tool.description}</p><Link href={tool.href} className="mt-auto text-sm font-semibold text-coral-700 underline underline-offset-4 hover:text-coral-900">Open {tool.title.toLowerCase()} →</Link></article>)}
-        </div>
+        <h2 id="tools-heading" className="scroll-mt-28 font-heading text-3xl font-bold">Small tools. Useful next steps.</h2>
+        <p className="mt-4 max-w-2xl text-gray-600">Start anywhere. Your startup details carry across the tools, with drafts saved on this device. Copy and download your results for free.</p>
+        <div className="mt-10 space-y-10">{[...new Set(FOUNDER_TOOLS.map(tool => tool.group))].map(group => <section key={group} aria-label={group}>
+          <h3 className="mb-4 border-b border-gray-200 pb-3 text-sm font-semibold uppercase tracking-wider text-gray-600">{group}</h3>
+          <div className="grid gap-5 md:grid-cols-3">{FOUNDER_TOOLS.filter(tool => tool.group === group).map(tool => <article key={tool.id} className="flex flex-col rounded-2xl border border-gray-200 bg-white p-6 transition-colors hover:border-coral-300">
+            <p className="mb-3 text-xs font-semibold text-coral-700">{tool.result}</p><h4 className="font-heading text-2xl font-bold">{tool.title}</h4><p className="mb-6 mt-3 text-sm leading-relaxed text-gray-600">{tool.description}</p><Link href={`/launch-support/${tool.id}`} className="mt-auto inline-flex items-center gap-2 rounded-sm text-sm font-semibold text-coral-700 underline underline-offset-4 hover:text-coral-900">Open {tool.title.toLowerCase()} <ArrowRight aria-hidden="true" size={15} /></Link>
+          </article>)}</div>
+        </section>)}</div>
       </section>
 
       <section aria-labelledby="support-heading" className="mx-auto max-w-6xl px-4 py-14 sm:px-6 md:py-20">

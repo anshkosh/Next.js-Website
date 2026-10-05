@@ -1,6 +1,7 @@
 import { db } from "@/lib/db";
 import { MetadataRoute } from "next";
 import { SITE_URL } from "@/lib/seo";
+import { FOUNDER_TOOLS } from "@/lib/founder-toolkit";
 
 export const revalidate = 3600;
 
@@ -14,9 +15,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${SITE_URL}/trust-safety`, changeFrequency: "monthly", priority: 0.4 },
     { url: `${SITE_URL}/contact`, changeFrequency: "monthly", priority: 0.5 },
     { url: `${SITE_URL}/launch-support`, changeFrequency: "monthly", priority: 0.5 },
-    { url: `${SITE_URL}/launch-support/directories`, changeFrequency: "monthly", priority: 0.5 },
-    { url: `${SITE_URL}/launch-support/checklist`, changeFrequency: "monthly", priority: 0.5 },
-    { url: `${SITE_URL}/launch-support/kit`, changeFrequency: "monthly", priority: 0.5 },
+    ...FOUNDER_TOOLS.map(tool => ({ url: `${SITE_URL}/launch-support/${tool.id}`, changeFrequency: "monthly" as const, priority: 0.5 })),
     { url: `${SITE_URL}/categories`, changeFrequency: "monthly", priority: 0.5 },
     { url: `${SITE_URL}/journal`, changeFrequency: "daily", priority: 0.8 },
   ];
