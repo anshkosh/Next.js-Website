@@ -34,6 +34,9 @@ export default async function DiscoverPage(props: {
           <div className="container mx-auto px-4 text-center max-w-5xl">
             <h1 className="text-4xl md:text-6xl font-extrabold text-gray-900 tracking-tight mb-6 font-heading">Discover <span className="text-coral-500">Startups</span></h1>
             <p className="text-xl text-gray-600 max-w-2xl mx-auto">Discover Indian startups before launch, explore their evidence, and follow founder progress. We’re preparing the first public profiles for the Anshkosh pilot.</p>
+            <Link href="/categories" className="mt-6 inline-flex min-h-11 items-center rounded-full border border-gray-200 px-5 py-2 text-sm font-medium text-gray-700 transition-colors hover:border-coral-500 hover:text-coral-600 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-coral-500">
+              Browse categories
+            </Link>
           </div>
         </section>
         <section className="container mx-auto px-4 py-12 max-w-3xl">
@@ -121,6 +124,9 @@ export default async function DiscoverPage(props: {
             Explore the next generation of builders and innovators shaping the future of the Indian tech ecosystem.
           </p>
           <SearchBar categories={categories} />
+          <Link href="/categories" className="mt-6 inline-flex min-h-11 items-center rounded-full border border-gray-200 px-5 py-2 text-sm font-medium text-gray-700 transition-colors hover:border-coral-500 hover:text-coral-600 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-coral-500">
+            Browse categories
+          </Link>
         </div>
       </section>
 
