@@ -1,6 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { existsSync, readFileSync } from "node:fs";
 import { resolveSiteUrl, absoluteUrl, DEFAULT_SOCIAL_IMAGE, seoMetadata, organizationSchema, websiteSchema } from "../lib/seo";
+import { FOUNDER_TOOLS } from "../lib/founder-toolkit";
 
 const queries = vi.hoisted(() => ({
   startup: vi.fn(), category: vi.fn(), journalPost: vi.fn(), redirect: vi.fn(),
@@ -39,10 +40,11 @@ describe("canonical URL policy", () => {
     const { default: sitemap } = await import("../app/sitemap");
     const { default: robots } = await import("../app/robots");
     const entries = await sitemap();
-    expect(entries).toHaveLength(13);
+    expect(entries).toHaveLength(19);
     expect(entries.some(entry => entry.url === absoluteUrl("/launch-support"))).toBe(true);
-    for (const tool of ["directories", "checklist", "kit"]) {
-      expect(entries.some(entry => entry.url === absoluteUrl(`/launch-support/${tool}`))).toBe(true);
+    for (const tool of FOUNDER_TOOLS) {
+      expect(entries.some(entry => entry.url === absoluteUrl(`/launch-support/${tool.id}`))).toBe(true);
+      expect(readFileSync("public/llms.txt", "utf8")).toContain(absoluteUrl(`/launch-support/${tool.id}`));
     }
     expect(entries.some(entry => entry.url.includes("/startup/"))).toBe(false);
     expect(entries.every(entry => entry.url.startsWith("https://www.anshkosh.com/"))).toBe(true);
@@ -61,7 +63,7 @@ describe("canonical URL policy", () => {
     queries.journalPost.mockResolvedValue([{ slug: "published-story", updatedAt }]);
     const { default: sitemap } = await import("../app/sitemap");
     const entries = await sitemap();
-    expect(entries).toHaveLength(16);
+    expect(entries).toHaveLength(22);
     expect(queries.startup).toHaveBeenCalledWith(expect.objectContaining({ where: { status: "LIVE" } }));
     expect(queries.journalPost).toHaveBeenCalledWith(expect.objectContaining({ where: { status: "PUBLISHED" } }));
     expect(entries.find(entry => entry.url.endsWith("/journal/published-story"))?.lastModified).toEqual(updatedAt);

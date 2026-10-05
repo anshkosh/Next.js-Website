@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { ExternalLink } from "lucide-react";
 import { LAUNCH_DIRECTORIES } from "@/lib/launch-resources";
 import { launchLinkStyle } from "./LaunchToolLayout";
@@ -15,6 +16,7 @@ export default function DirectoryCatalogue() {
     (cost === "All costs" || (cost === "Has a free option" ? item.cost.includes("free") : item.cost === "Paid")));
   return (
     <>
+      <div className="mb-6 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-gray-200 bg-white p-5"><p className="text-sm text-gray-600">Keep track of where you have applied and when to follow up.</p><Link href="/launch-support/tracker" className={launchLinkStyle}>Open submission tracker →</Link></div>
       <aside className="mb-8 rounded-xl border border-coral-200 bg-coral-50 p-5 text-sm leading-relaxed text-gray-700">
         Anshkosh does not submit for you or charge for this catalogue. External directories set their own fees, eligibility and review rules. These are tech-focused channels—not a fit for every startup, including many offline businesses. No acceptance, backlink or search-ranking guarantee.
         <p className="mt-2 font-medium">Official pages checked 2 October 2026. Recheck the source before submitting.</p>

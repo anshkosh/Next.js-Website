@@ -9,6 +9,7 @@ import DirectoryCatalogue from "../components/launch/DirectoryCatalogue";
 import DirectoryPage, { metadata as directoryMetadata } from "../app/(public)/launch-support/directories/page";
 import ChecklistPage from "../app/(public)/launch-support/checklist/page";
 import KitPage from "../app/(public)/launch-support/kit/page";
+import { FOUNDER_TOOLS } from "../lib/founder-toolkit";
 
 let root: Root | undefined;
 let container: HTMLDivElement;
@@ -96,11 +97,11 @@ describe("free launch tools", () => {
     await act(async () => vi.advanceTimersByTime(1000));
     expect(revoke).toHaveBeenCalledWith("blob:test");
   });
-  it("renders one H1 and three linked tools on each public tool page", () => {
+  it("renders one H1 and links to the complete toolkit on each public tool page", () => {
     for (const Page of [DirectoryPage, ChecklistPage, KitPage]) {
       const doc = new DOMParser().parseFromString(renderToStaticMarkup(<Page />), "text/html");
       expect(doc.querySelectorAll("h1")).toHaveLength(1);
-      expect(doc.querySelectorAll('nav[aria-label="Launch tools"] a')).toHaveLength(3);
+      expect(doc.querySelectorAll('nav[aria-label="Launch tools"] a')).toHaveLength(FOUNDER_TOOLS.length);
       expect(doc.querySelectorAll('[aria-current="page"]')).toHaveLength(1);
     }
     expect(directoryMetadata.alternates?.canonical).toContain("/launch-support/directories");
