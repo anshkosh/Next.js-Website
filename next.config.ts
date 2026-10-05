@@ -5,7 +5,8 @@ const nextConfig: NextConfig = {
   compress: true,
   poweredByHeader: false,
   images: {
-    formats: ["image/avif", "image/webp"],
+    formats: ["image/webp"],
+    qualities: [75, 85],
   },
   async headers() {
     return [{

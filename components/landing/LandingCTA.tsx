@@ -3,6 +3,7 @@
 import { useRef } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import validationArtwork from "@/public/images/why-anshkosh-validation-provided.png";
 import { motion, useInView } from "framer-motion";
 import { ArrowRight, Rocket } from "lucide-react";
 
@@ -12,13 +13,13 @@ export default function LandingCTA() {
 
   return (
     <section className="relative w-full min-h-[70vh] lg:min-h-[80vh] flex flex-col justify-center overflow-hidden bg-[#FAF8F5] text-gray-900 py-20 md:py-28 border-t border-b border-gray-200/60">
-      {/* Use the supplied PNG unchanged, preserving its dithering. */}
+      {/* Keep the original composition while serving a smaller, cached image. */}
       <div className="absolute inset-0 w-full h-full pointer-events-none">
         <Image
-          src="/images/why-anshkosh-validation-provided.png"
+          src={validationArtwork}
           alt="Anshkosh Validation Journey"
           fill
-          unoptimized
+          quality={85}
           sizes="100vw"
           className="object-cover object-bottom md:object-right-bottom"
         />

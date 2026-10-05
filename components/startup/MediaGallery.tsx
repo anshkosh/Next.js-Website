@@ -62,7 +62,7 @@ export default function MediaGallery({ videoUrl, images }: { videoUrl?: string |
             allowFullScreen
           ></iframe>
         ) : (
-          <Image src={activeMedia.url} alt={`Startup media ${activeIndex + 1}`} fill className="object-cover" />
+          <Image src={activeMedia.url} alt={`Startup media ${activeIndex + 1}`} fill sizes="(min-width: 1024px) 992px, calc(100vw - 32px)" className="object-cover" />
         )}
       </div>
 
@@ -84,7 +84,7 @@ export default function MediaGallery({ videoUrl, images }: { videoUrl?: string |
                   <Play className="w-6 h-6 text-white" fill="white" />
                 </div>
               ) : (
-                <Image src={item.url} alt={`Startup media thumbnail ${idx + 1}`} fill className="object-cover" />
+                <Image src={item.url} alt={`Startup media thumbnail ${idx + 1}`} fill sizes="128px" className="object-cover" />
               )}
             </button>
           ))}
