@@ -1,5 +1,7 @@
 # anshkosh
 
+> **Docs:** the project wiki is in [`docs/wiki/Home.md`](docs/wiki/Home.md). It covers the product, architecture, the VPS deployment pipeline, operations runbooks and agent guidelines, and is authoritative where this README is out of date.
+
 **India's Startup Showcase Platform** — a ProductHunt-style discovery platform built for the Indian market. Founders submit startups for public discovery; visitors browse, search by category, and upvote listings; an admin team moderates submissions for quality control.
 
 ---

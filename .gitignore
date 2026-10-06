@@ -41,7 +41,8 @@ compose.env
 *.tsbuildinfo
 next-env.d.ts
 
-/docs
+/docs/*
+!/docs/wiki/
 agent.md
 AGENTS.md
 CLAUDE.md
