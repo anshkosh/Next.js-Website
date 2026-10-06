@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { startupIdSchema } from "./id.schema";
 import { pitchDeckUrlSchema } from "./pitch-deck.schema";
+import { STARTUP_STAGES } from "../startup-stages";
 
 export const createStartupSchema = z.object({
   name: z.string().min(2).max(100),
@@ -40,12 +41,7 @@ export const createStartupSchema = z.object({
     .optional()
     .or(z.literal("")),
   prototypeStatus: z
-    .enum([
-      "Working Software Prototype (Functional Beta)",
-      "Physical Prototype / Hardware Sample Built",
-      "Production-Ready V1 (Preparing Pilot Run)",
-      "Active Live Service (Testing New Feature/Location)",
-    ])
+    .enum(STARTUP_STAGES)
     .optional()
     .or(z.literal("")),
   tractionEvidence: z
@@ -60,6 +56,7 @@ export const createStartupSchema = z.object({
       city: z.string().optional(),
       foundedYear: z.number().int().optional(),
       pitchDeckUrl: pitchDeckUrlSchema.optional(),
+      pitchDeckVisibility: z.enum(["private", "public"]).optional(),
       features: z.array(
         z.object({
           icon: z.string(),

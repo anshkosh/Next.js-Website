@@ -1,8 +1,8 @@
 // @vitest-environment node
 import { beforeEach, describe, expect, it, vi } from "vitest";
-const mock = vi.hoisted(() => ({ session: vi.fn(), find: vi.fn(), update: vi.fn(), queue: vi.fn(), revalidate: vi.fn() }));
+const mock = vi.hoisted(() => ({ session: vi.fn(), find: vi.fn(), update: vi.fn(), queue: vi.fn(), revalidate: vi.fn(), revision: vi.fn(), query: vi.fn() }));
 vi.mock("@/lib/auth", () => ({ auth: { api: { getSession: mock.session } } }));
-vi.mock("@/lib/db", () => ({ db: { startup: { findUnique: mock.find, update: mock.update } } }));
+vi.mock("@/lib/db", () => { const tx = { startup: { findUnique: mock.find, findUniqueOrThrow: mock.find, update: mock.update }, startupRevision: { findUnique: async () => null, upsert: mock.revision }, $queryRaw: mock.query }; return { db: { ...tx, $transaction: async (fn: (tx: object) => unknown) => fn(tx) } }; });
 vi.mock("next/headers", () => ({ headers: async () => new Headers() }));
 vi.mock("next/cache", () => ({ revalidatePath: mock.revalidate }));
 vi.mock("@/lib/jobs/queues", () => ({ notificationQueue: { add: mock.queue } }));
@@ -20,16 +20,29 @@ function form(fields: Record<string, string> = {}) {
 }
 beforeEach(() => {
   vi.clearAllMocks();
+  mock.queue.mockResolvedValue({});
   mock.session.mockResolvedValue({ user: { id: owner, name: "Owner" } });
   mock.find.mockResolvedValue({ id, founderId: owner, status: "LIVE", metadata: { sourceProject: "source", sourceId: id, city: "Hyderabad", pitchDeckUrl: deck } });
   mock.update.mockResolvedValue({ id, name: "Cane Theory", founder: { name: "Owner" }, category: { name: "FoodTech" } });
 });
 describe("UUID edit action", () => {
-  it("saves the original UUID, preserves migration metadata, clears all gallery images and sends for review", async () => {
+  it("keeps the UUID profile live and stages edits separately; deck removal immediately revokes public access", async () => {
     const result = await updateStartup(form({ name: "Cane Theory", pitchDeckUrl: "", galleryImages: "" }));
     expect(result.error).toBeUndefined();
-    expect(mock.update).toHaveBeenCalledWith(expect.objectContaining({ where: { id }, data: expect.objectContaining({ status: "PENDING_REVIEW", galleryImages: [], metadata: { sourceProject: "source", sourceId: id, city: "Hyderabad", pitchDeckUrl: "" } }) }));
+    expect(mock.revision).toHaveBeenCalledWith(expect.objectContaining({ create: { startupId: id, data: expect.objectContaining({ galleryImages: [], metadata: { sourceProject: "source", sourceId: id, city: "Hyderabad", pitchDeckUrl: "" } }) } }));
+    expect(mock.update).toHaveBeenCalledWith({ where: { id }, data: { metadata: expect.objectContaining({ pitchDeckVisibility: "private" }) } });
+    expect(mock.update.mock.calls.every(([arg]) => arg.data.status === undefined)).toBe(true);
     expect(mock.queue).toHaveBeenCalledOnce();
+  });
+  it("does not report failure after saving when notification delivery fails", async () => {
+    mock.queue.mockRejectedValueOnce(new Error("redis temporarily down"));
+    expect((await updateStartup(form({ name: "Cane Theory" }))).pendingRevision).toBe(true);
+  });
+  it("continues saving unpublished drafts directly", async () => {
+    mock.find.mockResolvedValue({ id, founderId: owner, status: "DRAFT", metadata: { sourceId: id } });
+    const result = await updateStartup(form({ name: "Cane Theory" }));
+    expect(result.error).toBeUndefined(); expect(mock.revision).not.toHaveBeenCalled();
+    expect(mock.update).toHaveBeenCalledWith(expect.objectContaining({ data: expect.objectContaining({ status: "DRAFT", name: "Cane Theory" }) }));
   });
   it("still rejects another user's startup", async () => {
     mock.session.mockResolvedValue({ user: { id: "someone-else" } });

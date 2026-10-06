@@ -3,6 +3,7 @@ import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { redirect, notFound } from "next/navigation";
 import EditStartupForm from "./EditStartupForm";
+import { revisionPatch } from "@/lib/startup-revisions";
 
 export default async function EditStartupPage(props: { params: Promise<{ id: string }> }) {
   const params = await props.params;
@@ -30,10 +31,15 @@ export default async function EditStartupPage(props: { params: Promise<{ id: str
     redirect("/dashboard");
   }
 
+  const revision = await db.startupRevision.findUnique({ where: { startupId: startup.id } });
+  const initialData = revision && startup.status === "LIVE"
+    ? { ...startup, ...revisionPatch(revision.data, startup.id), revisionStatus: revision.status, revisionNotes: revision.notes }
+    : startup;
+
   return (
     <div className="max-w-3xl mx-auto py-12 px-4">
       <h1 className="text-3xl font-bold mb-8 font-heading">Edit Startup</h1>
-      <EditStartupForm initialData={startup} />
+      <EditStartupForm initialData={initialData} userId={session.user.id} />
     </div>
   );
 }

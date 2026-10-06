@@ -66,6 +66,7 @@ export default async function DashboardPage() {
     where: { founderId: session.user.id },
     include: {
       category: true,
+      revision: { select: { status: true, notes: true } },
       _count: {
         select: {
           comments: { where: { status: "APPROVED" } },
@@ -265,6 +266,7 @@ export default async function DashboardPage() {
                         >
                           {cfg.label}
                         </span>
+                        {startup.revision && <span className="rounded-full bg-amber-50 px-2 py-1 text-xs font-medium text-amber-800">{startup.revision.status === "REJECTED" ? "Changes need attention" : "Changes awaiting review"}</span>}
                       </div>
                       <p className="text-sm text-gray-400 truncate mb-3">
                         {startup.tagline}

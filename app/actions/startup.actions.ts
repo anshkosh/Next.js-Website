@@ -1,6 +1,7 @@
 "use server";
 import { ownsPitchDeck } from "@/lib/validators/pitch-deck.schema";
 import { mergeStartupMetadata } from "@/lib/startup-metadata";
+import { savePublishedRevision } from "@/lib/startup-revisions";
 import { logger } from "@/lib/logger";
 
 import { db } from "@/lib/db";
@@ -69,6 +70,7 @@ export async function createStartup(formData: FormData) {
         linkedinUrl: formData.get("linkedinUrl") || undefined,
         city: formData.get("city") || undefined,
         pitchDeckUrl: formData.has("pitchDeckUrl") ? formData.get("pitchDeckUrl") : undefined,
+        pitchDeckVisibility: formData.get("pitchDeckVisibility") || undefined,
         foundedYear: formData.get("foundedYear")
           ? parseInt(formData.get("foundedYear") as string, 10)
           : undefined,
@@ -160,6 +162,7 @@ export async function updateStartup(formData: FormData) {
         linkedinUrl: formData.get("linkedinUrl") || undefined,
         city: formData.get("city") || undefined,
         pitchDeckUrl: formData.has("pitchDeckUrl") ? formData.get("pitchDeckUrl") : undefined,
+        pitchDeckVisibility: formData.get("pitchDeckVisibility") || undefined,
         foundedYear: formData.get("foundedYear")
           ? parseInt(formData.get("foundedYear") as string, 10)
           : undefined,
@@ -215,9 +218,21 @@ export async function updateStartup(formData: FormData) {
 
     const { id, ...updateData } = data;
 
-    const isSubmitting =
-      existingStartup.status === "LIVE" ||
-      existingStartup.status === "REJECTED";
+    if (existingStartup.status === "LIVE") {
+      const published = await db.$transaction(tx => savePublishedRevision(tx, existingStartup, updateData));
+      // Saving succeeds even if notification delivery is temporarily unavailable.
+      await notificationQueue.add("new_submission", {
+        startupName: existingStartup.name,
+        founderName: session.user.name,
+        category: "Profile changes",
+      }).catch(error => logger.error("Revision notification failed", error));
+      revalidatePath("/dashboard");
+      revalidatePath("/admin/moderation");
+      revalidatePath(`/startups/${published.slug}`);
+      return { data: published, pendingRevision: true };
+    }
+
+    const isSubmitting = existingStartup.status === "REJECTED";
 
     const updatedStartup = await db.startup.update({
       where: { id },
@@ -267,8 +282,9 @@ export async function deleteStartup(id: string) {
       return { error: "Unauthorized" };
     }
 
-    await db.startup.delete({
-      where: { id },
+    await db.$transaction(async tx => {
+      await tx.startupRevision.deleteMany({ where: { startupId: id } });
+      await tx.startup.delete({ where: { id } });
     });
 
     revalidatePath("/dashboard");

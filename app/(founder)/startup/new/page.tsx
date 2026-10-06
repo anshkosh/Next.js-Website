@@ -8,6 +8,10 @@ import GalleryImageEditor from "@/components/startup/GalleryImageEditor";
 import PitchDeckUpload from "@/components/startup/PitchDeckUpload";
 import FounderManager from "@/components/startup/FounderManager";
 import IconSelect from "@/components/startup/IconSelect";
+import { authClient } from "@/lib/auth-client";
+import { STARTUP_STAGES } from "@/lib/startup-stages";
+import { useDraftRecovery } from "@/components/startup/useDraftRecovery";
+import DraftRecoveryNotice from "@/components/startup/DraftRecoveryNotice";
 
 const availableIcons = [
   "Zap", "Shield", "Rocket", "Globe", "Users", "Smartphone", "CheckCircle", "Star", "Heart", 
@@ -30,6 +34,7 @@ const STEP_META = [
 ] as const;
 
 export default function NewStartupPage() {
+  const { data: session } = authClient.useSession();
   const router = useRouter();
   const [step, setStep] = useState(1);
   const [startupId, setStartupId] = useState<string | null>(null);
@@ -68,6 +73,7 @@ export default function NewStartupPage() {
     foundedYear: "",
     videoUrl: "",
     pitchDeckUrl: "",
+    pitchDeckVisibility: "private",
     galleryImages: [] as string[],
     features: [] as { icon: string; title: string; description: string }[],
     // Founder contact
@@ -79,6 +85,13 @@ export default function NewStartupPage() {
     prototypeStatus: "",
     tractionEvidence: "",
   });
+
+  const draft = useDraftRecovery(session?.user.id ? `anshkosh-draft:${session.user.id}:new` : null,
+    { formData, step, startupId }, recovered => {
+      setFormData(previous => ({ ...previous, ...recovered.formData }));
+      setStep(Math.max(1, Math.min(6, recovered.step || 1)));
+      setStartupId(recovered.startupId || null);
+    });
 
   const handleChange = (
     e: React.ChangeEvent<
@@ -174,6 +187,7 @@ export default function NewStartupPage() {
         twitterUrl: dataToValidate.twitterUrl || undefined,
         linkedinUrl: dataToValidate.linkedinUrl || undefined,
         pitchDeckUrl: formData.pitchDeckUrl,
+        pitchDeckVisibility: formData.pitchDeckVisibility,
         city: dataToValidate.city || undefined,
         foundedYear: dataToValidate.foundedYear,
       },
@@ -292,6 +306,7 @@ export default function NewStartupPage() {
       else setErrors({ form: [res.error] });
       setIsSaving(false);
     } else {
+      draft.markSaved();
       router.push("/dashboard");
     }
   };
@@ -300,6 +315,7 @@ export default function NewStartupPage() {
     <div className="min-h-screen bg-gray-50">
     <div className="max-w-2xl mx-auto py-10 px-4 sm:px-6">
       <h1 className="text-2xl sm:text-3xl font-bold mb-3 font-heading">Submit your Startup</h1>
+      <div className="mb-4"><DraftRecoveryNotice draft={draft} /></div>
 
       {/* Hero time badge — shown only on step 1 */}
       {step === 1 && (
@@ -653,10 +669,7 @@ export default function NewStartupPage() {
                 }`}
               >
                 <option value="">Select your current build stage</option>
-                <option value="Working Software Prototype (Functional Beta)">Working Software Prototype (Functional Beta)</option>
-                <option value="Physical Prototype / Hardware Sample Built">Physical Prototype / Hardware Sample Built</option>
-                <option value="Production-Ready V1 (Preparing Pilot Run)">Production-Ready V1 (Preparing Pilot Run)</option>
-                <option value="Active Live Service (Testing New Feature/Location)">Active Live Service (Testing New Feature/Location)</option>
+                {STARTUP_STAGES.map(stage => <option key={stage} value={stage}>{stage}</option>)}
               </select>
               {errors.prototypeStatus && (
                 <p className="text-red-500 text-xs mt-1">{errors.prototypeStatus[0]}</p>
@@ -733,7 +746,7 @@ export default function NewStartupPage() {
             </div>
 
             <GalleryImageEditor images={formData.galleryImages} onChange={images => setFormData(previous => ({ ...previous, galleryImages: images }))} onBusyChange={busy => setUploadBusy("gallery", busy)} />
-      <PitchDeckUpload value={formData.pitchDeckUrl} onChange={url => setFormData(previous => ({ ...previous, pitchDeckUrl: url }))} onBusyChange={busy => setUploadBusy("deck", busy)} />
+      <PitchDeckUpload value={formData.pitchDeckUrl} visibility={formData.pitchDeckVisibility} onVisibilityChange={visibility => setFormData(previous => ({ ...previous, pitchDeckVisibility: visibility }))} onChange={url => setFormData(previous => ({ ...previous, pitchDeckUrl: url }))} onBusyChange={busy => setUploadBusy("deck", busy)} />
       {/* Key Features Builder */}
             <div className="pt-6 border-t border-gray-100 mt-8">
               <div className="flex items-center justify-between mb-4">
