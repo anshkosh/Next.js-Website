@@ -57,8 +57,15 @@ explicit recovery, not for a second active deployment pipeline.
   additions belong in automatic deployments; backups are not an automatic undo.
 - Health, commit identity, pages, SEO, 404s, built assets and worker stability are checked.
   Failures before publication keep the old site; post-switch failures restore it.
-- Old releases, database backups and hashed static assets are retained. No automatic
-  recursive cleanup is performed. Static assets are shared to support older browser tabs.
+- Database backups and hashed static assets are retained. Static assets are shared to
+  support older browser tabs. Release directories are pruned daily by
+  `anshkosh-prune-releases.timer` (03:30 server time, as `deploy`): the live release from
+  `current.json` and the newest 3 releases are kept, older ones are deleted. It skips a run
+  while a deployment holds the lock and never deletes a directory a process is running from.
+  Install as root: `deploy/prune-releases.sh` → `/usr/local/libexec/anshkosh-prune-releases`
+  (root:root 755) and `deploy/systemd/anshkosh-prune-releases.{service,timer}` →
+  `/etc/systemd/system/`, then `systemctl daemon-reload` and
+  `systemctl enable --now anshkosh-prune-releases.timer`.
 - PM2 saves the successful process list for reboot recovery. The active release and
   web port are recorded in `/var/www/anshkosh-shared/state/current.json`.
 
