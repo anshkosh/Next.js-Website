@@ -1,0 +1,14 @@
+[Unit]
+Description=Delete old Anshkosh releases, keeping the live release and the newest rollback targets
+
+[Service]
+Type=oneshot
+User=deploy
+Group=deploy
+ExecStart=/usr/local/libexec/anshkosh-prune-releases
+UMask=0077
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ReadWritePaths=/var/www/anshkosh-releases /var/www/anshkosh-shared/state
+TimeoutStartSec=15min

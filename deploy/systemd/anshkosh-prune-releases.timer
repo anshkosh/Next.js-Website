@@ -1,0 +1,9 @@
+[Unit]
+Description=Daily Anshkosh release pruning
+[Timer]
+OnCalendar=*-*-* 03:30:00
+Persistent=true
+RandomizedDelaySec=300
+Unit=anshkosh-prune-releases.service
+[Install]
+WantedBy=timers.target
