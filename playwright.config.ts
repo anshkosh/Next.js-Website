@@ -2,19 +2,26 @@ import { defineConfig, devices } from "@playwright/test";
 
 export default defineConfig({
   testDir: "./e2e",
-  fullyParallel: true,
+  testMatch: "launch.spec.ts",
+  fullyParallel: false,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
   workers: process.env.CI ? 1 : undefined,
   reporter: "html",
   use: {
-    baseURL: "http://localhost:3000",
+    actionTimeout: 30000,
+    baseURL: "http://127.0.0.1:3100",
     trace: "on-first-retry",
   },
+  webServer: [
+    { command: "node e2e/fixtures/services.mjs", url: "http://127.0.0.1:3181/ready", reuseExistingServer: false, timeout: 30000 },
+    { command: "npx tsx lib/jobs/workers/email.worker.ts", url: "http://127.0.0.1:3181/worker-ready", reuseExistingServer: false, timeout: 30000 },
+    { command: "npx next dev --webpack --hostname 127.0.0.1 --port 3100", url: "http://127.0.0.1:3100/api/cron/health", reuseExistingServer: false, timeout: 120000 },
+  ],
   projects: [
     {
       name: "chromium",
-      use: { ...devices["Desktop Chrome"] },
+      use: { ...devices["Desktop Chrome"], ...(process.env.E2E_BROWSER_CHANNEL ? { channel: process.env.E2E_BROWSER_CHANNEL } : {}) },
     },
   ],
 });

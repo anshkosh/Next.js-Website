@@ -1,0 +1,14 @@
+[Unit]
+Description=Restore Anshkosh off-site backup into an isolated temporary database
+After=postgresql-15.service
+[Service]
+Type=oneshot
+User=deploy
+Group=deploy
+ExecStart=/usr/local/libexec/anshkosh-ops restore-test
+UMask=0077
+NoNewPrivileges=true
+PrivateTmp=true
+MemoryMax=768M
+CPUQuota=100%
+TimeoutStartSec=10min

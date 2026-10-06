@@ -1,0 +1,7 @@
+[Unit]
+Description=Update Anshkosh antivirus signatures
+After=network-online.target
+[Service]
+Type=oneshot
+User=clamupdate
+ExecStart=/usr/bin/freshclam --config-file=/etc/anshkosh-freshclam.conf

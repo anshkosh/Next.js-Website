@@ -1,0 +1,9 @@
+[Unit]
+Description=Daily verified encrypted off-site Anshkosh backup
+[Timer]
+OnCalendar=*-*-* 02:30:00
+Persistent=true
+RandomizedDelaySec=300
+Unit=anshkosh-ops@backup.service
+[Install]
+WantedBy=timers.target
