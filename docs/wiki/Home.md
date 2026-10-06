@@ -43,5 +43,4 @@ This wiki lives in the repository so it is reviewed with the code it describes. 
 
 ## Known gaps
 
-- The top-level `README.md` predates the validation-platform pivot and the automated VPS pipeline. It still describes `deploy/deploy.sh` (retired) and a fixed port 3000. Where they disagree, this wiki and `deploy/README.md` are authoritative.
 - `logs/error.log` and `logs/combined.log` are tracked in Git. Logs should not be committed.
