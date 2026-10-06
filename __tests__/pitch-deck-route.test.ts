@@ -1,10 +1,12 @@
 // @vitest-environment node
-import { beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
+import { beforeAll, beforeEach, afterEach, describe, expect, it, vi } from "vitest";
 import { PDFDocument } from "pdf-lib";
 import { NextRequest } from "next/server";
-const mocks = vi.hoisted(() => ({ session: vi.fn(), send: vi.fn() }));
+const mocks = vi.hoisted(() => ({ session: vi.fn(), send: vi.fn(), scan: vi.fn() }));
 vi.mock("@/lib/auth", () => ({ auth: { api: { getSession: mocks.session } } }));
-vi.mock("@/lib/storage/r2", () => ({ r2: { send: mocks.send } }));
+vi.mock("@/lib/uploads/store", () => ({ storeUpload: mocks.send }));
+vi.mock("ioredis", () => ({ default: class { on() {} disconnect() {} async eval() { return 1; } } }));
+vi.mock("@/lib/uploads/safety", async importOriginal => ({ ...await importOriginal<object>(), scanUpload: mocks.scan }));
 import { POST } from "../app/api/uploads/pitch-deck/route";
 const owner = "cmu7wfiv7000bzglryqzerzjo";
 let valid: Uint8Array;
@@ -17,14 +19,42 @@ beforeEach(() => {
   vi.clearAllMocks();
   mocks.session.mockResolvedValue({ user: { id: owner, emailVerified: true, banned: false } });
   mocks.send.mockResolvedValue({});
+  mocks.scan.mockResolvedValue(undefined);
 });
+afterEach(() => vi.unstubAllEnvs());
 describe("pitch deck upload security", () => {
+  it("supports the configured loopback browser origin when Next reports localhost", async () => {
+    vi.stubEnv("NODE_ENV", "development"); vi.stubEnv("BETTER_AUTH_URL", "http://127.0.0.1:3100");
+    expect((await POST(request({ origin: "http://127.0.0.1:3100" }))).status).toBe(200);
+  });
+  it("does not trust loopback origins in production", async () => {
+    vi.stubEnv("NODE_ENV", "production"); vi.stubEnv("BETTER_AUTH_URL", "http://localhost:3000");
+    expect((await POST(request({ origin: "http://localhost:3000" }))).status).toBe(403);
+    expect(mocks.send).not.toHaveBeenCalled();
+  });
+  it("does not trust an arbitrary development URL", async () => {
+    vi.stubEnv("NODE_ENV", "development"); vi.stubEnv("BETTER_AUTH_URL", "https://evil.invalid");
+    expect((await POST(request({ origin: "https://evil.invalid" }))).status).toBe(403);
+  });
   it.each(["https://www.anshkosh.com", "https://anshkosh.com"])("accepts official origin %s behind the HTTP reverse proxy", async origin => {
     const response = await POST(request({ origin }));
     expect(response.status).toBe(200);
     const data = await response.json();
     expect(data.url).toMatch(new RegExp(`^/api/uploads/serve/pitch-decks/${owner}/[a-f0-9-]+\\.pdf$`));
-    expect(mocks.send.mock.calls[0][0].input).toMatchObject({ ContentType: "application/pdf", ContentDisposition: 'attachment; filename="pitch-deck.pdf"' });
+    expect(mocks.send.mock.calls[0]).toEqual([owner, expect.stringContaining(`pitch-decks/${owner}/`), expect.any(Buffer), "application/pdf"]);
+    expect(mocks.scan).toHaveBeenCalledOnce();
+  });
+  it("never stores a file when the scan rejects it", async () => {
+    const { UploadError } = await import("@/lib/uploads/safety");
+    mocks.scan.mockRejectedValueOnce(new UploadError("Rejected by scanner", 422));
+    expect((await POST(request())).status).toBe(422);
+    expect(mocks.send).not.toHaveBeenCalled();
+  });
+  it("fails closed when antivirus is unavailable", async () => {
+    const { UploadError } = await import("@/lib/uploads/safety");
+    mocks.scan.mockRejectedValueOnce(new UploadError("Scan unavailable"));
+    expect((await POST(request())).status).toBe(503);
+    expect(mocks.send).not.toHaveBeenCalled();
   });
   it("rejects hostile origins without accessing auth or storage", async () => {
     expect((await POST(request({ origin: "https://evil.invalid" }))).status).toBe(403);

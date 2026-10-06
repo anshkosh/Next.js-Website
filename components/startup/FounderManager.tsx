@@ -5,6 +5,9 @@ import { useUploadActivity } from "./useUploadActivity";
 import { useState, useEffect } from "react";
 import { Loader2, Plus, Trash2 } from "lucide-react";
 import { getFounders, createFounder, updateFounder, deleteFounder } from "@/app/actions/founder.actions";
+import { authClient } from "@/lib/auth-client";
+import { useDraftRecovery } from "./useDraftRecovery";
+import DraftRecoveryNotice from "./DraftRecoveryNotice";
 
 type Founder = {
   id: string;
@@ -16,6 +19,7 @@ type Founder = {
 };
 
 export default function FounderManager({ startupId, onBusyChange }: { startupId: string; onBusyChange?: (busy: boolean) => void }) {
+  const { data: session } = authClient.useSession();
   const [founders, setFounders] = useState<Founder[]>([]);
   const [isLoading, setIsLoading] = useState(Boolean(startupId));
   const [isEditing, setIsEditing] = useState<string | null>(null);
@@ -30,6 +34,8 @@ export default function FounderManager({ startupId, onBusyChange }: { startupId:
     photoUrl: "",
   });
   const [isUploading, setIsUploading] = useState(false);
+  const draft = useDraftRecovery(session?.user.id ? `anshkosh-draft:${session.user.id}:founders:${startupId}` : null,
+    { isEditing, formData }, recovered => { setIsEditing(recovered.isEditing); setFormData(recovered.formData); }, Boolean(isEditing));
   useUploadActivity(isUploading || isSaving, onBusyChange);
 
   useEffect(() => {
@@ -74,6 +80,7 @@ export default function FounderManager({ startupId, onBusyChange }: { startupId:
       });
       if (res.error) alert(res.error);
       else {
+        draft.markSaved();
         setFounders([...founders, res.data as Founder]);
         setIsEditing(null);
       }
@@ -81,6 +88,7 @@ export default function FounderManager({ startupId, onBusyChange }: { startupId:
       const res = await updateFounder(isEditing, formData);
       if (res.error) alert(res.error);
       else {
+        draft.markSaved();
         setFounders(founders.map((f) => (f.id === isEditing ? (res.data as Founder) : f)));
         setIsEditing(null);
       }
@@ -106,6 +114,7 @@ export default function FounderManager({ startupId, onBusyChange }: { startupId:
     <div className="space-y-6">
       <h2 className="text-xl font-bold">Step 3: Founders</h2>
       <p className="text-gray-500 text-sm">Add up to 3 founders to your startup profile.</p>
+      <DraftRecoveryNotice draft={draft} />
 
       {/* List of Founders */}
       {founders.length > 0 && !isEditing && (
@@ -169,7 +178,7 @@ export default function FounderManager({ startupId, onBusyChange }: { startupId:
           </div>
 
           <div className="flex justify-end gap-3 pt-4 border-t border-gray-200 mt-6">
-            <button type="button" onClick={() => setIsEditing(null)} disabled={isSaving} className="px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 disabled:opacity-50">Cancel</button>
+            <button type="button" onClick={() => { if (!draft.dirty || confirm("Discard this founder's unsaved changes?")) { draft.markSaved(); setIsEditing(null); } }} disabled={isSaving} className="px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 disabled:opacity-50">Cancel</button>
             <button type="button" onClick={handleSave} disabled={isSaving || isUploading} className="px-4 py-2 text-sm font-medium bg-gray-900 text-white rounded-md hover:bg-gray-800 disabled:opacity-50">
               {isSaving ? "Saving..." : "Save Founder"}
             </button>
