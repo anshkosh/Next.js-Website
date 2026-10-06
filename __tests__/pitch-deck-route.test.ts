@@ -1,14 +1,16 @@
 // @vitest-environment node
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
+import { PDFDocument } from "pdf-lib";
 import { NextRequest } from "next/server";
 const mocks = vi.hoisted(() => ({ session: vi.fn(), send: vi.fn() }));
 vi.mock("@/lib/auth", () => ({ auth: { api: { getSession: mocks.session } } }));
 vi.mock("@/lib/storage/r2", () => ({ r2: { send: mocks.send } }));
 import { POST } from "../app/api/uploads/pitch-deck/route";
 const owner = "cmu7wfiv7000bzglryqzerzjo";
-const valid = "%PDF-1.7\n1 0 obj\n<<>>\nendobj\n%%EOF";
-function request({ origin = "https://www.anshkosh.com", content = valid, name = "deck.pdf", sizeHeader }: { origin?: string; content?: string; name?: string; sizeHeader?: string } = {}) {
-  const form = new FormData(); form.append("file", new File([content], name, { type: "application/pdf" }));
+let valid: Uint8Array;
+beforeAll(async () => { const doc = await PDFDocument.create(); doc.addPage(); valid = await doc.save(); });
+function request({ origin = "https://www.anshkosh.com", content, name = "deck.pdf", sizeHeader }: { origin?: string; content?: string; name?: string; sizeHeader?: string } = {}) {
+  const form = new FormData(); form.append("file", new File([content ?? Buffer.from(valid)], name, { type: "application/pdf" }));
   return new NextRequest("http://localhost:3000/api/uploads/pitch-deck", { method: "POST", headers: { origin, ...(sizeHeader ? { "content-length": sizeHeader } : {}) }, body: form });
 }
 beforeEach(() => {
@@ -46,5 +48,22 @@ describe("pitch deck upload security", () => {
     const response = await POST(request());
     expect(response.status).toBe(500);
     expect(JSON.stringify(await response.json())).not.toContain("Secret");
+  });
+});
+describe("pitch deck content safety", () => {
+  it("rejects a PDF with a JavaScript action without storing it", async () => {
+    const { PDFName, PDFString } = await import("pdf-lib");
+    const doc = await PDFDocument.create(); doc.addPage();
+    doc.catalog.set(PDFName.of("OpenAction"), doc.context.obj({ S: "JavaScript", JS: PDFString.of("app.alert(1)") }));
+    const form = new FormData(); form.append("file", new File([Buffer.from(await doc.save())], "deck.pdf", { type: "application/pdf" }));
+    const response = await POST(new NextRequest("http://localhost:3000/api/uploads/pitch-deck", { method: "POST", headers: { origin: "https://www.anshkosh.com" }, body: form }));
+    expect(response.status).toBe(400);
+    expect(mocks.send).not.toHaveBeenCalled();
+  });
+  it("stores the rewritten PDF rather than the uploaded bytes", async () => {
+    const form = new FormData(); form.append("file", new File([Buffer.concat([Buffer.from(valid), Buffer.from("\nHIDDEN-PAYLOAD")])], "deck.pdf", { type: "application/pdf" }));
+    const response = await POST(new NextRequest("http://localhost:3000/api/uploads/pitch-deck", { method: "POST", headers: { origin: "https://www.anshkosh.com" }, body: form }));
+    expect(response.status).toBe(200);
+    expect(Buffer.from(mocks.send.mock.calls[0][0].input.Body).toString("latin1")).not.toContain("HIDDEN-PAYLOAD");
   });
 });
