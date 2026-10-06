@@ -1,86 +1,34 @@
-"use client";
-
-import { useRef } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { ArrowRight } from "lucide-react";
 import validationArtwork from "@/public/images/why-anshkosh-validation-provided.png";
-import { motion, useInView } from "framer-motion";
-import { ArrowRight, Rocket } from "lucide-react";
 
 export default function LandingCTA() {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const isInView = useInView(containerRef, { once: true, margin: "-100px" });
-
   return (
-    <section className="relative w-full min-h-[70vh] lg:min-h-[80vh] flex flex-col justify-center overflow-hidden bg-[#FAF8F5] text-gray-900 py-20 md:py-28 border-t border-b border-gray-200/60">
-      {/* Keep the original composition while serving a smaller, cached image. */}
-      <div className="absolute inset-0 w-full h-full pointer-events-none">
-        <Image
-          src={validationArtwork}
-          alt="Anshkosh Validation Journey"
-          fill
-          quality={85}
-          sizes="100vw"
-          className="object-cover object-bottom md:object-right-bottom"
-        />
-        {/* Soft subtle blend gradient for text legibility on small screens */}
-        <div className="absolute inset-0 bg-gradient-to-r from-[#FAF8F5]/95 via-[#FAF8F5]/80 to-[#FAF8F5]/20 md:via-[#FAF8F5]/60 pointer-events-none" />
+    <section aria-labelledby="next-step-title" className="relative isolate overflow-hidden border-y border-gray-200 bg-[#FAF8F5] py-20 md:py-28">
+      <div className="pointer-events-none absolute inset-0 -z-10">
+        <Image src={validationArtwork} alt="" fill quality={85} sizes="100vw" className="object-cover object-bottom md:object-right-bottom" />
+        <div className="absolute inset-0 bg-gradient-to-r from-[#FAF8F5]/95 via-[#FAF8F5]/90 to-[#FAF8F5]/30 md:via-[#FAF8F5]/70" />
       </div>
-
-      {/* Decorative Glow Orb */}
-      <div className="absolute top-1/2 left-1/4 -translate-y-1/2 w-[500px] h-[300px] bg-coral-500/10 rounded-full blur-[120px] pointer-events-none" />
-
-      {/* Content Container - Aligned Left/Center-Left */}
-      <div
-        ref={containerRef}
-        className="relative z-10 container mx-auto px-6 sm:px-12 max-w-6xl"
-      >
-        <div className="max-w-2xl space-y-6 text-center md:text-left">
-          {/* Headline */}
-          <motion.h2
-            initial={{ opacity: 0, y: 30 }}
-            animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
-            transition={{ duration: 0.6, ease: "easeOut" }}
-            className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-tight text-gray-900 font-heading leading-[1.15]"
-          >
-            Build the case. <br />
-            <span className="bg-gradient-to-r from-coral-600 via-coral-500 to-orange-500 bg-clip-text text-transparent">
-              Earn the attention.
-            </span>
-          </motion.h2>
-
-          {/* Subtitle */}
-          <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
-            transition={{ duration: 0.6, delay: 0.2, ease: "easeOut" }}
-            className="text-gray-600 text-base sm:text-lg lg:text-xl font-medium max-w-xl leading-relaxed"
-          >
-            Join a public validation platform for startups. Question the plan, follow real progress, and build evidence before launch.
-          </motion.p>
-
-          {/* Action Buttons */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
-            transition={{ duration: 0.6, delay: 0.4, ease: "easeOut" }}
-            className="flex flex-col sm:flex-row items-center md:items-start justify-center md:justify-start gap-4 pt-4"
-          >
-            <Link
-              href="/register"
-              className="w-full sm:w-auto inline-flex items-center justify-center gap-2.5 px-8 py-4 rounded-xl bg-coral-500 hover:bg-coral-600 text-white font-extrabold text-base shadow-lg shadow-coral-500/25 hover:shadow-coral-500/35 transition-all transform hover:-translate-y-0.5"
-            >
-              <Rocket className="w-5 h-5 text-white" />
-              <span>Start Validating</span>
+      <div className="mx-auto max-w-6xl px-4 sm:px-6">
+        <div className="max-w-xl">
+          <p className="mb-4 text-xs font-semibold uppercase tracking-[0.16em] text-coral-700">There’s a place for your next step</p>
+          <h2 id="next-step-title" className="font-heading text-4xl font-bold leading-tight tracking-tight text-gray-900 sm:text-5xl">
+            Bring your next step<br />
+            <span className="text-coral-500">to Anshkosh.</span>
+          </h2>
+          <p className="mt-5 max-w-lg text-base leading-relaxed text-gray-600 sm:text-lg">
+            Find a startup that interests you. Share the one you’re building.
+            Or start with a free tool and make your idea a little clearer today.
+          </p>
+          <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+            <Link href="/discover" className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-coral-600 px-6 py-3 font-semibold text-white hover:bg-coral-700">
+              Discover startups <ArrowRight aria-hidden="true" className="h-4 w-4" />
             </Link>
-            <Link
-              href="/discover"
-              className="w-full sm:w-auto inline-flex items-center justify-center gap-2.5 px-8 py-4 rounded-xl bg-white hover:bg-gray-50 text-gray-900 font-extrabold text-base border border-gray-200/90 shadow-md transition-all transform hover:-translate-y-0.5"
-            >
-              <span>Explore Startups</span>
-              <ArrowRight className="w-4 h-4 text-gray-700" />
+            <Link href="/startup/new" className="inline-flex min-h-12 items-center justify-center rounded-xl border border-gray-300 bg-white px-6 py-3 font-semibold text-gray-900 hover:border-coral-500 hover:text-coral-700">
+              List your startup
             </Link>
-          </motion.div>
+          </div>
         </div>
       </div>
     </section>
