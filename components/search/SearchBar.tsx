@@ -92,7 +92,7 @@ export default function SearchBar({ categories = [] }: SearchBarProps) {
             <option value="all">All Categories</option>
             {categories.map((cat) => (
               <option key={cat.id} value={cat.slug}>
-                {cat.name.replace(/[^a-zA-Z\s]/g, "").trim()} {/* Remove emojis for clean dropdown */}
+                {cat.name.replace(/[\p{Extended_Pictographic}️‍]/gu, "").trim()} {/* Remove emojis for clean dropdown */}
               </option>
             ))}
           </select>
