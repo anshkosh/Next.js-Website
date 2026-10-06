@@ -5,6 +5,7 @@ import { PutObjectCommand } from "@aws-sdk/client-s3";
 import { randomUUID } from "node:crypto";
 import { validatePitchDeck, MAX_PITCH_DECK_BYTES } from "@/lib/validators/pitch-deck.schema";
 import { getTrustedAuthOrigins } from "@/lib/auth-origins";
+import { sanitizePdf, UnsafePdfError } from "@/lib/uploads/pdf-safety";
 
 export async function POST(req: NextRequest) {
   try {
@@ -28,10 +29,18 @@ export async function POST(req: NextRequest) {
     const bytes = Buffer.from(await file.arrayBuffer());
     const contentError = validatePitchDeck(file, bytes);
     if (contentError) return NextResponse.json({ error: contentError }, { status: 400 });
+    let clean: Uint8Array;
+    try {
+      clean = await sanitizePdf(bytes);
+    } catch (unsafe) {
+      if (unsafe instanceof UnsafePdfError) return NextResponse.json({ error: unsafe.message }, { status: 400 });
+      throw unsafe;
+    }
+    if (clean.byteLength > MAX_PITCH_DECK_BYTES) return NextResponse.json({ error: "The PDF must be smaller than 5 MB." }, { status: 413 });
     const key = `pitch-decks/${session.user.id}/${randomUUID()}.pdf`;
     await r2.send(new PutObjectCommand({
       Bucket: process.env.R2_BUCKET_NAME,
-      Key: key, Body: bytes, ContentType: "application/pdf",
+      Key: key, Body: clean, ContentType: "application/pdf",
       ContentDisposition: 'attachment; filename="pitch-deck.pdf"',
     }));
     return NextResponse.json({ url: `/api/uploads/serve/${key}` });
