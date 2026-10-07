@@ -25,8 +25,8 @@ for (const path of publicPaths) {
   assert.ok(![...document.querySelectorAll('meta[name="robots"]')].some(meta => meta.content.includes("noindex")), `${path}: indexable`);
   assert.equal(document.querySelector('meta[property="og:image"]')?.content, `${canonicalOrigin}/images/hero-pomegranate-v2.webp`, `${path}: social image`);
   if (path === "/faq") {
-    assert.equal(document.querySelectorAll('[data-slot="accordion-content"]').length, 11, "FAQ answers are server-rendered");
-    assert.equal(document.querySelectorAll('h2 [data-slot="accordion-trigger"]').length, 11, "FAQ heading hierarchy");
+    assert.equal(document.querySelectorAll('[data-slot="accordion-content"]').length, 15, "FAQ answers are server-rendered");
+    assert.equal(document.querySelectorAll('h2 [data-slot="accordion-trigger"]').length, 15, "FAQ heading hierarchy");
   }
   console.log(`PASS ${path}: status, canonical, metadata, H1, social image`);
 }
