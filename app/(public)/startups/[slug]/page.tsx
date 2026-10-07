@@ -13,6 +13,7 @@ import StartupTabNav from "@/components/startup/StartupTabNav";
 import CorePropositionSection from "@/components/startup/CorePropositionSection";
 import { SITE_URL, absoluteUrl } from "@/lib/seo";
 import { pitchDeckUrlSchema } from "@/lib/validators/pitch-deck.schema";
+import { publicPitchDeck } from "@/lib/pitch-deck-access";
 
 // Visitor-specific cookies must be read at request time, including for new slugs.
 export const dynamic = "force-dynamic";
@@ -65,7 +66,7 @@ function readStartupMetadata(value: unknown): StartupMetadata {
         ? record.linkedinUrl
         : undefined,
     features,
-    pitchDeckUrl: typeof record.pitchDeckUrl === "string" && pitchDeckUrlSchema.safeParse(record.pitchDeckUrl).success ? record.pitchDeckUrl : undefined,
+    pitchDeckUrl: publicPitchDeck(record) && pitchDeckUrlSchema.safeParse(record.pitchDeckUrl).success ? record.pitchDeckUrl as string : undefined,
   };
 }
 

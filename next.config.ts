@@ -1,7 +1,9 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  distDir: process.env.E2E_TEST_MODE === "1" ? (process.env.NODE_ENV === "production" ? ".next-e2e-build" : ".next-e2e") : ".next",
   reactCompiler: true,
+  serverExternalPackages: ["bullmq"],
   compress: true,
   poweredByHeader: false,
   images: {

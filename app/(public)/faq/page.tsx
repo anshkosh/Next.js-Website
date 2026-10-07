@@ -4,7 +4,7 @@ import { faqData } from "@/lib/faqs";
 
 export const metadata = seoMetadata({
   title: "FAQ — Anshkosh",
-  description: "Frequently asked questions about Anshkosh, the public validation platform for Indian startups.",
+  description: "Answers about discovering Indian startups, submitting a free startup profile, using the founder toolkit, and participating in the Anshkosh pilot.",
   path: "/faq",
 });
 
@@ -26,7 +26,7 @@ export default function FAQPage() {
           FAQs
         </h1>
         <p className="text-xl text-gray-500 mt-4 mb-12">
-          Clear before clever.
+          Answers about startup listings, free tools, and the early-access pilot.
         </p>
         <FAQContent />
       </div>

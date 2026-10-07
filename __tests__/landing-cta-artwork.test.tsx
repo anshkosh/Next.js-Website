@@ -2,7 +2,7 @@ import { expect, it } from "vitest";
 import { renderToStaticMarkup } from "react-dom/server";
 import LandingCTA from "../components/landing/LandingCTA";
 
-it("optimizes the original CTA artwork while retaining lazy loading, copy and destinations", () => {
+it("keeps the original CTA artwork optimized and points the revised copy to discovery and listing", () => {
   const container = document.createElement("div");
   container.innerHTML = renderToStaticMarkup(<LandingCTA />);
   const image = container.querySelector("img")!;
@@ -12,8 +12,8 @@ it("optimizes the original CTA artwork while retaining lazy loading, copy and de
   expect(image.getAttribute("srcset")).toContain("640w");
   expect(image.getAttribute("sizes")).toBe("100vw");
   expect(image.getAttribute("loading")).toBe("lazy");
-  expect(container.querySelector("h2")?.textContent).toContain("Build the case.");
-  expect(container.querySelector("h2")?.textContent).toContain("Earn the attention.");
-  expect(container.querySelector('a[href="/register"]')?.textContent).toBe("Start Validating");
-  expect(container.querySelector('a[href="/discover"]')?.textContent).toBe("Explore Startups");
+  expect(container.querySelector("h2")?.textContent).toContain("Bring your next step");
+  expect(container.querySelector("h2")?.textContent).toContain("to Anshkosh.");
+  expect(container.querySelector('a[href="/startup/new"]')?.textContent).toBe("List your startup");
+  expect(container.querySelector('a[href="/discover"]')?.textContent?.trim()).toBe("Discover startups");
 });

@@ -116,12 +116,37 @@ model Startup {
   featuredEntry FeaturedStartup?
   updates       StartupUpdate[]
   comments      Comment[]
+  revision      StartupRevision?
 
   @@index([founderId])
   @@index([categoryId])
   @@index([status])
   @@index([upvoteCount(sort: Desc)])
   @@index([searchVector], type: Gin)
+}
+
+// Pending changes never replace the published Startup until a reviewer approves.
+model StartupRevision {
+  id            String   @id @default(cuid())
+  startupId     String   @unique
+  startup       Startup  @relation(fields: [startupId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  data          Json
+  status        String   @default("PENDING_REVIEW")
+  notes         String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([status, updatedAt])
+}
+
+model MediaUpload {
+  id        String   @id @default(cuid())
+  userId    String
+  key       String   @unique
+  bytes     Int
+  createdAt DateTime @default(now())
+
+  @@index([userId, createdAt])
 }
 
 model StartupFounder {

@@ -1,6 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { r2 } from "@/lib/storage/r2";
 import { GetObjectCommand } from "@aws-sdk/client-s3";
+import { db } from "@/lib/db";
+import { auth } from "@/lib/auth";
+import { publicPitchDeck, mayReadDeck } from "@/lib/pitch-deck-access";
+import { pitchDeckUrlSchema } from "@/lib/validators/pitch-deck.schema";
 
 export async function GET(
   req: NextRequest,
@@ -9,7 +13,20 @@ export async function GET(
   try {
     const resolvedParams = await params;
     const key = resolvedParams.path.join("/");
+    // Storage also holds encrypted operations backups; never expose arbitrary keys.
+    if (!["logos", "gallery", "founders", "pitch-decks", "journal", "update-images"].includes(resolvedParams.path[0])) return new NextResponse("Not Found", { status: 404 });
+    if (resolvedParams.path.some(part => !/^[a-zA-Z0-9._-]+$/.test(part) || part === "." || part === "..")) return new NextResponse("Not Found", { status: 404 });
     const isPitchDeck = key.startsWith("pitch-decks/");
+    if (isPitchDeck) {
+      const url = `/api/uploads/serve/${key}`;
+      if (!pitchDeckUrlSchema.safeParse(url).success) return new NextResponse("Not Found", { status: 404 });
+      const profiles = await db.startup.findMany({ where: { status: "LIVE", metadata: { path: ["pitchDeckUrl"], equals: url } }, select: { metadata: true } });
+      const isPublic = profiles.some(profile => publicPitchDeck(profile.metadata) === url);
+      if (!isPublic) {
+        const session = await auth.api.getSession({ headers: req.headers });
+        if (!mayReadDeck(session?.user, resolvedParams.path[1])) return new NextResponse("Not Found", { status: 404, headers: { "Cache-Control": "private, no-store" } });
+      }
+    }
 
     const command = new GetObjectCommand({
       Bucket: process.env.R2_BUCKET_NAME,
@@ -31,6 +48,8 @@ export async function GET(
           "Content-Disposition": 'attachment; filename="pitch-deck.pdf"',
           "Content-Security-Policy": "sandbox",
           "X-Content-Type-Options": "nosniff",
+          "Cache-Control": "private, no-store",
+          "Vary": "Cookie",
         } : {}),
       },
     });

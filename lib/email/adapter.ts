@@ -13,7 +13,10 @@ export async function sendEmail(params: SendEmailParams): Promise<void> {
     throw new Error("BREVO_API_KEY is not configured in environment variables.");
   }
 
-  const response = await fetch("https://api.brevo.com/v3/smtp/email", {
+  // Explicit, loopback-only mail capture for isolated E2E tests. Never enabled in production.
+  const testEndpoint = process.env.E2E_TEST_MODE === "1" && process.env.NODE_ENV !== "production"
+    ? "http://127.0.0.1:3181/send" : null;
+  const response = await fetch(testEndpoint || "https://api.brevo.com/v3/smtp/email", {
     method: "POST",
     headers: {
       "api-key": apiKey,

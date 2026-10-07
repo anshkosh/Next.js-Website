@@ -1,7 +1,23 @@
 export const faqData = [
   {
     question: "What is Anshkosh?",
-    answer: "Anshkosh is a public validation platform for startups, with an optional reward-crowdfunding path. Founders can test a solution, publish evidence and risks, collect structured public signals, and share what they learn before deciding whether to launch a campaign.",
+    answer: "Anshkosh helps people discover Indian startups early and gives founders a place to explain their idea, share evidence, and publish progress. Founders can also use our free tools to plan customer conversations, choose MVP features, prepare launch materials, and estimate runway. The current site is an early-access pilot.",
+  },
+  {
+    question: "Is listing my startup free?",
+    answer: "Yes. Creating and submitting a startup profile is free during early access. You need an account, and the profile is reviewed before publication. Free listing does not guarantee featured placement or a founder article.",
+  },
+  {
+    question: "What happens after I submit?",
+    answer: "The team reviews your startup profile before it appears in public discovery. Keep the problem, audience, current stage, and supporting evidence clear. You can manage your startup from your dashboard; once published, you can share updates as you build.",
+  },
+  {
+    question: "Can I use the tools without an account?",
+    answer: "Yes. All nine founder tools are free to use without signing in, including their copy and download features. Drafts are saved in your browser on this device when storage is available. Use downloads to keep a copy; drafts do not automatically sync across devices.",
+  },
+  {
+    question: "What can I do during the pilot?",
+    answer: "Explore published startup profiles, upvote ideas that interest you, and give feedback. Founders can create an account, submit a startup for review, and publish progress updates. Everyone can use the free founder tools. Backing payments and reward orders are not open.",
   },
   {
     question: "What can a founder validate?",

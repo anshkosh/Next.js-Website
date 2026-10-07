@@ -1,0 +1,8 @@
+[Unit]
+Description=Check Anshkosh operations every five minutes
+[Timer]
+OnBootSec=5min
+OnUnitActiveSec=5min
+Unit=anshkosh-ops@check.service
+[Install]
+WantedBy=timers.target

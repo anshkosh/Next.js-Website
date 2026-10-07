@@ -11,13 +11,16 @@ import IconSelect from "@/components/startup/IconSelect";
 import { updateStartup } from "@/app/actions/startup.actions";
 import { updateStartupSchema } from "@/lib/validators/startup.schema";
 import Link from "next/link";
+import { STARTUP_STAGES } from "@/lib/startup-stages";
+import { useDraftRecovery } from "@/components/startup/useDraftRecovery";
+import DraftRecoveryNotice from "@/components/startup/DraftRecoveryNotice";
 
 const availableIcons = [
   "Zap", "Shield", "Rocket", "Globe", "Users", "Smartphone", "CheckCircle", "Star", "Heart", 
   "Activity", "TrendingUp", "Award", "Key", "Lock", "Cloud", "Server", "Database", "Cpu", "Code", "Monitor"
 ];
 
-export default function EditStartupForm({ initialData }: { initialData: any }) {
+export default function EditStartupForm({ initialData, userId }: { initialData: any; userId: string }) {
   const router = useRouter();
   const [isSaving, setIsSaving] = useState(false);
   const [mediaBusy, setMediaBusy] = useState<Record<string, boolean>>({});
@@ -87,6 +90,7 @@ export default function EditStartupForm({ initialData }: { initialData: any }) {
     foundedYear: metadata.foundedYear ? metadata.foundedYear.toString() : "",
     videoUrl: initialData.videoUrl || "",
     pitchDeckUrl: metadata.pitchDeckUrl || "",
+    pitchDeckVisibility: metadata.pitchDeckVisibility || (metadata.pitchDeckUrl ? "public" : "private"),
     galleryImages: (initialData.galleryImages || []) as string[],
     features: (metadata.features || []) as { icon: string; title: string; description: string }[],
     // Founder contact
@@ -98,6 +102,8 @@ export default function EditStartupForm({ initialData }: { initialData: any }) {
     prototypeStatus: initialData.prototypeStatus || "",
     tractionEvidence: initialData.tractionEvidence || "",
   });
+
+  const draft = useDraftRecovery(`anshkosh-draft:${userId}:edit:${initialData.id}`, formData, recovered => setFormData(previous => ({ ...previous, ...recovered, id: initialData.id })));
 
   const handleChange = (
     e: React.ChangeEvent<
@@ -157,6 +163,7 @@ export default function EditStartupForm({ initialData }: { initialData: any }) {
         twitterUrl: dataToValidate.twitterUrl || undefined,
         linkedinUrl: dataToValidate.linkedinUrl || undefined,
         pitchDeckUrl: formData.pitchDeckUrl,
+        pitchDeckVisibility: formData.pitchDeckVisibility,
         city: dataToValidate.city || undefined,
         foundedYear: dataToValidate.foundedYear,
       },
@@ -209,6 +216,7 @@ export default function EditStartupForm({ initialData }: { initialData: any }) {
         setErrors({ form: [res.error] });
       }
     } else {
+      draft.markSaved();
       router.push("/dashboard");
     }
   };
@@ -218,15 +226,16 @@ export default function EditStartupForm({ initialData }: { initialData: any }) {
       onSubmit={handleSubmit}
       className="bg-white p-8 rounded-2xl shadow-sm border border-gray-100 space-y-6"
     >
+      <DraftRecoveryNotice draft={draft} />
+      {initialData.revisionStatus && <p role="status" className="rounded-lg bg-gray-50 p-3 text-sm">{initialData.revisionStatus === "REJECTED" ? `Changes need attention: ${initialData.revisionNotes || "Please revise and resubmit."}` : "Your proposed changes are awaiting review. The published profile remains live."}</p>}
       {initialData.status === "LIVE" && (
         <div className="bg-amber-50 text-amber-900 p-4 rounded-xl text-sm border border-amber-200 flex items-start gap-3">
           <AlertCircle className="w-5 h-5 text-amber-500 shrink-0 mt-0.5" />
           <div className="space-y-1">
             <p className="font-semibold">Saving will submit for re-review</p>
             <p className="text-amber-800">
-              Any edits to a live startup will move it to{" "}
-              <span className="font-bold">Pending Review</span> until an admin re-approves it.
-              Your startup will temporarily go offline during this time.
+              Your changes will be reviewed before publication. Your current startup profile stays live.
+              Making your pitch deck private takes effect as soon as you save.
             </p>
             <p className="text-amber-700 text-xs mt-1">
               Want to post a quick update without re-review?{" "}
@@ -519,10 +528,7 @@ export default function EditStartupForm({ initialData }: { initialData: any }) {
             }`}
           >
             <option value="">Select your current build stage</option>
-            <option value="Working Software Prototype (Functional Beta)">Working Software Prototype (Functional Beta)</option>
-            <option value="Physical Prototype / Hardware Sample Built">Physical Prototype / Hardware Sample Built</option>
-            <option value="Production-Ready V1 (Preparing Pilot Run)">Production-Ready V1 (Preparing Pilot Run)</option>
-            <option value="Active Live Service (Testing New Feature/Location)">Active Live Service (Testing New Feature/Location)</option>
+            {STARTUP_STAGES.map(stage => <option key={stage} value={stage}>{stage}</option>)}
           </select>
           {errors.prototypeStatus && (
             <p className="text-red-500 text-xs mt-1">{errors.prototypeStatus[0]}</p>
@@ -581,7 +587,7 @@ export default function EditStartupForm({ initialData }: { initialData: any }) {
       </div>
 
       <GalleryImageEditor images={formData.galleryImages} onChange={images => setFormData(previous => ({ ...previous, galleryImages: images }))} onBusyChange={busy => setUploadBusy("gallery", busy)} />
-      <PitchDeckUpload value={formData.pitchDeckUrl} onChange={url => setFormData(previous => ({ ...previous, pitchDeckUrl: url }))} onBusyChange={busy => setUploadBusy("deck", busy)} />
+      <PitchDeckUpload value={formData.pitchDeckUrl} visibility={formData.pitchDeckVisibility} onVisibilityChange={visibility => setFormData(previous => ({ ...previous, pitchDeckVisibility: visibility }))} onChange={url => setFormData(previous => ({ ...previous, pitchDeckUrl: url }))} onBusyChange={busy => setUploadBusy("deck", busy)} />
       {/* Key Features Builder */}
       <div className="pt-6 border-t border-gray-100">
         <div className="flex items-center justify-between mb-4">

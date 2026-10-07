@@ -1,0 +1,50 @@
+name: Startup launch browser tests
+on:
+  workflow_call:
+  push:
+    branches: ['Anshkosh-Website/Rinu']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  browser:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_DB: anshkosh_e2e
+          POSTGRES_USER: test
+          POSTGRES_PASSWORD: isolated-test-password
+        ports: ['5432:5432']
+        options: --health-cmd "pg_isready -U test -d anshkosh_e2e" --health-interval 5s --health-timeout 3s --health-retries 10
+      redis:
+        image: redis:7
+        ports: ['6379:6379']
+        options: --health-cmd "redis-cli ping" --health-interval 5s --health-timeout 3s --health-retries 10
+    env:
+      DATABASE_URL: postgresql://test:isolated-test-password@127.0.0.1:5432/anshkosh_e2e
+      REDIS_HOST: 127.0.0.1
+      REDIS_PORT: '6379'
+      REDIS_PASSWORD: ''
+      BETTER_AUTH_URL: http://127.0.0.1:3100
+      BETTER_AUTH_SECRET: isolated-e2e-secret-not-for-production-2026
+      BREVO_API_KEY: test-only-no-external-delivery
+      EMAIL_FROM: testing@example.test
+      R2_ACCESS_KEY_ID: testing
+      R2_SECRET_ACCESS_KEY: testing
+      R2_BUCKET_NAME: uploads
+      R2_ACCOUNT_ID: testing
+      E2E_TEST_MODE: '1'
+      CLAMAV_PORT: '33101'
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      - run: npx prisma migrate deploy
+      - run: npx playwright install --with-deps chromium
+      - run: npx playwright test

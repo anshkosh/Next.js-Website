@@ -2,7 +2,7 @@
 
 import { useEffect } from "react";
 import Link from "next/link";
-import { AlertTriangle } from "lucide-react";
+import ErrorMascot from "@/components/site/ErrorMascot";
 
 export default function Error({
   error,
@@ -18,9 +18,7 @@ export default function Error({
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center px-4">
       <div className="bg-white p-8 rounded-2xl border border-gray-200 shadow-sm max-w-md w-full text-center">
-        <div className="w-16 h-16 bg-red-100 text-red-600 rounded-full flex items-center justify-center mx-auto mb-6">
-          <AlertTriangle size={32} />
-        </div>
+        <ErrorMascot size={140} />
         <h1 className="text-2xl font-bold text-gray-900 mb-2">Something went wrong</h1>
         <p className="text-gray-500 mb-8">
           We encountered an unexpected error. Please try again or contact support if the problem persists.

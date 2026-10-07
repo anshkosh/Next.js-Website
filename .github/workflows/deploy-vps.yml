@@ -30,8 +30,11 @@ jobs:
       - run: npm test -- --maxWorkers=2
       - run: python3 -B -m unittest discover -s deploy -p test_upload_limit.py
 
+  browser:
+    uses: ./.github/workflows/launch-tests.yml
+
   deploy:
-    needs: test
+    needs: [test, browser]
     if: github.repository == 'anshkosh/Next.js-Website' && github.ref == 'refs/heads/main' && github.event_name != 'pull_request' && vars.VPS_DEPLOY_ENABLED == 'true'
     runs-on: ubuntu-24.04
     timeout-minutes: 30

@@ -1,0 +1,21 @@
+[Unit]
+Description=Anshkosh upload antivirus (loopback only)
+After=network.target
+StartLimitIntervalSec=300
+StartLimitBurst=3
+
+[Service]
+Type=simple
+User=clamupdate
+ExecStart=/usr/sbin/clamd --config-file=/etc/clamd.d/anshkosh.conf
+Restart=on-failure
+RestartSec=30
+MemoryMax=4G
+CPUQuota=100%
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+
+[Install]
+WantedBy=multi-user.target

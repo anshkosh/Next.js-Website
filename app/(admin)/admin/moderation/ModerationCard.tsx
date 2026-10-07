@@ -79,7 +79,7 @@ export default function ModerationCard({ startup }: { startup: any }) {
                   </a>
                 )}
                 <span className="text-gray-500 block text-xs mt-1">
-                  Submitted {new Date(startup.createdAt).toLocaleDateString()}
+                  Submitted {new Date(startup.createdAt).toLocaleDateString("en-IN", { timeZone: "Asia/Kolkata" })}
                 </span>
               </div>
             </div>

@@ -80,9 +80,11 @@ Failures are reported in GitHub Actions; they must be investigated, not force-pu
 
 Root-owned helpers are deliberately not overwritten by uploaded application code.
 Changes to the deployment helpers require a reviewed server installation.
-The optional profile photo editor and PDF pitch-deck upload use existing R2
-storage and startup JSON metadata; no database migration or new key is needed.
-PDFs are public on published profiles, limited to 5 MB, and served as downloads.
+The profile photo editor and PDF pitch-deck upload use existing R2 storage.
+Launch safeguards add two backwards-compatible tables for pending revisions and
+tracked media quotas. New decks default to private; visibility is checked on
+every download. PDFs remain limited to 5 MB. See [LAUNCH-SAFEGUARDS.md](LAUNCH-SAFEGUARDS.md)
+for scanner prerequisites, admin access, encrypted backups and restore tests.
 Nginx must allow multipart requests up to 6 MB. On this VPS, after checking the
 active configuration, root can run `python3 deploy/set-upload-limit.py` from the
 new release directory. This manually backs up and changes only
