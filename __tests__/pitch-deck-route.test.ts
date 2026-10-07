@@ -94,6 +94,6 @@ describe("pitch deck content safety", () => {
     const form = new FormData(); form.append("file", new File([Buffer.concat([Buffer.from(valid), Buffer.from("\nHIDDEN-PAYLOAD")])], "deck.pdf", { type: "application/pdf" }));
     const response = await POST(new NextRequest("http://localhost:3000/api/uploads/pitch-deck", { method: "POST", headers: { origin: "https://www.anshkosh.com" }, body: form }));
     expect(response.status).toBe(200);
-    expect(Buffer.from(mocks.send.mock.calls[0][0].input.Body).toString("latin1")).not.toContain("HIDDEN-PAYLOAD");
+    expect(Buffer.from(mocks.send.mock.calls[0][2]).toString("latin1")).not.toContain("HIDDEN-PAYLOAD");
   });
 });
