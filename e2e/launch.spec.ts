@@ -2,6 +2,14 @@ import { test, expect, type Page } from "@playwright/test";
 import { PrismaClient } from "@prisma/client";
 import sharp from "sharp";
 import { randomUUID } from "node:crypto";
+import { PDFDocument } from "pdf-lib";
+
+// The upload route rewrites PDFs and rejects ones pdf-lib cannot parse, so the fixture must be a real document.
+async function validPdf() {
+  const doc = await PDFDocument.create();
+  doc.addPage();
+  return Buffer.from(await doc.save());
+}
 
 const database = new URL(process.env.DATABASE_URL || "http://invalid");
 if (process.env.E2E_TEST_MODE !== "1" || !["127.0.0.1", "localhost"].includes(database.hostname) || database.pathname !== "/anshkosh_e2e") throw new Error("Browser tests only run against the isolated local anshkosh_e2e database.");
@@ -101,7 +109,7 @@ test("signup, real verification token, login, photo editing, private deck and st
   await page.getByRole("button", { name: "Next", exact: true }).click();
   await expect(page.getByLabel("Pitch deck visibility")).toHaveValue("private");
   await uploadPhoto(page, "Upload new gallery image");
-  await page.getByLabel("Upload PDF pitch deck").setInputFiles({ name: "deck.pdf", mimeType: "application/pdf", buffer: Buffer.from("%PDF-1.7\n1 0 obj\n<<>>\nendobj\n%%EOF") });
+  await page.getByLabel("Upload PDF pitch deck").setInputFiles({ name: "deck.pdf", mimeType: "application/pdf", buffer: await validPdf() });
   await expect(page.getByRole("link", { name: "Download uploaded pitch deck" })).toBeVisible();
   await page.getByRole("button", { name: "Next", exact: true }).click();
   await page.getByRole("button", { name: "Submit for Review" }).click();
