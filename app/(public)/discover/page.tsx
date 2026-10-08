@@ -5,6 +5,7 @@ import SearchBar from "@/components/search/SearchBar";
 import { cookies } from "next/headers";
 import Link from "next/link";
 import { seoMetadata } from "@/lib/seo";
+import ErrorState, { recoveryLinkClass, secondaryRecoveryLinkClass } from "@/components/site/ErrorState";
 
 export const dynamic = "force-dynamic";
 
@@ -30,13 +31,14 @@ export default async function DiscoverPage(props: {
   if (!process.env.DATABASE_URL) {
     return (
       <div className="w-full">
-        <section className="bg-white py-16 md:py-24 border-b border-gray-100">
+        <section className="page-intro-spacing bg-white border-b border-gray-100">
           <div className="container mx-auto px-4 text-center max-w-5xl">
-            <h1 className="text-4xl md:text-6xl font-extrabold text-gray-900 tracking-tight mb-6 font-heading">Discover <span className="text-coral-500">Startups</span></h1>
-            <p className="text-xl text-gray-600 max-w-2xl mx-auto">Discover Indian startups before launch, explore their evidence, and follow founder progress. We’re preparing the first public profiles for the Anshkosh pilot.</p>
+            <h1 className="page-title mb-4">Discover <span className="text-coral-500">Startups</span></h1>
+            <p className="text-lg leading-relaxed text-gray-600 max-w-2xl mx-auto">Discover Indian startups before launch, explore their evidence, and follow founder progress. We’re preparing the first public profiles for the Anshkosh pilot.</p>
             <Link href="/categories" className="mt-6 inline-flex min-h-11 items-center rounded-full border border-gray-200 px-5 py-2 text-sm font-medium text-gray-700 transition-colors hover:border-coral-500 hover:text-coral-600 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-coral-500">
               Browse categories
             </Link>
+            <Link href="/leaderboard" className="ml-3 mt-6 inline-flex min-h-11 items-center rounded-full border border-gray-200 px-5 py-2 text-sm font-medium text-gray-700 transition-colors hover:border-coral-500 hover:text-coral-600">View leaderboard</Link>
           </div>
         </section>
         <section className="container mx-auto px-4 py-12 max-w-3xl">
@@ -44,7 +46,7 @@ export default async function DiscoverPage(props: {
             <h2 className="text-xl font-bold text-gray-900 mb-2">The pilot directory is being prepared</h2>
             <p className="text-gray-600 mb-6">Founders can register now and share a startup when the pilot opens.</p>
             <p className="text-gray-600 mb-6">Learn <Link href="/faq" className="text-coral-600 underline">how public validation works</Link> and read our <Link href="/trust-safety" className="text-coral-600 underline">trust and safety standards</Link>.</p>
-            <Link href="/register" className="inline-flex rounded-lg bg-coral-500 px-5 py-3 font-semibold text-white hover:bg-coral-600">Register as a founder</Link>
+            <Link href="/register" className="inline-flex min-h-12 items-center rounded-xl bg-coral-600 px-6 py-3 font-semibold text-white hover:bg-coral-700">Register as a founder</Link>
           </div>
         </section>
       </div>
@@ -115,18 +117,19 @@ export default async function DiscoverPage(props: {
   return (
     <div className="w-full">
       {/* Hero Section */}
-      <section className="bg-white py-16 md:py-24 border-b border-gray-100">
+      <section className="page-intro-spacing bg-white border-b border-gray-100">
         <div className="container mx-auto px-4 text-center max-w-5xl">
-          <h1 className="text-4xl md:text-6xl font-extrabold text-gray-900 tracking-tight mb-6 font-heading">
+          <h1 className="page-title mb-4">
             Discover <span className="text-coral-500">Startups</span>
           </h1>
-          <p className="text-xl text-gray-600 mb-10 max-w-2xl mx-auto">
+          <p className="text-lg leading-relaxed text-gray-600 mb-8 max-w-2xl mx-auto">
             Explore the next generation of builders and innovators shaping the future of the Indian tech ecosystem.
           </p>
           <SearchBar categories={categories} />
           <Link href="/categories" className="mt-6 inline-flex min-h-11 items-center rounded-full border border-gray-200 px-5 py-2 text-sm font-medium text-gray-700 transition-colors hover:border-coral-500 hover:text-coral-600 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-coral-500">
             Browse categories
           </Link>
+          <Link href="/leaderboard" className="ml-3 mt-6 inline-flex min-h-11 items-center rounded-full border border-gray-200 px-5 py-2 text-sm font-medium text-gray-700 transition-colors hover:border-coral-500 hover:text-coral-600">View leaderboard</Link>
         </div>
       </section>
 
@@ -138,22 +141,26 @@ export default async function DiscoverPage(props: {
               <StartupCard key={startup.id} startup={startup} />
             ))
           ) : (
-            <div className="col-span-full text-center py-24 bg-white rounded-2xl border border-gray-100">
-              <div className="text-4xl mb-4">🔍</div>
-              <h3 className="text-xl font-bold text-gray-900 mb-2">
-                No startups found
-              </h3>
-              <p className="text-gray-500">
-                Try adjusting your search or category filters.
-              </p>
-              {(query || categorySlug) && (
-                <Link
-                  href="/discover"
-                  className="mt-4 inline-block text-coral-500 hover:text-coral-600 font-medium"
-                >
-                  Clear all filters
-                </Link>
-              )}
+            <div className="col-span-full rounded-2xl border border-gray-100 bg-white">
+              <ErrorState
+                compact
+                headingLevel={2}
+                status="No startups found"
+                title="Kosh came back empty-pawed."
+                message={query || (categorySlug && categorySlug !== "all")
+                  ? "No startups matched these filters. Try a broader search or explore another category."
+                  : page > 1
+                    ? "There are no startup profiles on this page. Head back to the first page to keep exploring."
+                    : "There aren’t any public startup profiles here yet. Building something? Yours could be first."}
+                foxComment="I found a squirrel. It declined to pitch."
+              >
+                {query || (categorySlug && categorySlug !== "all") || page > 1 ? (
+                  <Link href="/discover" className={recoveryLinkClass}>{query || (categorySlug && categorySlug !== "all") ? "Clear all filters" : "Back to first page"}</Link>
+                ) : (
+                  <Link href="/startup/new" className={recoveryLinkClass}>List your startup</Link>
+                )}
+                <Link href="/categories" className={secondaryRecoveryLinkClass}>Browse categories</Link>
+              </ErrorState>
             </div>
           )}
         </div>

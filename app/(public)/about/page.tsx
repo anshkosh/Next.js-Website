@@ -1,43 +1,86 @@
 import Link from "next/link";
+import { ArrowRight } from "lucide-react";
 import { seoMetadata } from "@/lib/seo";
 
 export const metadata = seoMetadata({
-  title: "About Anshkosh — Indian startup discovery platform",
-  description: "Anshkosh (also written Ansh Kosh) is a public validation and discovery platform for Indian startups before launch. Learn what it is and who it is for.",
+  title: "About Anshkosh — A home for startups before launch",
+  description: "Discover why Anshkosh exists: a public home for Indian startup ideas, founder progress and useful feedback, with free tools for the next step.",
   path: "/about",
 });
 
 export default function AboutPage() {
   return (
-    <section className="bg-white py-16 md:py-24 min-h-screen">
-      <div className="max-w-3xl mx-auto px-4">
-        <span className="text-xs font-semibold text-coral-500 tracking-widest uppercase mb-4 block">ABOUT</span>
-        <h1 className="text-4xl md:text-5xl font-bold font-heading text-gray-900 mb-4 tracking-tight">What is Anshkosh?</h1>
-        <p className="text-xl text-gray-500 mb-8">
-          Anshkosh (also written Ansh Kosh) is a public validation and discovery platform for Indian startups before launch.
+    <section aria-labelledby="about-title" className="page-intro-spacing bg-white min-h-screen">
+      <div className="max-w-3xl mx-auto px-4 sm:px-6">
+        <h1 id="about-title" className="page-title mb-4">A home for the work before the launch.</h1>
+        <p className="text-lg leading-relaxed text-gray-600 mb-8">
+          Anshkosh helps people discover Indian startups before launch and understand the idea, the team, and the progress behind them.
         </p>
-        <div className="space-y-8 text-gray-600 leading-relaxed text-base">
-          <p>
-            Anshkosh is the name of this website, anshkosh.com. It is a startup platform, and it is not related to any other use of a similar-sounding word. If a search engine suggests a different spelling, search instead for &ldquo;Anshkosh startup&rdquo; or go directly to <Link href="/" className="text-coral-600 underline">www.anshkosh.com</Link>.
-          </p>
-          <div>
-            <h2 className="text-2xl font-bold text-gray-900 mb-3 font-heading">Who it is for</h2>
+        <div className="space-y-10 text-gray-600 leading-relaxed text-base">
+          <section aria-labelledby="about-purpose">
+            <h2 id="about-purpose" className="text-2xl font-bold text-gray-900 mb-3 font-heading">A startup begins long before its launch day</h2>
             <p>
-              Founders of Indian startups can publish a free profile with evidence of progress, and people can <Link href="/discover" className="text-coral-600 underline">discover startups</Link> and the proof behind them before those startups launch.
+              It begins with a problem worth solving. Then come the conversations, rough prototypes, small experiments, and decisions about what to build next. That early work helps explain why an idea matters and how it is taking shape.
             </p>
-          </div>
-          <div>
-            <h2 className="text-2xl font-bold text-gray-900 mb-3 font-heading">Free tools for founders</h2>
+            <p className="mt-4">
+              We want that work to be easier to find, understand, and discuss. Anshkosh gives founders a place to share it, and curious people a way to follow along.
+            </p>
+          </section>
+          <section aria-labelledby="about-founders">
+            <h2 id="about-founders" className="text-2xl font-bold text-gray-900 mb-3 font-heading">For founders: tell the story as it takes shape</h2>
             <p>
-              The <Link href="/launch-support" className="text-coral-600 underline">free founder toolkit</Link> includes a launch checklist, customer validation planner, pitch builder and runway calculator.
+              Your startup profile brings the problem, your approach, your team, and your progress into one public home. Share what you have tested, what you have learned, and the questions you are still working through. Give people enough context to offer feedback that helps.
             </p>
-          </div>
-          <div>
-            <h2 className="text-2xl font-bold text-gray-900 mb-3 font-heading">Where Anshkosh is today</h2>
+            <p className="mt-4">
+              Profiles are free to submit. You will need an account, and each profile is reviewed before publication. Once published, you can share updates as your work develops.
+            </p>
+          </section>
+          <section aria-labelledby="about-discovery">
+            <h2 id="about-discovery" className="text-2xl font-bold text-gray-900 mb-3 font-heading">For the curious: meet the people behind the idea</h2>
             <p>
-              Anshkosh is an early-access pilot. Validation signals are not investments, securities, orders, revenue or guarantees of delivery. Read the <Link href="/faq" className="text-coral-600 underline">FAQ</Link> and our <Link href="/trust-safety" className="text-coral-600 underline">trust and safety standards</Link>, or <Link href="/contact" className="text-coral-600 underline">contact the team</Link>.
+              Explore what Indian founders are building, who they are building for, and the progress they choose to share. Read their profiles, ask useful questions, and offer feedback from your own experience. A thoughtful response can help a founder see something they have missed.
             </p>
-          </div>
+            <Link href="/discover" className="mt-3 inline-flex min-h-11 items-center gap-2 font-semibold text-coral-700 underline underline-offset-4">
+              Discover Indian startups <ArrowRight aria-hidden="true" className="h-4 w-4" />
+            </Link>
+          </section>
+          <section aria-labelledby="about-tools">
+            <h2 id="about-tools" className="text-2xl font-bold text-gray-900 mb-3 font-heading">Practical help for your next step</h2>
+            <p>
+              When you are working out where to start, our free Launch Support tools can help you plan customer conversations, narrow your first build, explore your runway, and prepare a pitch or launch materials.
+            </p>
+            <p className="mt-4">
+              Use them without an account. Drafts stay in your browser on this device, and you can copy or download your results to keep working elsewhere.
+            </p>
+            <Link href="/launch-support" className="mt-3 inline-flex min-h-11 items-center gap-2 font-semibold text-coral-700 underline underline-offset-4">
+              Explore the free founder tools <ArrowRight aria-hidden="true" className="h-4 w-4" />
+            </Link>
+          </section>
+          <section aria-labelledby="about-trust">
+            <h2 id="about-trust" className="text-2xl font-bold text-gray-900 mb-3 font-heading">Trust grows from honest progress</h2>
+            <p>
+              Clear claims, evidence where it exists, and openness about what is still uncertain make a startup easier to understand. That is the kind of sharing we want to encourage here.
+            </p>
+            <p className="mt-4">
+              A published profile or a show of interest does not prove that an idea will work. Our review process supports responsible publishing; founders remain responsible for their claims. You can read more in our <Link href="/trust-safety" className="text-coral-700 underline underline-offset-4">trust and safety standards</Link>.
+            </p>
+          </section>
+          <section aria-labelledby="about-pilot">
+            <h2 id="about-pilot" className="text-2xl font-bold text-gray-900 mb-3 font-heading">We are building Anshkosh, too</h2>
+            <p>
+              Anshkosh is an early-access pilot focused on startup profiles, progress, discovery, feedback, and free founder tools. Payments, pledges, reward orders, and investments are not open during the pilot.
+            </p>
+            <p className="mt-4">
+              We are learning from the people who use it. If something is confusing, missing, or could be more useful, <Link href="/contact" className="text-coral-700 underline underline-offset-4">tell us what you think</Link>. For questions about getting started, visit the <Link href="/faq" className="text-coral-700 underline underline-offset-4">FAQ</Link>.
+            </p>
+          </section>
+        </div>
+        <div className="mt-10 border-t border-gray-200 pt-8">
+          <h2 className="font-heading text-2xl font-bold text-gray-900">Give people a place to follow your progress.</h2>
+          <Link href="/startup/new" className="mt-5 inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-coral-600 px-6 py-3 text-center font-semibold text-white transition-colors hover:bg-coral-700 active:bg-coral-800">
+            Create your free startup profile <ArrowRight aria-hidden="true" className="h-4 w-4 shrink-0" />
+          </Link>
+          <p className="mt-3 text-sm leading-relaxed text-gray-500">An account is needed to submit. Profiles are reviewed before publication.</p>
         </div>
       </div>
     </section>

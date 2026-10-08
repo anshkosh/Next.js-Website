@@ -25,6 +25,7 @@ export default function Footer() {
             <h4 className="font-bold text-gray-900 text-sm font-heading uppercase tracking-wider">Platform</h4>
             <ul className="space-y-2 text-sm text-gray-700">
               <li><Link href="/discover" className="hover:text-gray-900 transition-colors">Discover</Link></li>
+              <li><Link href="/leaderboard" className="hover:text-gray-900 transition-colors">Leaderboard</Link></li>
               <li><Link href="/categories" className="hover:text-gray-900 transition-colors">Categories</Link></li>
               <li><Link href="/journal" className="hover:text-gray-900 transition-colors">Journal</Link></li>
               <li><Link href="/register" className="hover:text-gray-900 transition-colors">Submit a Startup</Link></li>

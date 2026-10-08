@@ -1,20 +1,22 @@
 import Link from "next/link";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
-import ErrorMascot from "@/components/site/ErrorMascot";
+import ErrorState, { recoveryLinkClass, secondaryRecoveryLinkClass } from "@/components/site/ErrorState";
 
 export default function NotFound() {
   return (
-    <div className="min-h-screen flex flex-col bg-[#FAF8F5]">
+    <div className="min-h-screen flex flex-col bg-[#F7F1E7]">
       <Header />
-      <main id="main-content" className="flex flex-1 items-center justify-center px-4 py-24 text-center">
-        <div className="max-w-xl">
-          <ErrorMascot />
-          <p className="mb-3 text-sm font-semibold uppercase tracking-widest text-coral-500">404</p>
-          <h1 className="mb-4 text-4xl font-bold text-gray-900 font-heading">That page has moved on.</h1>
-          <p className="mb-8 text-lg text-gray-600">The page you requested could not be found. Our fox looked everywhere (give it a poke). Head back to Anshkosh and keep exploring.</p>
-          <Link href="/" className="inline-flex rounded-lg bg-gray-900 px-5 py-3 font-semibold text-white hover:bg-gray-800">Go to homepage</Link>
-        </div>
+      <main id="main-content" className="flex flex-1 items-center justify-center">
+        <ErrorState
+          status="404 · A little detour"
+          title="We couldn’t find that page."
+          message="This trail has gone cold. Check the address, try a search, or head home for a fresh start."
+          foxComment="I followed the link. It did not follow through."
+        >
+          <Link href="/" className={recoveryLinkClass}>Back to homepage</Link>
+          <Link href="/search" className={secondaryRecoveryLinkClass}>Search Anshkosh</Link>
+        </ErrorState>
       </main>
       <Footer />
     </div>

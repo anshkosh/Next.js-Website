@@ -54,6 +54,8 @@ TODO
 
 # local tooling, bot working files and build output
 .codex-*/
+# Impeccable launchers download their platform engine when needed.
+.github/skills/impeccable/scripts/bin/
 %SystemDrive%/
 /dist/
 __pycache__/
@@ -64,3 +66,11 @@ drive-anshkoshmod-*.md
 real_*.txt
 learnings-draft.*
 linkedin-post-draft.md
+
+# Local operations notes, retired cleanup scripts and bot tooling
+/README-VPS-HANDOVER.md
+/VPS-OPERATING-HANDOVER-*.md
+/ARUSH-NOTE-*.md
+/deploy/cleanup-space.mjs
+/deploy/archive/cleanup-space-*.mjs
+/tools/reddit-telegram-buttons/

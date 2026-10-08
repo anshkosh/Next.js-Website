@@ -68,7 +68,7 @@ textarea:focus-visible {
   --card-foreground: #1A1A2E;
   --popover: #FFFFFF;
   --popover-foreground: #1A1A2E;
-  --primary: #E8521E;
+  --primary: #c84112;
   --primary-foreground: #FFFFFF;
   --secondary: #FFC947;
   --secondary-foreground: #1A1A2E;
@@ -135,6 +135,24 @@ textarea:focus-visible {
     transform: translateY(1px);
   }
 }
+
+@layer components {
+  .page-title {
+    @apply font-heading text-4xl font-bold leading-[1.1] tracking-tight text-gray-900 text-balance md:text-5xl;
+  }
+
+  .page-intro-spacing {
+    @apply py-12 md:py-16;
+  }
+}
+
+::selection {
+  background-color: var(--color-coral-100);
+  color: var(--color-coral-900);
+}
+
+input, textarea { caret-color: var(--color-coral-700); }
+html { scroll-padding-top: 5rem; }
 
 /* Keep the existing editorial utility classes legible when the theme changes. */
 html.dark body { background-color: #111827; color: #f9fafb; }
@@ -331,10 +349,9 @@ html.dark [class*="bg-[#F7F1E7]"] { background-color: #1f2937; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  /* Only the visitor-triggered preview overrides reduced motion; no autoplay. */
   .curtain-stage--opening, .curtain-stage--opening .curtain-panel {
-    transition-duration: 3000ms !important;
-    transition-delay: 200ms;
+    transition-duration: 0.01ms !important;
+    transition-delay: 0ms;
   }
   .curtain-copy, .curtain-seam { transition-duration: 0.01ms; }
   .curtain-stage--opening .curtain-copy { transform: none; }

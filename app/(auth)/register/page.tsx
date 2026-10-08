@@ -228,7 +228,7 @@ export default function RegisterPage() {
             <button
               type="submit"
               disabled={loading || password.length < 8}
-              className="w-full flex justify-center items-center gap-2 py-2.5 px-4 border border-transparent rounded-lg shadow-sm text-sm font-semibold text-white bg-coral-500 hover:bg-coral-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-coral-500 disabled:opacity-70 transition-colors"
+              className="w-full min-h-12 flex justify-center items-center gap-2 py-3 px-4 border border-transparent rounded-xl shadow-sm text-sm font-semibold text-white bg-coral-600 hover:bg-coral-700 focus:ring-2 focus:ring-offset-2 focus:ring-coral-600 disabled:opacity-70 transition-colors"
             >
               {loading && <Loader2 size={16} className="animate-spin" />}
               Create Account

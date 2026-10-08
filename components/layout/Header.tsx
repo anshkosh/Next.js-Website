@@ -4,6 +4,7 @@ import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import MobileNav from "./MobileNav";
 import FullSiteSearch from "./FullSiteSearch";
+import NavigationLinks from "./NavigationLinks";
 
 export default async function Header() {
   const session = process.env.DATABASE_URL
@@ -22,19 +23,15 @@ export default async function Header() {
             <span className="text-coral-500">KOSH</span>
           </span>
         </Link>
-        <nav aria-label="Primary navigation" className="hidden lg:flex items-center gap-6">
-          <Link href="/discover" className="text-gray-600 hover:text-gray-900 font-medium">Discover</Link>
-          <Link href="/launch-support" className="text-gray-600 hover:text-gray-900 font-medium">Launch Support</Link>
-          <Link href="/journal" className="text-gray-600 hover:text-gray-900 font-medium">Journal</Link>
-          <Link href="/faq" className="text-gray-600 hover:text-gray-900 font-medium">FAQ</Link>
-          <Link href="/contact" className="text-gray-600 hover:text-gray-900 font-medium">Contact</Link>
+        <nav aria-label="Primary navigation" className="hidden lg:flex items-center gap-4 text-sm xl:gap-6 xl:text-base">
+          <NavigationLinks />
           <FullSiteSearch />
           {session ? (
-            <Link href="/dashboard" className="px-4 py-2 bg-coral-500 text-white rounded-md font-medium hover:bg-coral-600 transition-colors">
+            <Link href="/dashboard" className="inline-flex min-h-11 items-center rounded-xl bg-coral-600 px-4 py-2 font-medium text-white transition-colors hover:bg-coral-700">
               Dashboard
             </Link>
           ) : (
-            <Link href="/login" className="px-4 py-2 bg-gray-900 text-white rounded-md font-medium hover:bg-gray-800 transition-colors">
+            <Link href="/login" className="inline-flex min-h-11 items-center rounded-xl bg-gray-900 px-4 py-2 font-medium text-white transition-colors hover:bg-gray-800">
               Login
             </Link>
           )}

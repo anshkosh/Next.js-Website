@@ -20,12 +20,12 @@ export default function FAQPage() {
           acceptedAnswer: { "@type": "Answer", text: answer },
         })),
       }) }} />
-      <section className="bg-white py-16 md:py-24 min-h-screen">
+      <section className="page-intro-spacing bg-white min-h-screen">
       <div className="max-w-3xl mx-auto px-4">
-        <h1 className="text-4xl md:text-5xl font-bold font-heading text-gray-900 tracking-tight">
+        <h1 className="page-title">
           FAQs
         </h1>
-        <p className="text-xl text-gray-500 mt-4 mb-12">
+        <p className="text-lg leading-relaxed text-gray-600 mt-4 mb-10">
           Answers about startup listings, free tools, and the early-access pilot.
         </p>
         <FAQContent />

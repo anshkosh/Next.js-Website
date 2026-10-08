@@ -12,6 +12,8 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Installed design tooling ships third-party scripts, not application code.
+    ".github/skills/**",
   ]),
 ]);
 

@@ -113,6 +113,8 @@ export async function toggleUpvote(startupId: string) {
     }
 
     revalidatePath("/");
+    revalidatePath("/discover");
+    revalidatePath("/leaderboard");
     revalidatePath(`/startups/${startup.slug}`);
     
     return { success: true, count: newCount, upvoted: !existingUpvote };

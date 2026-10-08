@@ -46,11 +46,11 @@ export default function LaunchSupportPage() {
   return (
     <div className="bg-white text-gray-900">
       <section className="border-b border-gray-200">
-        <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6 md:py-24">
+        <div className="mx-auto max-w-6xl px-4 pb-6 pt-16 sm:px-6 md:pt-24">
           <p className="mb-5 text-sm font-semibold uppercase tracking-wider text-coral-700">
             Launch Support · Free during early access
           </p>
-          <h1 className="max-w-3xl font-heading text-4xl font-bold leading-tight tracking-tight sm:text-5xl md:text-6xl">
+          <h1 className="max-w-3xl font-heading text-4xl font-bold leading-[1.1] tracking-tight text-balance sm:text-5xl md:text-6xl">
             Your next step,<br />
             with Anshkosh.
           </h1>
@@ -70,7 +70,7 @@ export default function LaunchSupportPage() {
         </div>
       </section>
 
-      <section aria-labelledby="tools-heading" className="mx-auto max-w-6xl px-4 py-14 sm:px-6 md:py-20">
+      <section aria-labelledby="tools-heading" className="mx-auto max-w-6xl px-4 pb-14 pt-6 sm:px-6 md:pb-20">
         <p className="mb-3 text-sm font-semibold text-coral-700">Free founder tools · Available now</p>
         <h2 id="tools-heading" className="scroll-mt-28 font-heading text-3xl font-bold">Small tools. Useful next steps.</h2>
         <p className="mt-4 max-w-2xl text-gray-600">Start anywhere. Your startup details carry across the tools, with drafts saved on this device. Copy and download your results for free.</p>

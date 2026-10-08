@@ -77,14 +77,14 @@ export function SiteEnhancements() {
       </div>
 
       <div className="fixed bottom-5 right-5 z-40 flex flex-col gap-3 print:hidden">
-        <a href="/contact" aria-label="Contact Anshkosh" className="group flex items-center gap-2 rounded-full bg-coral-500 px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-coral-500/25 transition-all hover:-translate-y-1 hover:bg-coral-600">
+        <a href="/contact" aria-label="Contact Anshkosh" className="group flex min-h-11 min-w-11 items-center justify-center gap-2 rounded-full bg-coral-600 px-4 py-3 text-sm font-semibold text-white shadow-soft transition-colors hover:bg-coral-700">
           <MessageCircle size={18} aria-hidden="true" />
           <span className="hidden sm:inline">Contact us</span>
         </a>
       </div>
 
       {showTop && (
-        <button type="button" onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })} aria-label="Scroll back to top" className="fixed bottom-20 right-5 z-40 rounded-full border border-gray-200 bg-white p-3 text-gray-700 shadow-lg transition-all hover:-translate-y-1 hover:border-coral-300 hover:text-coral-600 print:hidden dark:border-gray-700 dark:bg-gray-900 dark:text-gray-200">
+        <button type="button" onClick={() => window.scrollTo({ top: 0, behavior: window.matchMedia?.("(prefers-reduced-motion: reduce)").matches ? "instant" : "smooth" })} aria-label="Scroll back to top" className="fixed bottom-20 right-5 z-40 flex h-11 w-11 items-center justify-center rounded-full border border-gray-200 bg-white text-gray-700 shadow-soft transition-colors hover:border-coral-300 hover:text-coral-600 print:hidden">
           <ArrowUp size={19} aria-hidden="true" />
         </button>
       )}

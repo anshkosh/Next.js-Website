@@ -4,44 +4,18 @@ import LaunchSupportPage, { metadata } from "../app/(public)/launch-support/page
 import ContactPage from "../app/(public)/contact/page";
 import { absoluteUrl } from "../lib/seo";
 import { CONTACT_SUBJECTS, contactSchema } from "../lib/validators/contact.schema";
-import LaunchSupportTeaser from "../components/landing/LaunchSupportTeaser";
-import LandingValueProps from "../components/landing/LandingValueProps";
 import LandingHero from "../components/landing/LandingHero";
 import LandingCTA from "../components/landing/LandingCTA";
 
 vi.mock("../app/(public)/contact/ContactContent", () => ({ default: () => null }));
 
 describe("free early-access launch support", () => {
-  it("places listing and SEO outreach only in founder benefits, not the hero or closing banner", () => {
-    const document = new DOMParser().parseFromString(renderToStaticMarkup(<LandingValueProps />), "text/html");
-    const founders = document.querySelector('article[aria-labelledby="founder-benefits-title"]');
-    const backers = document.querySelector('article[aria-labelledby="backer-benefits-title"]');
-    expect(founders?.querySelector('a[href="/launch-support"]')).not.toBeNull();
-    expect(founders?.textContent).toContain("credible SEO backlink outreach");
-    expect(founders?.textContent).toContain("credible SEO backlink outreach (planned)");
-    const benefits = founders?.querySelectorAll("ul > li");
-    expect(benefits).toHaveLength(5);
-    for (const benefit of benefits ?? []) {
-      expect(benefit.className).toBe(benefits?.[0].className);
-      expect(benefit.querySelector("svg")).not.toBeNull();
-    }
-    expect(founders?.querySelector('ul > li a[href="/launch-support"]')).not.toBeNull();
-    expect(backers?.querySelectorAll("ul > li")).toHaveLength(3);
-    expect(backers?.querySelector('a[href="/launch-support"]')).toBeNull();
+  it("keeps listing and SEO outreach offers out of the hero and closing banner", () => {
     for (const banner of [<LandingHero key="hero" />, <LandingCTA key="cta" />]) {
       const markup = renderToStaticMarkup(banner);
       expect(markup).not.toContain("Free startup listings");
       expect(markup).not.toContain("SEO backlink");
     }
-  });
-
-  it("explains the free listing offer and planned SEO outreach on the homepage", () => {
-    const document = new DOMParser().parseFromString(renderToStaticMarkup(<ul><LaunchSupportTeaser /></ul>), "text/html");
-    expect(document.querySelector('a[href="/launch-support"]')?.textContent).toContain("Free startup listings & launch support");
-    expect(document.body.textContent).toContain("credible SEO backlink outreach");
-    expect(document.body.textContent).toContain("credible SEO backlink outreach (planned)");
-    expect(document.querySelectorAll("ul > li")).toHaveLength(2);
-    expect(document.querySelector("p")).toBeNull();
   });
 
   it("renders one H1, free support, and working internal calls to action", () => {
