@@ -4,7 +4,7 @@ import path from "node:path";
 import { randomBytes, createHash } from "node:crypto";
 import { sealBackup, openBackup } from "./backup-crypto.mjs";
 import { restoreDatabase } from "./isolated-restore.mjs";
-import { scannerRequired, resourceWarnings } from "./monitor-policy.mjs";
+import { scannerRequired, resourceWarnings, sanitizeOnlyFromSource } from "./monitor-policy.mjs";
 import os from "node:os";
 import { createRequire } from "node:module";
 import { spawnSync } from "node:child_process";
@@ -108,7 +108,8 @@ async function checkAdmin(apply) {
 }
 async function check() {
   const failures = [];
-  const requireScanner = scannerRequired(process.env.OPS_SCANNER_MODE, fs.existsSync(path.join(process.cwd(), "lib/uploads/safety.ts")));
+  const sanitizeOnly = (() => { try { return sanitizeOnlyFromSource(fs.readFileSync(path.join(process.cwd(), "lib/uploads/scan-mode.ts"), "utf8")); } catch { return false; } })();
+  const requireScanner = scannerRequired(process.env.OPS_SCANNER_MODE, fs.existsSync(path.join(process.cwd(), "lib/uploads/safety.ts")), sanitizeOnly);
   try {
     const response = await fetch("https://www.anshkosh.com/api/cron/health", { signal: AbortSignal.timeout(10000) });
     if (!response.ok || (await response.json()).db !== "connected") failures.push("Public website/database health check failed.");
@@ -135,6 +136,7 @@ async function check() {
     const signatures = ["daily.cvd", "daily.cld"].map(name => `/var/lib/clamav/${name}`).filter(name => fs.existsSync(name));
     if (!signatures.length || Math.max(...signatures.map(name => fs.statSync(name).mtimeMs)) < Date.now() - 3 * 86400000) failures.push("Antivirus signatures are missing or older than three days.");
   } catch { failures.push("Antivirus signature age could not be checked."); }
+  if (sanitizeOnly) try { run("qpdf", ["--version"]); } catch { failures.push("qpdf is not installed; PDF uploads will fail until it is."); }
   try {
     const stat = fs.statfsSync(shared);
     if (stat.bavail / stat.blocks < .15) failures.push("VPS disk has less than 15% free space.");
@@ -157,7 +159,7 @@ async function check() {
     if (await alert("Anshkosh operations checks have recovered.")) writeState("health", { message: "", alertAt: Date.now() });
   }
   if (failures.length) throw new Error(message);
-  console.log(`Website, database, Redis, PM2, disk, memory/load, off-site backup and restore checks passed. Antivirus: ${requireScanner ? "checked" : "deferred pending approval; not verified"}.`);
+  console.log(`Website, database, Redis, PM2, disk, memory/load, off-site backup and restore checks passed. Antivirus: ${requireScanner ? "checked" : sanitizeOnly ? "not in use (uploads are sanitised; qpdf present)" : "deferred pending approval; not verified"}.`);
 }
 try {
   if (command === "backup") await backup();

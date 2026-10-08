@@ -1,6 +1,14 @@
 // A deliberate pre-rollout hold must not hide a scanner outage after publishing.
-export function scannerRequired(mode, releaseUsesScanner) {
+// While the release runs in sanitize-only mode (lib/uploads/scan-mode.ts) ClamAV is deliberately not in use, so a missing
+// scanner is not an outage. Default false keeps the original rule for every caller that does not opt in.
+export function scannerRequired(mode, releaseUsesScanner, sanitizeOnly = false) {
+  if (sanitizeOnly) return false;
   return mode !== "deferred" || releaseUsesScanner;
+}
+
+// Reads only the exact mode line; a commented-out, renamed or differently-valued line never counts as sanitize-only.
+export function sanitizeOnlyFromSource(source) {
+  return typeof source === "string" && /^export const UPLOAD_SCAN_MODE = "sanitize-only"/m.test(source);
 }
 
 // Available memory includes reclaimable cache, unlike Linux's misleading free figure.
