@@ -2,42 +2,31 @@
 
 import { useEffect } from "react";
 import Link from "next/link";
-import ErrorMascot from "@/components/site/ErrorMascot";
+import ErrorState, { recoveryLinkClass, secondaryRecoveryLinkClass } from "@/components/site/ErrorState";
 
 export default function Error({
   error,
-  reset,
+  retry,
 }: {
   error: Error & { digest?: string };
-  reset: () => void;
+  retry: () => void;
 }) {
   useEffect(() => {
     console.error(error);
   }, [error]);
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center px-4">
-      <div className="bg-white p-8 rounded-2xl border border-gray-200 shadow-sm max-w-md w-full text-center">
-        <ErrorMascot size={140} />
-        <h1 className="text-2xl font-bold text-gray-900 mb-2">Something went wrong</h1>
-        <p className="text-gray-500 mb-8">
-          We encountered an unexpected error. Please try again or contact support if the problem persists.
-        </p>
-        <div className="flex flex-col gap-3">
-          <button
-            onClick={() => reset()}
-            className="w-full py-3 bg-gray-900 text-white rounded-lg font-medium hover:bg-gray-800 transition-colors"
-          >
-            Try again
-          </button>
-          <Link
-            href="/"
-            className="w-full py-3 bg-white text-gray-700 border border-gray-200 rounded-lg font-medium hover:bg-gray-50 transition-colors"
-          >
-            Return Home
-          </Link>
-        </div>
-      </div>
+    <div className="flex min-h-[70vh] items-center justify-center bg-[#F7F1E7]">
+      <ErrorState
+        status="Something went wrong"
+        title="We hit a little snag."
+        message="Something went wrong on our end. Try again, or head home. If it keeps happening, please let us know."
+        foxComment="Something broke. For once, it wasn’t my doing."
+      >
+        <button type="button" onClick={() => retry()} className={recoveryLinkClass}>Try again</button>
+        <Link href="/" className={secondaryRecoveryLinkClass}>Back to homepage</Link>
+        <Link href="/contact" className="text-sm font-medium text-gray-700 underline underline-offset-4 hover:text-coral-700">Contact us</Link>
+      </ErrorState>
     </div>
   );
 }

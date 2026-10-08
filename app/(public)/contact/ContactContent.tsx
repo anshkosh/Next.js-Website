@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useTransition, useCallback } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import {
   Mail,
   MapPin,
@@ -31,26 +31,11 @@ interface FormState {
 
 function LeftPanel() {
   return (
-    <div className="relative flex flex-col justify-between bg-gradient-to-br from-coral-600 via-coral-500 to-orange-600 p-10 overflow-hidden lg:min-h-full">
-      {/* Decorative circles */}
-      <div className="absolute -top-16 -left-16 w-72 h-72 rounded-full bg-white/5 pointer-events-none" />
-      <div className="absolute top-1/3 -right-20 w-56 h-56 rounded-full bg-white/5 pointer-events-none" />
-      <div className="absolute -bottom-12 left-1/4 w-48 h-48 rounded-full bg-white/5 pointer-events-none" />
-
-      {/* Dot grid */}
-      <div
-        className="absolute inset-0 pointer-events-none"
-        style={{
-          backgroundImage:
-            "radial-gradient(circle, rgba(255,255,255,0.12) 1px, transparent 1px)",
-          backgroundSize: "28px 28px",
-        }}
-      />
-
+    <div className="flex h-full flex-col justify-between bg-coral-700 p-6 sm:p-8">
       {/* Content */}
       <div className="relative z-10">
-        <div className="inline-flex items-center gap-2 bg-white/15 backdrop-blur-sm border border-white/20 rounded-full px-4 py-1.5 mb-8">
-          <span className="w-2 h-2 rounded-full bg-green-300 animate-pulse" />
+        <div className="mb-6 inline-flex items-center gap-2">
+          <span className="w-2 h-2 rounded-full bg-green-300" aria-hidden="true" />
           <span className="text-white text-xs font-semibold tracking-wide">
             We&apos;re online
           </span>
@@ -61,7 +46,7 @@ function LeftPanel() {
           <br />
           message.
         </h2>
-        <p className="text-white/70 text-base leading-relaxed max-w-xs">
+        <p className="text-white/90 text-base leading-relaxed max-w-sm">
           Whether you have a question, a partnership idea, or just want to say
           hello — drop us a line and we&apos;ll get back to you within 24–48
           hours.
@@ -69,16 +54,16 @@ function LeftPanel() {
       </div>
 
       {/* Contact cards */}
-      <div className="relative z-10 mt-10 space-y-3">
+      <div className="mt-8 space-y-3">
         <a
           href="mailto:hello@anshkosh.com"
-          className="flex items-center gap-4 bg-white/10 hover:bg-white/20 backdrop-blur-sm border border-white/15 rounded-2xl px-5 py-4 transition-all duration-200 group"
+          className="group flex items-center gap-3 rounded-xl border border-white/25 px-4 py-3 transition-colors hover:bg-white/10"
         >
-          <div className="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center flex-shrink-0 group-hover:bg-white/30 transition-colors">
-            <Mail className="w-5 h-5 text-white" />
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center">
+            <Mail className="w-5 h-5 text-white" aria-hidden="true" />
           </div>
           <div>
-            <p className="text-white/60 text-xs font-medium mb-0.5">Email us</p>
+            <p className="text-white/90 text-xs font-medium mb-0.5">Email us</p>
             <p className="text-white text-sm font-semibold">
               hello@anshkosh.com
             </p>
@@ -89,9 +74,9 @@ function LeftPanel() {
           href="https://twitter.com/anshkosh"
           target="_blank"
           rel="noopener noreferrer"
-          className="flex items-center gap-4 bg-white/10 hover:bg-white/20 backdrop-blur-sm border border-white/15 rounded-2xl px-5 py-4 transition-all duration-200 group"
+          className="group flex items-center gap-3 rounded-xl border border-white/25 px-4 py-3 transition-colors hover:bg-white/10"
         >
-          <div className="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center flex-shrink-0 group-hover:bg-white/30 transition-colors">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center">
             {/* X (Twitter) icon — inline SVG since lucide removed it */}
             <svg
               className="w-5 h-5 text-white fill-current"
@@ -102,19 +87,19 @@ function LeftPanel() {
             </svg>
           </div>
           <div>
-            <p className="text-white/60 text-xs font-medium mb-0.5">
+            <p className="text-white/90 text-xs font-medium mb-0.5">
               Follow us
             </p>
             <p className="text-white text-sm font-semibold">@anshkosh</p>
           </div>
         </a>
 
-        <div className="flex items-center gap-4 bg-white/10 backdrop-blur-sm border border-white/15 rounded-2xl px-5 py-4">
-          <div className="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center flex-shrink-0">
-            <MapPin className="w-5 h-5 text-white" />
+        <div className="flex items-center gap-3 rounded-xl border border-white/25 px-4 py-3">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center">
+            <MapPin className="w-5 h-5 text-white" aria-hidden="true" />
           </div>
           <div>
-            <p className="text-white/60 text-xs font-medium mb-0.5">Based in</p>
+            <p className="text-white/90 text-xs font-medium mb-0.5">Based in</p>
             <p className="text-white text-sm font-semibold">
               Hyderabad, India 🇮🇳
             </p>
@@ -123,7 +108,7 @@ function LeftPanel() {
       </div>
 
       {/* Bottom note */}
-      <p className="relative z-10 mt-8 text-white/40 text-xs">
+      <p className="mt-6 text-xs leading-relaxed text-white/90">
         Response time: within 24–48 hours on business days.
       </p>
     </div>
@@ -142,21 +127,20 @@ function SubjectChips({
   return (
     <div role="radiogroup" aria-labelledby="contact-subject-label" className="flex flex-wrap gap-2">
       {CONTACT_SUBJECTS.map((s) => (
-        <button
-          key={s}
-          type="button"
-          role="radio"
-          aria-checked={value === s}
-          aria-label={`Subject: ${s}`}
-          onClick={() => onChange(s)}
-          className={`px-4 py-1.5 rounded-full text-sm font-medium border transition-all duration-150 ${
-            value === s
-              ? "bg-coral-500 border-coral-500 text-white shadow-sm shadow-coral-200"
-              : "bg-white border-gray-200 text-gray-600 hover:border-coral-300 hover:text-coral-600"
-          }`}
-        >
-          {s}
-        </button>
+        <label key={s} className="relative cursor-pointer">
+          <input
+            type="radio"
+            name="contact-subject"
+            value={s}
+            checked={value === s}
+            aria-label={`Subject: ${s}`}
+            onChange={() => onChange(s)}
+            className="peer sr-only"
+          />
+          <span className="inline-flex min-h-11 items-center rounded-full border border-gray-200 bg-white px-4 py-2 text-sm font-medium text-gray-600 transition-colors hover:border-coral-300 hover:text-coral-700 peer-checked:border-coral-600 peer-checked:bg-coral-600 peer-checked:text-white peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-coral-700">
+            {s}
+          </span>
+        </label>
       ))}
     </div>
   );
@@ -165,7 +149,7 @@ function SubjectChips({
 // ── Field wrapper ─────────────────────────────────────────────────────────────
 
 const inputClass =
-  "w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-coral-400 focus:border-transparent transition-all";
+  "w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50 text-sm text-gray-900 placeholder-gray-500 focus:ring-2 focus:ring-coral-600 focus:border-transparent transition-colors";
 
 // ── Success state ─────────────────────────────────────────────────────────────
 
@@ -176,9 +160,10 @@ function SuccessState({
   name: string;
   onReset: () => void;
 }) {
+  const reduceMotion = useReducedMotion();
   return (
     <motion.div
-      initial={{ opacity: 0, scale: 0.95 }}
+      initial={reduceMotion ? false : { opacity: 0, scale: 0.95 }}
       animate={{ opacity: 1, scale: 1 }}
       className="flex flex-col items-center justify-center text-center py-16 px-6 gap-5"
     >
@@ -207,6 +192,7 @@ function SuccessState({
 // ── Main form ─────────────────────────────────────────────────────────────────
 
 export default function ContactContent({ initialSubject = "" }: { initialSubject?: ContactSubject | "" }) {
+  const reduceMotion = useReducedMotion();
   const [form, setForm] = useState<FormState>({
     name: "",
     email: "",
@@ -275,35 +261,35 @@ export default function ContactContent({ initialSubject = "" }: { initialSubject
   const isSubmitDisabled = isPending || !form.token || !form.subject;
 
   return (
-    <div className="min-h-screen bg-gray-50/50 py-16 md:py-24 px-4">
+    <div className="page-intro-spacing min-h-screen bg-gray-50/50 px-4">
       <div className="max-w-5xl mx-auto">
         {/* Page heading */}
         <div className="mb-10 text-center">
           <span className="inline-block mb-3 px-3 py-1 rounded-full bg-coral-50 border border-coral-100 text-coral-600 text-xs font-semibold uppercase tracking-widest">
             Get in touch
           </span>
-          <h1 className="text-4xl md:text-5xl font-heading font-bold text-gray-900 tracking-tight">
+          <h1 className="page-title">
             Contact Us
           </h1>
-          <p className="mt-3 text-gray-500 text-lg max-w-md mx-auto">
+          <p className="mx-auto mt-4 max-w-2xl text-lg leading-relaxed text-gray-600">
             Questions, ideas, or feedback — we&apos;d love to hear from you.
           </p>
         </div>
 
         {/* Card */}
         <motion.div
-          initial={{ opacity: 0, y: 16 }}
+          initial={reduceMotion ? false : { opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4, ease: "easeOut" }}
-          className="bg-white rounded-3xl shadow-xl overflow-hidden border border-gray-100 grid grid-cols-1 lg:grid-cols-5"
+          className="grid grid-cols-1 overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-soft lg:grid-cols-5"
         >
           {/* Left decorative panel — 2/5 */}
-          <div className="lg:col-span-2">
+          <div className="order-2 lg:order-1 lg:col-span-2">
             <LeftPanel />
           </div>
 
           {/* Right form panel — 3/5 */}
-          <div className="lg:col-span-3 p-8 md:p-10">
+          <div className="order-1 p-6 sm:p-8 lg:order-2 lg:col-span-3">
             <AnimatePresence mode="wait">
               {success ? (
                 <SuccessState
@@ -314,9 +300,9 @@ export default function ContactContent({ initialSubject = "" }: { initialSubject
               ) : (
                 <motion.form
                   key="form"
-                  initial={{ opacity: 0, x: 12 }}
+                  initial={reduceMotion ? false : { opacity: 0, x: 12 }}
                   animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: -12 }}
+                  exit={reduceMotion ? { opacity: 1 } : { opacity: 0, x: -12 }}
                   transition={{ duration: 0.25 }}
                   onSubmit={handleSubmit}
                   className="space-y-6"
@@ -326,7 +312,7 @@ export default function ContactContent({ initialSubject = "" }: { initialSubject
                     <h2 className="text-2xl font-heading font-bold text-gray-900 mb-1">
                       Send us a message
                     </h2>
-                    <p className="text-sm text-gray-400">
+                    <p className="text-sm text-gray-500">
                       All fields marked{" "}
                       <span className="text-coral-500">*</span> are required.
                     </p>
@@ -411,7 +397,7 @@ export default function ContactContent({ initialSubject = "" }: { initialSubject
                         className={`text-xs tabular-nums ${
                           form.message.length > 1800
                             ? "text-coral-500"
-                            : "text-gray-400"
+                            : "text-gray-500"
                         }`}
                       >
                         {form.message.length}/2000
@@ -429,9 +415,10 @@ export default function ContactContent({ initialSubject = "" }: { initialSubject
                   <AnimatePresence>
                     {error && (
                       <motion.div
-                        initial={{ opacity: 0, y: -4 }}
+                        initial={reduceMotion ? false : { opacity: 0, y: -4 }}
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0 }}
+                        role="alert"
                         className="flex items-center gap-2 text-sm text-red-600 bg-red-50 border border-red-200 rounded-xl px-4 py-3"
                       >
                         <AlertCircle className="w-4 h-4 flex-shrink-0" />
@@ -444,7 +431,7 @@ export default function ContactContent({ initialSubject = "" }: { initialSubject
                   <button
                     type="submit"
                     disabled={isSubmitDisabled}
-                    className="w-full flex items-center justify-center gap-2 px-6 py-3.5 bg-coral-500 hover:bg-coral-600 active:bg-coral-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-semibold rounded-xl transition-all duration-150 shadow-sm hover:shadow-md"
+                    className="flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-coral-600 px-6 py-3 font-semibold text-white transition-colors hover:bg-coral-700 active:bg-coral-800 disabled:cursor-not-allowed disabled:opacity-50"
                   >
                     {isPending ? (
                       <>
@@ -459,7 +446,7 @@ export default function ContactContent({ initialSubject = "" }: { initialSubject
                     )}
                   </button>
 
-                  <p className="text-center text-xs text-gray-400">
+                  <p className="text-center text-xs text-gray-500">
                     Protected by Cloudflare Turnstile · No spam, ever.
                   </p>
                 </motion.form>

@@ -4,6 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import JournalCard from "@/components/landing/JournalCard";
 import { BookOpen } from "lucide-react";
+import ErrorState, { recoveryLinkClass, secondaryRecoveryLinkClass } from "@/components/site/ErrorState";
 
 const PER_PAGE = 12;
 
@@ -24,10 +25,10 @@ export default async function JournalPage(props: {
   if (!process.env.DATABASE_URL) {
     return (
       <div className="min-h-screen bg-gray-50/50">
-        <section className="bg-white border-b border-gray-200 py-14">
+        <section className="page-intro-spacing bg-white border-b border-gray-200">
           <div className="container mx-auto px-4 max-w-6xl text-center">
             <div className="inline-flex items-center gap-2 bg-coral-50 text-coral-600 text-sm font-semibold px-4 py-1.5 rounded-full mb-4"><BookOpen size={15} /> Anshkosh Journal</div>
-            <h1 className="text-4xl md:text-5xl font-bold font-heading text-gray-900 mb-4">Stories, insights & ideas</h1>
+            <h1 className="page-title mb-4">Stories, insights & ideas</h1>
             <p className="text-lg text-gray-500 max-w-2xl mx-auto">The Journal is being prepared for the pilot. Check back soon for founder stories and startup insights.</p>
           </div>
         </section>
@@ -91,12 +92,12 @@ export default async function JournalPage(props: {
   return (
     <div className="min-h-screen bg-gray-50/50">
       {/* Header */}
-      <section className="bg-white border-b border-gray-200 py-14">
+      <section className="page-intro-spacing bg-white border-b border-gray-200">
         <div className="container mx-auto px-4 max-w-6xl text-center">
           <div className="inline-flex items-center gap-2 bg-coral-50 text-coral-600 text-sm font-semibold px-4 py-1.5 rounded-full mb-4">
             <BookOpen size={15} /> Anshkosh Journal
           </div>
-          <h1 className="text-4xl md:text-5xl font-bold font-heading text-gray-900 mb-4">
+          <h1 className="page-title mb-4">
             Stories, insights & ideas
           </h1>
           <p className="text-lg text-gray-500 max-w-2xl mx-auto">
@@ -114,7 +115,7 @@ export default async function JournalPage(props: {
                 href="/journal"
                 className={`shrink-0 px-4 py-1.5 rounded-full text-sm font-medium transition-colors ${
                   !categorySlug
-                    ? "bg-coral-500 text-white"
+                    ? "bg-coral-600 text-white"
                     : "text-gray-600 hover:bg-gray-100"
                 }`}
               >
@@ -126,7 +127,7 @@ export default async function JournalPage(props: {
                   href={`/journal?category=${cat.slug}`}
                   className={`shrink-0 px-4 py-1.5 rounded-full text-sm font-medium transition-colors ${
                     categorySlug === cat.slug
-                      ? "bg-coral-500 text-white"
+                      ? "bg-coral-600 text-white"
                       : "text-gray-600 hover:bg-gray-100"
                   }`}
                 >
@@ -165,7 +166,7 @@ export default async function JournalPage(props: {
                 </div>
                 <div className="p-8 flex flex-col justify-center gap-4">
                   <div className="flex items-center gap-3">
-                    <span className="bg-coral-500 text-white text-xs font-bold px-3 py-1 rounded-full">✦ Featured</span>
+                    <span className="bg-coral-600 text-white text-xs font-bold px-3 py-1 rounded-full">✦ Featured</span>
                     {featuredPost.category && (
                       <span className="text-sm text-gray-500">{featuredPost.category.name}</span>
                     )}
@@ -191,10 +192,21 @@ export default async function JournalPage(props: {
 
         {/* Post Grid */}
         {posts.length === 0 ? (
-          <div className="text-center py-24 text-gray-400">
-            <BookOpen size={48} className="mx-auto mb-4 opacity-30" />
-            <p className="text-lg">No posts yet in this category.</p>
-          </div>
+          <ErrorState
+            compact
+            headingLevel={2}
+            status="No journal stories found"
+            title="A little quiet between chapters."
+            message={categorySlug
+              ? "No stories in this category yet. Browse the rest of the Journal, or suggest a story you’d love to read."
+              : page > 1
+                ? "There are no stories on this page. Head back to the first page for another chapter."
+                : "Our next chapter is still being written. Check back for founder stories, or send us an idea."}
+            foxComment="I’d write something, but the keyboard isn’t paw-friendly."
+          >
+            {(categorySlug || page > 1) && <Link href="/journal" className={recoveryLinkClass}>{categorySlug ? "Browse all stories" : "Back to first page"}</Link>}
+            <Link href="/contact" className={categorySlug || page > 1 ? secondaryRecoveryLinkClass : recoveryLinkClass}>Suggest a story</Link>
+          </ErrorState>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {posts.map(post => (
@@ -217,7 +229,7 @@ export default async function JournalPage(props: {
                 href={buildPageUrl(i + 1)}
                 className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
                   page === i + 1
-                    ? "bg-coral-500 text-white"
+                    ? "bg-coral-600 text-white"
                     : "border border-gray-200 text-gray-700 hover:bg-white"
                 }`}
               >

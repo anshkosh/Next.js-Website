@@ -1,0 +1,14 @@
+/* page-mascot 0.1 renders a motion wrapper containing two sprite layers.
+   Keep the expression swap, but suppress its click squash/stretch animation. */
+.mascot > span {
+  transform: none !important;
+}
+
+/* The visible fox is 225px tall in the centre direction cell and 238–244px
+   in the reaction cells (360px tiles). Match the character, excluding the
+   floating heart/sparkles, and keep its paws on the direction baseline.
+   Both adjustments are proportional, including on smaller empty states. */
+.mascot > span > span:last-child {
+  transform-origin: 47.5% 79.7%;
+  transform: translateY(-1.7%) scale(0.93);
+}

@@ -14,7 +14,7 @@ export default function HeroArtwork() {
             alt=""
             width={1672}
             height={941}
-            sizes="(max-width: 639px) 610px, (max-width: 767px) 712px, (max-width: 819px) 820px, 100vw"
+            sizes="(max-width: 639px) 610px, (max-width: 767px) 712px, (max-width: 819px) 820px, (max-width: 919px) 100vw, 920px"
             quality={85}
             preload
           />

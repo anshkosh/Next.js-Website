@@ -74,7 +74,7 @@ export default function LoginPage() {
           <button
             onClick={handleGoogleLogin}
             disabled={googleLoading || loading}
-            className="w-full flex justify-center items-center gap-3 py-2.5 px-4 border border-gray-300 rounded-lg shadow-sm bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-coral-500 disabled:opacity-70 transition-all"
+            className="w-full min-h-12 flex justify-center items-center gap-3 py-3 px-4 border border-gray-300 rounded-xl shadow-sm bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 focus:ring-2 focus:ring-offset-2 focus:ring-coral-500 disabled:opacity-70 transition-colors"
           >
             {googleLoading ? (
               <Loader2 size={20} className="animate-spin text-gray-500" />
@@ -102,7 +102,7 @@ export default function LoginPage() {
 
           <form className="space-y-5 mt-6" onSubmit={handleEmailLogin}>
             {error && (
-              <div className="bg-red-50 border border-red-100 text-red-600 text-sm p-3 rounded-lg text-center">
+              <div role="alert" className="bg-red-50 border border-red-100 text-red-600 text-sm p-3 rounded-lg text-center">
                 {error}
               </div>
             )}
@@ -151,7 +151,7 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={loading || googleLoading}
-              className="w-full flex justify-center items-center gap-2 py-2.5 px-4 border border-transparent rounded-lg shadow-sm text-sm font-semibold text-white bg-gray-900 hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-900 disabled:opacity-70 transition-colors"
+              className="w-full min-h-12 flex justify-center items-center gap-2 py-3 px-4 border border-transparent rounded-xl shadow-sm text-sm font-semibold text-white bg-gray-900 hover:bg-gray-800 focus:ring-2 focus:ring-offset-2 focus:ring-gray-900 disabled:opacity-70 transition-colors"
             >
               {loading && <Loader2 size={16} className="animate-spin" />}
               Sign In

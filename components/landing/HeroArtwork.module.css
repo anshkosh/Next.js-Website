@@ -2,8 +2,8 @@
   --hand-x: 8%;
   --hand-y: -10%;
   --hand-rotation: 4deg;
-  position: absolute;
-  inset: 0;
+  position: relative;
+  height: 220px;
   overflow: hidden;
   pointer-events: none;
   background: #f7f1e7;
@@ -99,20 +99,22 @@
 .fade {
   position: absolute;
   inset: 0 0 auto;
-  height: 62%;
+  height: 20%;
   background: linear-gradient(#f7f1e7, #f7f1e7ee, transparent);
 }
 
 @media (min-width: 640px) {
+  .artwork { height: 260px; }
   .frame { width: 712px; height: 400px; }
 }
 
 @media (min-width: 768px) {
-  .frame { width: max(100%, 820px); height: auto; aspect-ratio: 820 / 460; }
+  .artwork { height: 300px; }
+  .frame { width: min(100%, 920px); min-width: 820px; height: auto; aspect-ratio: 1672 / 941; }
 }
 
 @media (min-width: 1024px) {
-  .frame { left: 0; width: 100%; height: auto; aspect-ratio: 1672 / 941; transform: scaleY(0.9); }
+  .frame { width: 920px; min-width: 0; transform: translateX(-50%) scaleY(0.9); }
 }
 
 @media print {

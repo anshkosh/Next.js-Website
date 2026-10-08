@@ -6,7 +6,7 @@ import { SiteEnhancements } from "../components/site/SiteEnhancements";
 import MobileNav from "../components/layout/MobileNav";
 import RootLayout from "../app/layout";
 
-vi.mock("next/navigation", () => ({ useRouter: () => ({ push: vi.fn() }) }));
+vi.mock("next/navigation", () => ({ useRouter: () => ({ push: vi.fn() }), usePathname: () => "/" }));
 vi.mock("next/font/google", () => ({ Inter: () => ({ variable: "inter" }), Oswald: () => ({ variable: "oswald" }) }));
 vi.mock("@/components/site/PreEntryCurtain", () => ({ PreEntryCurtain: () => null }));
 

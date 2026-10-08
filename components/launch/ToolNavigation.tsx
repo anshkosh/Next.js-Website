@@ -15,6 +15,6 @@ export default function ToolNavigation({ active }: { active: string }) {
   }, [active]);
   return <nav ref={navigation} aria-label="Launch tools" className="my-8 flex gap-2 overflow-x-auto border-b border-gray-200 pb-5">
     {FOUNDER_TOOLS.map(({ id, title }) => <Link key={id} href={`/launch-support/${id}`} aria-current={active === id ? "page" : undefined}
-      className={`shrink-0 rounded-lg border px-4 py-2.5 text-sm font-semibold transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-coral-500 ${active === id ? "border-coral-200 bg-coral-50 text-coral-800" : "border-gray-200 bg-white text-gray-700 hover:border-coral-300"}`}>{title}</Link>)}
+      className={`inline-flex min-h-11 shrink-0 items-center rounded-xl border px-4 py-2.5 text-sm font-semibold transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-coral-500 ${active === id ? "border-coral-200 bg-coral-50 text-coral-800" : "border-gray-200 bg-white text-gray-700 hover:border-coral-300"}`}>{title}</Link>)}
   </nav>;
 }

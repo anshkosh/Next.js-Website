@@ -33,8 +33,27 @@ export function PreEntryCurtain() {
     }
   }, [entered]);
 
+  useEffect(() => {
+    if (!opening || entered) return;
+    // Unlock even if the browser cancels the transition or the motion preference changes.
+    const media = window.matchMedia?.("(prefers-reduced-motion: reduce)");
+    const onMotionChange = (event: MediaQueryListEvent) => {
+      if (event.matches) setEntered(true);
+    };
+    const fallback = window.setTimeout(() => setEntered(true), 3400);
+    media?.addEventListener("change", onMotionChange);
+    return () => {
+      window.clearTimeout(fallback);
+      media?.removeEventListener("change", onMotionChange);
+    };
+  }, [opening, entered]);
+
   const enterSite = () => {
     if (opening) return;
+    if (window.matchMedia?.("(prefers-reduced-motion: reduce)").matches) {
+      setEntered(true);
+      return;
+    }
     requestPreviewMotion();
     setOpening(true);
   };

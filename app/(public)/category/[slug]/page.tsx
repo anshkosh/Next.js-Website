@@ -5,6 +5,7 @@ import { cookies } from "next/headers";
 import Link from "next/link";
 import CategoryIcon from "@/components/category/CategoryIcon";
 import { seoMetadata } from "@/lib/seo";
+import ErrorState, { recoveryLinkClass, secondaryRecoveryLinkClass } from "@/components/site/ErrorState";
 
 // Visitor-specific cookies must be read at request time, including for new slugs.
 export const dynamic = "force-dynamic";
@@ -78,9 +79,18 @@ export default async function CategoryPage(props: { params: Promise<{ slug: stri
             <StartupCard key={startup.id} startup={startup} />
           ))
         ) : (
-          <div className="text-center py-12 bg-white rounded-xl border border-gray-100">
-            <p className="text-gray-500 mb-4">No startups found in this category yet.</p>
-            <Link href="/register" className="text-coral-600 font-semibold hover:text-coral-700">Submit a startup for this category →</Link>
+          <div className="rounded-xl border border-gray-100 bg-white">
+            <ErrorState
+              compact
+              headingLevel={2}
+              status="No startups found"
+              title="Kosh is first on the scene."
+              message={`There aren’t any public startups in ${category.name} yet. Explore other categories, or put yours on the map.`}
+              foxComment="First one here. I’m claiming the window seat."
+            >
+              <Link href="/discover" className={recoveryLinkClass}>Explore startups</Link>
+              <Link href="/startup/new" className={secondaryRecoveryLinkClass}>List your startup</Link>
+            </ErrorState>
           </div>
         )}
       </div>

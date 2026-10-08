@@ -10,7 +10,7 @@ vi.mock("@/lib/db", () => ({ db: {
   category: { findMany: queries.categories },
 } }));
 vi.mock("next/headers", () => ({ cookies: queries.cookies }));
-vi.mock("@/components/startup/StartupCard", () => ({ default: ({ startup }: { startup: { slug: string; name: string } }) => <a href={`/startups/${startup.slug}`}>{startup.name}</a> }));
+vi.mock("@/app/actions/upvote.actions", () => ({ toggleUpvote: vi.fn() }));
 
 beforeEach(() => {
   vi.stubEnv("DATABASE_URL", "postgresql://test.example/db");
@@ -20,13 +20,34 @@ afterEach(() => { vi.unstubAllEnvs(); vi.clearAllMocks(); });
 
 describe("homepage public content", () => {
   it("limits featured listings to public startups and preserves the visitor's upvote lookup", async () => {
-    queries.featured.mockResolvedValue([{ id: "featured", startup: { name: "Public startup", slug: "public-startup", upvotes: [] } }]);
+    queries.featured.mockResolvedValue([{ id: "featured", startup: { id: "startup", name: "Public startup", slug: "public-startup", tagline: "Built for founders", category: { name: "SaaS" }, upvoteCount: 12, upvotes: [{ id: "vote" }] } }]);
     const html = renderToStaticMarkup(await FeaturedStartups());
     expect(queries.featured).toHaveBeenCalledWith(expect.objectContaining({
       where: { startup: { status: "LIVE" } },
       include: { startup: { include: { category: true, upvotes: { where: { cookieId: "visitor" } } } } },
+      orderBy: [{ startup: { upvoteCount: "desc" } }, { sortOrder: "asc" }, { id: "asc" }],
+      take: 6,
     }));
     expect(html).toContain('href="/startups/public-startup"');
+    expect(html).toContain('aria-label="Featured startups ranked by upvotes"');
+    expect(html).toContain("Top featured");
+    expect(html).toContain('aria-label="Remove upvote for Public startup, 12 upvotes"');
+    expect(html).toContain('aria-pressed="true"');
+    expect(html).toContain("SaaS");
+  });
+
+  it("shows real zero-vote profiles without claiming a community leader", async () => {
+    queries.cookies.mockResolvedValue({ get: () => undefined });
+    queries.featured.mockResolvedValue([{ id: "featured", startup: { id: "new-startup", name: "New builder", slug: "new-builder", tagline: "<script>test</script>", logoUrl: null, category: { name: "Education" }, upvoteCount: 0 } }]);
+    const html = renderToStaticMarkup(await FeaturedStartups());
+    expect(queries.featured).toHaveBeenCalledWith(expect.objectContaining({
+      include: { startup: { include: { category: true, upvotes: false } } },
+    }));
+    expect(html).toContain('href="/startups/new-builder"');
+    expect(html).toContain("&lt;script&gt;test&lt;/script&gt;");
+    expect(html).not.toContain("Top featured");
+    expect(html).toContain('aria-label="Upvote for New builder, 0 upvotes"');
+    expect(html).toContain('aria-pressed="false"');
   });
 
   it("renders no placeholder card when there are no featured startups", async () => {

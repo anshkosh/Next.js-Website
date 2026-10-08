@@ -4,6 +4,35 @@ import { expect, it, vi } from "vitest";
 import { PreEntryCurtain } from "../components/site/PreEntryCurtain";
 import { previewMotionRequested } from "../lib/preview-motion";
 
+it("enters immediately with reduced motion and restores access and focus", async () => {
+  vi.stubGlobal("IS_REACT_ACT_ENVIRONMENT", true);
+  vi.stubGlobal("matchMedia", () => ({ matches: true }));
+  const container = document.createElement("div");
+  const content = document.createElement("div");
+  content.id = "site-content";
+  const main = document.createElement("main");
+  main.id = "main-content";
+  content.append(main);
+  document.body.append(container, content);
+  const previousOverflow = document.body.style.overflow;
+  const root = createRoot(container);
+  try {
+    await act(async () => root.render(<PreEntryCurtain />));
+    expect(content.inert).toBe(true);
+    await act(async () => container.querySelector("button")!.click());
+    expect(container.querySelector('[role="dialog"]')).toBeNull();
+    expect(content.inert).toBe(false);
+    expect(document.activeElement).toBe(main);
+    expect(document.body.style.overflow).toBe(previousOverflow);
+    expect(previewMotionRequested()).toBe(false);
+  } finally {
+    await act(async () => root.unmount());
+    container.remove();
+    content.remove();
+    vi.unstubAllGlobals();
+  }
+});
+
 it("opens with Sneak peek, has no skip button, and unlocks only after the reveal", async () => {
   vi.stubGlobal("IS_REACT_ACT_ENVIRONMENT", true);
   const container = document.createElement("div");

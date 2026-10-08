@@ -14,11 +14,11 @@ export const metadata = seoMetadata({
 export default async function CategoriesPage() {
   if (!process.env.DATABASE_URL) {
     return (
-      <div className="container mx-auto px-4 py-16 max-w-3xl text-center">
-        <h1 className="text-4xl md:text-5xl font-extrabold text-gray-900 tracking-tight mb-4 font-heading">Browse by <span className="text-coral-500">Category</span></h1>
+      <div className="page-intro-spacing container mx-auto px-4 max-w-3xl text-center">
+        <h1 className="page-title mb-4">Browse by <span className="text-coral-500">Category</span></h1>
         <p className="text-xl text-gray-600 mb-8">Explore Indian startups by industry as the Anshkosh pilot grows. We’re preparing the first category listings alongside our public startup profiles.</p>
         <p className="text-gray-600 mb-8">Visit <Link href="/discover" className="text-coral-600 underline">startup discovery</Link> or learn <Link href="/faq" className="text-coral-600 underline">how founders can participate</Link>.</p>
-        <Link href="/register" className="inline-flex rounded-lg bg-coral-500 px-5 py-3 font-semibold text-white hover:bg-coral-600">Register as a founder</Link>
+        <Link href="/register" className="inline-flex min-h-12 items-center rounded-xl bg-coral-600 px-6 py-3 font-semibold text-white hover:bg-coral-700">Register as a founder</Link>
       </div>
     );
   }
@@ -32,9 +32,9 @@ export default async function CategoriesPage() {
   });
 
   return (
-    <div className="container mx-auto px-4 py-16 max-w-6xl">
+    <div className="page-intro-spacing container mx-auto px-4 max-w-6xl">
       <div className="text-center mb-12">
-        <h1 className="text-4xl md:text-5xl font-extrabold text-gray-900 tracking-tight mb-4 font-heading">
+        <h1 className="page-title mb-4">
           Browse by <span className="text-coral-500">Category</span>
         </h1>
         <p className="text-xl text-gray-600 max-w-2xl mx-auto">
