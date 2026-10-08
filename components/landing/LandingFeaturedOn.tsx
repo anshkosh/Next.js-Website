@@ -1,5 +1,6 @@
 import { ArrowUpRight } from "lucide-react";
 import { FEATURED_LISTINGS } from "@/lib/featured-listings";
+import FeaturedMarquee from "./FeaturedMarquee";
 
 // The track holds the list twice so the CSS animation can loop seamlessly. The
 // second copy is hidden from assistive technology and the tab order.
@@ -17,12 +18,12 @@ export default function LandingFeaturedOn() {
             Find Anshkosh on startup and company directories.
           </p>
         </div>
-        <div className="featured-marquee overflow-hidden">
+        <FeaturedMarquee>
           <ul className="featured-marquee-track flex w-max">
             {TRACK.map((listing, index) => {
               const copy = index >= FEATURED_LISTINGS.length;
               return (
-                <li key={`${listing.id}-${index}`} aria-hidden={copy || undefined} className={`w-72 shrink-0 pr-4${copy ? " featured-marquee-copy" : ""}`}>
+                <li key={`${listing.id}-${index}`} aria-hidden={copy || undefined} className={`w-[22rem] shrink-0 pr-4${copy ? " featured-marquee-copy" : ""}`}>
                   <a
                     href={listing.href}
                     target="_blank"
@@ -34,7 +35,7 @@ export default function LandingFeaturedOn() {
                     {/* Self-hosted site icons; a text monogram where the directory has none. These are listings, not endorsements. */}
                     {"logo" in listing ? (
                       // eslint-disable-next-line @next/next/no-img-element
-                      <img src={listing.logo} alt="" width={48} height={48} loading="lazy" className="h-12 w-12 shrink-0 rounded-lg border border-gray-200 bg-white object-contain" />
+                      <img src={listing.logo} alt="" width={48} height={48} loading="lazy" className="h-12 w-12 shrink-0 rounded-[22%] object-cover" />
                     ) : (
                       <span aria-hidden="true" className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-lg text-xl font-bold text-white ${listing.accent}`}>
                         {listing.monogram}
@@ -54,7 +55,7 @@ export default function LandingFeaturedOn() {
               );
             })}
           </ul>
-        </div>
+        </FeaturedMarquee>
       </div>
     </section>
   );
