@@ -19,7 +19,7 @@ export default function LandingFeaturedOn() {
           </p>
         </div>
         <FeaturedMarquee>
-          <ul className="featured-marquee-track flex w-max">
+          <ul className="flex w-max">
             {TRACK.map((listing, index) => {
               const copy = index >= FEATURED_LISTINGS.length;
               return (

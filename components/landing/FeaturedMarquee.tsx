@@ -1,28 +1,96 @@
 "use client";
 
-import { useState, type ReactNode } from "react";
-import { Pause, Play } from "lucide-react";
+import { useEffect, useRef, type ReactNode } from "react";
 
-// Slow, continuous loop. It always moves (including for visitors who prefer reduced
-// motion, by request) but pauses on hover or focus and has a visible pause button.
+const SPEED = 26; // pixels per second: a slow drift
+
+// Slow looping strip that can also be dragged either way. The children hold the list
+// twice, so the track wraps seamlessly at half its width. Movement is driven here, not
+// by a CSS animation, so it keeps working when the visitor prefers reduced motion (by
+// request). It stops while hovered, focused or being dragged.
 export default function FeaturedMarquee({ children }: { children: ReactNode }) {
-  const [paused, setPaused] = useState(false);
+  const viewport = useRef<HTMLDivElement>(null);
+  const track = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const view = viewport.current;
+    const el = track.current;
+    if (!view || !el) return;
+    let offset = 0, last = performance.now(), frame = 0;
+    let hover = false, focus = false, dragging = false, captured = false;
+    let startX = 0, startOffset = 0, moved = 0;
+
+    const wrap = (value: number) => {
+      const half = el.scrollWidth / 2;
+      return half > 0 ? (((value % half) - half) % half) : 0;
+    };
+    const apply = () => { el.style.transform = `translate3d(${offset}px,0,0)`; };
+    const tick = (now: number) => {
+      const seconds = Math.min((now - last) / 1000, 0.1);
+      last = now;
+      if (!hover && !focus && !dragging) { offset = wrap(offset - SPEED * seconds); apply(); }
+      frame = requestAnimationFrame(tick);
+    };
+
+    const down = (event: PointerEvent) => {
+      if (event.pointerType === "mouse" && event.button !== 0) return;
+      dragging = true; captured = false; moved = 0;
+      startX = event.clientX; startOffset = offset;
+    };
+    const move = (event: PointerEvent) => {
+      if (!dragging) return;
+      const delta = event.clientX - startX;
+      moved = Math.max(moved, Math.abs(delta));
+      // Capture only once it is really a drag, so a plain click still reaches the link.
+      if (!captured && moved > 5) { captured = true; view.setPointerCapture(event.pointerId); view.dataset.dragging = "true"; }
+      if (captured) { offset = wrap(startOffset + delta); apply(); }
+    };
+    const up = (event: PointerEvent) => {
+      if (!dragging) return;
+      dragging = false;
+      if (captured && view.hasPointerCapture(event.pointerId)) view.releasePointerCapture(event.pointerId);
+      delete view.dataset.dragging;
+    };
+    const click = (event: MouseEvent) => {
+      if (moved > 5) { event.preventDefault(); event.stopPropagation(); }
+      moved = 0;
+    };
+    const noDrag = (event: Event) => event.preventDefault();
+    const enter = (event: PointerEvent) => { if (event.pointerType === "mouse") hover = true; };
+    const leave = () => { hover = false; };
+    const focusIn = () => { focus = true; };
+    const focusOut = () => { focus = false; };
+
+    view.addEventListener("pointerdown", down);
+    view.addEventListener("pointermove", move);
+    view.addEventListener("pointerup", up);
+    view.addEventListener("pointercancel", up);
+    view.addEventListener("click", click, true);
+    view.addEventListener("dragstart", noDrag);
+    view.addEventListener("pointerenter", enter);
+    view.addEventListener("pointerleave", leave);
+    view.addEventListener("focusin", focusIn);
+    view.addEventListener("focusout", focusOut);
+    frame = requestAnimationFrame(tick);
+    return () => {
+      cancelAnimationFrame(frame);
+      view.removeEventListener("pointerdown", down);
+      view.removeEventListener("pointermove", move);
+      view.removeEventListener("pointerup", up);
+      view.removeEventListener("pointercancel", up);
+      view.removeEventListener("click", click, true);
+      view.removeEventListener("dragstart", noDrag);
+      view.removeEventListener("pointerenter", enter);
+      view.removeEventListener("pointerleave", leave);
+      view.removeEventListener("focusin", focusIn);
+      view.removeEventListener("focusout", focusOut);
+    };
+  }, []);
+
   return (
-    <div>
-      <div className="featured-marquee" data-paused={paused}>
+    <div ref={viewport} className="featured-marquee cursor-grab select-none overflow-hidden" style={{ touchAction: "pan-y" }}>
+      <div ref={track} className="featured-marquee-track w-max will-change-transform">
         {children}
-      </div>
-      <div className="mt-3 flex justify-end">
-        <button
-          type="button"
-          onClick={() => setPaused(value => !value)}
-          aria-pressed={paused}
-          aria-label={paused ? "Play the directory carousel" : "Pause the directory carousel"}
-          className="inline-flex min-h-11 items-center gap-2 rounded-lg px-3 text-xs font-semibold text-gray-600 hover:text-gray-900 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-coral-500"
-        >
-          {paused ? <Play aria-hidden="true" className="h-3.5 w-3.5" /> : <Pause aria-hidden="true" className="h-3.5 w-3.5" />}
-          {paused ? "Play" : "Pause"}
-        </button>
       </div>
     </div>
   );

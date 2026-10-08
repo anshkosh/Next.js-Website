@@ -53,10 +53,8 @@ describe("Anshkosh directory badge strip", () => {
     expect(images.every(image => image.getAttribute("src")?.startsWith("/images/listings/") && image.getAttribute("alt") === "")).toBe(true);
   });
 
-  it("offers a pause control for the moving carousel", () => {
-    const button = renderSection().querySelector("button");
-    expect(button?.getAttribute("aria-label")).toBe("Pause the directory carousel");
-    expect(button?.getAttribute("aria-pressed")).toBe("false");
+  it("has no pause button; the strip is dragged instead", () => {
+    expect(renderSection().querySelector("button")).toBeNull();
   });
 
   it("loops as a carousel whose repeated copy is hidden from assistive technology and the tab order", () => {

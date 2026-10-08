@@ -369,18 +369,6 @@ html.dark [class*="bg-[#F7F1E7]"] { background-color: #1f2937; }
 .journal-content strong { color: #111827; }
 .journal-content hr { border: none; border-top: 1px solid #e5e7eb; margin: 2rem 0; }
 
-/* Homepage "Featured on & listed in" carousel: slow loop, paused on hover, focus or via the button. */
-@keyframes featured-marquee {
-  to { transform: translateX(-50%); }
-}
-.featured-marquee { overflow: hidden; scrollbar-width: none; }
-.featured-marquee::-webkit-scrollbar { display: none; }
-.featured-marquee-track { animation: featured-marquee 80s linear infinite; }
-.featured-marquee:hover .featured-marquee-track,
-.featured-marquee:focus-within .featured-marquee-track,
-.featured-marquee[data-paused="true"] .featured-marquee-track { animation-play-state: paused; }
-/* The site-wide reduced-motion rule above cuts every animation to one 0.01ms pass. This loop is the one
-   deliberate exception (by request): it stays slow and has a visible pause button. */
-@media (prefers-reduced-motion: reduce) {
-  .featured-marquee .featured-marquee-track { animation-duration: 80s !important; animation-iteration-count: infinite !important; }
-}
+/* Homepage "Featured on & listed in" strip (moved by components/landing/FeaturedMarquee.tsx). */
+.featured-marquee[data-dragging="true"] { cursor: grabbing; }
+.featured-marquee img { -webkit-user-drag: none; }
