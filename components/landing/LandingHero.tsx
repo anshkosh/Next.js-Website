@@ -27,7 +27,7 @@ export default function LandingHero() {
             List your startup
           </Link>
         </div>
-        <Link href="#founder-tools" className="mt-5 inline-flex min-h-11 items-center gap-2 text-sm font-medium text-gray-700 underline decoration-gray-400 underline-offset-4 hover:text-coral-700">
+        <Link href="/launch-support" className="mt-5 inline-flex min-h-11 items-center gap-2 text-sm font-medium text-gray-700 underline decoration-gray-400 underline-offset-4 hover:text-coral-700">
           Working on an idea? Explore the free tools <ArrowRight aria-hidden="true" className="h-3.5 w-3.5" />
         </Link>
       </div>

@@ -2,7 +2,6 @@ import { seoMetadata } from "@/lib/seo";
 
 import LandingHero from "@/components/landing/LandingHero";
 import LandingMission from "@/components/landing/LandingMission";
-import LandingToolkit from "@/components/landing/LandingToolkit";
 import LandingFounderStory from "@/components/landing/LandingFounderStory";
 import FeaturedStartups from "@/components/landing/FeaturedStartups";
 import LandingParticipation from "@/components/landing/LandingParticipation";
@@ -21,7 +20,6 @@ export default async function HomePage() {
     <div className="w-full">
       <LandingHero />
       <FeaturedStartups />
-      <LandingToolkit />
       <LandingFounderStory />
       <LandingParticipation />
       <LandingMission />

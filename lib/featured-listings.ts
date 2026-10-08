@@ -1,4 +1,5 @@
-// Public Anshkosh pages checked on 2026-10-02. These are listings, not
+// Public Anshkosh pages checked on 2026-10-02 (AppRater, LaunchFree and Free
+// Startup Listing re-checked on 2026-10-08). These are listings, not
 // partnerships or editorial endorsements. Only add a platform after checking
 // that its public page identifies Anshkosh and links to the correct website.
 export const FEATURED_LISTINGS = [
@@ -25,5 +26,29 @@ export const FEATURED_LISTINGS = [
     monogram: "cb",
     href: "https://www.crunchbase.com/organization/anshkosh",
     accent: "bg-[#146AFF]",
+  },
+  {
+    id: "apprater",
+    name: "AppRater",
+    label: "Listed on",
+    monogram: "AR",
+    href: "https://apprater.net/a/anshkosh",
+    accent: "bg-[#0F766E]",
+  },
+  {
+    id: "launchfree",
+    name: "LaunchFree",
+    label: "Listed on",
+    monogram: "LF",
+    href: "https://launchfree.io/listings/anshkosh.html",
+    accent: "bg-[#7C3AED]",
+  },
+  {
+    id: "free-startup-listing",
+    name: "Free Startup Listing",
+    label: "Listed on",
+    monogram: "FS",
+    href: "https://freestartuplisting.org/",
+    accent: "bg-[#B45309]",
   },
 ] as const;
