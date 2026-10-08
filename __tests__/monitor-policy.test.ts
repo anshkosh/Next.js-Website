@@ -1,10 +1,33 @@
 import { describe, expect, it } from "vitest";
-import { scannerRequired, resourceWarnings } from "../deploy/monitor-policy.mjs";
+import { scannerRequired, resourceWarnings, sanitizeOnlyFromSource } from "../deploy/monitor-policy.mjs";
+import { readFileSync } from "node:fs";
 describe("scanner monitoring rollout policy", () => {
   it("requires scanning by default", () => expect(scannerRequired(undefined, false)).toBe(true));
   it("allows an explicit pre-rollout hold without claiming antivirus readiness", () => expect(scannerRequired("deferred", false)).toBe(false));
   it("never hides a scanner outage once a scanner-dependent release is live", () => expect(scannerRequired("deferred", true)).toBe(true));
   it("does not treat misspelled policy values as a bypass", () => expect(scannerRequired("deferrred", false)).toBe(true));
+});
+
+describe("scanner monitoring in sanitize-only upload mode", () => {
+  it("does not demand ClamAV while the release deliberately runs without it", () => {
+    expect(scannerRequired(undefined, true, true)).toBe(false);
+    expect(scannerRequired("deferred", true, true)).toBe(false);
+  });
+  it("keeps the original rule when sanitize-only is not set", () => {
+    expect(scannerRequired("deferred", true, false)).toBe(true);
+    expect(scannerRequired(undefined, false, false)).toBe(true);
+  });
+  it("recognises only the exact mode line", () => {
+    const line = (text: string) => `${text}${String.fromCharCode(10)}`;
+    expect(sanitizeOnlyFromSource(line('export const UPLOAD_SCAN_MODE = "sanitize-only" as "clamav" | "sanitize-only";'))).toBe(true);
+    expect(sanitizeOnlyFromSource(line('export const UPLOAD_SCAN_MODE = "clamav" as "clamav" | "sanitize-only";'))).toBe(false);
+    expect(sanitizeOnlyFromSource(line('// export const UPLOAD_SCAN_MODE = "sanitize-only";'))).toBe(false);
+    expect(sanitizeOnlyFromSource(line('export const UPLOAD_SCAN_MODE_X = "sanitize-only";'))).toBe(false);
+    expect(sanitizeOnlyFromSource(undefined)).toBe(false);
+  });
+  it("matches the real mode file the routes use", () => {
+    expect(sanitizeOnlyFromSource(readFileSync("lib/uploads/scan-mode.ts", "utf8"))).toBe(true);
+  });
 });
 
 describe("resource pressure monitoring", () => {
