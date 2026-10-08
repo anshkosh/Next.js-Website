@@ -369,3 +369,6 @@ html.dark [class*="bg-[#F7F1E7]"] { background-color: #1f2937; }
 .journal-content strong { color: #111827; }
 .journal-content hr { border: none; border-top: 1px solid #e5e7eb; margin: 2rem 0; }
 
+/* Homepage "Featured on & listed in" strip (moved by components/landing/FeaturedMarquee.tsx). */
+.featured-marquee[data-dragging="true"] { cursor: grabbing; }
+.featured-marquee img { -webkit-user-drag: none; }

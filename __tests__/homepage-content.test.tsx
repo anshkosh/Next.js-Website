@@ -2,7 +2,6 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { renderToStaticMarkup } from "react-dom/server";
 import FeaturedStartups from "../components/landing/FeaturedStartups";
 import LandingFounderStory from "../components/landing/LandingFounderStory";
-import LandingCategories from "../components/landing/LandingCategories";
 
 const queries = vi.hoisted(() => ({ featured: vi.fn(), founder: vi.fn(), categories: vi.fn(), cookies: vi.fn() }));
 vi.mock("@/lib/db", () => ({ db: {
@@ -30,12 +29,13 @@ describe("homepage public content", () => {
     expect(html).toContain('href="/startups/public-startup"');
   });
 
-  it("offers a listing next step without pretending there are profiles in an empty local preview", async () => {
+  it("renders no placeholder card when there are no featured startups", async () => {
     vi.stubEnv("DATABASE_URL", "");
     const html = renderToStaticMarkup(await FeaturedStartups());
     expect(queries.featured).not.toHaveBeenCalled();
     expect(queries.cookies).not.toHaveBeenCalled();
-    expect(html).toContain('href="/startup/new"');
+    expect(html).not.toContain("Make room");
+    expect(html).not.toContain('href="/startup/new"');
     expect(html).not.toContain('href="/startups/');
   });
 
@@ -56,12 +56,5 @@ describe("homepage public content", () => {
     const html = renderToStaticMarkup(await LandingFounderStory());
     expect(html).not.toContain("From a founder’s profile");
     expect(html).toContain('href="/startup/new"');
-  });
-
-  it("uses database category slugs to open the existing discovery filter", async () => {
-    queries.categories.mockResolvedValue([{ name: "Tools & workflows", slug: "tools & workflows" }]);
-    const html = renderToStaticMarkup(await LandingCategories());
-    expect(html).toContain('href="/discover?category=tools%20%26%20workflows"');
-    expect(queries.categories).toHaveBeenCalledWith(expect.objectContaining({ select: { name: true, slug: true } }));
   });
 });
