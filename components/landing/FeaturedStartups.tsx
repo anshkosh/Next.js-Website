@@ -68,7 +68,7 @@ export default async function FeaturedStartups() {
               </div>
             );
           })}
-        </div> : <div className="flex flex-col gap-5 rounded-xl border border-gray-200 bg-gray-50 p-6 sm:flex-row sm:items-center sm:justify-between sm:p-8"><div><h3 className="font-heading text-2xl font-semibold text-gray-900">Make room for what’s next.</h3><p className="mt-2 max-w-lg text-sm leading-relaxed text-gray-600">New featured startup profiles will appear here as the pilot grows. Share what you’re building and submit your profile for review.</p></div><Link href="/startup/new" className="inline-flex min-h-12 shrink-0 items-center justify-center gap-2 rounded-xl border border-gray-300 bg-white px-5 py-3 text-sm font-semibold text-gray-900 hover:border-coral-500 hover:text-coral-700">List your startup <ArrowRight aria-hidden="true" className="h-4 w-4" /></Link></div>}
+        </div> : null}
       </div>
     </section>
   );
