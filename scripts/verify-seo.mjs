@@ -4,7 +4,7 @@ import { JSDOM } from "jsdom";
 // Read-only HTTP smoke check. Run against a local/preview build before publishing.
 const origin = process.argv[2] || "http://localhost:3011";
 const canonicalOrigin = process.argv[3] || "https://www.anshkosh.com";
-const publicPaths = ["/", "/discover", "/categories", "/journal", "/faq", "/contact", "/privacy", "/terms", "/trust-safety"];
+const publicPaths = ["/", "/discover", "/categories", "/journal", "/faq", "/about", "/contact", "/privacy", "/terms", "/trust-safety"];
 
 async function get(path, userAgent) {
   const response = await fetch(new URL(path, origin), {
