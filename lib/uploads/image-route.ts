@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import sharp from "sharp";
 import { randomUUID } from "node:crypto";
-import { authorizeUpload, scanUpload, uploadFailure, UploadError } from "./safety";
+import { authorizeUpload, uploadFailure, UploadError } from "./safety";
+import { scanIfEnabled } from "./scan";
 import { storeUpload } from "./store";
 
 export async function imageUpload(req: NextRequest, kind: "logos" | "gallery" | "founders") {
@@ -14,7 +15,7 @@ export async function imageUpload(req: NextRequest, kind: "logos" | "gallery" | 
     if (!types.includes(file.type) || !file.size) throw new UploadError("Choose a PNG, JPG or WebP image.", 400);
     if (file.size > maxBytes) throw new UploadError(`This image must be smaller than ${maxBytes / 1024 / 1024} MB.`, 413);
     const original = Buffer.from(await file.arrayBuffer());
-    await scanUpload(original);
+    await scanIfEnabled(original);
     let bytes: Buffer;
     try {
       const pipeline = sharp(original, { limitInputPixels: 40_000_000 }).rotate();

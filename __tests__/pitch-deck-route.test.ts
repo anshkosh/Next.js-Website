@@ -6,6 +6,8 @@ const mocks = vi.hoisted(() => ({ session: vi.fn(), send: vi.fn(), scan: vi.fn()
 vi.mock("@/lib/auth", () => ({ auth: { api: { getSession: mocks.session } } }));
 vi.mock("@/lib/uploads/store", () => ({ storeUpload: mocks.send }));
 vi.mock("ioredis", () => ({ default: class { on() {} disconnect() {} async eval() { return 1; } } }));
+// These tests cover the ClamAV control; the interim sanitize-only mode has its own tests.
+vi.mock("@/lib/uploads/scan-mode", () => ({ UPLOAD_SCAN_MODE: "clamav" }));
 vi.mock("@/lib/uploads/safety", async importOriginal => ({ ...await importOriginal<object>(), scanUpload: mocks.scan }));
 import { POST } from "../app/api/uploads/pitch-deck/route";
 const owner = "cmu7wfiv7000bzglryqzerzjo";

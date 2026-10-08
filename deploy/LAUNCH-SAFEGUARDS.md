@@ -9,8 +9,22 @@ Owner: Arush / VPS operator. Prepared 2 October 2026. Server installation and a 
 - Deck visibility defaults to private for new decks; previously uploaded decks retain their documented public behavior. Private downloads are restricted server-side to the verified owner and verified admin/reviewer. Only a public deck attached to a LIVE profile can be downloaded anonymously. Deck responses are not cached. Making a deck private/removing it revokes public access immediately on saving, even while other edits await approval. Copies previously downloaded cannot be recalled.
 - Startup stage options now include concept validation, preparing/running a pilot, launched and growing. Old values still work.
 - Profile uploads require verified, non-banned accounts and exact trusted origins. Limit: 20 attempts/hour, 100 MB stored/day and 500 MB tracked storage/account. New stored objects count toward the quotas; legacy untracked media is not retroactively counted. Removing a reference does not delete its object or reset the allowance. Contact support if full.
-- Every new startup logo, gallery/founder photo and deck is scanned via loopback ClamD before storage. Images are also decoded/re-encoded. Scanning fails closed: unavailable scanner means retryable upload errors, not unchecked uploads. Antivirus is layered protection, not a guarantee. Journal and founder-update upload routes are outside this profile-specific scanner rollout.
+- In `"clamav"` mode (see "Current upload checks" below for the interim mode) every new startup logo, gallery/founder photo and deck is scanned via loopback ClamD before storage. Images are also decoded/re-encoded. Scanning fails closed: unavailable scanner means retryable upload errors, not unchecked uploads. Antivirus is layered protection, not a guarantee. Journal and founder-update upload routes are outside this profile-specific scanner rollout.
 - Additive migration `20261002060000_profile_safeguards` adds two tables. No existing IDs/data are rewritten. The previous release remains compatible for rollback.
+
+## Current upload checks: sanitize-only mode (ClamAV pending)
+
+ClamAV is **not installed** on the VPS: the installer needs about 5 GiB of available RAM and the host has 3.66 GiB. Until the server is resized, `lib/uploads/scan-mode.ts` is set to `"sanitize-only"`. In this mode there is **no antivirus and no signature-based malware detection**. The controls are:
+
+- Images: type and size limits, decoded and re-encoded to WebP by sharp (metadata and embedded payloads are not stored).
+- PDFs: rejected if they contain scripts, launch/submit actions, attachments or XFA (`lib/uploads/pdf-safety.ts`), rewritten from parsed objects by pdf-lib, then validated with `qpdf --check` (any error or warning rejects the file) and rewritten by qpdf. Data hidden after `%%EOF` is not stored.
+- Unchanged: verified-account and trusted-origin checks, rate limits and storage quotas, private/public deck rules.
+
+**Install qpdf on the VPS before deploying this release** (AlmaLinux 8 AppStream, currently 7.1.1): `dnf install qpdf`. Without it PDF uploads fail closed with a retryable 503 and the five-minute operations check reports "qpdf is not installed".
+
+The operations check treats ClamAV as not required while `UPLOAD_SCAN_MODE` is `"sanitize-only"`. `deploy/operations.mjs` runs from the root-owned copy in `/usr/local/libexec/anshkosh-operations/`, so this behaviour needs a reviewed install of that helper.
+
+**Switching to ClamAV later:** resize the VPS to about 8 GiB, run `bash deploy/install-safeguards.sh`, confirm loopback-only port 3310, run `deploy/check-scanner.mjs` (clean file and EICAR must both pass), then change `lib/uploads/scan-mode.ts` to `"clamav"` and deploy. ClamAV scanning, fail-closed, is then enforced again for every upload and the monitor requires it.
 
 ## Before publishing
 
