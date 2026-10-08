@@ -1,3 +1,5 @@
+// Logos are self-hosted copies of each directory's public site icon (no third-party
+// image requests); Free Startup Listing publishes none, so it keeps a text monogram.
 // Public Anshkosh pages checked on 2026-10-02 (AppRater, LaunchFree and Free
 // Startup Listing re-checked on 2026-10-08). These are listings, not
 // partnerships or editorial endorsements. Only add a platform after checking
@@ -5,6 +7,7 @@
 export const FEATURED_LISTINGS = [
   {
     id: "product-hunt",
+    logo: "/images/listings/product-hunt.png",
     name: "Product Hunt",
     label: "Launched on",
     monogram: "P",
@@ -13,6 +16,7 @@ export const FEATURED_LISTINGS = [
   },
   {
     id: "techbase-directory",
+    logo: "/images/listings/techbase.png",
     name: "TechBaseDirectory",
     label: "Listed on",
     monogram: "TB",
@@ -21,6 +25,7 @@ export const FEATURED_LISTINGS = [
   },
   {
     id: "crunchbase",
+    logo: "/images/listings/crunchbase.png",
     name: "Crunchbase",
     label: "Company profile",
     monogram: "cb",
@@ -29,6 +34,7 @@ export const FEATURED_LISTINGS = [
   },
   {
     id: "apprater",
+    logo: "/images/listings/apprater.svg",
     name: "AppRater",
     label: "Listed on",
     monogram: "AR",
@@ -37,6 +43,7 @@ export const FEATURED_LISTINGS = [
   },
   {
     id: "launchfree",
+    logo: "/images/listings/launchfree.png",
     name: "LaunchFree",
     label: "Listed on",
     monogram: "LF",

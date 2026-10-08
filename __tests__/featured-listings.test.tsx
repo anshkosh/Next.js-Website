@@ -47,7 +47,10 @@ describe("Anshkosh directory badge strip", () => {
     expect(document.body.textContent).toContain("Listed on");
     expect(document.body.textContent).toContain("Company profile");
     expect(document.body.textContent).not.toMatch(/partner|award|ranked|#1|trusted by/i);
-    expect(document.querySelector("img")).toBeNull(); // No third-party tracking images.
+    // Logos are self-hosted site icons, never third-party image requests.
+    const images = [...document.querySelectorAll("img")];
+    expect(images.length).toBeGreaterThan(0);
+    expect(images.every(image => image.getAttribute("src")?.startsWith("/images/listings/") && image.getAttribute("alt") === "")).toBe(true);
   });
 
   it("loops as a carousel whose repeated copy is hidden from assistive technology and the tab order", () => {

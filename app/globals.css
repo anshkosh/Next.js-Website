@@ -373,7 +373,7 @@ html.dark [class*="bg-[#F7F1E7]"] { background-color: #1f2937; }
 @keyframes featured-marquee {
   to { transform: translateX(-50%); }
 }
-.featured-marquee-track { animation: featured-marquee 36s linear infinite; }
+.featured-marquee-track { animation: featured-marquee 80s linear infinite; }
 .featured-marquee:hover .featured-marquee-track,
 .featured-marquee:focus-within .featured-marquee-track { animation-play-state: paused; }
 @media (prefers-reduced-motion: reduce) {

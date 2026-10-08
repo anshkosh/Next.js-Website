@@ -31,10 +31,15 @@ export default function LandingFeaturedOn() {
                     aria-label={`View Anshkosh on ${listing.name} (opens in a new tab)`}
                     className="group flex h-full min-h-28 items-center gap-4 rounded-xl border border-gray-200 bg-white px-5 py-5 shadow-sm transition-colors hover:border-coral-300 hover:bg-coral-50 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-coral-500"
                   >
-                    {/* Text monograms, not official logos or award badges. */}
-                    <span aria-hidden="true" className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-lg text-xl font-bold text-white ${listing.accent}`}>
-                      {listing.monogram}
-                    </span>
+                    {/* Self-hosted site icons; a text monogram where the directory has none. These are listings, not endorsements. */}
+                    {"logo" in listing ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img src={listing.logo} alt="" width={48} height={48} loading="lazy" className="h-12 w-12 shrink-0 rounded-lg border border-gray-200 bg-white object-contain" />
+                    ) : (
+                      <span aria-hidden="true" className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-lg text-xl font-bold text-white ${listing.accent}`}>
+                        {listing.monogram}
+                      </span>
+                    )}
                     <span className="min-w-0 flex-1">
                       <span className="mb-1 block text-[0.65rem] font-semibold uppercase tracking-[0.14em] text-gray-600">
                         {listing.label}
