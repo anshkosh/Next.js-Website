@@ -62,6 +62,8 @@ export const organizationSchema = {
     "https://www.linkedin.com/company/143187995/",
     "https://github.com/anshkosh",
     "https://www.producthunt.com/products/anshkosh",
+    "https://apprater.net/a/anshkosh",
+    "https://launchfree.io/listings/anshkosh.html",
   ],
 };
 

@@ -36,6 +36,7 @@ export default function Footer() {
           <div className="space-y-3">
             <h4 className="font-bold text-gray-900 text-sm font-heading uppercase tracking-wider">Legal</h4>
             <ul className="space-y-2 text-sm text-gray-700">
+              <li><Link href="/about" className="hover:text-gray-900 transition-colors">About Anshkosh</Link></li>
               <li><Link href="/faq" className="hover:text-gray-900 transition-colors">FAQ</Link></li>
               <li><Link href="/privacy" className="hover:text-gray-900 transition-colors">Privacy</Link></li>
               <li><Link href="/trust-safety" className="hover:text-gray-900 transition-colors">Trust & Safety</Link></li>
