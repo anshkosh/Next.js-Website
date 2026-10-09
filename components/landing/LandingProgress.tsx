@@ -18,7 +18,7 @@ export default function LandingProgress() {
     {
       title: "No unverified claims of traction",
       description:
-        "Validation signals state what was tested, how, and what remains uncertain.",
+        "Validation evidence state what was tested, how, and what remains uncertain.",
       icon: Shield,
     },
   ];

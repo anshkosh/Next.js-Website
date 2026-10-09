@@ -218,7 +218,7 @@ export default function RegisterPage() {
                     href="/privacy"
                     className="font-medium text-coral-600 hover:text-coral-500"
                   >
-                    Privacy Policy
+                    Privacy Notice
                   </Link>
                   .
                 </label>

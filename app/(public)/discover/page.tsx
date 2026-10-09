@@ -1,3 +1,5 @@
+import { startupSearchWhere } from "@/lib/startup-search";
+import { publicStartupCard, publicStartupCardSelect } from "@/lib/public-startup-card";
 import { db } from "@/lib/db";
 import { Prisma } from "@prisma/client";
 import StartupCard from "@/components/startup/StartupCard";
@@ -46,7 +48,7 @@ export default async function DiscoverPage(props: {
             <h2 className="text-xl font-bold text-gray-900 mb-2">The pilot directory is being prepared</h2>
             <p className="text-gray-600 mb-6">Founders can register now and share a startup when the pilot opens.</p>
             <p className="text-gray-600 mb-6">Learn <Link href="/faq" className="text-coral-600 underline">how public validation works</Link> and read our <Link href="/trust-safety" className="text-coral-600 underline">trust and safety standards</Link>.</p>
-            <Link href="/register" className="inline-flex min-h-12 items-center rounded-xl bg-coral-600 px-6 py-3 font-semibold text-white hover:bg-coral-700">Register as a founder</Link>
+            <Link href="/startup/new" className="inline-flex min-h-12 items-center rounded-xl bg-coral-600 px-6 py-3 font-semibold text-white hover:bg-coral-700">List your startup</Link>
           </div>
         </section>
       </div>
@@ -65,38 +67,14 @@ export default async function DiscoverPage(props: {
   }
 
   if (query && query.trim() !== "") {
-    const results = await db.$queryRaw<{ id: string }[]>`
-      SELECT id FROM "Startup"
-      WHERE status = 'LIVE'
-      AND (
-        name ILIKE ${"%" + query.trim() + "%"}
-        OR tagline ILIKE ${"%" + query.trim() + "%"}
-        OR description ILIKE ${"%" + query.trim() + "%"}
-        OR (metadata->>'city') ILIKE ${"%" + query.trim() + "%"}
-      )
-    `;
-
-    const startupIds = Array.isArray(results) ? results.map((r) => r.id) : [];
-
-    if (startupIds.length === 0) {
-      where.id = { in: ["no-match"] };
-    } else {
-      where.id = { in: startupIds };
-    }
+    where.AND = startupSearchWhere(query);
   }
 
   const [startups, totalCount, categories] = await Promise.all([
     db.startup.findMany({
       where,
-      include: {
-        category: true,
-        upvotes: cookieId
-          ? {
-              where: { cookieId },
-            }
-          : false,
-      },
-      orderBy: [{ upvoteCount: "desc" }, { createdAt: "desc" }],
+      select: publicStartupCardSelect(cookieId),
+      orderBy: [{ signalCount: "desc" }, { createdAt: "desc" }],
       skip: (page - 1) * pageSize,
       take: pageSize,
     }),
@@ -109,10 +87,7 @@ export default async function DiscoverPage(props: {
 
   const totalPages = Math.ceil(totalCount / pageSize);
 
-  const formattedStartups = startups.map((startup) => ({
-    ...startup,
-    hasUpvoted: startup.upvotes ? startup.upvotes.length > 0 : false,
-  }));
+  const formattedStartups = startups.map(publicStartupCard);
 
   return (
     <div className="w-full">
@@ -123,7 +98,7 @@ export default async function DiscoverPage(props: {
             Discover <span className="text-coral-500">Startups</span>
           </h1>
           <p className="text-lg leading-relaxed text-gray-600 mb-8 max-w-2xl mx-auto">
-            Explore the next generation of builders and innovators shaping the future of the Indian tech ecosystem.
+            Explore what Indian founders are building, across industries and stages.
           </p>
           <SearchBar categories={categories} />
           <Link href="/categories" className="mt-6 inline-flex min-h-11 items-center rounded-full border border-gray-200 px-5 py-2 text-sm font-medium text-gray-700 transition-colors hover:border-coral-500 hover:text-coral-600 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-coral-500">

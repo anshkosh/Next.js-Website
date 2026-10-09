@@ -24,7 +24,7 @@ export default function LandingWorkflow() {
     {
       num: 3,
       title: "Validate",
-      description: "Publish a public test, collect signals, report results honestly.",
+      description: "Publish a public test, collect feedback, report results honestly.",
       icon: BarChart3,
     },
     {

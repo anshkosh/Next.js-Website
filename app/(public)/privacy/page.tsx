@@ -1,136 +1,65 @@
+import Link from "next/link";
 import { seoMetadata } from "@/lib/seo";
 
 export const metadata = seoMetadata({
   title: "Privacy Notice — Anshkosh",
-  description: "How Anshkosh handles information during the early-access pilot.",
+  description: "How Anshkosh handles accounts, public comments, voting and browser-only founder tool drafts during the pilot.",
   path: "/privacy",
 });
 
+const sections = [
+  { title: "Information sent to Anshkosh", paragraphs: [
+    "Account registration and sign-in handle your name, email, credentials and session information. Startup submissions include the profile, founding team, links, media and contact details you provide. These records are stored on our servers for account, review and publishing workflows.",
+    "Discussion forms send your display name, email and comment text for moderation. Contact forms send your contact details and message. Newsletter signups send your email so we can send the updates you request. These submissions are separate from the browser-only planning tools.",
+  ] },
+  { title: "What becomes public", paragraphs: [
+    "Published startup profiles, listed founder names and roles, public media, links and founder progress updates can be viewed by visitors and found through site search. Only the published profile is used for public discovery; pending profile revisions are not shown as published changes.",
+    "When a discussion comment is approved, its display name, text and posting date become public. A published founder reply and its date are also public. Your comment email is kept private and is excluded from public discussion responses. Avoid putting private contact details or sensitive information in your display name or comment text.",
+    "Public voting totals include upvotes, downvotes and signals. Signals are upvotes minus downvotes. Individual visitor voting identifiers are not displayed publicly. Votes reflect community opinion and do not verify a startup’s claims.",
+    "Account email addresses, startup contact numbers, private pitch decks, account credentials and raw security records are not published as part of public profiles. A pitch deck marked public is accessible through its public link; choose its visibility carefully before submitting it.",
+  ] },
+  { title: "Free founder tools and local drafts", paragraphs: [
+    "Launch Support tools work without an account. Shared startup details, planning drafts, validation notes, runway inputs and submission-tracker data are saved in local browser storage on this device when storage is available. Checklist progress is also saved locally. Shared details can appear across the tools in the same browser; drafts do not automatically sync to another device or account.",
+    "Using the planning tools does not send those drafts to Anshkosh or publish a startup profile. If browser storage is unavailable, some tools keep a temporary draft for the current visit and display a warning. Download any results you want to keep before leaving.",
+    "The launch-card maker reads a selected logo in your browser to create the graphic. That logo is not uploaded or saved between visits. This is different from uploading media through an account’s startup submission form.",
+    "Copy and download controls create materials you can save or share yourself. Use a tool’s clear or reset control where provided, or remove this site’s storage in your browser settings. Clear drafts before changing startups or sharing a device. Clearing browser drafts does not delete your account, submitted profiles or saved downloads.",
+  ] },
+  { title: "Cookies, votes and abuse prevention", paragraphs: [
+    "Session cookies support sign-in. The visitor cookie anshkosh_vid helps remember your active vote for a startup and is set for up to one year. It is not a public voter name and does not require an account. You can remove cookies through your browser settings; doing so may sign you out or remove remembered voting state.",
+    "Voting and some public forms use a hash derived from the request’s IP address and browser user-agent to help limit duplicate submissions and abuse. Security checks and rate limits may also process request information. These identifiers help enforce voting controls; they are not proof that every vote comes from a unique person.",
+    "Where a CAPTCHA is shown, its provider may process browser and request information to check for automated activity. Hosting, database, file storage and email services process the information needed to deliver their respective functions.",
+  ] },
+  { title: "How information is used", paragraphs: [
+    "We use submitted information to operate accounts, review and publish startup profiles and comments, deliver requested updates, respond to messages, maintain voting totals and prevent abuse. Staff responsible for these workflows can access the records needed to carry them out.",
+    "Public comments are published after approval rather than treated only as anonymous, aggregated feedback. The planning tools help you work with your own notes locally; they do not automatically collect survey respondents, waitlists or preorder requests for a startup. Payments and preorders are not open during the pilot.",
+  ] },
+  { title: "Retention, access and choices", paragraphs: [
+    "Server records are retained for account and platform operation, moderation, legal requirements and abuse prevention. We do not state a fixed deletion period for every record. Local drafts remain in your browser until you clear them or the browser removes its storage; downloaded copies remain wherever you save them.",
+    "Contact us to request access to, correction of or deletion of account information or submitted comments, or to ask about newsletter preferences. Tell us which record or account your request concerns. We may need to confirm your identity, and some records may need to be retained for legal or security reasons. Removal from Anshkosh cannot remove copies someone else has already saved or shared.",
+  ] },
+  { title: "Do not submit sensitive material", paragraphs: [
+    "Do not put passwords, financial credentials, private health information, confidential trade secrets or other highly sensitive material into public profile fields or discussions. Use only media and personal details you have permission to share. On a shared device, take care with locally saved tool drafts too.",
+  ] },
+];
+
 export default function PrivacyPage() {
   return (
-    <section className="bg-white py-16 md:py-24 min-h-screen">
-      <div className="max-w-3xl mx-auto px-4">
-        {/* Badge & Title */}
-        <span className="text-xs font-semibold text-coral-500 tracking-widest uppercase mb-4 block">
-          PILOT PRIVACY NOTICE
-        </span>
-        <h1 className="text-4xl md:text-5xl font-bold font-heading text-gray-900 mb-4 tracking-tight">
-          Privacy Notice
-        </h1>
-        <p className="text-sm text-gray-600 mb-8 block">
-          Effective date: September 20, 2026 · Operator: Anshkosh
-        </p>
-
-        {/* Intro */}
-        <p className="text-gray-600 text-base leading-relaxed mb-8">
-          This notice describes information handled by the current Anshkosh early-access website and public-validation model.
-        </p>
-
-        {/* Sections */}
+    <section className="min-h-screen bg-white py-16 md:py-24">
+      <div className="mx-auto max-w-3xl px-4">
+        <span className="mb-4 block text-xs font-semibold uppercase tracking-widest text-coral-500">Pilot privacy notice</span>
+        <h1 className="mb-4 font-heading text-4xl font-bold tracking-tight text-gray-900 md:text-5xl">Privacy Notice</h1>
+        <p className="mb-8 text-sm text-gray-600">Updated: 9 October 2026 · Operator: Anshkosh</p>
+        <p className="mb-8 text-base leading-relaxed text-gray-600">This notice describes the current startup discovery pilot, accounts, discussions, voting and free founder tools. It distinguishes information sent to Anshkosh from drafts kept in your browser.</p>
         <div className="space-y-12">
-          {/* Section 1 */}
-          <div className="pt-8 border-t border-gray-100">
-            <h2 className="text-2xl font-bold text-gray-900 mb-4 font-heading">
-              What the pilot may collect
-            </h2>
-            <ul className="space-y-3 text-gray-600 leading-relaxed text-base">
-              <li className="flex items-start gap-3">
-                <span className="text-coral-500 font-bold shrink-0 mt-1">•</span>
-                <span>Founder details submitted via forms (name, contact info, startup details, links)</span>
-              </li>
-              <li className="flex items-start gap-3">
-                <span className="text-coral-500 font-bold shrink-0 mt-1">•</span>
-                <span>Interest-list signups (email, persona, requested updates)</span>
-              </li>
-              <li className="flex items-start gap-3">
-                <span className="text-coral-500 font-bold shrink-0 mt-1">•</span>
-                <span>Validation activity (actions taken on test pages, feedback submitted)</span>
-              </li>
-              <li className="flex items-start gap-3">
-                <span className="text-coral-500 font-bold shrink-0 mt-1">•</span>
-                <span>Technical data (IP addresses, browser signatures, device logs to prevent abuse)</span>
-              </li>
-              <li className="flex items-start gap-3">
-                <span className="text-coral-500 font-bold shrink-0 mt-1">•</span>
-                <span>Cookies & local tokens necessary for session management and vote tracking</span>
-              </li>
-            </ul>
-          </div>
-
-          {/* Section 2 */}
-          <div className="pt-8 border-t border-gray-100">
-            <h2 className="text-2xl font-bold text-gray-900 mb-4 font-heading">
-              How information is used
-            </h2>
-            <p className="text-gray-600 leading-relaxed text-base">
-              Collected data is used to operate the validation platform, verify founder identity, prevent bot-generated signals or voting fraud, analyze platform usage, communicate pilot updates, and improve startup discovery and founder support.
-            </p>
-          </div>
-
-          {/* Section 3 */}
-          <div className="pt-8 border-t border-gray-100">
-            <h2 className="text-2xl font-bold text-gray-900 mb-4 font-heading">
-              Public visibility
-            </h2>
-            <p className="text-gray-600 leading-relaxed text-base">
-              Startup profiles, problem statements, evidence logs, proposed preorders, and overall signal aggregates are intended for public discovery. Personal contact numbers, private credentials, and raw technical logs remain confidential and non-public.
-            </p>
-          </div>
-
-          {/* Section 4 */}
-          <div className="pt-8 border-t border-gray-100">
-            <h2 className="text-2xl font-bold text-gray-900 mb-4 font-heading">
-              Signals and consent
-            </h2>
-            <p className="text-gray-600 leading-relaxed text-base">
-              By submitting feedback, joining a waitlist, or completing a survey on Anshkosh, you consent to having your input aggregated and displayed to founders as validation telemetry. Your consent can be withdrawn by contacting support.
-            </p>
-          </div>
-
-          {/* Section 5 */}
-          <div className="pt-8 border-t border-gray-100">
-            <h2 className="text-2xl font-bold text-gray-900 mb-4 font-heading">
-              Service providers
-            </h2>
-            <p className="text-gray-600 leading-relaxed text-base">
-              We utilize trusted cloud infrastructure, database hosting, email delivery, and security providers to process data securely. All service providers are bound by strict data processing and confidentiality obligations.
-            </p>
-          </div>
-
-          {/* Section 6 */}
-          <div className="pt-8 border-t border-gray-100">
-            <h2 className="text-2xl font-bold text-gray-900 mb-4 font-heading">
-              Retention, choices, and security
-            </h2>
-            <p className="text-gray-600 leading-relaxed text-base">
-              We retain information only as long as necessary for platform operation, legal compliance, and abuse prevention. You may request account deletion, data access, or correction at any time.
-            </p>
-          </div>
-
-          {/* Section 7 */}
-          <div className="pt-8 border-t border-gray-100">
-            <h2 className="text-2xl font-bold text-gray-900 mb-4 font-heading">
-              Do not submit
-            </h2>
-            <p className="text-gray-600 leading-relaxed text-base">
-              Do not submit confidential trade secrets, unpatented proprietary source code, protected personal health information, or highly sensitive financial credentials through public validation forms.
-            </p>
-          </div>
-
-          {/* Section 8 */}
-          <div className="pt-8 border-t border-gray-100">
-            <h2 className="text-2xl font-bold text-gray-900 mb-4 font-heading">
-              Contact
-            </h2>
-            <p className="text-gray-600 leading-relaxed text-base">
-              If you have questions or privacy concerns regarding this notice, please contact us at{" "}
-              <a href="mailto:hello@anshkosh.com" className="text-coral-500 hover:text-coral-600 font-semibold underline">
-                hello@anshkosh.com
-              </a>.
-            </p>
-          </div>
+          {sections.map(section => <section key={section.title} className="border-t border-gray-100 pt-8">
+            <h2 className="mb-4 font-heading text-2xl font-bold text-gray-900">{section.title}</h2>
+            <div className="space-y-4 text-base leading-relaxed text-gray-600">{section.paragraphs.map(paragraph => <p key={paragraph}>{paragraph}</p>)}</div>
+          </section>)}
+          <section className="border-t border-gray-100 pt-8">
+            <h2 className="mb-4 font-heading text-2xl font-bold text-gray-900">Contact</h2>
+            <p className="text-base leading-relaxed text-gray-600">For privacy questions or requests, email <a href="mailto:hello@anshkosh.com" className="font-semibold text-coral-700 underline underline-offset-4">hello@anshkosh.com</a>. You can also use our <Link href="/contact" className="font-semibold text-coral-700 underline underline-offset-4">contact page</Link>.</p>
+          </section>
         </div>
-
       </div>
     </section>
   );

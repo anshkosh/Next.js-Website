@@ -13,18 +13,23 @@ type StartupCardProps = {
     tagline: string;
     logoUrl?: string | null;
     upvoteCount: number;
+    downvoteCount: number;
     category: {
       name: string;
       iconName?: string | null;
     };
-    metadata?: any;
+    metadata?: unknown;
     hasUpvoted: boolean;
+    hasDownvoted: boolean;
     updateCount?: number;
   };
 };
 
 export default function StartupCard({ startup }: StartupCardProps) {
-  const { city, foundedYear } = startup.metadata || {};
+  const metadata = startup.metadata && typeof startup.metadata === "object" && !Array.isArray(startup.metadata)
+    ? startup.metadata as Record<string, unknown> : {};
+  const city = typeof metadata.city === "string" ? metadata.city : undefined;
+  const foundedYear = typeof metadata.foundedYear === "string" || typeof metadata.foundedYear === "number" ? metadata.foundedYear : undefined;
 
   return (
     <div className="flex flex-col bg-white border border-gray-200 rounded-xl shadow-sm hover:shadow-md transition-shadow h-full group relative">
@@ -100,6 +105,9 @@ export default function StartupCard({ startup }: StartupCardProps) {
             startupId={startup.id}
             initialCount={startup.upvoteCount}
             initialUpvoted={startup.hasUpvoted}
+            initialDownvotes={startup.downvoteCount}
+            initialDownvoted={startup.hasDownvoted}
+            startupName={startup.name}
           />
         </div>
       </div>

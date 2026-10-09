@@ -10,9 +10,12 @@ export type LeaderboardEntry = {
   logoUrl: string | null;
   category: { name: string };
   upvoteCount: number;
+  downvoteCount: number;
+  signalCount: number;
   updateCount: number;
   rank: number;
   hasUpvoted: boolean;
+  hasDownvoted: boolean;
 };
 
 export function leaderboardPageNumber(value?: string | string[]) {
@@ -29,15 +32,15 @@ export async function getLeaderboard(requestedPage = 1, cookieId?: string) {
   // Keep the global ranks and paginated rows in the same voting snapshot.
   return db.$transaction(async (tx) => {
     const groups = await tx.startup.groupBy({
-      by: ["upvoteCount"],
+      by: ["signalCount"],
       where: { status: "LIVE" },
       _count: { _all: true },
-      orderBy: { upvoteCount: "desc" },
+      orderBy: { signalCount: "desc" },
     });
     const rankByVotes = new Map<number, number>();
     let totalCount = 0;
     for (const group of groups) {
-      rankByVotes.set(group.upvoteCount, totalCount + 1);
+      rankByVotes.set(group.signalCount, totalCount + 1);
       totalCount += group._count._all;
     }
     const totalPages = Math.max(1, Math.ceil(totalCount / LEADERBOARD_PAGE_SIZE));
@@ -50,18 +53,20 @@ export async function getLeaderboard(requestedPage = 1, cookieId?: string) {
       where: { status: "LIVE" },
       select: {
         id: true, slug: true, name: true, tagline: true, logoUrl: true,
-        upvoteCount: true, updateCount: true,
+        upvoteCount: true, downvoteCount: true, signalCount: true, updateCount: true,
         category: { select: { name: true } },
         upvotes: cookieId ? { where: { cookieId }, select: { id: true } } : false,
+        downvotes: cookieId ? { where: { cookieId }, select: { id: true } } : false,
       },
-      orderBy: [{ upvoteCount: "desc" }, { name: "asc" }, { id: "asc" }],
+      orderBy: [{ signalCount: "desc" }, { name: "asc" }, { id: "asc" }],
       skip: (page - 1) * LEADERBOARD_PAGE_SIZE,
       take: LEADERBOARD_PAGE_SIZE,
     });
-    const entries: LeaderboardEntry[] = startups.map(({ upvotes, ...startup }) => ({
+    const entries: LeaderboardEntry[] = startups.map(({ upvotes, downvotes, ...startup }) => ({
       ...startup,
-      rank: rankByVotes.get(startup.upvoteCount)!,
+      rank: rankByVotes.get(startup.signalCount)!,
       hasUpvoted: Boolean(upvotes?.length),
+      hasDownvoted: Boolean(downvotes?.length),
     }));
     return { entries, totalCount, page, totalPages };
   }, { isolationLevel: "RepeatableRead" });

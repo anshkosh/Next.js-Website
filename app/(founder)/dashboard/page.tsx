@@ -84,7 +84,7 @@ export default async function DashboardPage() {
   const maxStartups = Math.max(1, parseInt(maxStartupsSetting, 10) || 1);
   const isAtLimit = totalStartups >= maxStartups;
 
-  const totalUpvotes = startups.reduce((sum, s) => sum + s.upvoteCount, 0);
+  const totalSignals = startups.reduce((sum, s) => sum + s.signalCount, 0);
   const liveStartups = startups.filter((s) => s.status === "LIVE").length;
 
   return (
@@ -106,7 +106,7 @@ export default async function DashboardPage() {
             ! 👋
           </h1>
           <p className="text-gray-500 mt-2 text-base">
-            Here's what's happening with your startups today.
+            Here’s what’s happening with your startups today.
           </p>
         </div>
 
@@ -130,18 +130,19 @@ export default async function DashboardPage() {
             </div>
           </div>
 
-          {/* Total Upvotes */}
+          {/* Total Signals */}
           <div className="bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-shadow p-6 flex items-center gap-5">
             <div className="w-14 h-14 rounded-2xl bg-coral-50 flex items-center justify-center shrink-0">
               <Star size={26} className="text-coral-500" />
             </div>
             <div>
               <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-0.5">
-                Total Upvotes
+                Total Signals
               </p>
               <p className="text-3xl font-bold text-gray-900 leading-none">
-                {totalUpvotes}
+                {totalSignals}
               </p>
+              <p className="mt-1 text-xs text-gray-500">Upvotes minus downvotes</p>
             </div>
           </div>
 
@@ -206,7 +207,7 @@ export default async function DashboardPage() {
               No startups yet
             </h2>
             <p className="text-gray-400 mb-8 max-w-md text-sm">
-              You haven't submitted any startups. Add your first startup to get
+              You haven’t submitted any startups. Add your first startup to get
               discovered by thousands of makers and investors.
             </p>
             <Link
@@ -276,7 +277,7 @@ export default async function DashboardPage() {
                       <div className="flex items-center gap-2 flex-wrap">
                         <span className="inline-flex items-center gap-1 text-xs font-semibold text-gray-600 bg-gray-50 border border-gray-100 px-2.5 py-1 rounded-full">
                           <Star size={11} className="text-coral-400" />
-                          {startup.upvoteCount}
+                          {startup.signalCount} signals
                         </span>
                         <span className="inline-flex items-center gap-1 text-xs font-medium text-gray-500 bg-gray-50 border border-gray-100 px-2.5 py-1 rounded-full">
                           {startup.category.name}
@@ -372,7 +373,7 @@ export default async function DashboardPage() {
                             size={13}
                             className="shrink-0 mt-0.5 text-yellow-500"
                           />
-                          Under review — we'll email you when it's approved.
+                          Under review — we’ll email you when it’s approved.
                         </div>
                         {startup._count.comments > 0 && (
                           <Link

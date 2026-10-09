@@ -1,5 +1,5 @@
 import { PrismaClient } from "@prisma/client";
-import { auth } from "../lib/auth";
+import additionalCategories from "../scripts/data/additional-categories.json";
 
 const prisma = new PrismaClient();
 
@@ -22,6 +22,7 @@ const categories = [
   { name: "Cybersecurity 🔒", slug: "cybersecurity", description: "Cybersecurity", iconName: "Shield" },
   { name: "Web3/Blockchain ⛓️", slug: "web3", description: "Web3 and Blockchain", iconName: "Link" },
   { name: "CleanTech/Sustainability ♻️", slug: "cleantech", description: "CleanTech and Sustainability", iconName: "Recycle" },
+  ...additionalCategories,
 ];
 
 async function main() {

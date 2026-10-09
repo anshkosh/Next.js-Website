@@ -69,7 +69,7 @@ export default function TrustSafetyPage() {
             <ul className="space-y-3 text-gray-600 leading-relaxed text-base">
               <li className="flex items-start gap-3">
                 <span className="text-coral-500 font-bold shrink-0 mt-1">•</span>
-                <span>Prohibition of purchased, fabricated, or bot-generated upvotes</span>
+                <span>Prohibition of purchased, fabricated, or bot-generated votes</span>
               </li>
               <li className="flex items-start gap-3">
                 <span className="text-coral-500 font-bold shrink-0 mt-1">•</span>
@@ -120,7 +120,7 @@ export default function TrustSafetyPage() {
               Current payment status
             </h2>
             <p className="text-gray-600 leading-relaxed text-base">
-              Payments and preorders are not open during the pilot. Interest lists and upvotes create no financial obligation or entitlement.
+              Payments and preorders are not open during the pilot. Interest lists and votes create no financial obligation or entitlement.
             </p>
           </div>
 

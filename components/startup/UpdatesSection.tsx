@@ -36,8 +36,6 @@ function formatDate(dateStr: string) {
 export default function UpdatesSection({ updates }: { updates: Update[] }) {
   const [showAll, setShowAll] = useState(false);
 
-  if (!updates || updates.length === 0) return null;
-
   const total = updates.length;
   const visibleUpdates = showAll ? updates : updates.slice(0, 3);
 
@@ -52,19 +50,23 @@ export default function UpdatesSection({ updates }: { updates: Update[] }) {
           <div>
             <h2 className="text-2xl font-bold text-gray-900 font-heading">Founder Updates</h2>
             <p className="text-sm text-gray-500">
-              {total} update{total !== 1 ? "s" : ""} from the team
+              {total ? `${total} update${total !== 1 ? "s" : ""} from the team` : "Progress from the team"}
             </p>
           </div>
         </div>
       </div>
 
       {/* Timeline */}
-      <div className="relative">
+      {total === 0 ? (
+        <p className="rounded-xl border border-gray-100 bg-gray-50 p-5 text-sm leading-relaxed text-gray-600">
+          No updates yet. The founder hasn’t published a progress update.
+        </p>
+      ) : <div className="relative">
         {/* Vertical line */}
         <div className="absolute left-[19px] top-0 bottom-0 w-0.5 bg-gray-100" />
 
         <div className="space-y-0">
-          {visibleUpdates.map((update, idx) => {
+          {visibleUpdates.map((update) => {
             const updateNumber = total - (updates.indexOf(update));
 
             return (
@@ -108,7 +110,7 @@ export default function UpdatesSection({ updates }: { updates: Update[] }) {
             );
           })}
         </div>
-      </div>
+      </div>}
 
       {/* Show More */}
       {total > 3 && !showAll && (

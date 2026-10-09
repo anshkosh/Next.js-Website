@@ -1,0 +1,12 @@
+[
+  { "name": "Consumer Products", "slug": "consumer-products", "description": "Everyday products, home goods and consumer brands.", "iconName": "Package" },
+  { "name": "Beauty & Personal Care", "slug": "beauty-personal-care", "description": "Beauty products, personal care brands and related services.", "iconName": "Sparkles" },
+  { "name": "Travel & Hospitality", "slug": "travel-hospitality", "description": "Travel experiences, accommodation and hospitality businesses.", "iconName": "Plane" },
+  { "name": "Education & Training", "slug": "education-training", "description": "Learning programmes, tutoring, vocational training and education services.", "iconName": "BookOpen" },
+  { "name": "Healthcare & Wellness", "slug": "healthcare-wellness", "description": "Healthcare services, wellness businesses and wellbeing products.", "iconName": "Heart" },
+  { "name": "Manufacturing & Industrial", "slug": "manufacturing-industrial", "description": "Manufacturing, industrial products, equipment and production services.", "iconName": "Factory" },
+  { "name": "Professional & Local Services", "slug": "professional-local-services", "description": "Professional services and businesses serving local communities.", "iconName": "BriefcaseBusiness" },
+  { "name": "Aerospace & Drones", "slug": "aerospace-drones", "description": "Aviation, space, drone products and drone-based services.", "iconName": "Rocket" },
+  { "name": "Sports & Fitness", "slug": "sports-fitness", "description": "Sports products, fitness services, facilities and training.", "iconName": "Dumbbell" },
+  { "name": "Retail & Offline Commerce", "slug": "retail-offline-commerce", "description": "Physical retail, neighbourhood shops and offline commerce businesses.", "iconName": "Store" }
+]

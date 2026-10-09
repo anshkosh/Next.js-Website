@@ -151,6 +151,11 @@ export default async function StartupDetailPage(props: {
             where: { cookieId },
           }
         : false,
+          downvotes: cookieId
+        ? {
+            where: { cookieId },
+          }
+        : false,
       founders: {
         orderBy: { sortOrder: "asc" }
       },
@@ -204,13 +209,13 @@ export default async function StartupDetailPage(props: {
 
   const { city, foundedYear, twitterUrl, linkedinUrl, features, pitchDeckUrl } =
     readStartupMetadata(startup.metadata);
-  const hasUpvoted = startup.upvotes && startup.upvotes.length > 0;
+  const hasUpvoted = Boolean(startup.upvotes?.length);
+  const hasDownvoted = Boolean(startup.downvotes?.length);
   const updates = startup.updates.map((update) => ({
     ...update,
     createdAt: update.createdAt.toISOString(),
   }));
 
-  const ratingValue = Math.min(5, (startup.upvoteCount / 100) * 5).toFixed(1);
 
   const tabs = [
     { id: "section-overview", label: "Overview" },
@@ -299,6 +304,8 @@ export default async function StartupDetailPage(props: {
                 startupId={startup.id}
                 initialCount={startup.upvoteCount}
                 initialUpvoted={hasUpvoted}
+                initialDownvoted={hasDownvoted}
+                initialDownvotes={startup.downvoteCount}
               />
             </div>
           </div>
@@ -382,11 +389,6 @@ export default async function StartupDetailPage(props: {
             author: {
               "@type": "Organization",
               name: startup.founder?.name || "Founder",
-            },
-            aggregateRating: {
-              "@type": "AggregateRating",
-              ratingValue: ratingValue,
-              ratingCount: startup.upvoteCount > 0 ? startup.upvoteCount : 1, // ensure it's valid
             },
           }),
         }}

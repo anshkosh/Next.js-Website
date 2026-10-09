@@ -28,9 +28,10 @@ export default function Footer() {
               <li><Link href="/leaderboard" className="hover:text-gray-900 transition-colors">Leaderboard</Link></li>
               <li><Link href="/categories" className="hover:text-gray-900 transition-colors">Categories</Link></li>
               <li><Link href="/journal" className="hover:text-gray-900 transition-colors">Journal</Link></li>
-              <li><Link href="/register" className="hover:text-gray-900 transition-colors">Submit a Startup</Link></li>
+              <li><Link href="/startup/new" className="hover:text-gray-900 transition-colors">List your startup</Link></li>
               <li><Link href="/launch-support" className="hover:text-gray-900 transition-colors">Free Launch Support</Link></li>
             </ul>
+            <p className="text-xs leading-relaxed text-gray-500">Listing is free. An account is required, and profiles are reviewed before publication.</p>
           </div>
 
           {/* Column 3: Legal */}
@@ -39,7 +40,8 @@ export default function Footer() {
             <ul className="space-y-2 text-sm text-gray-700">
               <li><Link href="/about" className="hover:text-gray-900 transition-colors">About Anshkosh</Link></li>
               <li><Link href="/faq" className="hover:text-gray-900 transition-colors">FAQ</Link></li>
-              <li><Link href="/privacy" className="hover:text-gray-900 transition-colors">Privacy</Link></li>
+              <li><Link href="/privacy" className="hover:text-gray-900 transition-colors">Privacy Notice</Link></li>
+              <li><Link href="/terms" className="hover:text-gray-900 transition-colors">Terms of Service</Link></li>
               <li><Link href="/trust-safety" className="hover:text-gray-900 transition-colors">Trust & Safety</Link></li>
             </ul>
           </div>
