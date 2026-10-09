@@ -91,6 +91,9 @@ model Startup {
   status        StartupStatus @default(DRAFT)
   metadata      Json?
   upvoteCount   Int           @default(0)
+  downvoteCount Int           @default(0)
+  // Stored generated column, maintained by PostgreSQL; never write it from Prisma.
+  signalCount   Int           @default(dbgenerated())
   updateCount   Int           @default(0)
   adminNotes    String?
   reviewedBy    String?
@@ -111,6 +114,7 @@ model Startup {
   searchVector  Unsupported("tsvector")?
 
   upvotes       Upvote[]
+  downvotes     Downvote[]
   slugRedirects SlugRedirect[]
   founders      StartupFounder[]
   featuredEntry FeaturedStartup?
@@ -122,6 +126,7 @@ model Startup {
   @@index([categoryId])
   @@index([status])
   @@index([upvoteCount(sort: Desc)])
+  @@index([signalCount(sort: Desc)])
   @@index([searchVector], type: Gin)
 }
 
@@ -177,6 +182,19 @@ model Category {
 }
 
 model Upvote {
+  id              String   @id @default(cuid())
+  startupId       String
+  startup         Startup  @relation(fields: [startupId], references: [id], onDelete: Cascade)
+  fingerprintHash String
+  cookieId        String?
+  createdAt       DateTime @default(now())
+
+  @@unique([startupId, fingerprintHash])
+  @@unique([startupId, cookieId])
+  @@index([startupId])
+}
+
+model Downvote {
   id              String   @id @default(cuid())
   startupId       String
   startup         Startup  @relation(fields: [startupId], references: [id], onDelete: Cascade)

@@ -8,16 +8,16 @@ export default function LeaderboardList({ entries }: { entries: LeaderboardEntry
     <div className="overflow-hidden rounded-xl border border-gray-200 bg-white">
       <div className="flex items-center justify-between gap-4 border-b border-gray-200 px-4 py-4 sm:px-6">
         <h2 className="font-heading text-xl font-semibold text-gray-900">All-time rankings</h2>
-        <span className="w-14 shrink-0 text-center text-sm font-medium text-gray-600">Votes</span>
+        <span className="w-32 shrink-0 text-center text-sm font-medium text-gray-600">Signals</span>
       </div>
-      <ol aria-label="Startups ranked by all-time votes" className="divide-y divide-gray-100">
+      <ol aria-label="Startups ranked by all-time signals" className="divide-y divide-gray-100">
         {entries.map(startup => (
           <li key={startup.id} className="flex items-center gap-3 px-4 py-5 sm:gap-5 sm:px-6">
             <Link href={`/startups/${startup.slug}`} className="group flex min-w-0 flex-1 items-center gap-3 rounded-lg sm:gap-5">
-              <span className={`w-6 shrink-0 text-center font-heading text-xl font-semibold tabular-nums sm:w-8 sm:text-2xl ${startup.rank <= 3 && startup.upvoteCount > 0 ? "text-coral-700" : "text-gray-500"}`}>
+              <span className={`w-6 shrink-0 text-center font-heading text-xl font-semibold tabular-nums sm:w-8 sm:text-2xl ${startup.rank <= 3 && startup.signalCount > 0 ? "text-coral-700" : "text-gray-500"}`}>
                 <span className="sr-only">Rank </span>{startup.rank}
               </span>
-              <div className="relative hidden h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-gray-200 bg-gray-50 sm:flex">
+              <div className="relative hidden h-14 w-32 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-gray-200 bg-gray-50 sm:flex">
                 {startup.logoUrl
                   ? <Image src={startup.logoUrl} alt="" fill sizes="56px" className="object-contain p-1" />
                   : <span aria-hidden="true" className="font-heading text-2xl font-semibold text-coral-700">{startup.name.charAt(0)}</span>}
@@ -30,7 +30,7 @@ export default function LeaderboardList({ entries }: { entries: LeaderboardEntry
               </div>
             </Link>
             <div className="shrink-0">
-              <UpvoteButton startupId={startup.id} startupName={startup.name} initialCount={startup.upvoteCount} initialUpvoted={startup.hasUpvoted} />
+              <UpvoteButton startupId={startup.id} startupName={startup.name} initialCount={startup.upvoteCount} initialUpvoted={startup.hasUpvoted} initialDownvoted={startup.hasDownvoted} initialDownvotes={startup.downvoteCount} />
             </div>
           </li>
         ))}

@@ -27,7 +27,7 @@ Do not invent superiority claims, guaranteed validation, fundraising outcomes, o
 ## Operating Context
 
 - The public experience includes the homepage, discovery and category browsing, an all-time startup leaderboard, search, startup profiles, Journal, FAQ, Contact, and policy pages.
-- The leaderboard includes only published startup profiles, ranked by their existing all-time upvote totals. Equal totals share a rank. It offers profile links, voting and pagination; category and time filters are outside the owner-requested scope.
+- The leaderboard includes only published startup profiles, ranked by their all-time signals (upvotes minus downvotes). Equal net totals share a rank. A visitor has one active vote per startup and can switch or remove it. Public founder-name search matches published founding teams. It offers profile links, voting and pagination; category and time filters are outside the owner-requested scope.
 - Founders create an account to submit a startup profile. Profiles are reviewed before publication; founders can manage profiles and updates through the existing account workflows.
 - Launch Support tools work without an account. Drafts are stored in the browser on the current device and shared across the tools; copy and download actions produce reusable materials.
 - The under-construction banner and preview entry curtain communicate the early-access pilot.

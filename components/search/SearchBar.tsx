@@ -115,7 +115,7 @@ export default function SearchBar({ categories = [] }: SearchBarProps) {
           type="text"
           autoComplete="off"
           className="block min-w-0 w-full pl-11 pr-10 py-4 bg-transparent text-gray-900 placeholder-gray-500 outline-none"
-          placeholder="Search startups, categories, or locations..."
+          placeholder="Search startups, founders, or locations..."
           value={text}
           onChange={(e) => setText(e.target.value)}
         />

@@ -160,3 +160,50 @@ test("password reset uses a delivered token and mobile forms fit the viewport", 
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
   await page.screenshot({ path: "test-results/startup-edit-mobile.png", fullPage: true });
 });
+
+test("public founder search and bidirectional voting share accurate signals across pages", async ({ page }) => {
+  await enter(page, "/search?q=test%20founder");
+  await expect(page.getByRole("heading", { name: startupName, exact: true })).toBeVisible();
+  await expect(page.getByText("Founders: Test Founder", { exact: true })).toBeVisible();
+  await enter(page, `/discover?q=${encodeURIComponent("test founder")}`);
+  await expect(page.getByRole("heading", { name: startupName, exact: true })).toBeVisible();
+  await enter(page, `/startups/${slug}`);
+  const up = () => page.getByRole("button", { name: /^(Remove upvote|Upvote)( for|,)/ });
+  const down = () => page.getByRole("button", { name: /^(Remove downvote|Downvote)( for|,)/ });
+  await down().click();
+  await expect(down()).toHaveAttribute("aria-pressed", "true");
+  await expect.poll(async () => (await db.startup.findUniqueOrThrow({ where: { id: startupId } })).signalCount).toBe(-1);
+  await up().click();
+  await expect(up()).toHaveAttribute("aria-pressed", "true");
+  await expect(down()).toHaveAttribute("aria-pressed", "false");
+  await expect.poll(async () => (await db.startup.findUniqueOrThrow({ where: { id: startupId } })).signalCount).toBe(1);
+  await up().click();
+  await expect(up()).toHaveAttribute("aria-pressed", "false");
+  await expect.poll(async () => (await db.startup.findUniqueOrThrow({ where: { id: startupId } })).signalCount).toBe(0);
+  await down().click(); await expect(down()).toHaveAttribute("aria-pressed", "true");
+  await enter(page, "/leaderboard");
+  const row = page.getByRole("listitem").filter({ has: page.getByRole("heading", { name: startupName, exact: true }) });
+  await expect(row.getByRole("status")).toContainText("-1 signals");
+  await expect(row.getByRole("button", { name: /Remove downvote/ })).toHaveAttribute("aria-pressed", "true");
+  await page.setViewportSize({ width: 390, height: 844 });
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+  await row.screenshot({ path: "test-results/net-signals-mobile.png" });
+  await row.getByRole("button", { name: /Remove downvote/ }).click();
+  await expect.poll(async () => (await db.startup.findUniqueOrThrow({ where: { id: startupId } })).signalCount).toBe(0);
+  await enter(page, `/search?q=${encodeURIComponent(email)}`);
+  await expect(page.getByRole("heading", { name: startupName, exact: true })).toHaveCount(0);
+});
+
+test("concurrent vote switches and reconciliation preserve one vote and correct counters", async () => {
+  const { recordVote, recountVotes } = await import("../lib/vote-store");
+  const fixture = await db.startup.create({ data: { name: "Concurrent vote fixture", slug: `concurrent-${randomUUID()}`, tagline: "Isolated voting fixture", description: "For concurrency testing only", websiteUrl: "https://example.test", founderName: "Test Founder", founderId: (await db.user.findUniqueOrThrow({ where: { email } })).id, categoryId, status: "LIVE" } });
+  const identity = { cookieId: randomUUID(), fingerprintHash: randomUUID() };
+  await recordVote(fixture.id, 1, identity);
+  await Promise.all([recordVote(fixture.id, -1, identity), recordVote(fixture.id, 1, identity), recountVotes()]);
+  const counts = { up: await db.upvote.count({ where: { startupId: fixture.id } }), down: await db.downvote.count({ where: { startupId: fixture.id } }) };
+  expect(counts.up + counts.down).toBeLessThanOrEqual(1);
+  const startup = await db.startup.findUniqueOrThrow({ where: { id: fixture.id } });
+  expect(startup.upvoteCount).toBe(counts.up); expect(startup.downvoteCount).toBe(counts.down); expect(startup.signalCount).toBe(counts.up - counts.down);
+  await db.startup.update({ where: { id: fixture.id }, data: { status: "SUSPENDED" } });
+  expect(await recordVote(fixture.id, -1, identity)).toMatchObject({ success: false });
+});

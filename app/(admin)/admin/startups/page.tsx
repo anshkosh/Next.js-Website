@@ -1,9 +1,10 @@
+import { Prisma, StartupStatus } from "@prisma/client";
 import { db } from "@/lib/db";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { suspendStartup, unsuspendStartup } from "@/app/actions/admin.actions";
 import Link from "next/link";
 import Image from "next/image";
-import { ExternalLink, ShieldOff, ShieldAlert, ShieldCheck } from "lucide-react";
+import { ExternalLink, ShieldAlert, ShieldCheck } from "lucide-react";
 import StartupsClientFilters from "./StartupsClientFilters";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
@@ -25,21 +26,23 @@ export default async function AdminStartupsPage(props: {
   });
   const isAdmin = session?.user.role === "admin";
 
-  const where: any = {};
+  const where: Prisma.StartupWhereInput = {};
   if (q) {
     where.name = { contains: q, mode: "insensitive" };
   }
-  if (status) {
-    where.status = status;
+  if (Object.values(StartupStatus).includes(status as StartupStatus)) {
+    where.status = status as StartupStatus;
   }
   if (categoryId) {
     where.categoryId = categoryId;
   }
 
-  let orderBy: any = {};
+  let orderBy: Prisma.StartupOrderByWithRelationInput = {};
   switch (sort) {
     case "name_asc": orderBy = { name: "asc" }; break;
     case "name_desc": orderBy = { name: "desc" }; break;
+    case "signals_desc": orderBy = { signalCount: "desc" }; break;
+    case "signals_asc": orderBy = { signalCount: "asc" }; break;
     case "upvotes_desc": orderBy = { upvoteCount: "desc" }; break;
     case "upvotes_asc": orderBy = { upvoteCount: "asc" }; break;
     case "date_asc": orderBy = { createdAt: "asc" }; break;
@@ -89,6 +92,8 @@ export default async function AdminStartupsPage(props: {
               <TableHead>Category</TableHead>
               <TableHead>Status</TableHead>
               <TableHead>Upvotes</TableHead>
+              <TableHead>Downvotes</TableHead>
+              <TableHead>Signals</TableHead>
               <TableHead>Founder</TableHead>
               <TableHead>Created</TableHead>
               <TableHead className="text-right">Actions</TableHead>
@@ -97,7 +102,7 @@ export default async function AdminStartupsPage(props: {
           <TableBody>
             {startups.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={8} className="text-center py-8 text-gray-500">
+                <TableCell colSpan={10} className="text-center py-8 text-gray-500">
                   No startups found matching your filters.
                 </TableCell>
               </TableRow>
@@ -123,6 +128,8 @@ export default async function AdminStartupsPage(props: {
                   <TableCell>{startup.category.name}</TableCell>
                   <TableCell>{getStatusBadge(startup.status)}</TableCell>
                   <TableCell>{startup.upvoteCount}</TableCell>
+                  <TableCell>{startup.downvoteCount}</TableCell>
+                  <TableCell>{startup.signalCount}</TableCell>
                   <TableCell>{startup.founder?.name || "Unknown"}</TableCell>
                   <TableCell>{startup.createdAt.toLocaleDateString()}</TableCell>
                   <TableCell className="text-right">

@@ -18,11 +18,16 @@ export default async function FeaturedStartups() {
                 where: { cookieId },
               }
             : false,
+          downvotes: cookieId
+            ? {
+                where: { cookieId },
+              }
+            : false,
         },
       },
     },
     orderBy: [
-      { startup: { upvoteCount: "desc" } },
+      { startup: { signalCount: "desc" } },
       { sortOrder: "asc" },
       { id: "asc" },
     ],
@@ -61,18 +66,18 @@ export default async function FeaturedStartups() {
               <Trophy aria-hidden="true" className="h-4 w-4 text-coral-600" />
               <span>Community favourites</span>
             </div>
-            <span className="text-right text-xs text-gray-600">Ranked by total upvotes</span>
+            <span className="text-right text-xs text-gray-600">Ranked by net signals</span>
           </div>
 
               <div aria-hidden="true" className="hidden items-center gap-6 border-b border-gray-100 px-6 py-3 text-[11px] font-semibold uppercase tracking-wider text-gray-500 md:flex">
                 <span className="w-8 shrink-0 text-center">Rank</span>
                 <span className="flex-1">Startup</span>
                 <span className="w-40 shrink-0">Category</span>
-                <span className="w-14 shrink-0 text-center">Upvotes</span>
+                <span className="w-32 shrink-0 text-center">Signals</span>
               </div>
-              <ol aria-label="Featured startups ranked by upvotes" className="divide-y divide-gray-100">
+              <ol aria-label="Featured startups ranked by signals" className="divide-y divide-gray-100">
                 {featured.map(({ id, startup }, index) => {
-                  const isLeader = index === 0 && startup.upvoteCount > 0;
+                  const isLeader = index === 0 && startup.signalCount > 0;
 
                   return (
                     <li key={id} className={`flex items-center gap-3 px-4 py-5 sm:gap-6 sm:px-6 ${isLeader ? "bg-coral-50/60" : "bg-white"}`}>
@@ -109,14 +114,16 @@ export default async function FeaturedStartups() {
                           startupId={startup.id}
                           startupName={startup.name}
                           initialCount={startup.upvoteCount}
-                          initialUpvoted={startup.upvotes ? startup.upvotes.length > 0 : false}
+                          initialUpvoted={Boolean(startup.upvotes?.length)}
+                          initialDownvoted={Boolean(startup.downvotes?.length)}
+                          initialDownvotes={startup.downvoteCount}
                         />
                       </div>
                     </li>
                   );
                 })}
               </ol>
-              <p className="border-t border-gray-100 px-4 py-4 text-xs leading-relaxed text-gray-500 sm:px-6">Featured by Anshkosh. Ranked by the community. Every upvote helps a founder get discovered.</p>
+              <p className="border-t border-gray-100 px-4 py-4 text-xs leading-relaxed text-gray-500 sm:px-6">Featured by Anshkosh. Ranked by the community. Signals = upvotes − downvotes. Votes reflect community opinion, not verified traction.</p>
         </div>
       </div>
     </section>

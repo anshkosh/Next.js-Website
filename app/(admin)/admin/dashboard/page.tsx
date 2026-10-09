@@ -1,6 +1,6 @@
 import { db } from "@/lib/db";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Rocket, ShieldAlert, TrendingUp, Users, BarChart3, AlertCircle } from "lucide-react";
+import { Rocket, TrendingUp, Users, AlertCircle } from "lucide-react";
 import Link from "next/link";
 
 export default async function AdminDashboardPage() {
@@ -43,11 +43,11 @@ export default async function AdminDashboardPage() {
     },
   });
 
-  // 6. Top 5 Startups by Upvotes
+  // 6. Top 5 Startups by Signals
   const topStartups = await db.startup.findMany({
-    orderBy: { upvoteCount: "desc" },
+    orderBy: { signalCount: "desc" },
     take: 5,
-    select: { id: true, name: true, upvoteCount: true, status: true },
+    select: { id: true, name: true, signalCount: true, status: true },
   });
 
   // 7. Startups Per Category
@@ -163,7 +163,7 @@ export default async function AdminDashboardPage() {
                       <span className="text-[10px] px-1.5 py-0.5 bg-gray-100 rounded text-gray-500">{startup.status}</span>
                     )}
                   </div>
-                  <div className="font-medium text-coral-500">{startup.upvoteCount}</div>
+                  <div className="font-medium text-coral-500">{startup.signalCount} signals</div>
                 </div>
               )) : (
                 <p className="text-sm text-gray-500">No startups yet.</p>

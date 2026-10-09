@@ -17,15 +17,19 @@ export const faqData = [
   },
   {
     question: "What can I do during the pilot?",
-    answer: "Explore published startup profiles, upvote ideas that interest you, and give feedback. Founders can create an account, submit a startup for review, and publish progress updates. Everyone can use the free founder tools. Payments and preorders are not open during the pilot.",
+    answer: "Explore published startup profiles, upvote or downvote startup profiles, and give feedback. Founders can create an account, submit a startup for review, and publish progress updates. Everyone can use the free founder tools. Payments and preorders are not open during the pilot.",
   },
   {
     question: "What can a founder validate?",
     answer: "A founder can test problem relevance, solution clarity, audience fit, behavioural intent, preorder interest, and practical delivery assumptions.",
   },
   {
-    question: "What counts as a validation signal?",
-    answer: "Depending on the test, signals may include genuine feedback, survey responses, waitlist actions, pilot requests, service enquiries, preorder intent, or other defined actions. A signal is not automatically a customer, order, payment, revenue result, or promise.",
+    question: "How are startup signals calculated?",
+    answer: "Signals are a startup’s all-time upvotes minus its all-time downvotes. You can have one active vote per startup: click the same arrow to remove it, or the other arrow to switch. A net score can be negative. Equal scores share a leaderboard rank. Votes reflect community opinion, not verified traction or product-market fit.",
+  },
+  {
+    question: "What counts as evidence in a validation test?",
+    answer: "Evidence from a founder’s test may include genuine feedback, survey responses, waitlist actions, pilot requests, service enquiries, preorder intent, or other defined actions. This evidence is separate from the site’s net voting score and is not automatically a customer, order, payment, revenue result, or promise.",
   },
   {
     question: "Can I place a preorder now?",
@@ -45,7 +49,7 @@ export const faqData = [
   },
   {
     question: "What would a preorder include?",
-    answer: "A preorder would be an advance order for a stated product, service, or experience, with clear pricing, delivery expectations, and terms. Payments and preorders are not open during the pilot. A profile, upvote, or interest list does not create an order or entitlement.",
+    answer: "A preorder would be an advance order for a stated product, service, or experience, with clear pricing, delivery expectations, and terms. Payments and preorders are not open during the pilot. A profile, vote, or interest list does not create an order or entitlement.",
   },
   {
     question: "How are startups reviewed?",

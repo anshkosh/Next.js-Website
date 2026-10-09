@@ -1,3 +1,4 @@
+import { publicStartupCard, publicStartupCardSelect } from "@/lib/public-startup-card";
 import { db } from "@/lib/db";
 import { notFound } from "next/navigation";
 import StartupCard from "@/components/startup/StartupCard";
@@ -45,20 +46,14 @@ export default async function CategoryPage(props: { params: Promise<{ slug: stri
       categoryId: category.id,
       status: "LIVE",
     },
-    include: {
-      category: true,
-      upvotes: cookieId ? { where: { cookieId } } : false,
-    },
+    select: publicStartupCardSelect(cookieId),
     orderBy: [
-      { upvoteCount: "desc" },
+      { signalCount: "desc" },
       { createdAt: "desc" },
     ],
   });
 
-  const formattedStartups = startups.map((startup) => ({
-    ...startup,
-    hasUpvoted: startup.upvotes ? startup.upvotes.length > 0 : false,
-  }));
+  const formattedStartups = startups.map(publicStartupCard);
 
   return (
     <div className="container mx-auto px-4 py-12 max-w-5xl">

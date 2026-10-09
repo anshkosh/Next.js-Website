@@ -80,6 +80,8 @@ export default function StartupsClientFilters({ categories }: { categories: { id
         >
           <option value="date_desc">Newest First</option>
           <option value="date_asc">Oldest First</option>
+          <option value="signals_desc">Most Signals</option>
+          <option value="signals_asc">Least Signals</option>
           <option value="upvotes_desc">Most Upvotes</option>
           <option value="upvotes_asc">Least Upvotes</option>
           <option value="name_asc">Name (A-Z)</option>

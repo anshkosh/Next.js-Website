@@ -145,7 +145,7 @@ export default function LaunchSupportPage() {
             <h2 id="standards-heading" className="font-heading text-2xl font-bold">Support is free. Credibility is earned.</h2>
             <ul className="mt-5 space-y-4 text-sm leading-relaxed text-gray-700">
               {[
-                "Startup approval, upvotes, and validation signals cannot be bought.",
+                "Startup approval, votes, and validation evidence cannot be bought.",
                 "Editorial features are selected on merit, not guaranteed by a request.",
                 "Any future paid offer will be optional and explained separately. Existing requests will not turn into paid subscriptions.",
               ].map((statement) => (

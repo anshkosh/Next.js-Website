@@ -38,7 +38,7 @@ describe("free early-access launch support", () => {
     expect(html).toContain("Planned — not available yet");
     expect(html).toContain("backlink packages are not currently offered");
     expect(html).toContain("We do not guarantee backlinks");
-    expect(html).toContain("Startup approval, upvotes, and validation signals cannot be bought.");
+    expect(html).toContain("Startup approval, votes, and validation evidence cannot be bought.");
   });
 
   it("supplies canonical and share metadata", () => {

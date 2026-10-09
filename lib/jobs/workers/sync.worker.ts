@@ -1,7 +1,7 @@
 import { Worker } from "bullmq";
 import { connection } from "../connection";
 import { syncQueue } from "../queues";
-import { db } from "@/lib/db";
+import { recountVotes } from "@/lib/vote-store";
 import { logger } from "@/lib/logger";
 
 export const syncWorker = new Worker(
@@ -11,15 +11,7 @@ export const syncWorker = new Worker(
       try {
         logger.info("Starting upvote-count-sync job...");
         
-        // Execute raw SQL to recount upvotes
-        const result = await db.$executeRaw`
-          UPDATE "Startup"
-          SET "upvoteCount" = (
-            SELECT COUNT(*)
-            FROM "Upvote"
-            WHERE "Upvote"."startupId" = "Startup"."id"
-          )
-        `;
+        const result = await recountVotes();
 
         logger.info(`upvote-count-sync completed successfully. Rows affected: ${result}`, { jobId: job.id });
       } catch (error) {
