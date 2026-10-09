@@ -168,6 +168,8 @@ test("public founder search and bidirectional voting share accurate signals acro
   await enter(page, `/discover?q=${encodeURIComponent("test founder")}`);
   await expect(page.getByRole("heading", { name: startupName, exact: true })).toBeVisible();
   await enter(page, `/startups/${slug}`);
+  await expect(page.getByRole("heading", { name: "Founder Updates", exact: true })).toBeVisible();
+  await expect(page.getByText("No updates yet. The founder hasn’t published a progress update.", { exact: true })).toBeVisible();
   const up = () => page.getByRole("button", { name: /^(Remove upvote|Upvote)( for|,)/ });
   const down = () => page.getByRole("button", { name: /^(Remove downvote|Downvote)( for|,)/ });
   await down().click();

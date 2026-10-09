@@ -81,13 +81,13 @@ export default function SearchBar({ categories = [] }: SearchBarProps) {
   return (
     <div className="relative w-full max-w-3xl mx-auto flex items-center bg-white border border-gray-200 rounded-full shadow-sm overflow-hidden focus-within:ring-2 focus-within:ring-coral-500 focus-within:border-transparent transition-all">
       {categories.length > 0 && (
-        <div className="relative flex-shrink-0 border-r border-gray-200 bg-gray-50/50">
+        <div className="relative w-2/5 flex-shrink-0 border-r border-gray-200 bg-gray-50/50 sm:w-auto sm:max-w-[45%]">
           <label htmlFor="startup-category" className="sr-only">Filter by category</label>
           <select
             id="startup-category"
             value={category}
             onChange={(e) => handleCategoryChange(e.target.value)}
-            className="appearance-none bg-transparent pl-4 pr-8 py-4 text-sm font-medium text-gray-700 outline-none cursor-pointer hover:bg-gray-100 transition-colors"
+            className="w-full max-w-64 appearance-none truncate bg-transparent pl-4 pr-8 py-4 text-sm font-medium text-gray-700 outline-none cursor-pointer hover:bg-gray-100 transition-colors"
           >
             <option value="all">All Categories</option>
             {categories.map((cat) => (
@@ -102,7 +102,7 @@ export default function SearchBar({ categories = [] }: SearchBarProps) {
         </div>
       )}
       
-      <div className="relative flex-1 flex items-center">
+      <div className="relative min-w-0 flex-1 flex items-center">
         <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
           <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />

@@ -18,7 +18,7 @@ export default async function CategoriesPage() {
         <h1 className="page-title mb-4">Browse by <span className="text-coral-500">Category</span></h1>
         <p className="text-xl text-gray-600 mb-8">Explore Indian startups by industry as the Anshkosh pilot grows. We’re preparing the first category listings alongside our public startup profiles.</p>
         <p className="text-gray-600 mb-8">Visit <Link href="/discover" className="text-coral-600 underline">startup discovery</Link> or learn <Link href="/faq" className="text-coral-600 underline">how founders can participate</Link>.</p>
-        <Link href="/register" className="inline-flex min-h-12 items-center rounded-xl bg-coral-600 px-6 py-3 font-semibold text-white hover:bg-coral-700">Register as a founder</Link>
+        <Link href="/startup/new" className="inline-flex min-h-12 items-center rounded-xl bg-coral-600 px-6 py-3 font-semibold text-white hover:bg-coral-700">List your startup</Link>
       </div>
     );
   }

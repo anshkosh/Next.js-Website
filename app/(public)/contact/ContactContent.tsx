@@ -11,6 +11,7 @@ import {
   Loader2,
 } from "lucide-react";
 import TurnstileWidget from "@/components/startup/TurnstileWidget";
+import { CONTACT_RESPONSE_TARGET } from "@/lib/contact-copy";
 import { submitContactForm } from "@/app/actions/contact.actions";
 import {
   CONTACT_SUBJECTS,
@@ -37,7 +38,7 @@ function LeftPanel() {
         <div className="mb-6 inline-flex items-center gap-2">
           <span className="w-2 h-2 rounded-full bg-green-300" aria-hidden="true" />
           <span className="text-white text-xs font-semibold tracking-wide">
-            We&apos;re online
+            Contact the team
           </span>
         </div>
 
@@ -48,8 +49,7 @@ function LeftPanel() {
         </h2>
         <p className="text-white/90 text-base leading-relaxed max-w-sm">
           Whether you have a question, a partnership idea, or just want to say
-          hello — drop us a line and we&apos;ll get back to you within 24–48
-          hours.
+          hello — drop us a line. {CONTACT_RESPONSE_TARGET}
         </p>
       </div>
 
@@ -109,7 +109,7 @@ function LeftPanel() {
 
       {/* Bottom note */}
       <p className="mt-6 text-xs leading-relaxed text-white/90">
-        Response time: within 24–48 hours on business days.
+        {CONTACT_RESPONSE_TARGET}
       </p>
     </div>
   );
@@ -176,7 +176,7 @@ function SuccessState({
         </h3>
         <p className="text-gray-500 text-sm leading-relaxed max-w-sm">
           Thanks, <strong className="text-gray-700">{name}</strong>! We&apos;ve
-          sent a confirmation to your inbox. Expect a reply within 24–48 hours.
+          sent a confirmation to your inbox. {CONTACT_RESPONSE_TARGET}
         </p>
       </div>
       <button

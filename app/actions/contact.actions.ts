@@ -1,4 +1,5 @@
 "use server";
+import { CONTACT_RESPONSE_TARGET } from "@/lib/contact-copy";
 
 import { headers } from "next/headers";
 import { db } from "@/lib/db";
@@ -96,7 +97,7 @@ export async function submitContactForm(formData: {
         <div style="background: #fff; border: 1px solid #e5e7eb; border-top: none; border-radius: 0 0 12px 12px; padding: 28px;">
           <p style="color: #111827; font-size: 16px; margin: 0 0 12px;">Hi ${name},</p>
           <p style="color: #374151; font-size: 15px; line-height: 1.7; margin: 0 0 16px;">
-            Thanks for reaching out! We've received your message about <strong>${subject}</strong> and will get back to you within 24–48 hours.
+            Thanks for reaching out! We've received your message about <strong>${subject}</strong>. ${CONTACT_RESPONSE_TARGET}
           </p>
           <p style="color: #6B7280; font-size: 13px; margin: 0;">
             — The Anshkosh Team
@@ -109,7 +110,7 @@ export async function submitContactForm(formData: {
       to: email,
       subject: `We received your message — Anshkosh`,
       html: autoReplyHtml,
-      text: `Hi ${name}, thanks for reaching out! We received your message about "${subject}" and will reply within 24–48 hours.\n\n— The Anshkosh Team`,
+      text: `Hi ${name}, thanks for reaching out! We received your message about "${subject}". ${CONTACT_RESPONSE_TARGET}\n\n— The Anshkosh Team`,
     });
 
     return { success: true };
