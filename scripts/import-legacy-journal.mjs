@@ -4,64 +4,16 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import path from "node:path";
 import { createRequire } from "node:module";
+import { convertJournalPost } from "./lib/journal-content.mjs";
 
 const source = JSON.parse(fs.readFileSync(new URL("./data/legacy-journal.json", import.meta.url), "utf8"));
 const args = process.argv.slice(2);
 const option = name => args[args.indexOf(name) + 1];
-const escapeHtml = value => value.replace(/[&<>"']/g, ch => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[ch]);
 const categorySlug = name => name.toLowerCase().trim().replace(/[^\w\s-]/g, "").replace(/[\s_-]+/g, "-");
-const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
-
-function convert(post) {
-  assert.match(post.slug, /^[a-z0-9]+(?:-[a-z0-9]+)*$/);
-  for (const key of ["title", "category", "excerpt", "lede"]) assert.ok(typeof post[key] === "string" && post[key].trim(), `Missing ${key}`);
-  const date = post.date.match(/^(\d{1,2}) (\w+) (\d{4})$/);
-  assert.ok(date && months.includes(date[2]), "Invalid publication date");
-  const isoDate = `${date[3]}-${String(months.indexOf(date[2]) + 1).padStart(2, "0")}-${date[1].padStart(2, "0")}`;
-  // The source stores dates without times. Noon UTC keeps the original calendar
-  // date in both India and the production server's America/Denver timezone.
-  const publishedAt = new Date(`${isoDate}T12:00:00Z`);
-  assert.ok(Number.isFinite(publishedAt.getTime()) && publishedAt < new Date(), "Invalid publication date");
-  assert.ok(post.sections.length > 0, "Missing article sections");
-  const html = [];
-  const ops = [];
-  function paragraph(text) {
-    html.push(`<p>${escapeHtml(text)}</p>`);
-    ops.push({ insert: text + "\n" });
-  }
-  function heading(text) {
-    html.push(`<h2>${escapeHtml(text)}</h2>`);
-    ops.push({ insert: text }, { insert: "\n", attributes: { header: 2 } });
-  }
-  paragraph(post.lede);
-  if (post.category === "Campaign Notes") paragraph(source.campaignNote);
-  for (const section of post.sections) {
-    heading(section.heading);
-    assert.ok(section.paragraphs.length > 0, "Missing section paragraphs");
-    section.paragraphs.forEach(paragraph);
-  }
-  if (post.sources?.length) {
-    heading("Sources");
-    html.push("<ul>");
-    for (const link of post.sources) {
-      assert.equal(new URL(link.url).protocol, "https:", "Invalid source link");
-      html.push(`<li><a href="${escapeHtml(link.url)}">${escapeHtml(link.label)}</a></li>`);
-      ops.push({ insert: link.label, attributes: { link: link.url } }, { insert: "\n", attributes: { list: "bullet" } });
-    }
-    html.push("</ul>");
-  }
-  return {
-    title: post.title, slug: post.slug, excerpt: post.excerpt,
-    authorName: source.authorName, contentHtml: html.join("\n"), contentJson: { ops },
-    status: "PUBLISHED", publishedAt, tags: [], metaKeywords: [],
-    readingTimeMinutes: Number.parseInt(post.readTime, 10),
-    metaTitle: post.title, metaDescription: post.excerpt,
-  };
-}
 
 assert.equal(source.posts.length, 12, "Expected all 12 recovered posts");
 assert.equal(new Set(source.posts.map(p => p.slug)).size, 12, "Duplicate source slugs");
-const posts = source.posts.map(convert);
+const posts = source.posts.map(post => convertJournalPost(source, post));
 assert.ok(posts.every(p => Number.isInteger(p.readingTimeMinutes) && p.readingTimeMinutes > 0));
 if (args.includes("--validate-only")) {
   console.log(JSON.stringify({ validated: posts.length, sourceCommit: source.sourceCommit }));

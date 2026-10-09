@@ -63,7 +63,7 @@ export default function PrivacyPage() {
               How information is used
             </h2>
             <p className="text-gray-600 leading-relaxed text-base">
-              Collected data is used to operate the validation platform, verify founder identity, prevent bot-generated signals or voting fraud, analyze platform usage, communicate pilot updates, and refine future crowdfunding mechanics.
+              Collected data is used to operate the validation platform, verify founder identity, prevent bot-generated signals or voting fraud, analyze platform usage, communicate pilot updates, and improve startup discovery and founder support.
             </p>
           </div>
 
@@ -73,7 +73,7 @@ export default function PrivacyPage() {
               Public visibility
             </h2>
             <p className="text-gray-600 leading-relaxed text-base">
-              Startup profiles, problem statements, evidence logs, reward proposals, and overall signal aggregates are intended for public discovery. Personal contact numbers, private credentials, and raw technical logs remain confidential and non-public.
+              Startup profiles, problem statements, evidence logs, proposed preorders, and overall signal aggregates are intended for public discovery. Personal contact numbers, private credentials, and raw technical logs remain confidential and non-public.
             </p>
           </div>
 

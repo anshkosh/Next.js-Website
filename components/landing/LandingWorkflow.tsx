@@ -30,7 +30,7 @@ export default function LandingWorkflow() {
     {
       num: 4,
       title: "Launch",
-      description: "If validated, proceed to an optional reward-crowdfunding campaign.",
+      description: "Share what you have learned and prepare your next step. Payments and preorders are not open during the pilot.",
       icon: Rocket,
     },
   ];

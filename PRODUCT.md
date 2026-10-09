@@ -39,11 +39,11 @@ Do not invent superiority claims, guaranteed validation, fundraising outcomes, o
 - Current owner-confirmed scope: startup profiles and progress, visitor discovery and feedback, and free founder tools.
 - The founder toolkit includes customer validation planning, MVP scope planning, runway calculation, pitch building, launch graphics, reusable launch materials, a launch checklist, directory information and submission tracking.
 - Account and review requirements must be explained accurately. Free support does not bypass profile review or guarantee editorial placement.
-- Payments, backing, pledges, reward orders and investments are closed during the pilot. Feedback, waitlists and expressions of interest do not create a financial obligation or verify a startup's claims.
+- Payments and preorders are not open during the pilot. Investments are not offered. Feedback, waitlists and expressions of interest do not create a financial obligation or verify a startup's claims.
 - Validation is not investment and does not establish product-market fit. Do not imply securities, ownership, returns or guaranteed traction.
 - Directory acceptance, backlinks, indexing, rankings, traffic and funding are not guaranteed. Automated directory submission and backlink packages are not current offers.
 - Preserve existing routes, authentication, moderation and data behavior during visual refinements unless the owner explicitly changes the scope.
-- Future monetization, campaign availability and a formal accessibility conformance target remain undecided here. Do not turn possible future features into current promises.
+- Future monetization, preorder availability and a formal accessibility conformance target remain undecided here. Do not turn possible future features into current promises.
 
 ## Brand Commitments
 

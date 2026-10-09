@@ -68,7 +68,7 @@ export default function AboutPage() {
           <section aria-labelledby="about-pilot">
             <h2 id="about-pilot" className="text-2xl font-bold text-gray-900 mb-3 font-heading">We are building Anshkosh, too</h2>
             <p>
-              Anshkosh is an early-access pilot focused on startup profiles, progress, discovery, feedback, and free founder tools. Payments, pledges, reward orders, and investments are not open during the pilot.
+              Anshkosh is an early-access pilot focused on startup profiles, progress, discovery, feedback, and free founder tools. Payments and preorders are not open during the pilot. Investments are not offered.
             </p>
             <p className="mt-4">
               We are learning from the people who use it. If something is confusing, missing, or could be more useful, <Link href="/contact" className="text-coral-700 underline underline-offset-4">tell us what you think</Link>. For questions about getting started, visit the <Link href="/faq" className="text-coral-700 underline underline-offset-4">FAQ</Link>.
