@@ -2,7 +2,7 @@ import { seoMetadata } from "@/lib/seo";
 
 export const metadata = seoMetadata({
   title: "Trust & Safety — Anshkosh",
-  description: "How Anshkosh keeps public validation and campaigns accountable.",
+  description: "How Anshkosh supports responsible startup profiles and public feedback.",
   path: "/trust-safety",
 });
 
@@ -18,7 +18,7 @@ export default function TrustSafetyPage() {
           Trust & Safety
         </h1>
         <p className="text-xl text-gray-500 mb-4">
-          How Anshkosh keeps public validation and campaigns accountable.
+          How Anshkosh supports responsible startup profiles and public feedback.
         </p>
         <p className="text-sm text-gray-600 mb-8 block">
           Effective date: September 20, 2026 · Operator: Anshkosh
@@ -120,7 +120,7 @@ export default function TrustSafetyPage() {
               Current payment status
             </h2>
             <p className="text-gray-600 leading-relaxed text-base">
-              During the current early-access pilot phase, backing payments, crowdfunding pledges, and reward orders are not active. Interest lists and upvotes create no financial obligation or entitlement.
+              Payments and preorders are not open during the pilot. Interest lists and upvotes create no financial obligation or entitlement.
             </p>
           </div>
 
@@ -130,7 +130,7 @@ export default function TrustSafetyPage() {
               Participant responsibility
             </h2>
             <p className="text-gray-600 leading-relaxed text-base">
-              Founders are responsible for fulfilling their public commitments and accurately representing their progress. Supporters are encouraged to examine evidence logs critically and ask questions before backing future campaigns.
+              Founders are responsible for fulfilling their public commitments and accurately representing their progress. Supporters are encouraged to examine evidence logs critically and ask questions before considering any future preorder.
             </p>
           </div>
         </div>

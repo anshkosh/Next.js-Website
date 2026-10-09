@@ -2,7 +2,7 @@
   "sourceCommit": "c7b406de46487b324689e4b17559bef818e8cc85",
   "sourcePath": "src/data/blog-posts.js",
   "authorName": "Anshkosh Research",
-  "campaignNote": "Campaign Notes discuss founder-supplied pilot plans. They do not independently verify every startup statement or report completed funding.",
+  "campaignNote": "Campaign Notes discuss founder-supplied pilot plans. They do not independently verify every startup statement or report completed funding or preorders.",
   "posts": [
     {
       "slug": "hyderabad-startup-ecosystem-choose-the-right-door",
@@ -279,24 +279,24 @@
       "slug": "a-clear-promise-before-a-big-campaign",
       "category": "Founder Playbook",
       "title": "A clear promise before a big campaign",
-      "excerpt": "The strongest reward campaigns begin with a specific outcome, a credible delivery plan, and a reason for early supporters to participate.",
+      "excerpt": "A credible preorder offer begins with a specific product or service, a realistic delivery plan, and clear terms for early customers.",
       "date": "15 August 2026",
       "readTime": "5 min read",
       "accent": "bg-terracotta",
-      "lede": "Reward crowdfunding works best when a founder asks the community to help make one understandable thing happen.",
+      "lede": "A preorder is an advance order, not a donation or an investment. A founder should explain exactly what a customer would order and how it would be delivered.",
       "sections": [
         {
           "heading": "Start with the outcome",
           "paragraphs": [
-            "A campaign is easier to trust when a backer can describe the intended outcome in one sentence. That might be a first production run, a local pilot, a public beta, or a carefully scoped launch.",
-            "The funding goal, timeline, and reward should all point toward that same outcome. Extra ambition can live in the roadmap, but the campaign itself needs a finish line people can see."
+            "A campaign is easier to trust when a customer can describe the intended outcome in one sentence. That might be a first production run, a local pilot, a public beta, or a carefully scoped launch.",
+            "The preorder offer, timeline, and delivery plan should all point toward that same outcome. Extra ambition can live in the roadmap, but the campaign itself needs a finish line people can see."
           ]
         },
         {
           "heading": "Make the exchange concrete",
           "paragraphs": [
-            "Backers are not passive spectators. They are choosing a clearly described reward and accepting delivery risk. Founders should explain what each tier includes, when it is expected, and what could change.",
-            "Useful rewards often come directly from the product or launch: early access, a first batch, a workshop, a tasting, or meaningful recognition. Simplicity is usually more credible than a long list of unrelated perks."
+            "Customers need a clearly described preorder offer and an honest explanation of delivery risk. Founders should state the price, what is included, the expected delivery date, and the cancellation or refund terms.",
+            "Useful preorder offers stay close to the product or launch: a first batch, a service, a workshop, or a tasting. Simplicity is usually more credible than a long list of unrelated perks."
           ]
         },
         {
@@ -306,7 +306,8 @@
             "Good risk disclosure does not weaken a campaign. It shows that the founder understands the work and has thought about how to respond when reality differs from the plan."
           ]
         }
-      ]
+      ],
+      "showPilotNotice": true
     },
     {
       "slug": "cane-theory-proof-first-pilot",
@@ -316,7 +317,7 @@
       "date": "11 August 2026",
       "readTime": "4 min read",
       "accent": "bg-mustard",
-      "lede": "Cane Theory’s submitted campaign plan treats a first Hyderabad location as a focused test, not a finished expansion model.",
+      "lede": "Cane Theory’s submitted pilot plan treats a first Hyderabad location as a focused test, not a finished expansion model.",
       "sections": [
         {
           "heading": "Premium is an operating standard",
@@ -328,17 +329,18 @@
         {
           "heading": "Spend to answer questions",
           "paragraphs": [
-            "The proposed campaign budget covers equipment, power, cold storage, permits, packaging, location setup, and early working capital. Each area is tied to a practical launch question rather than an abstract growth story.",
+            "The proposed pilot budget covers equipment, power, cold storage, permits, packaging, location setup, and early working capital. Each area is tied to a practical launch question rather than an abstract growth story.",
             "If the pilot launches, daily sales, customer response, wastage, service time, and unit economics could guide the next decision. The plan puts expansion after evidence, not before it."
           ]
         },
         {
-          "heading": "Let early supporters into the room",
+          "heading": "Let early customers into the room",
           "paragraphs": [
-            "The proposed Cane Theory rewards stay close to the launch: first drinks, a soft-launch invitation, progress updates, and recognition. They are preview concepts, not rewards currently available to order."
+            "Possible Cane Theory preorder offers would stay close to the launch, such as first drinks or a soft-launch tasting. These are proposed concepts, not offers currently available to order. Progress updates can help interested visitors follow the pilot."
           ]
         }
-      ]
+      ],
+      "showPilotNotice": true
     },
     {
       "slug": "dronehire-building-trust-into-a-marketplace",
@@ -361,7 +363,7 @@
           "heading": "Local density before broad coverage",
           "paragraphs": [
             "The proposed narrow Hyderabad launch is intended to test operator availability, customer demand, scheduling, and handoff. Marketplace quality would depend on having enough suitable supply near the work, not merely a large directory.",
-            "The founder proposes using future campaign funds for operator onboarding, credential checks, local outreach, workflow improvements, and early booking coordination. This is a campaign plan, not a statement that funding or bookings have already occurred."
+            "The founder’s proposed pilot budget covers operator onboarding, credential checks, local outreach, workflow improvements, and early booking coordination. This is a pilot plan, not a statement that funding, preorders, or bookings have already occurred."
           ]
         },
         {
@@ -376,13 +378,14 @@
           "label": "DigitalSky: RPTO Authorisation Circular (DTC 1 of 2022)",
           "url": "https://digitalsky.aai.aero/assets/files/DTC-1-of-2022-RPTO-Authorisation.pdf"
         }
-      ]
+      ],
+      "showPilotNotice": true
     },
     {
       "slug": "startup-funding-is-a-sequence",
       "category": "Funding Fundamentals",
       "title": "Startup funding is a sequence, not a single event",
-      "excerpt": "Bootstrapping, grants, rewards, angels, venture capital, and debt solve different problems at different stages of a company.",
+      "excerpt": "Bootstrapping, grants, preorders, angels, venture capital, and debt solve different problems at different stages of a company.",
       "date": "3 August 2026",
       "readTime": "6 min read",
       "accent": "bg-ink",
@@ -399,7 +402,7 @@
           "heading": "Know what each source asks in return",
           "paragraphs": [
             "Bootstrapping preserves ownership but places the financial load on founders and operating revenue. Grants are usually tied to eligibility and a defined purpose. Debt creates repayment obligations. Equity transfers an ownership interest and introduces investors whose returns depend on company value.",
-            "Reward crowdfunding is a different exchange. A backer supports a defined project or launch in return for a stated product, service, experience, or recognition. The planned Anshkosh model would not provide ownership or a financial return."
+            "Preorders are a different exchange: customers order a stated product, service, or experience before delivery. Those orders create delivery commitments, not ownership or a financial return. Anshkosh currently focuses on startup discovery, progress, feedback, and free founder tools."
           ]
         },
         {
@@ -419,13 +422,14 @@
           "label": "Startup India Seed Fund Scheme",
           "url": "https://seedfund.startupindia.gov.in/"
         }
-      ]
+      ],
+      "showPilotNotice": true
     },
     {
       "slug": "what-democratizing-startup-funding-means",
       "category": "Access & Participation",
       "title": "What democratizing startup funding should actually mean",
-      "excerpt": "Wider participation starts with better access to information, smaller meaningful commitments, and honest boundaries between backing and investing.",
+      "excerpt": "Wider participation starts with better access to information, smaller meaningful commitments, and honest boundaries between preorders and investing.",
       "date": "30 July 2026",
       "readTime": "6 min read",
       "accent": "bg-terracotta",
@@ -434,15 +438,15 @@
         {
           "heading": "Access has more than one dimension",
           "paragraphs": [
-            "Financial access matters, but so do informational and geographic access. A person should be able to understand what is being built, why funding is needed, what they receive, when delivery is expected, and which risks remain.",
-            "Local founders also need routes to prove demand without already belonging to a concentrated investor network. Community-backed pilots can help a startup demonstrate customer interest and operating ability before pursuing larger forms of capital."
+            "Financial access matters, but so do informational and geographic access. A person should be able to understand what is being built, why funding is needed, what a proposed preorder would include, when delivery would be expected, and which risks remain.",
+            "Local founders also need routes to prove demand without already belonging to a concentrated investor network. Customer-supported pilots can help a startup demonstrate customer interest and operating ability before pursuing larger forms of capital."
           ]
         },
         {
           "heading": "Participation is not automatically investment",
           "paragraphs": [
-            "Crowdfunding can refer to donations, rewards, lending, or securities. Those models create different rights and obligations. A reward backer may receive a product or experience, while an equity investor acquires an ownership interest and accepts investment risk in pursuit of a return.",
-            "Anshkosh is currently a preview pilot for a planned reward-crowdfunding service. If backing opens, it will not offer shares, ownership, dividends, interest, or a financial return. Clear language protects participation from being confused with an investment offer."
+            "Community participation can include donations, preorders, lending, or securities. Those models create different rights and obligations. A preorder customer orders a product, service, or experience, while an equity investor acquires an ownership interest and accepts investment risk in pursuit of a return.",
+            "Anshkosh currently helps people discover Indian startup profiles, follow founder progress, offer feedback, and use free founder tools. Payments and preorders are not open during the pilot. The pilot does not offer shares, ownership, dividends, interest, or a financial return."
           ]
         },
         {
@@ -462,37 +466,38 @@
           "label": "Startup India: Looking for Funding?",
           "url": "https://www.startupindia.gov.in/content/sih/en/looking_for_funding.html"
         }
-      ]
+      ],
+      "showPilotNotice": true
     },
     {
       "slug": "crowdfunding-four-models-four-promises",
       "category": "Funding Fundamentals",
-      "title": "Crowdfunding: four models, four different promises",
-      "excerpt": "Donation, reward, debt, and equity crowdfunding may share a digital interface, but the participant receives something fundamentally different in each.",
+      "title": "Community funding: four models, four different promises",
+      "excerpt": "Donations, preorders, debt, and equity funding may share a digital interface, but the participant receives something fundamentally different in each.",
       "date": "26 July 2026",
       "readTime": "7 min read",
       "accent": "bg-mustard",
       "lede": "“Crowdfunding” describes how many people can contribute through a platform. It does not, by itself, explain the legal or economic nature of the contribution.",
       "sections": [
         {
-          "heading": "Donation and reward models",
+          "heading": "Donations and preorders",
           "paragraphs": [
             "Donation crowdfunding supports a cause or project without a commercial return. A thank-you or symbolic acknowledgement may be offered, but the contribution is fundamentally philanthropic.",
-            "Reward crowdfunding creates a defined non-financial exchange. The backer may receive an early product, service, event, membership benefit, or recognition. Delivery can still fail or be delayed, so the campaign must explain fulfilment risk clearly."
+            "A preorder is an advance order for a stated product, service, or experience. The customer expects delivery rather than an ownership interest or a financial return. Delivery can still fail or be delayed, so the offer must explain fulfilment risk and cancellation or refund terms clearly."
           ]
         },
         {
           "heading": "Debt and equity models",
           "paragraphs": [
             "Debt crowdfunding involves money advanced with an expectation of repayment, usually with agreed terms. Equity or securities crowdfunding involves an investment interest whose value depends on the issuer and may be difficult to sell.",
-            "These are investment activities, not simply reward campaigns with different wording. They bring distinct regulatory, disclosure, suitability, and platform obligations that vary by jurisdiction."
+            "These are financial arrangements with different rights and risks from product preorders. They bring distinct regulatory, disclosure, suitability, and platform obligations that vary by jurisdiction."
           ]
         },
         {
           "heading": "Read the promise before the story",
           "paragraphs": [
-            "Before evaluating a campaign narrative, identify the model. Is the money a donation, a payment toward a reward, a loan, or an investment? What enforceable rights or delivery commitments follow?",
-            "The planned Anshkosh model is intentionally narrow: any future backing would support a campaign in exchange for the stated reward. It would not be a loan and would not provide ownership or financial return."
+            "Before evaluating a campaign narrative, identify the model. Is the money a donation, a product preorder, a loan, or an investment? What enforceable rights or delivery commitments follow?",
+            "Anshkosh currently focuses on startup profiles, progress, discovery, feedback, and free founder tools. A profile or an upvote is not a preorder, loan, or investment and creates no delivery entitlement."
           ]
         }
       ],
@@ -505,37 +510,38 @@
           "label": "Investor.gov: Regulation Crowdfunding for Investors",
           "url": "https://www.investor.gov/introduction-investing/general-resources/news-alerts/alerts-bulletins/investor-bulletins/updated-11"
         }
-      ]
+      ],
+      "showPilotNotice": true
     },
     {
       "slug": "angel-investing-and-reward-crowdfunding",
       "category": "Capital Explained",
-      "title": "Angel investing and reward crowdfunding are not the same thing",
+      "title": "Angel investing and preorders are not the same thing",
       "excerpt": "Both can support an early company, but ownership, return expectations, decision-making, diligence, and regulation are fundamentally different.",
       "date": "22 July 2026",
       "readTime": "7 min read",
       "accent": "bg-teal",
-      "lede": "An angel investor backs a company as an investment. A reward backer supports a defined campaign in exchange for what the campaign promises to deliver.",
+      "lede": "An angel investor backs a company as an investment. A preorder customer orders a stated product, service, or experience before delivery.",
       "sections": [
         {
           "heading": "Ownership changes the relationship",
           "paragraphs": [
             "Angel investing commonly involves acquiring equity or another investment instrument. The investor accepts a high possibility of loss in exchange for the possibility that the company’s ownership value grows over time.",
-            "Reward crowdfunding does not create that ownership relationship. The backer evaluates the campaign, reward, delivery plan, and founder credibility rather than a potential financial exit."
+            "A preorder does not create that ownership relationship. The customer evaluates the offer, delivery plan, terms, and founder credibility rather than a potential financial exit."
           ]
         },
         {
           "heading": "Angel capital can bring more than money",
           "paragraphs": [
             "Experienced angels may help with hiring, partnerships, strategic introductions, governance, and future fundraising. That involvement can be valuable, but founders should also understand dilution, information rights, decision rights, and alignment before accepting investment.",
-            "India’s regulated Angel Funds sit within SEBI’s Category I Alternative Investment Fund framework. Direct angel transactions and fund structures require appropriate professional advice; a reward campaign is not a substitute route for offering securities."
+            "India’s regulated Angel Funds sit within SEBI’s Category I Alternative Investment Fund framework. Direct angel transactions and fund structures require appropriate professional advice; a product preorder is not a substitute route for offering securities."
           ]
         },
         {
           "heading": "Choose based on the work ahead",
           "paragraphs": [
-            "A reward campaign may fit a specific launch that can be explained through customer outcomes and fulfilled rewards. Angel capital may fit a company pursuing a larger, longer, high-growth plan that needs ownership capital and investor support.",
-            "Some startups may use both at different times. The responsible approach is to keep each transaction legible: what the contributor provides, what they receive, and which risks they accept."
+            "A preorder may fit a specific launch with a clearly described product or service and a credible fulfilment plan. Angel capital may fit a company pursuing a larger, longer, high-growth plan that needs ownership capital and investor support.",
+            "Some startups may use both at different times. The responsible approach is to keep each transaction legible: what the contributor provides, what they receive, and which risks they accept. Anshkosh’s pilot offers startup discovery and feedback, not investment transactions."
           ]
         }
       ],
@@ -552,13 +558,14 @@
           "label": "Investor.gov: Introduction to Investing",
           "url": "https://www.investor.gov/introduction-investing"
         }
-      ]
+      ],
+      "showPilotNotice": true
     },
     {
       "slug": "campaign-diligence-before-you-back",
       "category": "Backer Field Guide",
-      "title": "Campaign diligence before you back",
-      "excerpt": "A practical way to examine the founder, the offer, the use of funds, the delivery plan, and the risks before choosing a reward.",
+      "title": "What to check before placing a preorder",
+      "excerpt": "A practical way to examine the founder, the offer, the use of funds, the delivery plan, and the risks before placing a preorder.",
       "date": "18 July 2026",
       "readTime": "6 min read",
       "accent": "bg-ink",
@@ -572,17 +579,17 @@
           ]
         },
         {
-          "heading": "Test the reward against operations",
+          "heading": "Test the preorder against operations",
           "paragraphs": [
-            "A reward is credible when its price, quantity, delivery date, and fulfilment effort fit the team’s plan. Physical products require manufacturing and logistics. Experiences require capacity and scheduling. Early access requires a product stable enough to support users.",
-            "Very generous rewards can create hidden cost. The best campaign tiers help fund the launch without making fulfilment harder than the product itself."
+            "A preorder offer is credible when its price, quantity, delivery date, and fulfilment effort fit the team’s plan. Physical products require manufacturing and logistics. Experiences require capacity and scheduling. Early access requires a product stable enough to support users.",
+            "Overpromising on preorder offers can create hidden costs. Each offer should fit the team’s capacity without making fulfilment harder than the product itself."
           ]
         },
         {
-          "heading": "Decide as a backer, not an investor",
+          "heading": "Understand what you are ordering",
           "paragraphs": [
-            "If backing later opens on Anshkosh, decide whether the final stated reward and the opportunity to support the launch justify the amount you may lose or wait longer to receive. Do not back because you expect shares, dividends, interest, resale value, or a financial return.",
-            "Read updates, retain the campaign terms, and use platform escalation paths when milestones change. Responsible backing combines optimism about the founder with a realistic view of execution risk."
+            "Before placing any preorder, understand the final offer, expected delivery, cancellation or refund terms, and the possibility of delays or non-delivery. A preorder does not provide shares, dividends, interest, or a financial return.",
+            "Read updates, retain the campaign terms, and use platform escalation paths when milestones change. Responsible preordering combines optimism about the founder with a realistic view of execution risk."
           ]
         }
       ],
@@ -595,7 +602,9 @@
           "label": "SEBI: Consultation Paper on Crowdfunding in India",
           "url": "https://www.sebi.gov.in/reports/reports/jun-2014/consultation-paper-on-crowdfunding-in-india_27102.html"
         }
-      ]
+      ],
+      "showPilotNotice": true
     }
-  ]
+  ],
+  "pilotNotice": "Payments and preorders are not open during the pilot."
 }

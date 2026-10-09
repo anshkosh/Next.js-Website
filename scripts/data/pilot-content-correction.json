@@ -1,0 +1,18 @@
+{
+  "version": 1,
+  "journalBeforeHashes": {
+    "a-clear-promise-before-a-big-campaign": "4b3b9f8bbd080a4deea696da28eeecd8544757d02cb3b2c2e593c8192b82c13b",
+    "cane-theory-proof-first-pilot": "c5291790050330b5e46b1cdab2984f8c6ede54fee47f929a4dcfa7bc79ae3a87",
+    "dronehire-building-trust-into-a-marketplace": "e62316354c9b31b64dddd6586a774d89c506ada02d2e6ee0868dc148d4e744e8",
+    "startup-funding-is-a-sequence": "a6b4a17a717db5a9e8ed4191f221f130acc532754bc4659c69cce3b7e5955732",
+    "what-democratizing-startup-funding-means": "dbf633e9304a033f75349e9a0d9e91b2e1dff8653eafdf87fe6669f58ac439d8",
+    "crowdfunding-four-models-four-promises": "2c88352dc1fc52b7875b6b251f7cdd63ee5ebbe85cf8dc4b1de2552c4e48ebe6",
+    "angel-investing-and-reward-crowdfunding": "7c1db0d07ec1810759e46aa4c157ac19b9e9059bd350893cd90905f734f5216a",
+    "campaign-diligence-before-you-back": "36a5104ff92d6e48661065193e26a829f43042fef992927452ee80cf0b1efd6c"
+  },
+  "startup": {
+    "slug": "cane-theory",
+    "before": "Working Software Prototype (Functional Beta)",
+    "after": "Preparing a pilot"
+  }
+}

@@ -67,7 +67,7 @@ export default function Footer() {
         {/* Bottom Bar */}
         <div className="pt-6 space-y-3 text-center text-xs text-gray-600">
           <p>
-            This platform is an early-access pilot. Payments and reward orders are not currently open.
+            This platform is an early-access pilot. Payments and preorders are not open during the pilot.
           </p>
           <p>© 2026 Anshkosh. All rights reserved.</p>
         </div>

@@ -1,15 +1,15 @@
 # Anshkosh
 
-> Anshkosh is a public validation platform for Indian startups before launch.
+> Anshkosh helps people discover Indian startups before launch, follow founder progress, and offer feedback.
 
 ## Key pages
 
-- [Home](https://www.anshkosh.com/): Overview of the public validation platform.
+- [Home](https://www.anshkosh.com/): Startup discovery, founder profiles, progress, and free tools.
 - [About Anshkosh](https://www.anshkosh.com/about): What Anshkosh is, who it is for and how its name is written.
 - [Discover startups](https://www.anshkosh.com/discover): Browse startup profiles and evidence as the pilot opens.
 - [Categories](https://www.anshkosh.com/categories): Explore startups by industry category.
 - [Journal](https://www.anshkosh.com/journal): Founder stories, startup insights, and validation guidance.
-- [FAQ](https://www.anshkosh.com/faq): Questions about validation, campaigns, and participation.
+- [FAQ](https://www.anshkosh.com/faq): Questions about listings, free tools, feedback, and the pilot.
 - [Trust & Safety](https://www.anshkosh.com/trust-safety): Platform standards and accountability practices.
 - [Contact](https://www.anshkosh.com/contact): Contact the Anshkosh team.
 - [Free founder toolkit and launch support](https://www.anshkosh.com/launch-support): Free founder tools with browser-saved drafts and downloadable results, alongside startup listings and support requests. Automated directory submissions and backlink packages are not currently available.
@@ -25,7 +25,7 @@
 
 ## Editorial and product context
 
-Anshkosh is currently an early-access pilot. Public validation, applications, accounts, and interest lists may be available, but backing payments and reward orders are not currently open. Validation signals are not investments, securities, orders, revenue, or guarantees of delivery.
+Anshkosh is currently an early-access pilot. Startup profiles, progress, feedback, and free founder tools are available. Payments and preorders are not open during the pilot. Validation signals are not investments, securities, orders, revenue, or guarantees of delivery.
 
 ## Machine-readable resources
 
