@@ -25,9 +25,16 @@ for (const path of publicPaths) {
   assert.ok(![...document.querySelectorAll('meta[name="robots"]')].some(meta => meta.content.includes("noindex")), `${path}: indexable`);
   assert.equal(document.querySelector('meta[property="og:image"]')?.content, `${canonicalOrigin}/images/hero-pomegranate-v2.webp`, `${path}: social image`);
   if (path === "/faq") {
-    assert.equal(document.querySelectorAll('[data-slot="accordion-content"]').length, 15, "FAQ answers are server-rendered");
-    assert.equal(document.querySelectorAll('h2 [data-slot="accordion-trigger"]').length, 15, "FAQ heading hierarchy");
+    const faq = [...document.querySelectorAll('script[type="application/ld+json"]')]
+      .map(script => JSON.parse(script.textContent)).find(schema => schema["@type"] === "FAQPage");
+    assert.ok(Array.isArray(faq?.mainEntity) && faq.mainEntity.length > 0, "Published FAQ questions are present");
+    const answers = [...document.querySelectorAll('[data-slot="accordion-content"]')];
+    assert.equal(answers.length, faq.mainEntity.length, "Every published FAQ answer is server-rendered");
+    assert.ok(answers.every(answer => answer.textContent.trim()), "FAQ answers are not empty");
+    assert.deepEqual([...document.querySelectorAll('h2 [data-slot="accordion-trigger"]')].map(trigger => trigger.textContent.trim()), faq.mainEntity.map(question => question.name), "FAQ heading hierarchy matches every published question");
   }
+  assert.equal(document.querySelectorAll(".curtain-stage").length, path === "/" ? 1 : 0, `${path}: homepage-only preview curtain`);
+  assert.equal(document.querySelectorAll('aside[aria-label="Site status"]').length, path === "/" ? 1 : 0, `${path}: homepage-only construction banner`);
   console.log(`PASS ${path}: status, canonical, metadata, H1, social image`);
 }
 
