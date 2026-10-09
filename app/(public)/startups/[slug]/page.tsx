@@ -11,7 +11,7 @@ import UpdatesSection from "@/components/startup/UpdatesSection";
 import DiscussionSection from "@/components/startup/DiscussionSection";
 import StartupTabNav from "@/components/startup/StartupTabNav";
 import CorePropositionSection from "@/components/startup/CorePropositionSection";
-import { SITE_URL, absoluteUrl } from "@/lib/seo";
+import { SITE_URL, absoluteUrl, startupOrganizationSchema } from "@/lib/seo";
 import { pitchDeckUrlSchema } from "@/lib/validators/pitch-deck.schema";
 import { publicPitchDeck } from "@/lib/pitch-deck-access";
 
@@ -145,7 +145,6 @@ export default async function StartupDetailPage(props: {
     where: { slug: params.slug },
     include: {
       category: true,
-      founder: { select: { name: true } },
       upvotes: cookieId
         ? {
             where: { cookieId },
@@ -376,21 +375,7 @@ export default async function StartupDetailPage(props: {
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
-          __html: JSON.stringify({
-            "@context": "https://schema.org",
-            "@type": "SoftwareApplication",
-            name: startup.name,
-            description: startup.description,
-            url: startup.websiteUrl,
-            image:
-              startup.logoUrl ||
-              absoluteUrl(`/api/og/${startup.slug}`),
-            applicationCategory: startup.category.name,
-            author: {
-              "@type": "Organization",
-              name: startup.founder?.name || "Founder",
-            },
-          }),
+          __html: JSON.stringify(startupOrganizationSchema(startup)).replace(/</g, "\\u003c"),
         }}
       />
     </main>

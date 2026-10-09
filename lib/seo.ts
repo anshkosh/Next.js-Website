@@ -12,6 +12,7 @@ export function resolveSiteUrl(configuredUrl = "https://www.anshkosh.com") {
 
 export const SITE_URL = resolveSiteUrl(process.env.NEXT_PUBLIC_BASE_URL || undefined);
 export const DEFAULT_SOCIAL_IMAGE = "/images/hero-pomegranate-v2.webp";
+export const PILOT_DESCRIPTION = "Discover Indian startups before launch, follow founder progress, offer feedback, and use free founder tools.";
 
 export function absoluteUrl(path = "/") {
   const url = new URL(path, `${SITE_URL}/`);
@@ -55,7 +56,7 @@ export const organizationSchema = {
   alternateName: "Ansh Kosh",
   url: SITE_URL,
   logo: absoluteUrl("/logo.svg"),
-  description: "A public validation platform for Indian startups before launch.",
+  description: PILOT_DESCRIPTION,
   email: "hello@anshkosh.com",
   sameAs: [
     "https://twitter.com/anshkosh",
@@ -82,3 +83,31 @@ export const websiteSchema = {
     "query-input": "required name=search_term_string",
   },
 };
+
+export function startupOrganizationSchema(startup: {
+  slug: string;
+  name: string;
+  description: string;
+  websiteUrl: string;
+  logoUrl?: string | null;
+  founders: { name: string; role?: string | null }[];
+}) {
+  const profileUrl = absoluteUrl(`/startups/${startup.slug}`);
+  return {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    "@id": `${profileUrl}#organization`,
+    name: startup.name,
+    description: startup.description,
+    url: startup.websiteUrl || profileUrl,
+    mainEntityOfPage: profileUrl,
+    ...(startup.logoUrl ? { logo: absoluteUrl(startup.logoUrl) } : {}),
+    ...(startup.founders.length ? {
+      founder: startup.founders.map(founder => ({
+        "@type": "Person",
+        name: founder.name,
+        ...(founder.role ? { jobTitle: founder.role } : {}),
+      })),
+    } : {}),
+  };
+}

@@ -45,7 +45,7 @@ export const faqData = [
   },
   {
     question: "Can founders manipulate validation?",
-    answer: "They must not buy, fabricate, conceal, or selectively misrepresent signals. Anshkosh may apply moderation and anti-abuse controls, request evidence, label limitations, or remove a test.",
+    answer: "Founders must not buy or fabricate votes, or selectively misrepresent test results. Voting cookies, request-derived hashes and rate limits help reduce abuse but do not prove that each vote comes from a unique person. Comments are reviewed before publication. Content that violates the platform’s standards may be rejected or removed.",
   },
   {
     question: "What would a preorder include?",
@@ -53,7 +53,7 @@ export const faqData = [
   },
   {
     question: "How are startups reviewed?",
-    answer: "The workflow may include founder checks, submitted evidence review, risk disclosure, validation-method review, and assessment of whether the public page clearly separates claims from measured events.",
+    answer: "Startup profiles are reviewed before publication. Founders should clearly describe the problem, approach, current stage and evidence, and remain responsible for their claims. Publication is not identity certification or independent verification of every result, and does not prove business registration, traction or product-market fit.",
   },
   {
     question: "What if a future preorder is delayed?",

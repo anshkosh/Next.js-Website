@@ -1,6 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { Clock, Star } from "lucide-react";
+import { calculateReadingTime } from "@/lib/journal-reading-time.mjs";
 
 interface JournalCardProps {
   post: {
@@ -9,7 +10,7 @@ interface JournalCardProps {
     excerpt?: string | null;
     coverImageUrl?: string | null;
     authorName: string;
-    readingTimeMinutes: number;
+    contentHtml: string | null;
     isFeatured: boolean;
     publishedAt?: Date | null;
     updatedAt?: Date | null;
@@ -92,7 +93,7 @@ export default function JournalCard({ post }: JournalCardProps) {
           <div className="flex items-center gap-3">
             {post.updatedAt ? <span>Updated {formatDate(post.updatedAt)}</span> : post.publishedAt && <span>{formatDate(post.publishedAt)}</span>}
             <span className="flex items-center gap-1">
-              <Clock size={12} /> {post.readingTimeMinutes}m read
+              <Clock size={12} /> {calculateReadingTime(post.contentHtml)}m read
             </span>
           </div>
         </div>

@@ -4,6 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import JournalCard from "@/components/landing/JournalCard";
 import { BookOpen } from "lucide-react";
+import { calculateReadingTime } from "@/lib/journal-reading-time.mjs";
 import ErrorState, { recoveryLinkClass, secondaryRecoveryLinkClass } from "@/components/site/ErrorState";
 
 const PER_PAGE = 12;
@@ -54,7 +55,7 @@ export default async function JournalPage(props: {
         excerpt: true,
         coverImageUrl: true,
         authorName: true,
-        readingTimeMinutes: true,
+        contentHtml: true,
         isFeatured: true,
         publishedAt: true,
         updatedAt: true,
@@ -71,7 +72,7 @@ export default async function JournalPage(props: {
           orderBy: { publishedAt: "desc" },
           select: {
             slug: true, title: true, excerpt: true, coverImageUrl: true,
-            authorName: true, readingTimeMinutes: true, publishedAt: true,
+            authorName: true, contentHtml: true, publishedAt: true,
             updatedAt: true,
             category: { select: { name: true, slug: true } },
           },
@@ -182,7 +183,7 @@ export default async function JournalPage(props: {
                     {featuredPost.publishedAt && (
                       <span>{featuredPost.publishedAt.toLocaleDateString("en-IN", { day: "numeric", month: "long", year: "numeric" })}</span>
                     )}
-                    <span>{featuredPost.readingTimeMinutes}m read</span>
+                    <span>{calculateReadingTime(featuredPost.contentHtml)}m read</span>
                   </div>
                 </div>
               </div>

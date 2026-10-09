@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { existsSync, readFileSync } from "node:fs";
-import { resolveSiteUrl, absoluteUrl, DEFAULT_SOCIAL_IMAGE, seoMetadata, organizationSchema, websiteSchema } from "../lib/seo";
+import { resolveSiteUrl, absoluteUrl, DEFAULT_SOCIAL_IMAGE, seoMetadata, organizationSchema, websiteSchema, startupOrganizationSchema } from "../lib/seo";
 import { FOUNDER_TOOLS } from "../lib/founder-toolkit";
 
 const queries = vi.hoisted(() => ({
@@ -40,7 +40,9 @@ describe("canonical URL policy", () => {
     const { default: sitemap } = await import("../app/sitemap");
     const { default: robots } = await import("../app/robots");
     const entries = await sitemap();
-    expect(entries).toHaveLength(20);
+    expect(entries).toHaveLength(21);
+    expect(entries.some(entry => entry.url === absoluteUrl("/leaderboard"))).toBe(true);
+    expect(readFileSync("public/llms.txt", "utf8")).toContain(absoluteUrl("/leaderboard"));
     expect(entries.some(entry => entry.url === absoluteUrl("/launch-support"))).toBe(true);
     for (const tool of FOUNDER_TOOLS) {
       expect(entries.some(entry => entry.url === absoluteUrl(`/launch-support/${tool.id}`))).toBe(true);
@@ -63,9 +65,27 @@ describe("canonical URL policy", () => {
     queries.journalPost.mockResolvedValue([{ slug: "published-story", updatedAt }]);
     const { default: sitemap } = await import("../app/sitemap");
     const entries = await sitemap();
-    expect(entries).toHaveLength(23);
+    expect(entries).toHaveLength(24);
     expect(queries.startup).toHaveBeenCalledWith(expect.objectContaining({ where: { status: "LIVE" } }));
     expect(queries.journalPost).toHaveBeenCalledWith(expect.objectContaining({ where: { status: "PUBLISHED" } }));
     expect(entries.find(entry => entry.url.endsWith("/journal/published-story"))?.lastModified).toEqual(updatedAt);
   });
+});
+
+it("describes a beverage startup as an organization with only its public founders", () => {
+  const schema = startupOrganizationSchema({
+    slug: "beverage-example", name: "Beverage example", description: "A fresh beverage business",
+    websiteUrl: "https://beverage.example", logoUrl: "/logo.webp",
+    founders: [{ name: "Public founder", role: "CEO" }],
+  });
+  expect(schema).toMatchObject({
+    "@type": "Organization", mainEntityOfPage: absoluteUrl("/startups/beverage-example"),
+    logo: absoluteUrl("/logo.webp"), founder: [{ "@type": "Person", name: "Public founder", jobTitle: "CEO" }],
+  });
+  expect(schema).not.toHaveProperty("applicationCategory");
+  expect(schema).not.toHaveProperty("author");
+  expect(schema).not.toHaveProperty("aggregateRating");
+  const noFounders = startupOrganizationSchema({ slug: "team", name: "Team", description: "A startup", websiteUrl: "", founders: [] });
+  expect(noFounders).not.toHaveProperty("founder");
+  expect(noFounders.url).toBe(absoluteUrl("/startups/team"));
 });

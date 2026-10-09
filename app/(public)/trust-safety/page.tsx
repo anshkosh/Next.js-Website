@@ -1,144 +1,59 @@
+import Link from "next/link";
 import { seoMetadata } from "@/lib/seo";
 
 export const metadata = seoMetadata({
   title: "Trust & Safety — Anshkosh",
-  description: "How Anshkosh supports responsible startup profiles and public feedback.",
+  description: "How profile review, founder-supplied evidence, moderation and voting work during the Anshkosh pilot.",
   path: "/trust-safety",
 });
+
+const sections = [
+  { title: "What profile review means", paragraphs: [
+    "Startup profiles are reviewed before publication. Founders should explain the problem, their approach, current stage and supporting evidence clearly. They remain responsible for the accuracy of their profile, links, media and updates.",
+    "Publishing review should not be read as identity certification or independent verification of every claim. A published profile does not prove business registration, prototype performance, traction or product-market fit.",
+  ] },
+  { title: "Founder progress and evidence", paragraphs: [
+    "Progress updates and proof points are supplied by founders. They should distinguish what they plan to do from what they have completed, and explain how results were measured, when the test took place and what its limitations are.",
+    "The pilot does not present progress updates as independently verified milestone logs. Read the available evidence, ask questions and consider what remains uncertain.",
+  ] },
+  { title: "Votes and their limits", paragraphs: [
+    "Signals are all-time upvotes minus downvotes. A visitor can have one active vote per startup, switch it or remove it. Votes reflect community opinion; they do not verify a startup’s claims or establish demand, revenue or product-market fit.",
+    "Visitor cookies, a hash derived from request IP address and browser user-agent, and rate limits help reduce duplicate voting and abuse. These controls have limits and do not prove that every vote comes from a unique person. Do not buy, fabricate or automate votes.",
+  ] },
+  { title: "Discussion and conduct", paragraphs: [
+    "Comments are reviewed before appearing publicly. Approved comments display the commenter’s name, text and posting date; comment email addresses remain private. Published founder replies are public too.",
+    "Keep discussions respectful and useful. Do not submit harassment, hate speech, spam, deceptive impersonation, fabricated claims or material you do not have permission to share. Content that violates these standards may be rejected or removed.",
+  ] },
+  { title: "No endorsement or guarantee", paragraphs: [
+    "Publication, featured placement and voting totals are not an endorsement or a guarantee that a startup will succeed or deliver a product. Founders remain responsible for their public commitments. Visitors should assess the evidence and the risks for themselves.",
+  ] },
+  { title: "Current pilot limits", paragraphs: [
+    "The pilot supports startup profiles, progress, discovery, feedback and free founder tools. Payments and preorders are not open during the pilot. Investments are not offered. A profile, vote or expression of interest creates no financial obligation or order entitlement.",
+  ] },
+];
 
 export default function TrustSafetyPage() {
   return (
     <section className="bg-white py-16 md:py-24 min-h-screen">
       <div className="max-w-3xl mx-auto px-4">
-        {/* Badge & Title */}
-        <span className="text-xs font-semibold text-coral-500 tracking-widest uppercase mb-4 block">
-          TRUST & SAFETY
-        </span>
-        <h1 className="text-4xl md:text-5xl font-bold font-heading text-gray-900 mb-4 tracking-tight">
-          Trust & Safety
-        </h1>
-        <p className="text-xl text-gray-500 mb-4">
-          How Anshkosh supports responsible startup profiles and public feedback.
-        </p>
-        <p className="text-sm text-gray-600 mb-8 block">
-          Effective date: September 20, 2026 · Operator: Anshkosh
-        </p>
-
-        {/* Sections */}
+        <span className="text-xs font-semibold text-coral-500 tracking-widest uppercase mb-4 block">TRUST & SAFETY</span>
+        <h1 className="text-4xl md:text-5xl font-bold font-heading text-gray-900 mb-4 tracking-tight">Trust & Safety</h1>
+        <p className="text-xl text-gray-500 mb-4">Clear profiles, responsible feedback and an honest view of the pilot’s limits.</p>
+        <p className="text-sm text-gray-600 mb-8">Updated: 9 October 2026 · Operator: Anshkosh</p>
         <div className="space-y-12">
-          {/* Section 1 */}
-          <div className="pt-8 border-t border-gray-100">
-            <h2 className="text-2xl font-bold text-gray-900 mb-4 font-heading">
-              Purpose
-            </h2>
-            <p className="text-gray-600 leading-relaxed text-base">
-              Anshkosh is designed to establish authentic public proof and transparent validation standards. We maintain strict trust guidelines to ensure that founders publish honest metrics and that supporters participate in a safe, accountable environment.
-            </p>
-          </div>
-
-          {/* Section 2 */}
-          <div className="pt-8 border-t border-gray-100">
-            <h2 className="text-2xl font-bold text-gray-900 mb-4 font-heading">
-              Founder and campaign checks
-            </h2>
-            <ul className="space-y-3 text-gray-600 leading-relaxed text-base">
-              <li className="flex items-start gap-3">
-                <span className="text-coral-500 font-bold shrink-0 mt-1">•</span>
-                <span>Identity screening and contact verification for all founding team members</span>
-              </li>
-              <li className="flex items-start gap-3">
-                <span className="text-coral-500 font-bold shrink-0 mt-1">•</span>
-                <span>Pre-listing review of startup briefs, prototype status, and website URLs</span>
-              </li>
-              <li className="flex items-start gap-3">
-                <span className="text-coral-500 font-bold shrink-0 mt-1">•</span>
-                <span>Methodological check ensuring claims are separated from measured events</span>
-              </li>
-              <li className="flex items-start gap-3">
-                <span className="text-coral-500 font-bold shrink-0 mt-1">•</span>
-                <span>Rejection of fraudulent projects, clone listings, or deceptive claims</span>
-              </li>
-            </ul>
-          </div>
-
-          {/* Section 3 */}
-          <div className="pt-8 border-t border-gray-100">
-            <h2 className="text-2xl font-bold text-gray-900 mb-4 font-heading">
-              Validation integrity
-            </h2>
-            <ul className="space-y-3 text-gray-600 leading-relaxed text-base">
-              <li className="flex items-start gap-3">
-                <span className="text-coral-500 font-bold shrink-0 mt-1">•</span>
-                <span>Prohibition of purchased, fabricated, or bot-generated votes</span>
-              </li>
-              <li className="flex items-start gap-3">
-                <span className="text-coral-500 font-bold shrink-0 mt-1">•</span>
-                <span>Technical abuse controls including browser fingerprinting and rate limiting</span>
-              </li>
-              <li className="flex items-start gap-3">
-                <span className="text-coral-500 font-bold shrink-0 mt-1">•</span>
-                <span>Requirement for founders to disclose test methodology and limitations</span>
-              </li>
-              <li className="flex items-start gap-3">
-                <span className="text-coral-500 font-bold shrink-0 mt-1">•</span>
-                <span>Right to request supporting documentation for published traction claims</span>
-              </li>
-              <li className="flex items-start gap-3">
-                <span className="text-coral-500 font-bold shrink-0 mt-1">•</span>
-                <span>Clear labeling of unverified vs. verified milestone logs</span>
-              </li>
-              <li className="flex items-start gap-3">
-                <span className="text-coral-500 font-bold shrink-0 mt-1">•</span>
-                <span>Removal or suspension of listings violating integrity standards</span>
-              </li>
-            </ul>
-          </div>
-
-          {/* Section 4 */}
-          <div className="pt-8 border-t border-gray-100">
-            <h2 className="text-2xl font-bold text-gray-900 mb-4 font-heading">
-              Content and conduct
-            </h2>
-            <p className="text-gray-600 leading-relaxed text-base">
-              Participants must maintain respectful, constructive communication. We enforce zero tolerance for harassment, hate speech, spam, intellectual property theft, or deceptive impersonation.
-            </p>
-          </div>
-
-          {/* Section 5 */}
-          <div className="pt-8 border-t border-gray-100">
-            <h2 className="text-2xl font-bold text-gray-900 mb-4 font-heading">
-              No endorsement or guarantee
-            </h2>
-            <p className="text-gray-600 leading-relaxed text-base">
-              Listing on Anshkosh does not constitute an endorsement, financial recommendation, or guarantee of product delivery. Backers and visitors participate at their own discretion.
-            </p>
-          </div>
-
-          {/* Section 6 */}
-          <div className="pt-8 border-t border-gray-100">
-            <h2 className="text-2xl font-bold text-gray-900 mb-4 font-heading">
-              Current payment status
-            </h2>
-            <p className="text-gray-600 leading-relaxed text-base">
-              Payments and preorders are not open during the pilot. Interest lists and votes create no financial obligation or entitlement.
-            </p>
-          </div>
-
-          {/* Section 7 */}
-          <div className="pt-8 border-t border-gray-100">
-            <h2 className="text-2xl font-bold text-gray-900 mb-4 font-heading">
-              Participant responsibility
-            </h2>
-            <p className="text-gray-600 leading-relaxed text-base">
-              Founders are responsible for fulfilling their public commitments and accurately representing their progress. Supporters are encouraged to examine evidence logs critically and ask questions before considering any future preorder.
-            </p>
-          </div>
+          {sections.map(section => (
+            <section key={section.title} className="pt-8 border-t border-gray-100">
+              <h2 className="text-2xl font-bold text-gray-900 mb-4 font-heading">{section.title}</h2>
+              <div className="space-y-4 text-gray-600 leading-relaxed text-base">
+                {section.paragraphs.map(paragraph => <p key={paragraph}>{paragraph}</p>)}
+              </div>
+            </section>
+          ))}
+          <section className="pt-8 border-t border-gray-100">
+            <h2 className="text-2xl font-bold text-gray-900 mb-4 font-heading">Report a concern</h2>
+            <p className="text-gray-600 leading-relaxed">If a profile, comment or voting pattern concerns you, <Link href="/contact" className="text-coral-700 underline underline-offset-4">contact the team</Link> or email <a href="mailto:hello@anshkosh.com" className="text-coral-700 underline underline-offset-4">hello@anshkosh.com</a>. Include the page link and the specific concern. Read the <Link href="/privacy" className="text-coral-700 underline underline-offset-4">Privacy Notice</Link> for how submitted information is handled.</p>
+          </section>
         </div>
-
-        {/* Footer Disclaimer */}
-        <p className="text-sm text-gray-600 mt-12 pt-6 border-t border-gray-100">
-          Questions about trust and safety can be sent to <a className="text-coral-600 underline" href="mailto:hello@anshkosh.com">hello@anshkosh.com</a>.
-        </p>
       </div>
     </section>
   );
