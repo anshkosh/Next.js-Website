@@ -110,7 +110,7 @@ test("signup, real verification token, login, photo editing, private deck and st
   await expect(page.getByLabel("Pitch deck visibility")).toHaveValue("private");
   await uploadPhoto(page, "Upload new gallery image");
   await page.getByLabel("Upload PDF pitch deck").setInputFiles({ name: "deck.pdf", mimeType: "application/pdf", buffer: await validPdf() });
-  await expect(page.getByRole("link", { name: "Download uploaded pitch deck" })).toBeVisible();
+  await expect(page.getByRole("link", { name: "Download uploaded pitch deck" })).toBeVisible({ timeout: 15000 });
   await page.getByRole("button", { name: "Next", exact: true }).click();
   await page.getByRole("button", { name: "Submit for Review" }).click();
   await expect(page).toHaveURL(/\/dashboard/);

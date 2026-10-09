@@ -1,5 +1,5 @@
-import { db } from "@/lib/db";
-import { voteTransition } from "@/lib/voting";
+import { db } from "./db";
+import { voteTransition } from "./voting";
 
 // Serialize changes to both vote tables and the counters using the startup row.
 export async function recordVote(startupId: string, requested: -1 | 1, identity: { fingerprintHash: string; cookieId: string }) {
