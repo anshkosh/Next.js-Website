@@ -29,6 +29,10 @@ async function reveal(page: Page) {
 }
 async function enter(page: Page, url: string) {
   await page.goto(url);
+  if (new URL(page.url()).pathname !== "/") {
+    await expect(page.getByRole("dialog", { name: "Anshkosh is under construction." })).toHaveCount(0);
+    await expect(page.getByRole("complementary", { name: "Site status" })).toHaveCount(0);
+  }
   await reveal(page);
 }
 async function login(page: Page, account: string, secret = password, admin = false) {
@@ -208,4 +212,16 @@ test("concurrent vote switches and reconciliation preserve one vote and correct 
   expect(startup.upvoteCount).toBe(counts.up); expect(startup.downvoteCount).toBe(counts.down); expect(startup.signalCount).toBe(counts.up - counts.down);
   await db.startup.update({ where: { id: fixture.id }, data: { status: "SUSPENDED" } });
   expect(await recordVote(fixture.id, -1, identity)).toMatchObject({ success: false });
+});
+
+test("homepage retains the preview while navigation opens internal pages directly", async ({ page }) => {
+  await page.goto("/");
+  await expect(page.getByRole("dialog", { name: "Anshkosh is under construction." })).toBeVisible();
+  await expect(page.getByRole("complementary", { name: "Site status" })).toHaveCount(1);
+  await reveal(page);
+  await page.getByRole("navigation", { name: "Primary navigation" }).getByRole("link", { name: "Discover", exact: true }).click();
+  await expect(page).toHaveURL(/\/discover$/);
+  await expect(page.getByRole("dialog", { name: "Anshkosh is under construction." })).toHaveCount(0);
+  await expect(page.getByRole("complementary", { name: "Site status" })).toHaveCount(0);
+  expect(await page.evaluate(() => !document.getElementById("site-content")?.inert && document.body.style.overflow !== "hidden")).toBe(true);
 });

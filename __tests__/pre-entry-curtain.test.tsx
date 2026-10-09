@@ -1,8 +1,38 @@
 import { act } from "react";
 import { createRoot } from "react-dom/client";
-import { expect, it, vi } from "vitest";
+import { beforeEach, expect, it, vi } from "vitest";
 import { PreEntryCurtain } from "../components/site/PreEntryCurtain";
+import { UnderConstructionBanner } from "../components/site/UnderConstructionBanner";
 import { previewMotionRequested } from "../lib/preview-motion";
+
+const route = vi.hoisted(() => ({ pathname: "/" }));
+vi.mock("next/navigation", () => ({ usePathname: () => route.pathname }));
+beforeEach(() => { route.pathname = "/"; });
+
+it("removes homepage preview on navigation and releases content and scrolling", async () => {
+  vi.stubGlobal("IS_REACT_ACT_ENVIRONMENT", true);
+  const container = document.createElement("div");
+  const content = document.createElement("div");
+  content.id = "site-content";
+  document.body.append(container, content);
+  const previousOverflow = document.body.style.overflow;
+  const root = createRoot(container);
+  try {
+    await act(async () => root.render(<><PreEntryCurtain /><UnderConstructionBanner /></>));
+    expect(content.inert).toBe(true);
+    expect(container.querySelector('[role="dialog"]')).not.toBeNull();
+    expect(container.querySelector('aside[aria-label="Site status"]')).not.toBeNull();
+    route.pathname = "/journal";
+    await act(async () => root.render(<><PreEntryCurtain /><UnderConstructionBanner /></>));
+    expect(container.querySelector('[role="dialog"]')).toBeNull();
+    expect(container.querySelector('aside')).toBeNull();
+    expect(content.inert).toBe(false);
+    expect(document.body.style.overflow).toBe(previousOverflow);
+  } finally {
+    await act(async () => root.unmount());
+    container.remove(); content.remove(); vi.unstubAllGlobals();
+  }
+});
 
 it("enters immediately with reduced motion and restores access and focus", async () => {
   vi.stubGlobal("IS_REACT_ACT_ENVIRONMENT", true);

@@ -1,9 +1,15 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { usePathname } from "next/navigation";
 import { requestPreviewMotion } from "@/lib/preview-motion";
 
 export function PreEntryCurtain() {
+  const pathname = usePathname();
+  return pathname === "/" ? <HomeCurtain /> : null;
+}
+
+function HomeCurtain() {
   const [entered, setEntered] = useState(false);
   const [opening, setOpening] = useState(false);
   const enterButtonRef = useRef<HTMLButtonElement>(null);
