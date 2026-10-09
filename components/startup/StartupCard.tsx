@@ -3,7 +3,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import UpvoteButton from "@/components/upvote/UpvoteButton";
-import { BadgeCheck, Rocket, MessageSquare } from "lucide-react";
+import { Rocket, MessageSquare } from "lucide-react";
 
 type StartupCardProps = {
   startup: {
@@ -64,7 +64,6 @@ export default function StartupCard({ startup }: StartupCardProps) {
           <h3 className="text-xl font-bold text-gray-900 group-hover:text-coral-500 transition-colors truncate">
             <Link href={`/startups/${startup.slug}`}>{startup.name}</Link>
           </h3>
-          <BadgeCheck className="w-5 h-5 text-coral-500 shrink-0" />
         </div>
 
         {/* Tagline */}

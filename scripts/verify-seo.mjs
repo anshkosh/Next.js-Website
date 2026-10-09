@@ -4,7 +4,7 @@ import { JSDOM } from "jsdom";
 // Read-only HTTP smoke check. Run against a local/preview build before publishing.
 const origin = process.argv[2] || "http://localhost:3011";
 const canonicalOrigin = process.argv[3] || "https://www.anshkosh.com";
-const publicPaths = ["/", "/discover", "/categories", "/journal", "/faq", "/about", "/contact", "/privacy", "/terms", "/trust-safety"];
+const publicPaths = ["/", "/discover", "/leaderboard", "/categories", "/journal", "/faq", "/about", "/contact", "/privacy", "/terms", "/trust-safety"];
 
 async function get(path, userAgent) {
   const response = await fetch(new URL(path, origin), {
@@ -54,17 +54,24 @@ const xml = new JSDOM(sitemap.text, { contentType: "text/xml" }).window.document
 const urls = [...xml.querySelectorAll("loc")].map(loc => loc.textContent);
 assert.ok(urls.length >= 9);
 assert.ok(urls.every(url => url.startsWith(`${canonicalOrigin}/`)));
+assert.ok(urls.includes(`${canonicalOrigin}/leaderboard`), "Leaderboard included in sitemap");
 const robots = await get("/robots.txt");
 assert.equal(robots.response.status, 200);
 assert.ok(robots.text.includes(`Sitemap: ${canonicalOrigin}/sitemap.xml`));
 const llms = await get("/llms.txt");
 assert.equal(llms.response.status, 200);
 assert.ok(!llms.text.includes("https://anshkosh.com/"));
+assert.ok(llms.text.includes("https://www.anshkosh.com/leaderboard"), "Leaderboard included in public guide");
 const image = await fetch(new URL("/images/hero-pomegranate-v2.webp", origin));
 assert.equal(image.status, 200);
 assert.ok(image.headers.get("content-type")?.startsWith("image/"));
 for (const path of ["/login", "/register", "/search"]) {
   const { document } = await get(path);
   assert.ok([...document.querySelectorAll('meta[name="robots"]')].some(meta => meta.content.includes("noindex")), `${path}: exclusion retained`);
+  assert.ok(!document.querySelector('meta[property="og:description"]')?.content.includes("before backing opens"), `${path}: current pilot social description`);
+  if (path === "/search") {
+    assert.equal(document.querySelector('meta[property="og:url"]')?.content, `${canonicalOrigin}/search`, "Search social URL");
+    assert.equal(document.querySelector('meta[property="og:title"]')?.content, "Search | Anshkosh", "Search social title");
+  }
 }
 console.log("PASS sitemap, robots, llms.txt, image availability, and authentication/search exclusions");

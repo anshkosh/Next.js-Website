@@ -5,6 +5,7 @@ import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { revalidatePath } from "next/cache";
 import { logger } from "@/lib/logger";
+import { calculateReadingTime } from "@/lib/journal-reading-time.mjs";
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -17,12 +18,6 @@ function generateSlug(title: string): string {
     .replace(/[^\w\s-]/g, "")
     .replace(/[\s_-]+/g, "-")
     .replace(/^-+|-+$/g, "");
-}
-
-function calculateReadingTime(html: string): number {
-  const text = html.replace(/<[^>]+>/g, " ");
-  const words = text.trim().split(/\s+/).filter(Boolean).length;
-  return Math.max(1, Math.ceil(words / 200));
 }
 
 function generateExcerpt(html: string, maxLength = 160): string {

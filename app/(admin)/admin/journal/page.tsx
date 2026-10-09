@@ -7,6 +7,7 @@ import { Plus, ExternalLink, Clock, Star } from "lucide-react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import JournalAdminActions from "./JournalAdminActions";
 import JournalCategorySelect from "./JournalCategorySelect";
+import { calculateReadingTime } from "@/lib/journal-reading-time.mjs";
 
 export const metadata = { title: "Journal — Admin" };
 
@@ -135,7 +136,7 @@ export default async function AdminJournalPage(props: {
                   </TableCell>
                   <TableCell>{getStatusBadge(post.status)}</TableCell>
                   <TableCell className="text-sm text-gray-600">{post.authorName}</TableCell>
-                  <TableCell className="text-sm text-gray-500">{post.readingTimeMinutes}m</TableCell>
+                  <TableCell className="text-sm text-gray-500">{calculateReadingTime(post.contentHtml)}m</TableCell>
                   <TableCell>
                     {post.isFeatured && <Star size={14} className="text-amber-400 fill-amber-400" />}
                   </TableCell>

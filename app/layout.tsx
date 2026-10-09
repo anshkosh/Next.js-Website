@@ -4,7 +4,7 @@ import "./globals.css";
 import { SiteEnhancements } from "@/components/site/SiteEnhancements";
 import { UnderConstructionBanner } from "@/components/site/UnderConstructionBanner";
 import { PreEntryCurtain } from "@/components/site/PreEntryCurtain";
-import { DEFAULT_SOCIAL_IMAGE, SITE_URL, absoluteUrl } from "@/lib/seo";
+import { DEFAULT_SOCIAL_IMAGE, SITE_URL, absoluteUrl, PILOT_DESCRIPTION } from "@/lib/seo";
 
 const BASE_URL = SITE_URL;
 
@@ -21,13 +21,13 @@ const oswald = Oswald({
 
 export const metadata: Metadata = {
   title: "Anshkosh | Discover Indian Startups Before Launch",
-  description: "Anshkosh helps you discover Indian startups before launch, examine what they can prove, and follow founder progress.",
+  description: PILOT_DESCRIPTION,
   metadataBase: new URL(BASE_URL),
   alternates: { canonical: "/" },
   robots: { index: true, follow: true },
   openGraph: {
     title: "Anshkosh | Discover Indian Startups Before Launch",
-    description: "Explore Anshkosh startup evidence, launch plans, and founder progress before backing opens.",
+    description: PILOT_DESCRIPTION,
     type: "website",
     url: BASE_URL,
     images: [{ url: absoluteUrl(DEFAULT_SOCIAL_IMAGE), alt: "Anshkosh startup discovery" }],
@@ -38,7 +38,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     images: [absoluteUrl(DEFAULT_SOCIAL_IMAGE)],
     title: "Anshkosh | Discover Indian Startups Before Launch",
-    description: "Explore Anshkosh startup evidence, launch plans, and founder progress before backing opens.",
+    description: PILOT_DESCRIPTION,
   },
 };
 

@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
+import { calculateReadingTime } from "../../lib/journal-reading-time.mjs";
 
 const escapeHtml = value => value.replace(/[&<>"']/g, ch => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[ch]);
 const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
@@ -61,7 +62,7 @@ export function convertJournalPost(source, post) {
     title: post.title, slug: post.slug, excerpt: post.excerpt,
     authorName: source.authorName, contentHtml: html.join("\n"), contentJson: { ops },
     status: "PUBLISHED", publishedAt, tags: [], metaKeywords: [],
-    readingTimeMinutes: Number.parseInt(post.readTime, 10),
+    readingTimeMinutes: calculateReadingTime(html.join("\n")),
     metaTitle: post.title, metaDescription: post.excerpt,
   };
 }

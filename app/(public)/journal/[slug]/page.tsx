@@ -8,6 +8,7 @@ import JournalCard from "@/components/landing/JournalCard";
 import CopyButton from "@/components/content/CopyButton";
 import { cache } from "react";
 import { DEFAULT_SOCIAL_IMAGE, SITE_URL, absoluteUrl } from "@/lib/seo";
+import { calculateReadingTime } from "@/lib/journal-reading-time.mjs";
 
 const BASE_URL = SITE_URL;
 
@@ -81,7 +82,7 @@ export default async function JournalArticlePage({ params }: Props) {
           excerpt: true,
           coverImageUrl: true,
           authorName: true,
-          readingTimeMinutes: true,
+          contentHtml: true,
           isFeatured: true,
           publishedAt: true,
           updatedAt: true,
@@ -177,7 +178,7 @@ export default async function JournalArticlePage({ params }: Props) {
                 )}
                 <span className="flex items-center gap-1.5">
                   <Clock size={14} />
-                  {post.readingTimeMinutes} min read
+                  {calculateReadingTime(post.contentHtml)} min read
                 </span>
                 {post.updatedAt && post.publishedAt && post.updatedAt.getTime() > post.publishedAt.getTime() && (
                   <span>Updated {post.updatedAt.toLocaleDateString("en-IN", { day: "numeric", month: "long", year: "numeric" })}</span>

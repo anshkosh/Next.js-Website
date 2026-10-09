@@ -2,12 +2,11 @@ import Link from "next/link";
 import { Search, Rocket, BookOpen, Layers3 } from "lucide-react";
 import { startupSearchWhere } from "@/lib/startup-search";
 import { db } from "@/lib/db";
+import { seoMetadata } from "@/lib/seo";
 import ErrorState, { recoveryLinkClass, secondaryRecoveryLinkClass } from "@/components/site/ErrorState";
 
 export const metadata = {
-  title: "Search | Anshkosh",
-  description: "Search Anshkosh startups, public founder names, stories, and categories.",
-  alternates: { canonical: "/search" },
+  ...seoMetadata({ title: "Search | Anshkosh", description: "Search Anshkosh startups, public founder names, stories, and categories.", path: "/search" }),
   robots: { index: false, follow: true },
 };
 
