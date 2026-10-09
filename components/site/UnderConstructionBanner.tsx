@@ -1,4 +1,11 @@
+"use client";
+
+import { usePathname } from "next/navigation";
+
 export function UnderConstructionBanner() {
+  const pathname = usePathname();
+  if (pathname !== "/") return null;
+
   return (
     <aside
       aria-label="Site status"
