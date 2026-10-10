@@ -187,6 +187,8 @@ test("public founder search and bidirectional voting share accurate signals acro
   await expect(up()).toHaveAttribute("aria-pressed", "false");
   await expect.poll(async () => (await db.startup.findUniqueOrThrow({ where: { id: startupId } })).signalCount).toBe(0);
   await down().click(); await expect(down()).toHaveAttribute("aria-pressed", "true");
+  // aria-pressed flips optimistically; wait for the vote to be stored before leaving the page.
+  await expect.poll(async () => (await db.startup.findUniqueOrThrow({ where: { id: startupId } })).signalCount).toBe(-1);
   await enter(page, "/leaderboard");
   const row = page.getByRole("listitem").filter({ has: page.getByRole("heading", { name: startupName, exact: true }) });
   await expect(row.getByRole("status")).toContainText("-1 signals");
