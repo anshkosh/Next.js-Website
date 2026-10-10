@@ -68,6 +68,8 @@ export const organizationSchema = {
     "https://www.crunchbase.com/organization/anshkosh",
     "https://medium.com/@anshkosh",
     "https://www.youtube.com/@Anshkosh",
+    "https://www.instagram.com/ansh.kosh/",
+    "https://www.facebook.com/profile.php?id=61592499604748",
   ],
 };
 
