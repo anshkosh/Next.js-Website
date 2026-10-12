@@ -19,6 +19,8 @@ npx playwright test
 
 Specs in `e2e/` cover public browsing, auth, the founder flow, the admin flow and later feature phases. They need a running app with a seeded database.
 
+Before navigating after a mutation, wait for its persisted result. A voting button's optimistic `aria-pressed` state does not confirm that the server has saved the vote; leaving immediately can cancel the request and make cross-page signal checks race with the save.
+
 ## CI
 
 `.github/workflows/deploy-vps.yml` runs on every pull request into `main` and every push to `main`:
