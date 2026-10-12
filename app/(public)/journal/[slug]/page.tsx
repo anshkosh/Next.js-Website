@@ -137,12 +137,12 @@ export default async function JournalArticlePage({ params }: Props) {
         {/* Article Container */}
         <div className="container mx-auto px-4 max-w-4xl">
           {/* Article Header */}
-          <div className={`${post.coverImageUrl ? "-mt-32 relative z-10" : "pt-12"} pb-8`}>
-            <div className={`${post.coverImageUrl ? "text-white" : "text-gray-900"}`}>
+          <header className={`${post.coverImageUrl ? "-mt-32 relative z-10 rounded-xl bg-white px-6 pt-8 mb-8 shadow-sm md:px-8" : "pt-12"} pb-8`}>
+            <div className="text-gray-900">
               {/* Breadcrumb */}
               <Link
                 href="/journal"
-                className={`inline-flex items-center gap-1.5 text-sm mb-6 opacity-70 hover:opacity-100 transition-opacity ${post.coverImageUrl ? "text-white" : "text-gray-500"}`}
+                className="inline-flex items-center gap-1.5 text-sm mb-6 text-gray-600 hover:text-gray-900 transition-colors"
               >
                 <ArrowLeft size={15} /> Journal
               </Link>
@@ -168,7 +168,7 @@ export default async function JournalArticlePage({ params }: Props) {
               </h1>
 
               {/* Meta */}
-              <div className={`flex flex-wrap items-center gap-5 text-sm ${post.coverImageUrl ? "text-white/80" : "text-gray-500"}`}>
+              <div className="flex flex-wrap items-center gap-5 text-sm text-gray-600">
                 <span className="font-semibold">{post.authorName}</span>
                 {post.publishedAt && (
                   <span className="flex items-center gap-1.5">
@@ -186,7 +186,7 @@ export default async function JournalArticlePage({ params }: Props) {
                 <CopyButton value={`${BASE_URL}/journal/${post.slug}`} label="Copy article link" />
               </div>
             </div>
-          </div>
+          </header>
 
           {/* Excerpt (if cover image present, show below header) */}
           {post.excerpt && (

@@ -225,3 +225,55 @@ test("homepage retains the preview while navigation opens internal pages directl
   await expect(page.getByRole("complementary", { name: "Site status" })).toHaveCount(0);
   expect(await page.evaluate(() => !document.getElementById("site-content")?.inert && document.body.style.overflow !== "hidden")).toBe(true);
 });
+
+test("journal titles and bylines remain readable with and without a cover at narrow widths", async ({ page }) => {
+  const post = await db.journalPost.create({ data: {
+    title: "Why a student community closed with money still in the bank and what founders can learn from its decisions",
+    slug: `journal-header-${randomUUID()}`, authorName: "Journal Layout Reviewer",
+    coverImageUrl: "/logo.png", contentHtml: "<p>A published layout fixture.</p>",
+    status: "PUBLISHED", publishedAt: new Date(), tags: [], metaKeywords: [], isFeatured: true,
+  } });
+  try {
+    for (const coverImageUrl of ["/logo.png", null]) {
+      await db.journalPost.update({ where: { id: post.id }, data: { coverImageUrl } });
+      for (const width of [375, 768, 1280]) {
+        await page.setViewportSize({ width, height: 900 });
+        await enter(page, `/journal/${post.slug}`);
+        const title = page.getByRole("heading", { level: 1, name: post.title });
+        await expect(title).toBeVisible();
+        // Check rendered colors against the nearest painted background, not Tailwind class names.
+        for (const text of [title, page.locator("article").getByText(post.authorName, { exact: true }).first()]) {
+          const contrast = await text.evaluate(element => {
+            const canvas = document.createElement("canvas");
+            canvas.width = canvas.height = 1;
+            const context = canvas.getContext("2d")!;
+            const rgb = (color: string) => {
+              context.clearRect(0, 0, 1, 1);
+              context.fillStyle = color;
+              context.fillRect(0, 0, 1, 1);
+              return Array.from(context.getImageData(0, 0, 1, 1).data);
+            };
+            const luminance = (color: number[]) => color.slice(0, 3).map(value => {
+              const channel = value / 255;
+              return channel <= 0.04045 ? channel / 12.92 : ((channel + 0.055) / 1.055) ** 2.4;
+            }).reduce((sum, value, index) => sum + value * [0.2126, 0.7152, 0.0722][index], 0);
+            let parent: Element | null = element;
+            let background = [255, 255, 255];
+            while (parent) {
+              const color = rgb(getComputedStyle(parent).backgroundColor);
+              if (color[3] > 0) { background = color; break; }
+              parent = parent.parentElement;
+            }
+            const foreground = luminance(rgb(getComputedStyle(element).color));
+            const backdrop = luminance(background);
+            return (Math.max(foreground, backdrop) + 0.05) / (Math.min(foreground, backdrop) + 0.05);
+          });
+          expect(contrast).toBeGreaterThanOrEqual(4.5);
+        }
+        expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+      }
+    }
+  } finally {
+    await db.journalPost.delete({ where: { id: post.id } });
+  }
+});

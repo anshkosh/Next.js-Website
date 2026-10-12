@@ -22,6 +22,8 @@ Use `seoMetadata()` from `lib/seo.ts` on every new public page so it gets a titl
 
 Admins write journal posts at `/admin/journal` (rich text via Quill), grouped by `JournalCategory`. Topics so far: regional ecosystems (Hyderabad, Bengaluru, Delhi-NCR), government support for startups, founder playbooks, campaign notes and case studies of listed startups.
 
+Articles with cover images use a white header panel with dark title, breadcrumb and byline text. The panel grows with wrapped titles and metadata, so readability does not depend on fitting everything inside the cover's fixed height. Articles without a cover keep their plain header.
+
 Reading times use `lib/journal-reading-time.mjs`: visible article text at 200 words per minute, rounded up with a one-minute minimum. Journal cards, featured articles, detail pages, related articles and the admin table calculate from the current body. Create, edit and import operations use the same estimate. Existing articles do not need a database rewrite merely to correct their displayed reading time.
 
 ## Listings and backlinks
