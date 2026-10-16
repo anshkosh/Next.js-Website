@@ -24,6 +24,7 @@ model User {
   accounts      Account[]
   startups      Startup[]
   journalPosts  JournalPost[]
+  founderEntries FounderJournalEntry[]
 }
 
 model Session {
@@ -121,6 +122,7 @@ model Startup {
   updates       StartupUpdate[]
   comments      Comment[]
   revision      StartupRevision?
+  founderEntries FounderJournalEntry[]
 
   @@index([founderId])
   @@index([categoryId])
@@ -285,6 +287,31 @@ model JournalPost {
   @@index([categoryId])
   @@index([isFeatured])
   @@index([publishedAt(sort: Desc)])
+}
+
+enum FounderEntryVisibility {
+  PRIVATE
+  PUBLIC
+}
+
+model FounderJournalEntry {
+  id            String @id @default(cuid())
+  authorId      String
+  author        User @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  startupId     String?
+  startup       Startup? @relation(fields: [startupId], references: [id], onDelete: SetNull)
+  title         String @db.VarChar(180)
+  body          String @db.VarChar(12000)
+  prompt        String @default("FREE_WRITE") @db.VarChar(30)
+  visibility    FounderEntryVisibility @default(PRIVATE)
+  milestone     String? @db.VarChar(180)
+  milestoneDone Boolean @default(false)
+  publishedAt   DateTime?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([authorId, updatedAt(sort: Desc)])
+  @@index([startupId, visibility, publishedAt(sort: Desc)])
 }
 
 model StartupUpdate {

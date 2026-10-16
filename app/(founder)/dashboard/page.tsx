@@ -7,6 +7,7 @@ import Image from "next/image";
 import { getSettingValue } from "@/app/actions/settings.actions";
 import SubmitReviewButton from "@/components/dashboard/SubmitReviewButton";
 import DeleteStartupButton from "@/components/dashboard/DeleteStartupButton";
+import FounderWorkspace from "@/components/dashboard/FounderWorkspace";
 import {
   Rocket,
   Star,
@@ -161,6 +162,8 @@ export default async function DashboardPage() {
             </div>
           </div>
         </div>
+
+        <FounderWorkspace />
 
         {/* Section Header */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
