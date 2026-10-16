@@ -115,10 +115,11 @@ interface FormState {
   token: string;
 }
 
-function CommentForm({ startupId, startupSlug, onSubmitted }: {
+function CommentForm({ startupId, startupSlug, onSubmitted, turnstileEnabled }: {
   startupId: string;
   startupSlug: string;
   onSubmitted: (name: string) => void;
+  turnstileEnabled: boolean;
 }) {
   const [form, setForm] = useState<FormState>({ name: "", email: "", body: "", token: "" });
   const [error, setError] = useState<string | null>(null);
@@ -136,7 +137,7 @@ function CommentForm({ startupId, startupSlug, onSubmitted }: {
       setError("Please fill in all fields.");
       return;
     }
-    if (!form.token) {
+    if (turnstileEnabled && !form.token) {
       setError("Please complete the CAPTCHA challenge.");
       return;
     }
@@ -225,10 +226,12 @@ function CommentForm({ startupId, startupSlug, onSubmitted }: {
         </div>
 
         {/* Turnstile */}
-        <TurnstileWidget
-          onToken={(token) => setForm((prev) => ({ ...prev, token }))}
-          onExpire={() => setForm((prev) => ({ ...prev, token: "" }))}
-        />
+        {turnstileEnabled && (
+          <TurnstileWidget
+            onToken={(token) => setForm((prev) => ({ ...prev, token }))}
+            onExpire={() => setForm((prev) => ({ ...prev, token: "" }))}
+          />
+        )}
 
         {/* Error */}
         {error && (
@@ -242,7 +245,7 @@ function CommentForm({ startupId, startupSlug, onSubmitted }: {
         <div className="flex items-center gap-4 flex-wrap">
           <button
             type="submit"
-            disabled={isPending || !form.token}
+            disabled={isPending || (turnstileEnabled && !form.token)}
             className="inline-flex items-center gap-2 px-6 py-2.5 bg-coral-500 hover:bg-coral-600 disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-semibold rounded-xl transition-colors shadow-sm"
           >
             {isPending ? (
@@ -275,6 +278,7 @@ interface DiscussionSectionProps {
   initialComments: PublicComment[];
   initialNextCursor: string | null;
   totalApprovedCount: number;
+  turnstileEnabled?: boolean;
 }
 
 export default function DiscussionSection({
@@ -283,6 +287,7 @@ export default function DiscussionSection({
   initialComments,
   initialNextCursor,
   totalApprovedCount,
+  turnstileEnabled = true,
 }: DiscussionSectionProps) {
   const [comments, setComments] = useState<PublicComment[]>(initialComments);
   const [nextCursor, setNextCursor] = useState<string | null>(initialNextCursor);
@@ -370,6 +375,7 @@ export default function DiscussionSection({
             startupId={startupId}
             startupSlug={startupSlug}
             onSubmitted={handleSubmitted}
+            turnstileEnabled={turnstileEnabled}
           />
         )}
 

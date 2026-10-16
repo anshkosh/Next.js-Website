@@ -359,6 +359,7 @@ export default async function StartupDetailPage(props: {
         <div id="section-questions" className="scroll-mt-32">
           <DiscussionSection
             startupId={startup.id}
+            turnstileEnabled={process.env.COMMENTS_TURNSTILE_ENABLED !== "false"}
             startupSlug={startup.slug}
             initialComments={initialComments.map((c) => ({
               ...c,
