@@ -34,10 +34,15 @@ export async function submitComment(formData: {
     const { startupId, authorName, authorEmail, body, turnstileToken } =
       parsed.data;
 
-    // Verify Turnstile CAPTCHA
-    const tokenValid = await verifyTurnstileToken(turnstileToken);
-    if (!tokenValid) {
-      return { error: "CAPTCHA verification failed. Please try again." };
+    // Only an explicit server setting can pause CAPTCHA; request data cannot opt out.
+    if (process.env.COMMENTS_TURNSTILE_ENABLED !== "false") {
+      if (!turnstileToken) {
+        return { error: "Please complete the CAPTCHA challenge." };
+      }
+      const tokenValid = await verifyTurnstileToken(turnstileToken);
+      if (!tokenValid) {
+        return { error: "CAPTCHA verification failed. Please try again." };
+      }
     }
 
     // Rate limiting: 3 comments per IP per hour

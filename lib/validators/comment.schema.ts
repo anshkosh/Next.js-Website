@@ -19,7 +19,8 @@ export const submitCommentSchema = z.object({
     .min(5, "Comment must be at least 5 characters")
     .max(2000, "Comment cannot exceed 2000 characters")
     .trim(),
-  turnstileToken: z.string().min(1, "Please complete the CAPTCHA challenge"),
+  // The server action decides whether CAPTCHA is required from its own configuration.
+  turnstileToken: z.string(),
 });
 
 export const replyToCommentSchema = z.object({
