@@ -8,6 +8,7 @@ import { getSettingValue } from "@/app/actions/settings.actions";
 import SubmitReviewButton from "@/components/dashboard/SubmitReviewButton";
 import DeleteStartupButton from "@/components/dashboard/DeleteStartupButton";
 import FounderWorkspace from "@/components/dashboard/FounderWorkspace";
+import DashboardOverview, { type DashboardNotice } from "@/components/dashboard/DashboardOverview";
 import {
   Rocket,
   Star,
@@ -20,6 +21,7 @@ import {
   MessageSquare,
   Zap,
   BookOpen,
+  MoreHorizontal,
 } from "lucide-react";
 
 const statusConfig = {
@@ -89,6 +91,48 @@ export default async function DashboardPage() {
   const totalSignals = startups.reduce((sum, s) => sum + s.signalCount, 0);
   const liveStartups = startups.filter((s) => s.status === "LIVE").length;
 
+  const journalReviews = await db.founderJournalRevision.findMany({
+    where: { entry: { authorId: session.user.id, visibility: "PUBLIC" }, status: { in: ["PENDING_REVIEW", "CHANGES_REQUESTED", "SCHEDULED"] } },
+    select: { id: true, status: true, scheduledAt: true, reviewerNotes: true },
+    orderBy: { updatedAt: "desc" }, take: 5,
+  });
+  const notices: DashboardNotice[] = startups.flatMap(startup => {
+    if (startup.revision?.status === "REJECTED" || startup.status === "REJECTED") return [{ id: startup.id, title: `${startup.name}: changes need attention`, detail: startup.revision?.notes || startup.adminNotes || "Review the feedback and resubmit your startup.", href: `/startup/${startup.id}/edit` }];
+    if (startup.status === "PENDING_REVIEW" || startup.revision?.status === "PENDING_REVIEW") return [{ id: startup.id, title: `${startup.name}: under review`, detail: "Your submission is awaiting a review.", href: `/startup/${startup.id}/edit` }];
+    if (startup.status === "SUSPENDED") return [{ id: startup.id, title: `${startup.name}: listing suspended`, detail: "Contact us for help with your listing.", href: "/contact" }];
+    return [];
+  });
+  for (const review of journalReviews) {
+    const scheduled = review.status === "SCHEDULED";
+    notices.push({ id: review.id, title: scheduled ? "Journal entry scheduled" : review.status === "CHANGES_REQUESTED" ? "Journal feedback is ready" : "Journal entry awaiting review", detail: scheduled && review.scheduledAt ? `Scheduled for ${review.scheduledAt.toLocaleString("en-IN", { timeZone: "Asia/Kolkata", dateStyle: "medium", timeStyle: "short" })} IST.` : review.reviewerNotes || "Open your journal to check the submission.", href: "/dashboard/journal", scheduled });
+  }
+  const draftStartup = startups.find(startup => startup.status === "DRAFT");
+  const liveStartup = startups.find(startup => startup.status === "LIVE");
+  const incomplete = liveStartup && (!liveStartup.logoUrl || !liveStartup.problemStatement || !liveStartup.solutionStatement);
+  const liveStartupIds = startups.filter(startup => startup.status === "LIVE").map(startup => startup.id);
+  const activitySince = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+  const journalDueSince = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+  const [latestJournal, recentMilestone, latestUpdate, recentFounderReply, communityStartup] = await Promise.all([
+    db.founderJournalEntry.findFirst({ where: { authorId: session.user.id }, select: { updatedAt: true }, orderBy: { updatedAt: "desc" } }),
+    db.founderJournalEntry.findFirst({ where: { authorId: session.user.id, milestoneDone: true, updatedAt: { gte: activitySince } }, select: { id: true } }),
+    liveStartupIds.length ? db.startupUpdate.findFirst({ where: { startupId: { in: liveStartupIds }, createdAt: { gte: activitySince } }, select: { id: true } }) : null,
+    liveStartupIds.length ? db.comment.findFirst({ where: { startupId: { in: liveStartupIds }, repliedAt: { gte: activitySince } }, select: { id: true } }) : null,
+    db.startup.findFirst({
+      where: { status: "LIVE", founderId: { not: session.user.id }, ...(session.user.email ? { comments: { none: { authorEmail: { equals: session.user.email, mode: "insensitive" }, status: { in: ["PENDING", "APPROVED"] } } } } : {}) },
+      select: { slug: true, name: true }, orderBy: [{ publishedAt: "desc" }, { id: "desc" }],
+    }),
+  ]);
+  const needsJournal = !latestJournal || latestJournal.updatedAt < journalDueSince;
+  const nextStep = draftStartup ? { title: `Finish ${draftStartup.name}`, detail: "Complete your draft and send it for review.", href: `/startup/${draftStartup.id}/edit`, label: "Continue draft" }
+    : incomplete ? { title: "Help people understand your startup", detail: "Add your logo, the problem you solve, and your solution to your profile.", href: `/startup/${liveStartup.id}/edit`, label: "Complete profile" }
+    : needsJournal ? { title: "Capture a lesson from your journey", detail: "What worked, what surprised you, and what will you try next? Keep it private or submit a journal story to share.", href: "/dashboard/journal", label: "Write in your journal" }
+    : liveStartup && !latestUpdate ? { title: liveStartup.updateCount === 0 ? "Share your first startup update" : "Share what you’re working on", detail: "Tell people about a product improvement, a customer insight, or what you plan to try next.", href: `/startup/${liveStartup.id}/updates`, label: "Write an update" }
+    : !recentMilestone ? { title: "Recognise a milestone", detail: "Mark a small win in your journal, note what it means, and choose whether to share it publicly.", href: "/dashboard/journal", label: "Record a milestone" }
+    : liveStartup && !recentFounderReply ? { title: "Continue a conversation", detail: "Reply to a question or piece of feedback on your startup. A thoughtful response helps your community take part.", href: `/startup/${liveStartup.id}/discussion`, label: "Join your discussion" }
+    : communityStartup ? { title: `Join ${communityStartup.name}’s discussion`, detail: "Offer one specific observation or ask a thoughtful question that helps this founder test an assumption.", href: `/startups/${communityStartup.slug}#section-questions`, label: "Share feedback" }
+    : liveStartup ? { title: "Keep building in public", detail: "Add a journal reflection, share a recent update, or celebrate a new milestone when you have something meaningful to share.", href: "/dashboard/journal", label: "Open your journal" }
+    : { title: "Explore another founder’s journey", detail: "Browse startups and share a useful question or piece of feedback with a founder.", href: "/discover", label: "Explore startups" };
+
   return (
     <div
       className="min-h-screen"
@@ -97,9 +141,9 @@ export default async function DashboardPage() {
           "linear-gradient(135deg, #fafafa 0%, #f0f4ff 40%, #fff5f2 100%)",
       }}
     >
-      <div className="container mx-auto px-4 py-10 md:py-14 max-w-6xl">
+      <div className="container mx-auto px-4 pt-7 pb-28 md:pt-10 max-w-6xl">
         {/* Welcome Header */}
-        <div className="mb-10">
+        <div className="mb-6">
           <h1 className="text-3xl md:text-4xl font-bold font-heading text-gray-900 tracking-tight">
             Welcome back,{" "}
             <span className="text-coral-500">
@@ -108,7 +152,7 @@ export default async function DashboardPage() {
             ! 👋
           </h1>
           <p className="text-gray-500 mt-2 text-base">
-            Here’s what’s happening with your startups today.
+            Your startup, your progress, your next move.
           </p>
         </div>
 
@@ -144,7 +188,6 @@ export default async function DashboardPage() {
               <p className="text-3xl font-bold text-gray-900 leading-none">
                 {totalSignals}
               </p>
-              <p className="mt-1 text-xs text-gray-500">Upvotes minus downvotes</p>
             </div>
           </div>
 
@@ -164,6 +207,8 @@ export default async function DashboardPage() {
           </div>
         </div>
 
+        <DashboardOverview notices={notices} nextStep={nextStep} />
+
         {/* Section Header */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
           <div>
@@ -174,29 +219,8 @@ export default async function DashboardPage() {
             </p>
           </div>
 
-          <div className="relative group">
-            {isAtLimit ? (
-              <button
-                disabled
-                className="flex items-center gap-2 px-5 py-2.5 bg-gray-200 text-gray-400 rounded-xl font-semibold cursor-not-allowed text-sm"
-              >
-                <Plus size={16} /> Submit a New Startup
-              </button>
-            ) : (
-              <Link
-                href="/startup/new"
-                className="flex items-center gap-2 px-5 py-2.5 bg-coral-500 text-white rounded-xl font-semibold hover:bg-coral-600 transition-colors shadow-sm text-sm"
-              >
-                <Plus size={16} /> Submit a New Startup
-              </Link>
-            )}
-            {isAtLimit && (
-              <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-max px-3 py-1.5 bg-gray-900 text-white text-xs font-medium rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10">
-                Maximum {maxStartups} startup{maxStartups === 1 ? "" : "s"}{" "}
-                allowed
-              </div>
-            )}
-          </div>
+          {!isAtLimit && <Link href="/startup/new" className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-coral-500 px-5 py-2.5 text-sm font-semibold text-white hover:bg-coral-600"><Plus size={16} /> Submit a New Startup</Link>}
+
         </div>
 
         {/* Startup Cards */}
@@ -221,7 +245,7 @@ export default async function DashboardPage() {
             <div className="mt-5 w-full max-w-md"><FounderWorkspace /></div>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+          <div className={`grid grid-cols-1 gap-5 ${startups.length > 1 ? "md:grid-cols-2" : ""}`}>
             {startups.map((startup) => {
               const cfg =
                 statusConfig[startup.status as keyof typeof statusConfig] ??
@@ -233,12 +257,13 @@ export default async function DashboardPage() {
                   className={`bg-white rounded-2xl border border-gray-100 border-t-4 ${cfg.borderCls} shadow-sm hover:shadow-lg transition-all duration-200 flex flex-col overflow-hidden relative group`}
                 >
                   {/* Delete button */}
-                  <div className="absolute top-3 right-3 z-10 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <DeleteStartupButton
+                  <details className="absolute top-3 right-3 z-10">
+                    <summary aria-label={`More actions for ${startup.name}`} className="flex min-h-11 min-w-11 cursor-pointer list-none items-center justify-center rounded-lg text-gray-500 hover:bg-gray-100 focus-visible:outline-2 focus-visible:outline-coral-500 [&::-webkit-details-marker]:hidden"><MoreHorizontal size={20} aria-hidden="true" /></summary>
+                    <div className="absolute right-0 flex items-center gap-3 whitespace-nowrap rounded-xl border border-gray-200 bg-white p-3 text-xs text-gray-600 shadow-lg">Delete startup<DeleteStartupButton
                       startupId={startup.id}
                       startupName={startup.name}
-                    />
-                  </div>
+                    /></div>
+                  </details>
 
                   {/* Card Body */}
                   <div className="p-5 flex items-start gap-4">
@@ -300,7 +325,7 @@ export default async function DashboardPage() {
 
                   {/* Card Footer — Status-aware actions */}
                   <div className="p-4">
-                    <div className="mb-3"><FounderWorkspace showJournal={startup.status !== "LIVE"} /></div>
+                    <div className="mb-3"><FounderWorkspace showJournal={startup.status !== "LIVE"} /><p className="mt-2 text-center text-xs leading-relaxed text-gray-500">Free tools to validate your idea, plan your runway, and prepare your launch.</p></div>
                     {/* LIVE */}
                     {startup.status === "LIVE" && (
                       <div className="space-y-2.5">
@@ -350,6 +375,7 @@ export default async function DashboardPage() {
                           </Link>
                           </div>
                         </div>
+                        <p className="text-xs leading-relaxed text-gray-500">Updates for announcements. Journal for reflections and stories. Discussion for conversations.</p>
                       </div>
                     )}
 
@@ -427,6 +453,7 @@ export default async function DashboardPage() {
             })}
           </div>
         )}
+        <p className="mt-8 border-t border-gray-200 pt-5 text-sm text-gray-600">Need a hand? <Link href="/contact" className="inline-flex min-h-11 items-center font-semibold text-coral-700 underline underline-offset-4">Contact us</Link></p>
       </div>
     </div>
   );
