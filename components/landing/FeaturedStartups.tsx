@@ -123,7 +123,6 @@ export default async function FeaturedStartups() {
                   );
                 })}
               </ol>
-              <p className="border-t border-gray-100 px-4 py-4 text-xs leading-relaxed text-gray-500 sm:px-6">Featured by Anshkosh. Ranked by the community. Signals = upvotes − downvotes. Votes reflect community opinion, not verified traction.</p>
         </div>
       </div>
     </section>
