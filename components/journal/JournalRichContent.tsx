@@ -29,7 +29,7 @@ export default function JournalRichContent({ content, fallback }: { content?: un
         if (attrs.italic) node = <em>{node}</em>;
         if (attrs.underline) node = <u>{node}</u>;
         if (attrs.strike) node = <s>{node}</s>;
-        if (attrs.link && safeJournalLink(attrs.link)) node = <a href={attrs.link} target="_blank" rel="noopener noreferrer" className="text-coral-700 underline">{node}</a>;
+        if (attrs.link && safeJournalLink(attrs.link)) node = <a href={attrs.link} target="_blank" rel="ugc noopener noreferrer" className="text-coral-700 underline">{node}</a>;
         current.push(<span key={key++}>{node}</span>);
       }
       if (index < parts.length - 1) { lines.push({ children: current, attributes: attrs }); current = []; }

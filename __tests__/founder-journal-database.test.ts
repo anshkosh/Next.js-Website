@@ -8,7 +8,7 @@ vi.mock("next/headers", () => ({ headers: async () => new Headers() }));
 vi.mock("next/cache", () => ({ revalidatePath: vi.fn() }));
 import { db } from "../lib/db";
 import { saveFounderEntry, deleteFounderEntry } from "../app/actions/founder-journal.actions";
-import { publicFounderEntries } from "../lib/founder-journal-queries";
+import { publicFounderEntries, publicFounderEntry } from "../lib/founder-journal-queries";
 
 const enabled = process.env.JOURNAL_DATABASE_TEST === "1";
 let author: string; let other: string; let startup: string; let otherStartup: string; let category: string;
@@ -42,6 +42,7 @@ it.skipIf(!enabled)("preserves privacy across real database creation, publicatio
   expect(entry.visibility).toBe("PRIVATE"); expect(entry.publishedAt).toBeNull();
   expect(entry.contentJson).toEqual(draft.contentJson);
   expect(await publicFounderEntries(startup, author)).toEqual([]);
+  expect(await publicFounderEntry(entry.id)).toBeNull();
   session.id = other;
   expect(await saveFounderEntry(entry.id, { ...draft, title: "Stolen" })).toHaveProperty("error");
   expect(await deleteFounderEntry(entry.id)).toHaveProperty("error");
@@ -49,14 +50,17 @@ it.skipIf(!enabled)("preserves privacy across real database creation, publicatio
   session.id = author;
   expect(await saveFounderEntry(entry.id, { ...draft, visibility: "PUBLIC" })).toEqual({ success: true });
   const publicRows = await publicFounderEntries(startup, author);
+  expect((await publicFounderEntry(entry.id))?.title).toBe(draft.title);
   expect(publicRows).toHaveLength(1); expect(publicRows[0].milestoneDone).toBe(true);
   expect(publicRows[0]).not.toHaveProperty("authorId");
   await db.startup.update({ where: { id: startup }, data: { status: "SUSPENDED" } });
+  expect(await publicFounderEntry(entry.id)).toBeNull();
   expect(await publicFounderEntries(startup, author)).toEqual([]);
   await db.startup.update({ where: { id: startup }, data: { status: "LIVE", founderId: other } });
   expect(await publicFounderEntries(startup, author)).toEqual([]);
   await db.startup.update({ where: { id: startup }, data: { founderId: author } });
   expect(await saveFounderEntry(entry.id, { ...draft, visibility: "PRIVATE" })).toEqual({ success: true });
+  expect(await publicFounderEntry(entry.id)).toBeNull();
   expect(await publicFounderEntries(startup, author)).toEqual([]);
   expect(await deleteFounderEntry(entry.id)).toEqual({ success: true });
   expect(await db.founderJournalEntry.findUnique({ where: { id: entry.id } })).toBeNull();

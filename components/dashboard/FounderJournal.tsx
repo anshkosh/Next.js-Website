@@ -9,6 +9,7 @@ import { saveFounderEntry, deleteFounderEntry } from "@/app/actions/founder-jour
 import { JOURNAL_PROMPTS } from "@/lib/founder-journal";
 import { journalDeltaSchema, journalPlainText, plainTextDelta } from "@/lib/journal-rich-text";
 import JournalRichContent from "@/components/journal/JournalRichContent";
+import { founderEntryPath } from "@/lib/founder-journal-seo";
 
 const QuillEditor = dynamic(() => import("@/components/admin/QuillEditor"), { ssr: false, loading: () => <p role="status" className="py-8 text-sm text-gray-500">Loading editor…</p> });
 
@@ -79,6 +80,12 @@ export default function FounderJournal({ entries, startups }: { entries: Entry[]
       } catch { setError("Could not delete your entry. Please try again."); }
     });
   }
+  async function copyEntryLink(entry: Entry) {
+    try {
+      await navigator.clipboard.writeText(new URL(founderEntryPath(entry), window.location.origin).href);
+      setStatus("Public entry link copied.");
+    } catch { setError("Open the shareable page and copy its address to share this entry."); }
+  }
 
   return <div className="grid items-start gap-8 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
     <section aria-labelledby="journal-editor" className="min-w-0 rounded-2xl border border-gray-200 bg-white p-5 sm:p-7">
@@ -132,7 +139,7 @@ export default function FounderJournal({ entries, startups }: { entries: Entry[]
               {startups.map(startup => <option key={startup.id} value={startup.id} disabled={draft.visibility === "PUBLIC" && startup.status !== "LIVE"}>{startup.name}{startup.status !== "LIVE" ? " (not live)" : ""}</option>)}
             </select>
           </label>
-          {draft.visibility === "PUBLIC" && <p className="rounded-xl border border-blue-200 bg-blue-50 p-4 text-sm leading-relaxed text-blue-900">{canPublish ? `Anyone visiting ${selected.name}'s startup page will be able to read this entry and its milestone. You can make it private again later, but people may already have copied it.` : "You need a live startup to share publicly. You can write and save private entries before your startup goes live."}</p>}
+          {draft.visibility === "PUBLIC" && <p className="rounded-xl border border-blue-200 bg-blue-50 p-4 text-sm leading-relaxed text-blue-900">{canPublish ? `Anyone visiting ${selected.name}'s startup page will be able to read this entry and its milestone. It will also have a shareable page that can appear in search results. You can make it private again later, but existing copies and search results may remain for a while.` : "You need a live startup to share publicly. You can write and save private entries before your startup goes live."}</p>}
           <div className="flex flex-wrap gap-3">
             <button type="button" onClick={() => setPreview(value => !value)} className={secondary}>{preview ? "Hide preview" : "Preview entry"}</button>
             <button type="submit" disabled={uploading || (draft.visibility === "PUBLIC" && !canPublish)} className="min-h-11 rounded-xl bg-coral-500 px-5 py-3 text-sm font-semibold text-white hover:bg-coral-600 disabled:cursor-not-allowed disabled:opacity-50">{uploading ? "Uploading image…" : pending ? "Saving…" : draft.visibility === "PUBLIC" ? "Save public entry" : "Save private entry"}</button>
@@ -163,6 +170,8 @@ export default function FounderJournal({ entries, startups }: { entries: Entry[]
         <div className="mt-4 flex flex-wrap items-center gap-3">
           <button type="button" disabled={pending || uploading} onClick={() => edit(entry)} className={secondary}>Read / edit<span className="sr-only"> {entry.title}</span></button>
           {entry.visibility === "PUBLIC" && entry.startup?.status === "LIVE" && <Link href={`/startups/${entry.startup.slug}#section-founder-journal`} className="inline-flex min-h-11 items-center text-sm font-semibold text-coral-700 hover:underline">View on startup</Link>}
+          {entry.visibility === "PUBLIC" && entry.startup?.status === "LIVE" && <Link href={founderEntryPath(entry)} className="inline-flex min-h-11 items-center text-sm font-semibold text-coral-700 hover:underline">Open shareable page</Link>}
+          {entry.visibility === "PUBLIC" && entry.startup?.status === "LIVE" && <button type="button" className="min-h-11 text-sm font-semibold text-coral-700 hover:underline" onClick={() => copyEntryLink(entry)}>Copy link<span className="sr-only"> for {entry.title}</span></button>}
           <button type="button" disabled={pending || uploading} onClick={() => setDeleting(entry.id)} className="min-h-11 text-sm text-red-700 hover:underline">Delete<span className="sr-only"> {entry.title}</span></button>
         </div>
         {deleting === entry.id && <div className="mt-4 rounded-xl border border-red-200 bg-red-50 p-4 text-sm"><p>Delete “{entry.title}”? This permanently removes it{entry.visibility === "PUBLIC" ? " from your journal and startup page" : ""}.</p><div className="mt-3 flex flex-wrap gap-3"><button type="button" disabled={pending || uploading} onClick={() => remove(entry.id)} className="min-h-11 rounded-xl bg-red-700 px-4 py-2 font-semibold text-white">Delete permanently</button><button type="button" disabled={pending || uploading} onClick={() => setDeleting(null)} className={secondary}>Keep entry</button></div></div>}

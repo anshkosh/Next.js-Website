@@ -11,6 +11,8 @@ import { Prisma } from "@prisma/client";
 function invalidate(slugs: (string | null | undefined)[]) {
   revalidatePath("/dashboard");
   revalidatePath("/dashboard/journal");
+  revalidatePath("/founder-journal/[id]/[slug]", "page");
+  revalidatePath("/sitemap.xml");
   for (const slug of new Set(slugs.filter(Boolean))) revalidatePath(`/startups/${slug}`);
 }
 

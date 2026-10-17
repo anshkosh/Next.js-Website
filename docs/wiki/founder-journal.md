@@ -15,6 +15,16 @@ Founders open their journal at `/dashboard/journal` or from the dashboard and fo
 
 Each startup card has compact Journal and “Tools to build and launch” buttons. On live startup cards, Journal sits alongside Updates and Discussion, below View Page and Edit; the tools button spans the card above these actions. The tools button replaces “Open free launch kit” and opens the full toolkit catalogue. The same resources are available in the no-startups state; there are no separate journal or tools promotional cards. Existing tools retain their current browser-local draft behavior.
 
+## Public entry pages and search
+
+Each public entry has a canonical `/founder-journal/{id}/{title-slug}` URL, reachable from its startup page and the owner's journal. The owner can open or copy the public link. Titles determine readable slugs; old title slugs redirect to the current canonical only after publication and ownership checks pass. Private entries have no public preview route, even for their author or an administrator.
+
+Pages include the entry title, a generated description, public founder attribution, publication/update dates, BlogPosting structured data, Open Graph/Twitter article metadata and the existing Anshkosh social image. Links lead back to the startup profile and its website. Founder-submitted outgoing links are attributed with `rel="ugc noopener noreferrer"`. Search visibility and ranking are not guaranteed.
+
+Public queries require explicit publication, a live attached startup and matching ownership. Missing/private/deleted/non-live/mismatched entries return 404 before metadata or redirects reveal their contents. Pages are rendered fresh per request. The sitemap is also dynamic and includes only public matching-owner entries, so withdrawal does not leave cached entry titles or links in it. Journal mutations invalidate entry pages and the sitemap. Previously downloaded copies and search-engine snippets may persist after withdrawal; the publishing notice explains this.
+
+The SEO addition passes 10 focused cases for metadata/canonicals, ownership and publication boundaries, redirects, structured-data escaping and sitemap removal. The latest full suite passes 344 tests, with the real-database case passing separately. A fictional local public story was checked in the browser. No additional database migration is required for public URLs.
+
 ## Database and release
 
 Apply the additive `20261016160000_founder_journal` and `20261017120000_founder_journal_rich_text` Prisma migrations before starting the new code. They create the founder journal table and add nullable Delta JSON and media-reference fields/indexes; they do not alter existing startup updates or editorial posts. Generate the Prisma client during installation/build.
