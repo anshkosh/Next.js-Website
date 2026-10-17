@@ -36,7 +36,16 @@ describe("TurnstileWidget", () => {
 
     expect(appendChild).toHaveBeenCalledOnce();
     expect(render).toHaveBeenCalledOnce();
-    expect(render.mock.calls[0][1]).toMatchObject({ sitekey: "test-site-key" });
+    expect(render.mock.calls[0][1]).toMatchObject({
+      sitekey: "test-site-key",
+      "error-callback": expect.any(Function),
+    });
+
+    await act(async () => {
+      const options = render.mock.calls[0][1] as Record<string, (code: string) => boolean>;
+      options["error-callback"]("110200");
+    });
+    expect(container.textContent).toContain("not configured for this website domain");
 
     await act(async () => root.unmount());
     expect(remove).toHaveBeenCalledWith("widget-1");
