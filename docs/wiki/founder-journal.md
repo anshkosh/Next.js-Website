@@ -12,7 +12,7 @@ Founders open their journal at `/dashboard/journal` or from the dashboard and fo
 - Entries attached to a suspended or non-live startup do not appear publicly. Deleting a startup detaches its entries rather than deleting the founder's journal. Public queries exclude detached entries.
 - Owner pages show 20 entries at a time; public startup pages show 10 with older/newer navigation. Entry bodies are plain text rendered through React escaping, not supplied HTML.
 
-Each startup card has compact Journal and “Explore all 9 free tools” buttons. The tools button replaces “Open free launch kit” and opens the full toolkit catalogue. The same buttons are available in the no-startups state; there are no separate journal or tools promotional cards. Existing tools retain their current browser-local draft behavior.
+Each startup card has compact Journal and “Explore all 9 free tools” buttons. On live startup cards, Journal sits alongside Updates and Discussion, below View Page and Edit; the tools button spans the card above these actions. The tools button replaces “Open free launch kit” and opens the full toolkit catalogue. The same resources are available in the no-startups state; there are no separate journal or tools promotional cards. Existing tools retain their current browser-local draft behavior.
 
 ## Database and release
 
