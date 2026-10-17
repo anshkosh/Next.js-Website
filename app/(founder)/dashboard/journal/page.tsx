@@ -28,16 +28,17 @@ export default async function JournalPage({ searchParams }: { searchParams: Prom
     <h1 className="mt-4 font-heading text-3xl font-bold text-gray-900 sm:text-4xl">Founder Journal</h1>
     <p className="mb-8 mt-3 max-w-2xl text-sm leading-relaxed text-gray-600">Keep a record of the journey. Write freely, use a prompt, or mark a milestone. Every entry starts private; you choose what to share on your startup page.</p>
     <FounderJournal entries={rows.slice(0, 20).map(row => {
+      const visibility = row.visibility === "PUBLIC" ? "PUBLIC" : "PRIVATE";
       const pending = row.revision && ["PENDING_REVIEW", "CHANGES_REQUESTED", "SCHEDULED"].includes(row.revision.status) ? row.revision : null;
       const parsed = pending ? founderEntrySchema.safeParse(pending.data) : null;
       const draft = parsed?.success ? parsed.data : null;
       const profile = draft?.startupId ? startups.find(startup => startup.id === draft.startupId) : row.startup;
       return { id: row.id, title: draft?.title ?? row.title, body: draft?.body ?? row.body, contentJson: draft ? draft.contentJson : row.contentJson,
-        prompt: draft?.prompt ?? row.prompt, visibility: draft?.visibility ?? row.visibility,
+        prompt: draft?.prompt ?? row.prompt, visibility: draft?.visibility ?? visibility,
         startupId: draft?.startupId ?? row.startupId, milestone: draft?.milestone ?? row.milestone, milestoneDone: draft?.milestoneDone ?? row.milestoneDone,
         updatedAt: row.updatedAt.toISOString(), startup: profile ? { name: profile.name, slug: profile.slug, status: profile.status } : null,
-        reviewStatus: pending?.status ?? (row.approvedAt && row.visibility === "PUBLIC" ? "PUBLISHED" : "PRIVATE"), reviewerNotes: pending?.reviewerNotes ?? null,
-        scheduledFor: pending?.scheduledAt ? istDateTimeInput(pending.scheduledAt) : "", liveVersion: Boolean(row.approvedAt && row.publishedAt && row.visibility === "PUBLIC"), publishedEntryPath: founderEntryPath(row), publishedStartupSlug: row.startup?.slug };
+        reviewStatus: pending?.status ?? (row.approvedAt && visibility === "PUBLIC" ? "PUBLISHED" : "PRIVATE"), reviewerNotes: pending?.reviewerNotes ?? null,
+        scheduledFor: pending?.scheduledAt ? istDateTimeInput(pending.scheduledAt) : "", liveVersion: Boolean(row.approvedAt && row.publishedAt && visibility === "PUBLIC"), publishedEntryPath: founderEntryPath(row), publishedStartupSlug: row.startup?.slug };
     })} startups={startups} />
     {(page > 1 || rows.length > 20) && <nav aria-label="Journal pages" className="mt-8 flex flex-wrap items-center gap-5 text-sm font-semibold">
       {page > 1 && <Link href={`/dashboard/journal?page=${page - 1}`} className="inline-flex min-h-11 items-center text-coral-700">← Newer entries</Link>}
