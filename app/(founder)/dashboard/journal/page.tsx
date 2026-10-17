@@ -15,7 +15,7 @@ export default async function JournalPage({ searchParams }: { searchParams: Prom
   const [rows, startups] = await Promise.all([
     db.founderJournalEntry.findMany({
       where: { authorId: session.user.id },
-      select: { id: true, title: true, body: true, prompt: true, visibility: true, startupId: true, milestone: true, milestoneDone: true, updatedAt: true, startup: { select: { name: true, slug: true, status: true } } },
+      select: { id: true, title: true, body: true, contentJson: true, prompt: true, visibility: true, startupId: true, milestone: true, milestoneDone: true, updatedAt: true, startup: { select: { name: true, slug: true, status: true } } },
       orderBy: [{ updatedAt: "desc" }, { id: "desc" }], skip: (page - 1) * 20, take: 21,
     }),
     db.startup.findMany({ where: { founderId: session.user.id }, select: { id: true, name: true, status: true }, orderBy: { name: "asc" } }),

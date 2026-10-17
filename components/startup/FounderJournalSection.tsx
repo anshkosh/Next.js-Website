@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { BookOpen } from "lucide-react";
 import type { publicFounderEntries } from "@/lib/founder-journal-queries";
+import JournalRichContent from "@/components/journal/JournalRichContent";
 
 export default function FounderJournalSection({ entries, slug, page }: {
   entries: Awaited<ReturnType<typeof publicFounderEntries>>; slug: string; page: number;
@@ -14,7 +15,7 @@ export default function FounderJournalSection({ entries, slug, page }: {
       {entries.slice(0, 10).map(entry => <article key={entry.id} className="min-w-0 rounded-xl border border-gray-200 p-5">
         {entry.publishedAt && <time className="text-xs text-gray-500" dateTime={entry.publishedAt.toISOString()}>{entry.publishedAt.toLocaleDateString("en-IN", { day: "numeric", month: "long", year: "numeric", timeZone: "Asia/Kolkata" })}</time>}
         <h3 className="mt-2 break-words text-lg font-bold text-gray-900">{entry.title}</h3>
-        <p className="mt-3 whitespace-pre-wrap break-words text-sm leading-relaxed text-gray-700">{entry.body}</p>
+        <div className="mt-3"><JournalRichContent content={entry.contentJson} fallback={entry.body} /></div>
         {entry.milestone && <p className="mt-4 break-words rounded-lg bg-slate-50 p-3 text-sm text-slate-700">{entry.milestoneDone ? "✓ Milestone complete" : "○ Milestone in progress"}: {entry.milestone}</p>}
       </article>)}
     </div>}

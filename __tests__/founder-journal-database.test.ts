@@ -36,10 +36,11 @@ afterAll(async () => {
 });
 
 it.skipIf(!enabled)("preserves privacy across real database creation, publication, owner changes, withdrawal and deletion", async () => {
-  const draft = { title: "Private decision", body: "Private customer notes", startupId: startup, milestone: "Interview five customers", milestoneDone: true };
+  const draft = { title: "Private decision", body: "Private customer notes", contentJson: { ops: [{ insert: "Private customer notes", attributes: { bold: true } }, { insert: "\n" }] }, startupId: startup, milestone: "Interview five customers", milestoneDone: true };
   expect(await saveFounderEntry(null, draft)).toEqual({ success: true });
   const entry = await db.founderJournalEntry.findFirstOrThrow({ where: { authorId: author } });
   expect(entry.visibility).toBe("PRIVATE"); expect(entry.publishedAt).toBeNull();
+  expect(entry.contentJson).toEqual(draft.contentJson);
   expect(await publicFounderEntries(startup, author)).toEqual([]);
   session.id = other;
   expect(await saveFounderEntry(entry.id, { ...draft, title: "Stolen" })).toHaveProperty("error");

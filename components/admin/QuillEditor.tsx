@@ -1,10 +1,15 @@
 "use client";
 
-import { useEffect, useRef, useCallback } from "react";
+import { useEffect, useRef } from "react";
+import type Quill from "quill";
 
 interface QuillEditorProps {
   value?: unknown; // Quill Delta JSON
-  onChange?: (delta: unknown, html: string) => void;
+  onChange?: (delta: unknown, html: string, text: string) => void;
+  imageUploadUrl?: string;
+  onUploadStateChange?: (uploading: boolean) => void;
+  readOnly?: boolean;
+  ariaLabel?: string;
   placeholder?: string;
   className?: string;
 }
@@ -14,36 +19,48 @@ export default function QuillEditor({
   onChange,
   placeholder = "Write your post content here…",
   className = "",
+  imageUploadUrl = "/api/uploads/journal",
+  onUploadStateChange,
+  readOnly = false,
+  ariaLabel = "Journal content",
 }: QuillEditorProps) {
   const editorRef = useRef<HTMLDivElement>(null);
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const quillRef = useRef<any>(null);
-  const initializedRef = useRef(false);
-
-  const uploadImageToR2 = useCallback(async (file: File): Promise<string | null> => {
-    const formData = new FormData();
-    formData.append("file", file);
-    try {
-      const res = await fetch("/api/uploads/journal", { method: "POST", body: formData });
-      if (!res.ok) return null;
-      const data = await res.json();
-      return data.url ?? null;
-    } catch {
-      return null;
+  const quillRef = useRef<Quill | null>(null);
+  const changeRef = useRef(onChange);
+  const valueRef = useRef(value);
+  const uploadRef = useRef(onUploadStateChange);
+  const readOnlyRef = useRef(readOnly);
+  useEffect(() => { changeRef.current = onChange; uploadRef.current = onUploadStateChange; }, [onChange, onUploadStateChange]);
+  useEffect(() => {
+    valueRef.current = value;
+    const q = quillRef.current;
+    const next = value ?? { ops: [{ insert: "\n" }] };
+    if (q && JSON.stringify(q.getContents()) !== JSON.stringify(next)) {
+      try { q.setContents(next as Parameters<Quill["setContents"]>[0], "silent"); } catch { /* Keep current content if a caller supplies an invalid Delta. */ }
     }
-  }, []);
+  }, [value]);
+  useEffect(() => {
+    readOnlyRef.current = readOnly;
+    const q = quillRef.current;
+    q?.enable(!readOnly);
+    editorRef.current?.querySelectorAll<HTMLButtonElement | HTMLSelectElement>(".ql-toolbar button, .ql-toolbar select").forEach(control => { control.disabled = readOnly; });
+  }, [readOnly]);
 
   useEffect(() => {
-    if (initializedRef.current || !editorRef.current) return;
-    initializedRef.current = true;
-
-    let quillInstance: unknown;
+    const host = editorRef.current;
+    if (!host) return;
+    let cancelled = false;
+    let quillInstance: Quill | undefined;
+    let changed: (() => void) | undefined;
 
     (async () => {
       const Quill = (await import("quill")).default;
 
       // Import Quill CSS
       await import("quill/dist/quill.snow.css");
+      if (cancelled) return;
+      const canvas = document.createElement("div");
+      host.replaceChildren(canvas);
 
       const toolbarOptions = [
         [{ header: [2, 3, 4, false] }],
@@ -54,7 +71,7 @@ export default function QuillEditor({
         ["clean"],
       ];
 
-      quillInstance = new Quill(editorRef.current!, {
+      quillInstance = new Quill(canvas, {
         theme: "snow",
         placeholder,
         modules: {
@@ -62,6 +79,7 @@ export default function QuillEditor({
             container: toolbarOptions,
             handlers: {
               image: function () {
+                if (readOnlyRef.current) return;
                 const input = document.createElement("input");
                 input.setAttribute("type", "file");
                 input.setAttribute("accept", "image/png,image/jpeg,image/webp,image/gif");
@@ -71,17 +89,19 @@ export default function QuillEditor({
                   const file = input.files?.[0];
                   if (!file) return;
 
-                  const url = await uploadImageToR2(file);
-                  if (!url) {
-                    alert("Image upload failed. Please try again.");
-                    return;
-                  }
-
-                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                  const q = quillInstance as any;
-                  const range = q.getSelection(true);
-                  q.insertEmbed(range.index, "image", url);
-                  q.setSelection(range.index + 1);
+                  uploadRef.current?.(true);
+                  try {
+                    const data = new FormData(); data.append("file", file);
+                    const response = await fetch(imageUploadUrl, { method: "POST", body: data });
+                    const result = await response.json();
+                    if (!response.ok || !result.url) throw new Error(result.error || "Image upload failed. Please try again.");
+                    if (cancelled || !quillInstance) return;
+                    const range = quillInstance.getSelection(true);
+                    quillInstance.insertEmbed(range.index, "image", result.url);
+                    quillInstance.setSelection(range.index + 1);
+                  } catch (error) {
+                    if (!cancelled) alert(error instanceof Error ? error.message : "Image upload failed. Please try again.");
+                  } finally { if (!cancelled) uploadRef.current?.(false); }
                 };
               },
             },
@@ -90,33 +110,37 @@ export default function QuillEditor({
       });
 
       quillRef.current = quillInstance;
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const q = quillInstance as any;
+      const q = quillInstance;
+      q.root.setAttribute("role", "textbox");
+      q.root.setAttribute("aria-label", ariaLabel);
+      q.root.setAttribute("aria-multiline", "true");
+      q.enable(!readOnlyRef.current);
 
       // Set initial content if provided
-      if (value) {
+      if (valueRef.current) {
         try {
-          q.setContents(value);
+          q.setContents(valueRef.current as Parameters<Quill["setContents"]>[0]);
         } catch {
           // ignore invalid delta
         }
       }
 
       // Listen for changes
-      q.on("text-change", () => {
+      changed = () => {
         const delta = q.getContents();
-        const html = editorRef.current?.querySelector(".ql-editor")?.innerHTML ?? "";
-        onChange?.(delta, html);
-      });
+        changeRef.current?.(delta, q.root.innerHTML, q.getText());
+      };
+      q.on("text-change", changed);
     })();
 
     return () => {
-      // Quill v2 doesn't have a destroy() API, just clean up the DOM
+      cancelled = true;
+      if (quillInstance && changed) quillInstance.off("text-change", changed);
+      quillInstance?.disable();
       quillRef.current = null;
-      initializedRef.current = false;
+      host.replaceChildren();
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [imageUploadUrl, placeholder, ariaLabel]);
 
   return (
     <div className={`quill-wrapper ${className}`}>

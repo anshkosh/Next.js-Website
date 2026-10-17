@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { journalDeltaSchema, journalPlainText } from "@/lib/journal-rich-text";
 
 export const JOURNAL_PROMPTS = {
   FREE_WRITE: { label: "Free writing", text: "" },
@@ -10,13 +11,16 @@ export const JOURNAL_PROMPTS = {
 
 export const founderEntrySchema = z.object({
   title: z.string().trim().min(1, "Give your entry a title.").max(180),
-  body: z.string().trim().min(1, "Write something before saving.").max(12000),
+  body: z.string().trim().max(12000).default(""),
+  contentJson: journalDeltaSchema.nullable().optional(),
   prompt: z.enum(["FREE_WRITE", "PROGRESS", "BLOCKER", "LESSON", "WEEKLY"]).default("FREE_WRITE"),
   visibility: z.enum(["PRIVATE", "PUBLIC"]).default("PRIVATE"),
   startupId: z.string().trim().max(100).nullable().optional(),
   milestone: z.string().trim().max(180).default(""),
   milestoneDone: z.boolean().default(false),
 }).superRefine((entry, ctx) => {
+  const text = entry.contentJson ? journalPlainText(entry.contentJson) : entry.body;
+  if (!text || text.length > 12000) ctx.addIssue({ code: "custom", path: ["body"], message: text ? "Keep your entry under 12,000 characters." : "Write something before saving." });
   if (entry.visibility === "PUBLIC" && !entry.startupId) {
     ctx.addIssue({ code: "custom", path: ["startupId"], message: "Choose a live startup for your public entry." });
   }

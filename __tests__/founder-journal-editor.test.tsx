@@ -3,6 +3,9 @@ import { createRoot, type Root } from "react-dom/client";
 import { afterEach, beforeEach, expect, it, vi } from "vitest";
 const m = vi.hoisted(() => ({ save: vi.fn(), remove: vi.fn(), refresh: vi.fn() }));
 vi.mock("next/navigation", () => ({ useRouter: () => ({ refresh: m.refresh }) }));
+vi.mock("next/dynamic", () => ({ default: () => function MockQuill({ value, onChange }: { value?: { ops: { insert: string }[] }; onChange: (delta: unknown, html: string, text: string) => void }) {
+  return <textarea aria-label="Your entry" value={value?.ops.map(op => op.insert).join("").trimEnd() ?? ""} onChange={event => onChange({ ops: [{ insert: `${event.target.value}\n` }] }, "", event.target.value)} />;
+} }));
 vi.mock("@/app/actions/founder-journal.actions", () => ({ saveFounderEntry: m.save, deleteFounderEntry: m.remove }));
 import FounderJournal from "../components/dashboard/FounderJournal";
 let root: Root; let container: HTMLDivElement;

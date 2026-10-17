@@ -1,12 +1,12 @@
 // @vitest-environment node
 import { beforeEach, describe, expect, it, vi } from "vitest";
-const m = vi.hoisted(() => ({ session: vi.fn(), find: vi.fn(), startup: vi.fn(), create: vi.fn(), update: vi.fn(), remove: vi.fn(), revalidate: vi.fn() }));
+const m = vi.hoisted(() => ({ session: vi.fn(), find: vi.fn(), startup: vi.fn(), create: vi.fn(), update: vi.fn(), remove: vi.fn(), revalidate: vi.fn(), media: vi.fn() }));
 vi.mock("@/lib/auth", () => ({ auth: { api: { getSession: m.session } } }));
 vi.mock("next/headers", () => ({ headers: async () => new Headers() }));
 vi.mock("next/cache", () => ({ revalidatePath: m.revalidate }));
 vi.mock("@/lib/db", () => {
   const tx = { founderJournalEntry: { findFirst: m.find, create: m.create, updateMany: m.update, deleteMany: m.remove }, startup: { findFirst: m.startup } };
-  return { db: { ...tx, $transaction: async (fn: (tx: object) => unknown) => fn(tx) } };
+  return { db: { ...tx, mediaUpload: { count: m.media }, $transaction: async (fn: (tx: object) => unknown) => fn(tx) } };
 });
 import { saveFounderEntry, deleteFounderEntry } from "../app/actions/founder-journal.actions";
 const entry = { title: "A lesson", body: "Customers wanted fewer features.", visibility: "PRIVATE" };
@@ -68,5 +68,23 @@ describe("founder journal authorization and visibility", () => {
     m.create.mockRejectedValueOnce(new Error("private journal body + database credentials"));
     const result = await saveFounderEntry(null, entry);
     expect(result).toHaveProperty("error"); expect(JSON.stringify(result)).not.toContain("credentials");
+  });
+  it("derives saved text from the validated Delta and ignores client HTML or forged summary text", async () => {
+    const contentJson = { ops: [{ insert: "Rich text", attributes: { bold: true } }, { insert: "\n" }] };
+    expect(await saveFounderEntry(null, { ...entry, body: "Forged summary", contentHtml: "<script>bad()</script>", contentJson })).toEqual({ success: true });
+    const data = m.create.mock.calls[0][0].data;
+    expect(data.body).toBe("Rich text"); expect(data.contentJson).toEqual(contentJson); expect(data).not.toHaveProperty("contentHtml");
+  });
+  it("rejects another founder's images, including images that were previously public", async () => {
+    const contentJson = { ops: [{ insert: { image: "/api/uploads/serve/founder-journal/someone-else/12345678-1234-1234-1234-123456789abc.webp" } }] };
+    expect(await saveFounderEntry(null, { ...entry, contentJson })).toHaveProperty("error"); expect(m.create).not.toHaveBeenCalled();
+  });
+  it("requires an owned upload record before attaching an image", async () => {
+    const contentJson = { ops: [{ insert: { image: "/api/uploads/serve/founder-journal/owner/12345678-1234-1234-1234-123456789abc.webp" } }] };
+    m.media.mockResolvedValueOnce(0);
+    expect(await saveFounderEntry(null, { ...entry, contentJson })).toHaveProperty("error"); expect(m.create).not.toHaveBeenCalled();
+    m.media.mockResolvedValueOnce(1);
+    expect(await saveFounderEntry(null, { ...entry, contentJson })).toEqual({ success: true });
+    expect(m.create.mock.calls[0][0].data.mediaKeys).toEqual(["founder-journal/owner/12345678-1234-1234-1234-123456789abc.webp"]);
   });
 });

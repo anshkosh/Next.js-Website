@@ -5,6 +5,8 @@ import { db } from "@/lib/db";
 import { headers } from "next/headers";
 import { revalidatePath } from "next/cache";
 import { founderEntrySchema } from "@/lib/founder-journal";
+import { journalMediaKeys, journalPlainText } from "@/lib/journal-rich-text";
+import { Prisma } from "@prisma/client";
 
 function invalidate(slugs: (string | null | undefined)[]) {
   revalidatePath("/dashboard");
@@ -20,6 +22,10 @@ export async function saveFounderEntry(id: string | null, input: unknown) {
   if (id !== null && (typeof id !== "string" || !id || id.length > 100)) return { error: "Entry not found." };
 
   try {
+    const rich = parsed.data.contentJson;
+    const mediaKeys = rich ? journalMediaKeys(rich) : [];
+    if (mediaKeys.some(key => !key.startsWith(`founder-journal/${session.user.id}/`))) return { error: "Use images uploaded to your own journal." };
+    if (mediaKeys.length && await db.mediaUpload.count({ where: { userId: session.user.id, key: { in: mediaKeys } } }) !== mediaKeys.length) return { error: "One of these images is unavailable. Upload it again before saving." };
     const result = await db.$transaction(async (tx) => {
       const existing = id ? await tx.founderJournalEntry.findFirst({
         where: { id, authorId: session.user.id }, include: { startup: { select: { slug: true } } },
@@ -35,6 +41,9 @@ export async function saveFounderEntry(id: string | null, input: unknown) {
       if (entry.visibility === "PUBLIC" && startup?.status !== "LIVE") return { error: "Public entries need a live startup. You can save this entry privately." };
       const data = {
         ...entry, startupId: startup?.id ?? null,
+        body: rich ? journalPlainText(rich) : entry.body,
+        contentJson: rich ?? Prisma.DbNull,
+        mediaKeys,
         milestone: entry.milestone || null,
         milestoneDone: Boolean(entry.milestone && entry.milestoneDone),
         publishedAt: entry.visibility === "PUBLIC" ? existing?.publishedAt ?? new Date() : null,

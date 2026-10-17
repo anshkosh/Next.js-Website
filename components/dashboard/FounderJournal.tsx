@@ -1,20 +1,25 @@
 "use client";
 
 import Link from "next/link";
+import dynamic from "next/dynamic";
 import { useEffect, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { BookOpen, Globe, LockKeyhole } from "lucide-react";
 import { saveFounderEntry, deleteFounderEntry } from "@/app/actions/founder-journal.actions";
 import { JOURNAL_PROMPTS } from "@/lib/founder-journal";
+import { journalDeltaSchema, journalPlainText, plainTextDelta } from "@/lib/journal-rich-text";
+import JournalRichContent from "@/components/journal/JournalRichContent";
+
+const QuillEditor = dynamic(() => import("@/components/admin/QuillEditor"), { ssr: false, loading: () => <p role="status" className="py-8 text-sm text-gray-500">Loading editor…</p> });
 
 type Prompt = keyof typeof JOURNAL_PROMPTS;
-type Draft = { title: string; body: string; prompt: Prompt; visibility: "PRIVATE" | "PUBLIC"; startupId: string; milestone: string; milestoneDone: boolean };
+type Draft = { title: string; body: string; contentJson?: unknown; prompt: Prompt; visibility: "PRIVATE" | "PUBLIC"; startupId: string; milestone: string; milestoneDone: boolean };
 type Entry = Omit<Draft, "prompt" | "startupId" | "milestone"> & {
   id: string; prompt: string; startupId: string | null; milestone: string | null; updatedAt: string;
   startup: { name: string; slug: string; status: string } | null;
 };
 type Startup = { id: string; name: string; status: string };
-const empty: Draft = { title: "", body: "", prompt: "FREE_WRITE", visibility: "PRIVATE", startupId: "", milestone: "", milestoneDone: false };
+const empty: Draft = { title: "", body: "", contentJson: null, prompt: "FREE_WRITE", visibility: "PRIVATE", startupId: "", milestone: "", milestoneDone: false };
 const field = "mt-2 block w-full rounded-xl border border-gray-300 bg-white px-3 py-3 text-base text-gray-900 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-coral-600";
 const secondary = "min-h-11 rounded-xl border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50 disabled:opacity-50";
 
@@ -28,6 +33,7 @@ export default function FounderJournal({ entries, startups }: { entries: Entry[]
   const [status, setStatus] = useState("");
   const [preview, setPreview] = useState(false);
   const [deleting, setDeleting] = useState<string | null>(null);
+  const [uploading, setUploading] = useState(false);
   const selected = startups.find(startup => startup.id === draft.startupId);
   const canPublish = selected?.status === "LIVE";
 
@@ -47,11 +53,12 @@ export default function FounderJournal({ entries, startups }: { entries: Entry[]
   }
   function edit(entry: Entry) {
     if (dirty && !window.confirm("Discard your unsaved changes and open this entry?")) return;
-    setDraft({ title: entry.title, body: entry.body, prompt: entry.prompt in JOURNAL_PROMPTS ? entry.prompt as Prompt : "FREE_WRITE", visibility: entry.visibility, startupId: entry.startupId ?? "", milestone: entry.milestone ?? "", milestoneDone: entry.milestoneDone });
+    setDraft({ title: entry.title, body: entry.body, contentJson: entry.contentJson ?? plainTextDelta(entry.body), prompt: entry.prompt in JOURNAL_PROMPTS ? entry.prompt as Prompt : "FREE_WRITE", visibility: entry.visibility, startupId: entry.startupId ?? "", milestone: entry.milestone ?? "", milestoneDone: entry.milestoneDone });
     setEditing(entry.id); setDirty(false); setPreview(false); setError(""); setStatus("");
     document.getElementById("entry-title")?.focus();
   }
   function save() {
+    if (uploading) return;
     startTransition(async () => {
       try {
         const result = await saveFounderEntry(editing, { ...draft, startupId: draft.startupId || null });
@@ -77,10 +84,10 @@ export default function FounderJournal({ entries, startups }: { entries: Entry[]
     <section aria-labelledby="journal-editor" className="min-w-0 rounded-2xl border border-gray-200 bg-white p-5 sm:p-7">
       <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
         <h2 id="journal-editor" className="font-heading text-xl font-bold">{editing ? "Edit entry" : "New entry"}</h2>
-        {editing && <button type="button" disabled={pending} className={secondary} onClick={() => { if (!dirty || window.confirm("Discard your unsaved changes?")) reset(); }}>New entry</button>}
+        {editing && <button type="button" disabled={pending || uploading} className={secondary} onClick={() => { if (!dirty || window.confirm("Discard your unsaved changes?")) reset(); }}>New entry</button>}
       </div>
       <form onSubmit={event => { event.preventDefault(); save(); }} className="space-y-5">
-        <fieldset disabled={pending} className="space-y-5 disabled:opacity-60">
+        <fieldset disabled={pending || uploading} className="space-y-5 disabled:opacity-60">
           <label className="block text-sm font-semibold">Entry style
             <select value={draft.prompt} onChange={event => change({ prompt: event.target.value as Prompt })} className={field}>
               {Object.entries(JOURNAL_PROMPTS).map(([value, prompt]) => <option key={value} value={value}>{prompt.label}</option>)}
@@ -88,14 +95,21 @@ export default function FounderJournal({ entries, startups }: { entries: Entry[]
           </label>
           {draft.prompt !== "FREE_WRITE" && <aside className="rounded-xl border-l-4 border-coral-400 bg-coral-50 p-4 text-sm leading-relaxed text-gray-700">
             <p className="whitespace-pre-line">{JOURNAL_PROMPTS[draft.prompt].text}</p>
-            <button type="button" className="mt-2 min-h-11 font-semibold text-coral-700 hover:underline" onClick={() => change({ body: draft.body ? `${draft.body}\n\n${JOURNAL_PROMPTS[draft.prompt].text}` : JOURNAL_PROMPTS[draft.prompt].text })}>Add prompts to my entry</button>
+            <button type="button" disabled={uploading} className="mt-2 min-h-11 font-semibold text-coral-700 hover:underline" onClick={() => {
+              const parsed = journalDeltaSchema.safeParse(draft.contentJson);
+              const contentJson = { ops: [...(parsed.success ? parsed.data : plainTextDelta(draft.body)).ops, { insert: `${draft.body ? "\n" : ""}${JOURNAL_PROMPTS[draft.prompt].text}\n` }] };
+              change({ body: journalPlainText(contentJson), contentJson });
+            }}>Add prompts to my entry</button>
           </aside>}
           <label className="block text-sm font-semibold">Title
             <input id="entry-title" required maxLength={180} value={draft.title} onChange={event => change({ title: event.target.value })} className={field} placeholder="What is on your mind?" />
           </label>
-          <label className="block text-sm font-semibold">Your entry
-            <textarea required maxLength={12000} rows={10} value={draft.body} onChange={event => change({ body: event.target.value })} className={`${field} resize-y font-normal leading-relaxed`} placeholder="Ideas, decisions, progress, or a lesson worth keeping…" />
-          </label>
+          <div><p className="mb-3 text-sm font-semibold">Your entry</p>
+            <QuillEditor value={draft.contentJson ?? plainTextDelta(draft.body)} ariaLabel="Your entry" readOnly={pending || uploading} imageUploadUrl="/api/uploads/founder-journal" onUploadStateChange={setUploading} placeholder="Ideas, decisions, progress, or a lesson worth keeping…" onChange={(delta, _html, text) => {
+              const parsed = journalDeltaSchema.safeParse(delta);
+              change({ body: parsed.success ? journalPlainText(parsed.data) : text.trim(), contentJson: delta });
+            }} />
+          </div>
           <p className="text-right text-xs text-gray-500">{draft.body.length.toLocaleString()} / 12,000 characters</p>
           <div className="rounded-xl bg-gray-50 p-4">
             <label className="block text-sm font-semibold">Milestone (optional)
@@ -121,14 +135,14 @@ export default function FounderJournal({ entries, startups }: { entries: Entry[]
           {draft.visibility === "PUBLIC" && <p className="rounded-xl border border-blue-200 bg-blue-50 p-4 text-sm leading-relaxed text-blue-900">{canPublish ? `Anyone visiting ${selected.name}'s startup page will be able to read this entry and its milestone. You can make it private again later, but people may already have copied it.` : "You need a live startup to share publicly. You can write and save private entries before your startup goes live."}</p>}
           <div className="flex flex-wrap gap-3">
             <button type="button" onClick={() => setPreview(value => !value)} className={secondary}>{preview ? "Hide preview" : "Preview entry"}</button>
-            <button type="submit" disabled={draft.visibility === "PUBLIC" && !canPublish} className="min-h-11 rounded-xl bg-coral-500 px-5 py-3 text-sm font-semibold text-white hover:bg-coral-600 disabled:cursor-not-allowed disabled:opacity-50">{pending ? "Saving…" : draft.visibility === "PUBLIC" ? "Save public entry" : "Save private entry"}</button>
+            <button type="submit" disabled={uploading || (draft.visibility === "PUBLIC" && !canPublish)} className="min-h-11 rounded-xl bg-coral-500 px-5 py-3 text-sm font-semibold text-white hover:bg-coral-600 disabled:cursor-not-allowed disabled:opacity-50">{uploading ? "Uploading image…" : pending ? "Saving…" : draft.visibility === "PUBLIC" ? "Save public entry" : "Save private entry"}</button>
           </div>
         </fieldset>
       </form>
       {preview && <article aria-label="Entry preview" className="mt-6 space-y-3 rounded-xl border border-gray-200 p-5">
         <p className="text-xs font-semibold text-gray-600">Preview · {draft.visibility === "PRIVATE" ? "Private · Only you" : `Public · ${selected?.name ?? "Choose a startup"}`}</p>
         <h3 className="break-words text-xl font-bold">{draft.title || "Untitled entry"}</h3>
-        <p className="whitespace-pre-wrap break-words text-sm leading-relaxed">{draft.body || "Your entry will appear here."}</p>
+        <JournalRichContent content={draft.contentJson} fallback={draft.body || "Your entry will appear here."} />
         {draft.milestone && <p className="break-words text-sm">{draft.milestoneDone ? "✓ Completed" : "○ In progress"}: {draft.milestone}</p>}
       </article>}
       {error && <p role="alert" className="mt-4 text-sm text-red-700">{error}</p>}
@@ -147,11 +161,11 @@ export default function FounderJournal({ entries, startups }: { entries: Entry[]
         {entry.milestone && <p className="mt-3 break-words text-sm text-slate-700">{entry.milestoneDone ? "✓ Completed" : "○ In progress"}: {entry.milestone}</p>}
         {entry.startup && <p className="mt-3 text-xs text-gray-500">{entry.startup.name}{entry.visibility === "PUBLIC" && entry.startup.status !== "LIVE" ? " · Hidden while startup is not live" : ""}</p>}
         <div className="mt-4 flex flex-wrap items-center gap-3">
-          <button type="button" disabled={pending} onClick={() => edit(entry)} className={secondary}>Read / edit<span className="sr-only"> {entry.title}</span></button>
+          <button type="button" disabled={pending || uploading} onClick={() => edit(entry)} className={secondary}>Read / edit<span className="sr-only"> {entry.title}</span></button>
           {entry.visibility === "PUBLIC" && entry.startup?.status === "LIVE" && <Link href={`/startups/${entry.startup.slug}#section-founder-journal`} className="inline-flex min-h-11 items-center text-sm font-semibold text-coral-700 hover:underline">View on startup</Link>}
-          <button type="button" disabled={pending} onClick={() => setDeleting(entry.id)} className="min-h-11 text-sm text-red-700 hover:underline">Delete<span className="sr-only"> {entry.title}</span></button>
+          <button type="button" disabled={pending || uploading} onClick={() => setDeleting(entry.id)} className="min-h-11 text-sm text-red-700 hover:underline">Delete<span className="sr-only"> {entry.title}</span></button>
         </div>
-        {deleting === entry.id && <div className="mt-4 rounded-xl border border-red-200 bg-red-50 p-4 text-sm"><p>Delete “{entry.title}”? This permanently removes it{entry.visibility === "PUBLIC" ? " from your journal and startup page" : ""}.</p><div className="mt-3 flex flex-wrap gap-3"><button type="button" disabled={pending} onClick={() => remove(entry.id)} className="min-h-11 rounded-xl bg-red-700 px-4 py-2 font-semibold text-white">Delete permanently</button><button type="button" disabled={pending} onClick={() => setDeleting(null)} className={secondary}>Keep entry</button></div></div>}
+        {deleting === entry.id && <div className="mt-4 rounded-xl border border-red-200 bg-red-50 p-4 text-sm"><p>Delete “{entry.title}”? This permanently removes it{entry.visibility === "PUBLIC" ? " from your journal and startup page" : ""}.</p><div className="mt-3 flex flex-wrap gap-3"><button type="button" disabled={pending || uploading} onClick={() => remove(entry.id)} className="min-h-11 rounded-xl bg-red-700 px-4 py-2 font-semibold text-white">Delete permanently</button><button type="button" disabled={pending || uploading} onClick={() => setDeleting(null)} className={secondary}>Keep entry</button></div></div>}
       </article>)}</div>}
     </section>
   </div>;

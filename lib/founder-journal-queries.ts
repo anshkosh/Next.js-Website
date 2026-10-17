@@ -6,7 +6,7 @@ import { db } from "@/lib/db";
 export async function publicFounderEntries(startupId: string, authorId: string, page = 1) {
   return db.founderJournalEntry.findMany({
     where: { startupId, authorId, visibility: "PUBLIC", startup: { status: "LIVE", founderId: authorId } },
-    select: { id: true, title: true, body: true, milestone: true, milestoneDone: true, publishedAt: true },
+    select: { id: true, title: true, body: true, contentJson: true, milestone: true, milestoneDone: true, publishedAt: true },
     orderBy: [{ publishedAt: "desc" }, { id: "desc" }],
     skip: (page - 1) * 10,
     take: 11,

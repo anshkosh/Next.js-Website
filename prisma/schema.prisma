@@ -302,6 +302,8 @@ model FounderJournalEntry {
   startup       Startup? @relation(fields: [startupId], references: [id], onDelete: SetNull)
   title         String @db.VarChar(180)
   body          String @db.VarChar(12000)
+  contentJson   Json?
+  mediaKeys     String[] @default([])
   prompt        String @default("FREE_WRITE") @db.VarChar(30)
   visibility    FounderEntryVisibility @default(PRIVATE)
   milestone     String? @db.VarChar(180)
@@ -312,6 +314,7 @@ model FounderJournalEntry {
 
   @@index([authorId, updatedAt(sort: Desc)])
   @@index([startupId, visibility, publishedAt(sort: Desc)])
+  @@index([mediaKeys], type: Gin)
 }
 
 model StartupUpdate {

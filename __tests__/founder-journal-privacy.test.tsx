@@ -16,7 +16,7 @@ beforeEach(() => { vi.clearAllMocks(); m.find.mockResolvedValue([]); m.startups.
 it("public reads exclude private entries and non-live or mismatched startups in the database query", async () => {
   await publicFounderEntries("startup-a", "founder-a", 2);
   expect(m.find).toHaveBeenCalledWith(expect.objectContaining({ where: { startupId: "startup-a", authorId: "founder-a", visibility: "PUBLIC", startup: { status: "LIVE", founderId: "founder-a" } }, skip: 10, take: 11 }));
-  expect(m.find.mock.calls[0][0].select).toEqual({ id: true, title: true, body: true, milestone: true, milestoneDone: true, publishedAt: true });
+  expect(m.find.mock.calls[0][0].select).toEqual({ id: true, title: true, body: true, contentJson: true, milestone: true, milestoneDone: true, publishedAt: true });
 });
 it("requires a session before reading the private journal", async () => {
   m.session.mockResolvedValue(null);
@@ -28,7 +28,7 @@ it("only loads the current founder's entries and disables indexing", async () =>
   expect(metadata.robots).toEqual({ index: false, follow: false });
 });
 it("escapes founder content instead of rendering supplied HTML", () => {
-  const html = renderToStaticMarkup(<FounderJournalSection page={1} slug="startup" entries={[{ id: "entry", title: "<script>bad()</script>", body: '<img src=x onerror="bad()">', milestone: null, milestoneDone: false, publishedAt: new Date("2026-10-16") }]} />);
+  const html = renderToStaticMarkup(<FounderJournalSection page={1} slug="startup" entries={[{ id: "entry", title: "<script>bad()</script>", body: '<img src=x onerror="bad()">', contentJson: null, milestone: null, milestoneDone: false, publishedAt: new Date("2026-10-16") }]} />);
   expect(html).not.toContain("<script>"); expect(html).not.toContain("<img"); expect(html).toContain("&lt;script&gt;");
 });
 it("offers compact journal and all-tools buttons without separate promotional cards", () => {
