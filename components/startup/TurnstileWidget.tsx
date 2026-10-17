@@ -81,7 +81,7 @@ export default function TurnstileWidget({
   const widgetIdRef = useRef<string | null>(null);
   const onTokenRef = useRef(onToken);
   const onExpireRef = useRef(onExpire);
-  const [loadError, setLoadError] = useState(false);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const siteKey = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
 
   useEffect(() => {
@@ -113,12 +113,21 @@ export default function TurnstileWidget({
           sitekey: siteKey,
           callback: (token: string) => onTokenRef.current(token),
           "expired-callback": () => onExpireRef.current?.(),
+          "error-callback": (errorCode: string) => {
+            console.error("[TurnstileWidget] Cloudflare error:", errorCode);
+            setLoadError(
+              errorCode === "110200"
+                ? "CAPTCHA is not configured for this website domain. Please contact support."
+                : "CAPTCHA could not load. Please refresh and try again."
+            );
+            return true;
+          },
           theme: "light",
           size: "normal",
         });
       } catch (error) {
         console.error("[TurnstileWidget] Failed to render widget:", error);
-        setLoadError(true);
+        setLoadError("CAPTCHA could not load. Please refresh and try again.");
       }
     };
 
@@ -128,7 +137,7 @@ export default function TurnstileWidget({
       loadTurnstile().then(renderWidget).catch((error) => {
         if (!disposed) {
           console.error("[TurnstileWidget] Failed to load widget:", error);
-          setLoadError(true);
+          setLoadError("CAPTCHA could not load. Please refresh and try again.");
         }
       });
     }
@@ -163,7 +172,7 @@ export default function TurnstileWidget({
   if (loadError) {
     return (
       <p className={`text-sm text-red-600 ${className ?? ""}`} role="alert">
-        CAPTCHA could not load. Please refresh and try again.
+        {loadError}
       </p>
     );
   }
