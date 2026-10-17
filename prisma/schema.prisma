@@ -237,7 +237,6 @@ model FeaturedStartup {
 enum JournalPostStatus {
   DRAFT
   PUBLISHED
-  SCHEDULED
 }
 
 model JournalCategory {
@@ -291,23 +290,18 @@ model JournalPost {
   @@index([publishedAt(sort: Desc)])
 }
 
-enum FounderEntryVisibility {
-  PRIVATE
-  PUBLIC
-}
-
 model FounderJournalEntry {
   id            String @id @default(cuid())
   authorId      String
-  author        User @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  author        User @relation(fields: [authorId], references: [id], onDelete: NoAction, onUpdate: NoAction)
   startupId     String?
-  startup       Startup? @relation(fields: [startupId], references: [id], onDelete: SetNull)
+  startup       Startup? @relation(fields: [startupId], references: [id], onDelete: NoAction, onUpdate: NoAction)
   title         String @db.VarChar(180)
   body          String @db.VarChar(12000)
   contentJson   Json?
   mediaKeys     String[] @default([])
   prompt        String @default("FREE_WRITE") @db.VarChar(30)
-  visibility    FounderEntryVisibility @default(PRIVATE)
+  visibility    String @default("PRIVATE") @db.VarChar(10)
   milestone     String? @db.VarChar(180)
   milestoneDone Boolean @default(false)
   publishedAt   DateTime?
@@ -324,7 +318,7 @@ model FounderJournalEntry {
 model FounderJournalRevision {
   id            String @id @default(cuid())
   entryId       String @unique
-  entry         FounderJournalEntry @relation(fields: [entryId], references: [id], onDelete: Cascade)
+  entry         FounderJournalEntry @relation(fields: [entryId], references: [id], onDelete: NoAction, onUpdate: NoAction)
   data          Json
   status        String @default("PENDING_REVIEW") @db.VarChar(30)
   version       Int @default(1)

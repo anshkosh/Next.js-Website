@@ -27,7 +27,15 @@ export default async function AdminJournalPage(props: {
 
   const where: Record<string, unknown> = {};
   if (q) where.title = { contains: q, mode: "insensitive" };
-  if (["DRAFT", "PUBLISHED", "SCHEDULED"].includes(status)) where.status = status;
+  if (status === "SCHEDULED") {
+    where.status = "DRAFT";
+    where.scheduledAt = { not: null };
+  } else if (status === "DRAFT") {
+    where.status = "DRAFT";
+    where.scheduledAt = null;
+  } else if (status === "PUBLISHED") {
+    where.status = "PUBLISHED";
+  }
   if (categoryId) where.categoryId = categoryId;
 
   const [posts, totalCount, categories] = await Promise.all([
@@ -127,7 +135,9 @@ export default async function AdminJournalPage(props: {
                 </TableCell>
               </TableRow>
             ) : (
-              posts.map(post => (
+              posts.map(post => {
+                const displayStatus = post.status === "DRAFT" && post.scheduledAt ? "SCHEDULED" : post.status;
+                return (
                 <TableRow key={post.id}>
                   <TableCell className="font-medium max-w-[260px]">
                     <span className="line-clamp-2">{post.title}</span>
@@ -135,14 +145,14 @@ export default async function AdminJournalPage(props: {
                   <TableCell>
                     <span className="text-xs text-gray-500">{post.category?.name ?? "—"}</span>
                   </TableCell>
-                  <TableCell>{getStatusBadge(post.status)}</TableCell>
+                  <TableCell>{getStatusBadge(displayStatus)}</TableCell>
                   <TableCell className="text-sm text-gray-600">{post.authorName}</TableCell>
                   <TableCell className="text-sm text-gray-500">{calculateReadingTime(post.contentHtml)}m</TableCell>
                   <TableCell>
                     {post.isFeatured && <Star size={14} className="text-amber-400 fill-amber-400" />}
                   </TableCell>
                   <TableCell className="text-sm text-gray-500">
-                    {post.status === "SCHEDULED" && post.scheduledAt ? `${post.scheduledAt.toLocaleString("en-IN", { timeZone: "Asia/Kolkata", day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" })} IST` : (post.publishedAt ?? post.createdAt).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric", timeZone: "Asia/Kolkata" })}
+                    {displayStatus === "SCHEDULED" && post.scheduledAt ? `${post.scheduledAt.toLocaleString("en-IN", { timeZone: "Asia/Kolkata", day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" })} IST` : (post.publishedAt ?? post.createdAt).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric", timeZone: "Asia/Kolkata" })}
                   </TableCell>
                   <TableCell className="text-right">
                     <div className="flex justify-end items-center gap-1.5">
@@ -156,11 +166,11 @@ export default async function AdminJournalPage(props: {
                         className="px-3 py-1 text-xs font-medium bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-md transition-colors">
                         Edit
                       </Link>
-                      <JournalAdminActions postId={post.id} status={post.status} />
+                      <JournalAdminActions postId={post.id} status={displayStatus} />
                     </div>
                   </TableCell>
                 </TableRow>
-              ))
+              ); })
             )}
           </TableBody>
         </Table>

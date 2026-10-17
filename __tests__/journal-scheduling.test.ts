@@ -33,7 +33,7 @@ describe("scheduled publisher", () => {
   it("limits publishing to approved due revisions and scheduled due admin posts", async () => {
     await publishScheduledJournals(now);
     expect(m.list).toHaveBeenCalledWith(expect.objectContaining({ where: { status: "SCHEDULED", scheduledAt: { lte: now } } }));
-    expect(m.admins).toHaveBeenCalledWith({ where: { status: "SCHEDULED", scheduledAt: { lte: now } }, data: { status: "PUBLISHED", publishedAt: now, scheduledAt: null } });
+    expect(m.admins).toHaveBeenCalledWith({ where: { status: "DRAFT", scheduledAt: { lte: now } }, data: { status: "PUBLISHED", publishedAt: now, scheduledAt: null } });
   });
   it.each([null, { status: "PENDING_REVIEW", scheduledAt: now }, { status: "SCHEDULED", scheduledAt: new Date("2027-01-01") }])("rechecks revision state under a lock before publishing", async revision => {
     m.list.mockResolvedValue([{ id: "revision", entryId: "entry" }]); m.revision.mockResolvedValue(revision);
@@ -56,7 +56,7 @@ describe("admin scheduling", () => {
   });
   it("schedules drafts without marking them published and refuses live posts", async () => {
     expect(await scheduleJournalPost("post", "2027-01-01T12:00")).toEqual({ success: true });
-    expect(m.admins).toHaveBeenCalledWith(expect.objectContaining({ data: { status: "SCHEDULED", scheduledAt: new Date("2027-01-01T06:30:00Z"), publishedAt: null } }));
+    expect(m.admins).toHaveBeenCalledWith(expect.objectContaining({ where: { id: "post", status: "DRAFT" }, data: { scheduledAt: new Date("2027-01-01T06:30:00Z"), publishedAt: null } }));
     m.post.mockResolvedValue({ slug: "live", status: "PUBLISHED" });
     expect(await scheduleJournalPost("post", "2027-01-01T12:00")).toHaveProperty("error");
   });
