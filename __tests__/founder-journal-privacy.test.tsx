@@ -33,7 +33,7 @@ it("escapes founder content instead of rendering supplied HTML", () => {
 });
 it("offers compact journal and all-tools buttons without separate promotional cards", () => {
   const html = renderToStaticMarkup(<Workspace />);
-  expect(html).toContain("Explore all 9 free tools");
+  expect(html).toContain("Tools to build and launch");
   expect(html).not.toContain("<h2");
   expect(html).toContain('/dashboard/journal'); expect(html).toContain('/launch-support#tools-heading');
 });
