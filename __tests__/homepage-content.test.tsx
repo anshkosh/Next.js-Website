@@ -3,10 +3,9 @@ import { renderToStaticMarkup } from "react-dom/server";
 import FeaturedStartups from "../components/landing/FeaturedStartups";
 import LandingFounderStory from "../components/landing/LandingFounderStory";
 
-const queries = vi.hoisted(() => ({ featured: vi.fn(), founder: vi.fn(), categories: vi.fn(), cookies: vi.fn() }));
+const queries = vi.hoisted(() => ({ featured: vi.fn(), categories: vi.fn(), cookies: vi.fn() }));
 vi.mock("@/lib/db", () => ({ db: {
   featuredStartup: { findMany: queries.featured },
-  startup: { findFirst: queries.founder },
   category: { findMany: queries.categories },
 } }));
 vi.mock("next/headers", () => ({ cookies: queries.cookies }));
@@ -34,6 +33,7 @@ describe("homepage public content", () => {
     expect(html).toContain('aria-label="Remove upvote for Public startup, 12 upvotes"');
     expect(html).toContain('aria-pressed="true"');
     expect(html).toContain("SaaS");
+    expect(html).not.toContain("Featured by Anshkosh. Ranked by the community.");
   });
 
   it("shows real zero-vote profiles without claiming a community leader", async () => {
@@ -60,22 +60,10 @@ describe("homepage public content", () => {
     expect(html).not.toContain('href="/startups/');
   });
 
-  it("uses only public profile fields for the founder excerpt and escapes user-authored statements", async () => {
-    queries.founder.mockResolvedValue({ name: "A real startup", slug: "real-startup", founderName: "A founder", problemStatement: "<script>test</script>" });
-    const html = renderToStaticMarkup(await LandingFounderStory());
-    expect(queries.founder).toHaveBeenCalledWith(expect.objectContaining({
-      where: { status: "LIVE", problemStatement: { not: null } },
-      select: { name: true, slug: true, founderName: true, problemStatement: true },
-    }));
-    expect(html).toContain("&lt;script&gt;test&lt;/script&gt;");
-    expect(html).not.toContain("<script>");
-    expect(html).toContain('href="/startups/real-startup"');
-  });
-
-  it("does not fabricate a founder story when no public excerpt is available", async () => {
-    queries.founder.mockResolvedValue(null);
+  it("keeps the founder section focused on the founder steps without a profile excerpt", async () => {
     const html = renderToStaticMarkup(await LandingFounderStory());
     expect(html).not.toContain("From a founder’s profile");
+    expect(html).not.toContain("A public profile excerpt");
     expect(html).toContain('href="/startup/new"');
   });
 });

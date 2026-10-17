@@ -19,8 +19,8 @@ export default async function HomePage() {
   return (
     <div className="w-full">
       <LandingHero />
-      <FeaturedStartups />
       <LandingFounderStory />
+      <FeaturedStartups />
       <LandingParticipation />
       <LandingMission />
       <LandingFAQTeaser />
