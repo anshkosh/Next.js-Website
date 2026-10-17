@@ -40,7 +40,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     select: { slug: true, updatedAt: true },
   });
   const founderEntries = await db.founderJournalEntry.findMany({
-    where: { visibility: "PUBLIC", publishedAt: { not: null }, startup: { status: "LIVE" } },
+    where: { visibility: "PUBLIC", approvedAt: { not: null }, publishedAt: { lte: new Date() }, startup: { status: "LIVE" } },
     select: { id: true, title: true, updatedAt: true, authorId: true, startup: { select: { founderId: true } } },
   });
 

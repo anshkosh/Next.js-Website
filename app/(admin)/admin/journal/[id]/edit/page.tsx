@@ -24,6 +24,7 @@ export default async function EditJournalPostPage(props: { params: Promise<{ id:
         contentJson: true,
         contentHtml: true,
         status: true,
+        scheduledAt: true,
         isFeatured: true,
         tags: true,
         metaTitle: true,
@@ -47,7 +48,8 @@ export default async function EditJournalPostPage(props: { params: Promise<{ id:
         categories={categories}
         post={{
           ...post,
-          status: post.status as "DRAFT" | "PUBLISHED",
+          status: post.status,
+          scheduledAt: post.scheduledAt?.toISOString() ?? null,
         }}
       />
     </div>

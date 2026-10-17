@@ -6,7 +6,7 @@ import { publishJournalPost, unpublishJournalPost, deleteJournalPost } from "@/a
 
 interface JournalAdminActionsProps {
   postId: string;
-  status: "DRAFT" | "PUBLISHED";
+  status: "DRAFT" | "PUBLISHED" | "SCHEDULED";
 }
 
 export default function JournalAdminActions({ postId, status }: JournalAdminActionsProps) {
@@ -49,7 +49,7 @@ export default function JournalAdminActions({ postId, status }: JournalAdminActi
           onClick={handleUnpublish}
           className="px-3 py-1 text-xs font-medium bg-amber-50 text-amber-700 hover:bg-amber-100 rounded-md transition-colors border border-amber-200"
         >
-          Unpublish
+          {status === "SCHEDULED" ? "Cancel schedule" : "Unpublish"}
         </button>
       )}
       <button

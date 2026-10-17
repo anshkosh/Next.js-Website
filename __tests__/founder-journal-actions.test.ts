@@ -1,18 +1,19 @@
 // @vitest-environment node
 import { beforeEach, describe, expect, it, vi } from "vitest";
-const m = vi.hoisted(() => ({ session: vi.fn(), find: vi.fn(), startup: vi.fn(), create: vi.fn(), update: vi.fn(), remove: vi.fn(), revalidate: vi.fn(), media: vi.fn() }));
+const m = vi.hoisted(() => ({ session: vi.fn(), find: vi.fn(), startup: vi.fn(), create: vi.fn(), update: vi.fn(), remove: vi.fn(), revalidate: vi.fn(), media: vi.fn(), query: vi.fn(), revision: vi.fn(), clearRevision: vi.fn() }));
 vi.mock("@/lib/auth", () => ({ auth: { api: { getSession: m.session } } }));
 vi.mock("next/headers", () => ({ headers: async () => new Headers() }));
 vi.mock("next/cache", () => ({ revalidatePath: m.revalidate }));
 vi.mock("@/lib/db", () => {
-  const tx = { founderJournalEntry: { findFirst: m.find, create: m.create, updateMany: m.update, deleteMany: m.remove }, startup: { findFirst: m.startup } };
+  const tx = { founderJournalEntry: { findFirst: m.find, create: m.create, updateMany: m.update, deleteMany: m.remove }, startup: { findFirst: m.startup }, $queryRaw: m.query, founderJournalRevision: { upsert: m.revision, deleteMany: m.clearRevision } };
   return { db: { ...tx, mediaUpload: { count: m.media }, $transaction: async (fn: (tx: object) => unknown) => fn(tx) } };
 });
 import { saveFounderEntry, deleteFounderEntry } from "../app/actions/founder-journal.actions";
 const entry = { title: "A lesson", body: "Customers wanted fewer features.", visibility: "PRIVATE" };
 beforeEach(() => {
   vi.clearAllMocks(); m.session.mockResolvedValue({ user: { id: "owner", emailVerified: true, banned: false } });
-  m.find.mockResolvedValue({ id: "entry", publishedAt: new Date("2026-10-01"), startup: { slug: "old-startup" } });
+  m.find.mockResolvedValue({ id: "entry", visibility: "PUBLIC", approvedAt: new Date("2026-10-01"), publishedAt: new Date("2026-10-01"), startup: { slug: "old-startup" } });
+  m.create.mockResolvedValue({ id: "new-entry" }); m.query.mockResolvedValue([]);
   m.startup.mockResolvedValue({ id: "startup", slug: "new-startup", status: "LIVE" });
   m.update.mockResolvedValue({ count: 1 }); m.remove.mockResolvedValue({ count: 1 });
 });
@@ -45,9 +46,10 @@ describe("founder journal authorization and visibility", () => {
     expect(await saveFounderEntry(null, { ...entry, visibility: "PUBLIC", startupId: "startup" })).toHaveProperty("error");
     expect(m.create).not.toHaveBeenCalled();
   });
-  it("publishes only to the owned live startup and invalidates old and new public pages", async () => {
+  it("submits an owned live startup revision without replacing its approved version", async () => {
     expect(await saveFounderEntry("entry", { ...entry, visibility: "PUBLIC", startupId: "startup", milestone: "First customer", milestoneDone: true })).toEqual({ success: true });
-    expect(m.update).toHaveBeenCalledWith({ where: { id: "entry", authorId: "owner" }, data: expect.objectContaining({ visibility: "PUBLIC", startupId: "startup", milestoneDone: true, publishedAt: new Date("2026-10-01") }) });
+    expect(m.update).not.toHaveBeenCalled();
+    expect(m.revision).toHaveBeenCalledWith(expect.objectContaining({ where: { entryId: "entry" }, create: expect.objectContaining({ status: "PENDING_REVIEW", data: expect.objectContaining({ visibility: "PUBLIC", startupId: "startup", milestoneDone: true }) }) }));
     expect(m.revalidate).toHaveBeenCalledWith("/startups/old-startup"); expect(m.revalidate).toHaveBeenCalledWith("/startups/new-startup");
   });
   it("withdraws a public entry, including from a suspended startup", async () => {

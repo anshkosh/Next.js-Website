@@ -15,7 +15,7 @@ beforeEach(() => { vi.clearAllMocks(); m.find.mockResolvedValue([]); m.startups.
 
 it("public reads exclude private entries and non-live or mismatched startups in the database query", async () => {
   await publicFounderEntries("startup-a", "founder-a", 2);
-  expect(m.find).toHaveBeenCalledWith(expect.objectContaining({ where: { startupId: "startup-a", authorId: "founder-a", visibility: "PUBLIC", startup: { status: "LIVE", founderId: "founder-a" } }, skip: 10, take: 11 }));
+  expect(m.find).toHaveBeenCalledWith(expect.objectContaining({ where: { startupId: "startup-a", authorId: "founder-a", visibility: "PUBLIC", approvedAt: { not: null }, publishedAt: { lte: expect.any(Date) }, startup: { status: "LIVE", founderId: "founder-a" } }, skip: 10, take: 11 }));
   expect(m.find.mock.calls[0][0].select).toEqual({ id: true, title: true, body: true, contentJson: true, milestone: true, milestoneDone: true, publishedAt: true });
 });
 it("requires a session before reading the private journal", async () => {

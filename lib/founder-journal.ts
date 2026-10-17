@@ -18,6 +18,7 @@ export const founderEntrySchema = z.object({
   startupId: z.string().trim().max(100).nullable().optional(),
   milestone: z.string().trim().max(180).default(""),
   milestoneDone: z.boolean().default(false),
+  scheduledFor: z.string().max(16).default(""),
 }).superRefine((entry, ctx) => {
   const text = entry.contentJson ? journalPlainText(entry.contentJson) : entry.body;
   if (!text || text.length > 12000) ctx.addIssue({ code: "custom", path: ["body"], message: text ? "Keep your entry under 12,000 characters." : "Write something before saving." });

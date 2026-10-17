@@ -29,6 +29,7 @@ export default function AdminSidebar({ role, pendingReviewCount, pendingCommentC
     { name: "Comments", href: "/admin/comments", icon: MessageSquare, roles: ["admin", "reviewer"], badge: pendingCommentCount },
     { name: "Categories", href: "/admin/categories", icon: Tags, roles: ["admin", "reviewer"] },
     { name: "Journal", href: "/admin/journal", icon: BookOpen, roles: ["admin"] },
+    { name: "Founder Journal review", href: "/admin/founder-journal", icon: BookOpen, roles: ["admin", "reviewer"] },
     { name: "Settings", href: "/admin/settings", icon: Settings, roles: ["admin"] },
     { name: "Admins", href: "/admin/admins", icon: Users, roles: ["admin"] },
   ];

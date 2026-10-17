@@ -5,8 +5,8 @@ Founders open their journal at `/dashboard/journal` or from the dashboard and fo
 ## Visibility and ownership
 
 - New entries default to `PRIVATE` in the database, server validation, and editor. They are account-backed; unsaved text is not written to browser storage.
-- Every owner read and mutation is scoped to the current authenticated user's ID. Saving and deleting require an email-verified, unbanned account. There is no administrator read/edit shortcut.
-- `PUBLIC` requires a selected startup belonging to that founder with status `LIVE`. The editor names the startup before saving and offers a preview. The optional milestone is public along with the entry.
+- Every owner read and mutation is scoped to the current authenticated user's ID. Saving and deleting require an email-verified, unbanned account. There is no administrator read/edit shortcut for private entries; reviewers only receive actively submitted public revisions.
+- `PUBLIC` requires a selected startup belonging to that founder with status `LIVE`. Saving submits a revision for review; it does not immediately publish. The optional milestone is public along with the approved entry.
 - The startup detail page displays public entries under **Founder Journal**, separate from existing Founder Updates and editorial Journal articles. Public queries filter by visibility, live startup, and matching founder, and use a separate field projection. Private entries never enter the public component payload, including when the viewer is their author.
 - Returning an entry to private clears its publication timestamp and invalidates both the owner views and affected startup pages. Previous readers may retain their own copies; withdrawing an entry cannot revoke those copies.
 - Entries attached to a suspended or non-live startup do not appear publicly. Deleting a startup detaches its entries rather than deleting the founder's journal. Public queries exclude detached entries.
@@ -23,11 +23,21 @@ Pages include the entry title, a generated description, public founder attributi
 
 Public queries require explicit publication, a live attached startup and matching ownership. Missing/private/deleted/non-live/mismatched entries return 404 before metadata or redirects reveal their contents. Pages are rendered fresh per request. The sitemap is also dynamic and includes only public matching-owner entries, so withdrawal does not leave cached entry titles or links in it. Journal mutations invalidate entry pages and the sitemap. Previously downloaded copies and search-engine snippets may persist after withdrawal; the publishing notice explains this.
 
-The SEO addition passes 10 focused cases for metadata/canonicals, ownership and publication boundaries, redirects, structured-data escaping and sitemap removal. The latest full suite passes 344 tests, with the real-database case passing separately. A fictional local public story was checked in the browser. No additional database migration is required for public URLs.
+SEO checks cover metadata/canonicals, ownership and publication boundaries, redirects, structured-data escaping and sitemap removal. A fictional local public story was checked in the browser.
+
+## Review and scheduling
+
+Private entries need no review. Public submissions appear at `/admin/founder-journal` for verified administrators and reviewers. Reviewers can approve or request changes with a note, shown in the founder dashboard. Notes are not sent by email. Existing approved content stays live while a replacement is reviewed; version checks prevent approval of an obsolete submission.
+
+Founders can optionally choose a future publication time in IST. Approval before that time queues publication. If review occurs after the requested time, the submission returns with a note to choose a new time. Founders can resubmit or immediately make an entry private to cancel its review/schedule and withdraw the live version. Pending and scheduled revisions are excluded from public pages, metadata, sitemap and anonymous image access.
+
+The editorial admin Journal also supports a future IST date/time on new or draft posts, rescheduling, and **Cancel schedule** to return to draft. Immediate publication remains available. Live posts must be unpublished before scheduling.
+
+The existing BullMQ sync worker registers a `journal-publication` job every minute. It publishes only due scheduled posts, rechecks founder revisions under a transaction lock, and retries failures. Restart the sync worker when deploying this change so it registers the job. Publication can be delayed by worker/Redis outages; it is not an exact-second guarantee. Public editorial Journal routes render fresh so newly published posts appear without worker-side Next.js cache calls.
 
 ## Database and release
 
-Apply the additive `20261016160000_founder_journal` and `20261017120000_founder_journal_rich_text` Prisma migrations before starting the new code. They create the founder journal table and add nullable Delta JSON and media-reference fields/indexes; they do not alter existing startup updates or editorial posts. Generate the Prisma client during installation/build.
+Apply `20261016160000_founder_journal`, `20261017120000_founder_journal_rich_text`, and `20261017130000_journal_review_and_scheduling` before starting the new code. The last migration adds review revisions, approval timestamps and editorial schedules; existing published founder entries are backfilled as approved. Generate the Prisma client during installation/build and restart the sync worker.
 
 This feature has been built and tested locally; it is not a production deployment. The production comment-Turnstile pause and Google OAuth replacement from 16 October are separate runtime/release changes. Preserve them when preparing a release and check the active production marker and environment rather than deploying an older local baseline wholesale.
 
@@ -35,7 +45,7 @@ Code rollback can use the previous release while retaining the new table and use
 
 ## Validation
 
-- Latest full suite after rich-editor integration: 334 tests passed; the separate opt-in database case is skipped in the default run and passed separately against disposable PostgreSQL.
+- Latest full suite: 359 tests passed; two opt-in database cases are skipped in the default run and passed separately against disposable PostgreSQL.
 - Editor coverage includes private defaults/reset, retained text on save failure, explicit startup choice for publication, and non-destructive weekly prompts.
 - Prisma validation, TypeScript, changed-file ESLint and optimized Next.js build passed.
 - Migration applied successfully to local disposable PostgreSQL database `anshkosh_e2e`. An opt-in real-database test passed for private creation, publication, cross-owner denial, suspension/owner-change exclusion, withdrawal and deletion.

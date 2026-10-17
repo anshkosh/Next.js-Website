@@ -14,13 +14,15 @@ import { founderEntryPath } from "@/lib/founder-journal-seo";
 const QuillEditor = dynamic(() => import("@/components/admin/QuillEditor"), { ssr: false, loading: () => <p role="status" className="py-8 text-sm text-gray-500">Loading editor…</p> });
 
 type Prompt = keyof typeof JOURNAL_PROMPTS;
-type Draft = { title: string; body: string; contentJson?: unknown; prompt: Prompt; visibility: "PRIVATE" | "PUBLIC"; startupId: string; milestone: string; milestoneDone: boolean };
+type Draft = { title: string; body: string; contentJson?: unknown; scheduledFor?: string; prompt: Prompt; visibility: "PRIVATE" | "PUBLIC"; startupId: string; milestone: string; milestoneDone: boolean };
 type Entry = Omit<Draft, "prompt" | "startupId" | "milestone"> & {
   id: string; prompt: string; startupId: string | null; milestone: string | null; updatedAt: string;
   startup: { name: string; slug: string; status: string } | null;
+  reviewStatus?: string; reviewerNotes?: string | null; liveVersion?: boolean;
+  publishedEntryPath?: string; publishedStartupSlug?: string;
 };
 type Startup = { id: string; name: string; status: string };
-const empty: Draft = { title: "", body: "", contentJson: null, prompt: "FREE_WRITE", visibility: "PRIVATE", startupId: "", milestone: "", milestoneDone: false };
+const empty: Draft = { title: "", body: "", contentJson: null, scheduledFor: "", prompt: "FREE_WRITE", visibility: "PRIVATE", startupId: "", milestone: "", milestoneDone: false };
 const field = "mt-2 block w-full rounded-xl border border-gray-300 bg-white px-3 py-3 text-base text-gray-900 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-coral-600";
 const secondary = "min-h-11 rounded-xl border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50 disabled:opacity-50";
 
@@ -55,6 +57,7 @@ export default function FounderJournal({ entries, startups }: { entries: Entry[]
   function edit(entry: Entry) {
     if (dirty && !window.confirm("Discard your unsaved changes and open this entry?")) return;
     setDraft({ title: entry.title, body: entry.body, contentJson: entry.contentJson ?? plainTextDelta(entry.body), prompt: entry.prompt in JOURNAL_PROMPTS ? entry.prompt as Prompt : "FREE_WRITE", visibility: entry.visibility, startupId: entry.startupId ?? "", milestone: entry.milestone ?? "", milestoneDone: entry.milestoneDone });
+    setDraft(previous => ({ ...previous, scheduledFor: entry.scheduledFor ?? "" }));
     setEditing(entry.id); setDirty(false); setPreview(false); setError(""); setStatus("");
     document.getElementById("entry-title")?.focus();
   }
@@ -65,7 +68,7 @@ export default function FounderJournal({ entries, startups }: { entries: Entry[]
         const result = await saveFounderEntry(editing, { ...draft, startupId: draft.startupId || null });
         if (result.error) { setError(result.error); return; }
         const wasPublic = draft.visibility === "PUBLIC";
-        reset(); setStatus(wasPublic ? "Public entry saved to your startup page." : "Private entry saved. Only you can view it.");
+        reset(); setStatus(wasPublic ? "Submitted for review. Your approved version, if any, stays live until the replacement is approved and published." : "Private entry saved. Only you can view it. Any pending review or schedule has been cancelled.");
         router.refresh();
       } catch { setError("Could not save your entry. Your text is still here; please try again."); }
     });
@@ -82,9 +85,15 @@ export default function FounderJournal({ entries, startups }: { entries: Entry[]
   }
   async function copyEntryLink(entry: Entry) {
     try {
-      await navigator.clipboard.writeText(new URL(founderEntryPath(entry), window.location.origin).href);
+      await navigator.clipboard.writeText(new URL(entry.publishedEntryPath ?? founderEntryPath(entry), window.location.origin).href);
       setStatus("Public entry link copied.");
     } catch { setError("Open the shareable page and copy its address to share this entry."); }
+  }
+  function withdraw(entry: Entry) {
+    startTransition(async () => {
+      try { const result = await saveFounderEntry(entry.id, { ...entry, visibility: "PRIVATE" }); if (result.error) setError(result.error); else { if (editing === entry.id) reset(); setStatus("Entry is private. Pending review and scheduled publication cancelled."); router.refresh(); } }
+      catch { setError("Could not withdraw the entry. Please try again."); }
+    });
   }
 
   return <div className="grid items-start gap-8 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
@@ -139,10 +148,13 @@ export default function FounderJournal({ entries, startups }: { entries: Entry[]
               {startups.map(startup => <option key={startup.id} value={startup.id} disabled={draft.visibility === "PUBLIC" && startup.status !== "LIVE"}>{startup.name}{startup.status !== "LIVE" ? " (not live)" : ""}</option>)}
             </select>
           </label>
-          {draft.visibility === "PUBLIC" && <p className="rounded-xl border border-blue-200 bg-blue-50 p-4 text-sm leading-relaxed text-blue-900">{canPublish ? `Anyone visiting ${selected.name}'s startup page will be able to read this entry and its milestone. It will also have a shareable page that can appear in search results. You can make it private again later, but existing copies and search results may remain for a while.` : "You need a live startup to share publicly. You can write and save private entries before your startup goes live."}</p>}
+          {draft.visibility === "PUBLIC" && <div className="space-y-3 rounded-xl border border-blue-200 bg-blue-50 p-4 text-sm leading-relaxed text-blue-900"><p>{canPublish ? `Public entries for ${selected.name} require review. After approval, the entry and milestone can appear on your startup page, its shareable page, and in search results. An existing approved version stays live while edits are reviewed. Making an entry private withdraws it immediately; old copies or search results may remain for a while.` : "You need a live startup to share publicly. You can write and save private entries before your startup goes live."}</p>
+            <label className="block font-semibold">Preferred publication time (IST, optional)<input type="datetime-local" value={draft.scheduledFor ?? ""} onChange={event => change({ scheduledFor: event.target.value })} className={field} /></label>
+            <p className="text-xs">Leave blank to publish after approval. Times use India Standard Time (UTC+05:30). If your requested time passes before approval, a reviewer will return the entry so you can choose a new time. Publication is checked every minute and may be delayed by outages.</p>
+          </div>}
           <div className="flex flex-wrap gap-3">
             <button type="button" onClick={() => setPreview(value => !value)} className={secondary}>{preview ? "Hide preview" : "Preview entry"}</button>
-            <button type="submit" disabled={uploading || (draft.visibility === "PUBLIC" && !canPublish)} className="min-h-11 rounded-xl bg-coral-500 px-5 py-3 text-sm font-semibold text-white hover:bg-coral-600 disabled:cursor-not-allowed disabled:opacity-50">{uploading ? "Uploading image…" : pending ? "Saving…" : draft.visibility === "PUBLIC" ? "Save public entry" : "Save private entry"}</button>
+            <button type="submit" disabled={uploading || (draft.visibility === "PUBLIC" && !canPublish)} className="min-h-11 rounded-xl bg-coral-500 px-5 py-3 text-sm font-semibold text-white hover:bg-coral-600 disabled:cursor-not-allowed disabled:opacity-50">{uploading ? "Uploading image…" : pending ? "Saving…" : draft.visibility === "PUBLIC" ? "Submit for review" : "Save private entry"}</button>
           </div>
         </fieldset>
       </form>
@@ -160,18 +172,21 @@ export default function FounderJournal({ entries, startups }: { entries: Entry[]
       <h2 id="saved-entries" className="mb-5 flex items-center gap-2 font-heading text-xl font-bold"><BookOpen aria-hidden="true" className="h-5 w-5 text-coral-600" />Your entries</h2>
       {entries.length === 0 ? <div className="rounded-2xl border border-dashed border-gray-300 p-6 text-sm leading-relaxed text-gray-600">Your journal starts here. Write freely, or choose a prompt to reflect on your week. Entries start private.</div> : <div className="space-y-4">{entries.map(entry => <article key={entry.id} className="rounded-2xl border border-gray-200 bg-white p-5">
         <div className="flex flex-wrap items-center gap-2 text-xs text-gray-600">
-          <span className="inline-flex items-center gap-1 rounded-full bg-gray-100 px-2 py-1 font-semibold">{entry.visibility === "PRIVATE" ? <LockKeyhole aria-hidden="true" className="h-3 w-3" /> : <Globe aria-hidden="true" className="h-3 w-3" />}{entry.visibility === "PRIVATE" ? "Private" : "Public"}</span>
+          <span className="inline-flex items-center gap-1 rounded-full bg-gray-100 px-2 py-1 font-semibold">{entry.visibility === "PRIVATE" ? <LockKeyhole aria-hidden="true" className="h-3 w-3" /> : <Globe aria-hidden="true" className="h-3 w-3" />}{entry.visibility === "PRIVATE" ? "Private" : entry.liveVersion ? "Public" : "Not published"}</span>
           <time dateTime={entry.updatedAt}>{new Date(entry.updatedAt).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric", timeZone: "Asia/Kolkata" })}</time>
         </div>
+        {entry.reviewStatus && entry.reviewStatus !== "PRIVATE" && <p className="mt-3 text-xs font-semibold text-blue-800">{entry.reviewStatus.replaceAll("_", " ")}{entry.liveVersion && entry.reviewStatus !== "PUBLISHED" ? " · Approved version still live" : ""}{entry.scheduledFor ? ` · ${entry.scheduledFor.replace("T", " ")} IST` : ""}</p>}
+        {entry.reviewerNotes && <p className="mt-3 rounded-lg bg-amber-50 p-3 text-sm text-amber-900">Reviewer note: {entry.reviewerNotes}</p>}
         <h3 className="mt-3 break-words text-lg font-semibold">{entry.title}</h3>
         <p className="mt-2 line-clamp-3 whitespace-pre-wrap break-words text-sm leading-relaxed text-gray-600">{entry.body}</p>
         {entry.milestone && <p className="mt-3 break-words text-sm text-slate-700">{entry.milestoneDone ? "✓ Completed" : "○ In progress"}: {entry.milestone}</p>}
         {entry.startup && <p className="mt-3 text-xs text-gray-500">{entry.startup.name}{entry.visibility === "PUBLIC" && entry.startup.status !== "LIVE" ? " · Hidden while startup is not live" : ""}</p>}
         <div className="mt-4 flex flex-wrap items-center gap-3">
           <button type="button" disabled={pending || uploading} onClick={() => edit(entry)} className={secondary}>Read / edit<span className="sr-only"> {entry.title}</span></button>
-          {entry.visibility === "PUBLIC" && entry.startup?.status === "LIVE" && <Link href={`/startups/${entry.startup.slug}#section-founder-journal`} className="inline-flex min-h-11 items-center text-sm font-semibold text-coral-700 hover:underline">View on startup</Link>}
-          {entry.visibility === "PUBLIC" && entry.startup?.status === "LIVE" && <Link href={founderEntryPath(entry)} className="inline-flex min-h-11 items-center text-sm font-semibold text-coral-700 hover:underline">Open shareable page</Link>}
-          {entry.visibility === "PUBLIC" && entry.startup?.status === "LIVE" && <button type="button" className="min-h-11 text-sm font-semibold text-coral-700 hover:underline" onClick={() => copyEntryLink(entry)}>Copy link<span className="sr-only"> for {entry.title}</span></button>}
+          {entry.liveVersion && <Link href={`/startups/${entry.publishedStartupSlug ?? entry.startup?.slug}#section-founder-journal`} className="inline-flex min-h-11 items-center text-sm font-semibold text-coral-700 hover:underline">View approved version on startup</Link>}
+          {entry.liveVersion && <Link href={entry.publishedEntryPath ?? founderEntryPath(entry)} className="inline-flex min-h-11 items-center text-sm font-semibold text-coral-700 hover:underline">Open shareable page</Link>}
+          {entry.liveVersion && <button type="button" className="min-h-11 text-sm font-semibold text-coral-700 hover:underline" onClick={() => copyEntryLink(entry)}>Copy link<span className="sr-only"> for {entry.title}</span></button>}
+          {entry.visibility === "PUBLIC" && <button type="button" disabled={pending || uploading} onClick={() => withdraw(entry)} className="min-h-11 text-sm font-semibold text-gray-700 hover:underline">Make private / cancel publication</button>}
           <button type="button" disabled={pending || uploading} onClick={() => setDeleting(entry.id)} className="min-h-11 text-sm text-red-700 hover:underline">Delete<span className="sr-only"> {entry.title}</span></button>
         </div>
         {deleting === entry.id && <div className="mt-4 rounded-xl border border-red-200 bg-red-50 p-4 text-sm"><p>Delete “{entry.title}”? This permanently removes it{entry.visibility === "PUBLIC" ? " from your journal and startup page" : ""}.</p><div className="mt-3 flex flex-wrap gap-3"><button type="button" disabled={pending || uploading} onClick={() => remove(entry.id)} className="min-h-11 rounded-xl bg-red-700 px-4 py-2 font-semibold text-white">Delete permanently</button><button type="button" disabled={pending || uploading} onClick={() => setDeleting(null)} className={secondary}>Keep entry</button></div></div>}

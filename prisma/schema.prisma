@@ -237,6 +237,7 @@ model FeaturedStartup {
 enum JournalPostStatus {
   DRAFT
   PUBLISHED
+  SCHEDULED
 }
 
 model JournalCategory {
@@ -280,6 +281,7 @@ model JournalPost {
   author             User?             @relation(fields: [authorId], references: [id])
 
   publishedAt        DateTime?
+  scheduledAt        DateTime?
   createdAt          DateTime          @default(now())
   updatedAt          DateTime          @updatedAt
 
@@ -309,12 +311,31 @@ model FounderJournalEntry {
   milestone     String? @db.VarChar(180)
   milestoneDone Boolean @default(false)
   publishedAt   DateTime?
+  approvedAt    DateTime?
+  revision      FounderJournalRevision?
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
   @@index([authorId, updatedAt(sort: Desc)])
   @@index([startupId, visibility, publishedAt(sort: Desc)])
   @@index([mediaKeys], type: Gin)
+}
+
+model FounderJournalRevision {
+  id            String @id @default(cuid())
+  entryId       String @unique
+  entry         FounderJournalEntry @relation(fields: [entryId], references: [id], onDelete: Cascade)
+  data          Json
+  status        String @default("PENDING_REVIEW") @db.VarChar(30)
+  version       Int @default(1)
+  scheduledAt   DateTime?
+  reviewerNotes String? @db.VarChar(2000)
+  reviewedBy    String?
+  reviewedAt    DateTime?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([status, scheduledAt])
 }
 
 model StartupUpdate {

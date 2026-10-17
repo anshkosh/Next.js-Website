@@ -41,10 +41,10 @@ it("keeps unsaved text when saving fails", async () => {
 it("requires a selected live startup before enabling publication and names that startup in the disclosure", async () => {
   await mount(); await write();
   await act(async () => container.querySelector<HTMLInputElement>('input[value="PUBLIC"]')!.click());
-  expect(button("Save public entry").disabled).toBe(true);
+  expect(button("Submit for review").disabled).toBe(true);
   await act(async () => { const select = container.querySelectorAll("select")[1]; select.value = "owned"; select.dispatchEvent(new Event("change", { bubbles: true })); });
-  expect(button("Save public entry").disabled).toBe(false);
-  expect(container.textContent).toContain("Anyone visiting My startup's startup page");
+  expect(button("Submit for review").disabled).toBe(false);
+  expect(container.textContent).toContain("Public entries for My startup require review");
   await submit();
   expect(m.save).toHaveBeenCalledWith(null, expect.objectContaining({ visibility: "PUBLIC", startupId: "owned" }));
   expect(container.querySelector<HTMLInputElement>('input[value="PRIVATE"]')!.checked).toBe(true);

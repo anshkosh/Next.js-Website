@@ -26,9 +26,17 @@ export async function GET(
       const session = await auth.api.getSession({ headers: req.headers });
       if (session?.user.id !== ownerId) {
         const shared = await db.founderJournalEntry.findFirst({
-          where: { authorId: ownerId, visibility: "PUBLIC", mediaKeys: { has: key }, startup: { status: "LIVE", founderId: ownerId } }, select: { id: true },
+          where: { authorId: ownerId, visibility: "PUBLIC", approvedAt: { not: null }, publishedAt: { lte: new Date() }, mediaKeys: { has: key }, startup: { status: "LIVE", founderId: ownerId } }, select: { id: true },
         });
-        if (!shared) return new NextResponse("Not Found", { status: 404, headers: { "Cache-Control": "private, no-store", "Vary": "Cookie" } });
+        const reviewer = session?.user.emailVerified && !session.user.banned && ["admin", "reviewer"].includes(session.user.role ?? "");
+        const submitted = !shared && reviewer ? await db.founderJournalRevision.findFirst({
+          where: {
+            status: { in: ["PENDING_REVIEW", "SCHEDULED"] },
+            entry: { authorId: ownerId, visibility: "PUBLIC" },
+            data: { path: ["contentJson", "ops"], array_contains: [{ insert: { image: url } }] },
+          }, select: { id: true },
+        }) : null;
+        if (!shared && !submitted) return new NextResponse("Not Found", { status: 404, headers: { "Cache-Control": "private, no-store", "Vary": "Cookie" } });
       }
     }
     if (isPitchDeck) {
