@@ -334,6 +334,9 @@ export default async function DashboardPage() {
                               </span>
                             )}
                           </Link>
+                          <Link href="/dashboard/journal" className="flex min-h-11 items-center justify-center gap-1.5 rounded-xl border border-violet-200 bg-violet-50 py-2.5 text-xs font-semibold text-violet-700 transition-colors hover:bg-violet-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-500">
+                            <BookOpen aria-hidden="true" size={13} /> Journal
+                          </Link>
                           <Link
                             href={`/startup/${startup.id}/discussion`}
                             className="flex items-center justify-center gap-1.5 py-2.5 bg-blue-50 border border-blue-200 text-blue-700 rounded-xl text-xs font-semibold hover:bg-blue-100 transition-colors relative"
@@ -344,9 +347,6 @@ export default async function DashboardPage() {
                                 {startup._count.comments}
                               </span>
                             )}
-                          </Link>
-                          <Link href="/dashboard/journal" className="flex min-h-11 items-center justify-center gap-1.5 rounded-xl border border-gray-200 bg-white py-2.5 text-xs font-semibold text-gray-700 transition-colors hover:bg-gray-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-coral-500">
-                            <BookOpen aria-hidden="true" size={13} /> Journal
                           </Link>
                           </div>
                         </div>
