@@ -1,5 +1,17 @@
 import { expect, it } from "vitest";
+import { readFileSync } from "node:fs";
 import { assertAdditiveMigration } from "../deploy/deployment-policy.mjs";
+
+it("keeps the founder journal release migrations within the automatic deploy gate", () => {
+  for (const name of [
+    "20261016160000_founder_journal",
+    "20261017120000_founder_journal_rich_text",
+    "20261017130000_journal_review_and_scheduling",
+  ]) {
+    const sql = readFileSync(`prisma/migrations/${name}/migration.sql`, "utf8");
+    expect(() => assertAdditiveMigration(sql, name)).not.toThrow();
+  }
+});
 
 it("allows additive tables, indexes, nullable columns and defaulted columns", () => {
   for (const sql of [

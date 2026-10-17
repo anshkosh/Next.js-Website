@@ -60,6 +60,7 @@ describe("founder journal authorization and visibility", () => {
   });
   it("deletes with ownership in the write query and invalidates public output", async () => {
     expect(await deleteFounderEntry("entry")).toEqual({ success: true });
+    expect(m.clearRevision).toHaveBeenCalledWith({ where: { entryId: "entry" } });
     expect(m.remove).toHaveBeenCalledWith({ where: { id: "entry", authorId: "owner" } });
     expect(m.revalidate).toHaveBeenCalledWith("/startups/old-startup");
   });

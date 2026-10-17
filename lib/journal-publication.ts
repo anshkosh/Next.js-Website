@@ -48,7 +48,7 @@ export async function publishScheduledJournals(now = new Date()) {
       if (published) founders++;
     } catch { failed++; }
   }
-  const admins = await db.journalPost.updateMany({ where: { status: "SCHEDULED", scheduledAt: { lte: now } }, data: { status: "PUBLISHED", publishedAt: now, scheduledAt: null } });
+  const admins = await db.journalPost.updateMany({ where: { status: "DRAFT", scheduledAt: { lte: now } }, data: { status: "PUBLISHED", publishedAt: now, scheduledAt: null } });
   if (failed) throw new Error(`${failed} scheduled founder publication(s) failed; retry required.`);
   return { founders, admins: admins.count };
 }

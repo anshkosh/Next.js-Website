@@ -284,6 +284,7 @@ export async function deleteStartup(id: string) {
 
     await db.$transaction(async tx => {
       await tx.startupRevision.deleteMany({ where: { startupId: id } });
+      await tx.founderJournalEntry.updateMany({ where: { startupId: id }, data: { startupId: null } });
       await tx.startup.delete({ where: { id } });
     });
 

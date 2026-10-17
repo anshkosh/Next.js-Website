@@ -48,7 +48,7 @@ export default async function EditJournalPostPage(props: { params: Promise<{ id:
         categories={categories}
         post={{
           ...post,
-          status: post.status,
+          status: post.status === "DRAFT" && post.scheduledAt ? "SCHEDULED" : post.status,
           scheduledAt: post.scheduledAt?.toISOString() ?? null,
         }}
       />

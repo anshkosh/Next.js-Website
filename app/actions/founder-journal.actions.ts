@@ -93,7 +93,10 @@ export async function deleteFounderEntry(id: string) {
       where: { id, authorId: session.user.id }, select: { startup: { select: { slug: true } } },
     });
     if (!existing) return { error: "Entry not found." };
-    const deleted = await db.founderJournalEntry.deleteMany({ where: { id, authorId: session.user.id } });
+    const deleted = await db.$transaction(async tx => {
+      await tx.founderJournalRevision.deleteMany({ where: { entryId: id } });
+      return tx.founderJournalEntry.deleteMany({ where: { id, authorId: session.user.id } });
+    });
     if (deleted.count !== 1) return { error: "Entry not found." };
     invalidate([existing.startup?.slug]);
     return { success: true };
