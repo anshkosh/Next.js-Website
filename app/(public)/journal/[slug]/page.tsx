@@ -11,6 +11,7 @@ import { DEFAULT_SOCIAL_IMAGE, SITE_URL, absoluteUrl } from "@/lib/seo";
 import { calculateReadingTime } from "@/lib/journal-reading-time.mjs";
 
 const BASE_URL = SITE_URL;
+export const dynamic = "force-dynamic";
 
 interface Props {
   params: Promise<{ slug: string }>;

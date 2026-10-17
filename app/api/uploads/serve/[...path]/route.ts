@@ -5,6 +5,7 @@ import { db } from "@/lib/db";
 import { auth } from "@/lib/auth";
 import { publicPitchDeck, mayReadDeck } from "@/lib/pitch-deck-access";
 import { pitchDeckUrlSchema } from "@/lib/validators/pitch-deck.schema";
+import { journalImagePattern } from "@/lib/journal-rich-text";
 
 export async function GET(
   req: NextRequest,
@@ -14,9 +15,30 @@ export async function GET(
     const resolvedParams = await params;
     const key = resolvedParams.path.join("/");
     // Storage also holds encrypted operations backups; never expose arbitrary keys.
-    if (!["logos", "gallery", "founders", "pitch-decks", "journal", "update-images"].includes(resolvedParams.path[0])) return new NextResponse("Not Found", { status: 404 });
+    if (!["logos", "gallery", "founders", "pitch-decks", "journal", "update-images", "founder-journal"].includes(resolvedParams.path[0])) return new NextResponse("Not Found", { status: 404 });
     if (resolvedParams.path.some(part => !/^[a-zA-Z0-9._-]+$/.test(part) || part === "." || part === "..")) return new NextResponse("Not Found", { status: 404 });
     const isPitchDeck = key.startsWith("pitch-decks/");
+    const isFounderJournal = key.startsWith("founder-journal/");
+    if (isFounderJournal) {
+      const url = `/api/uploads/serve/${key}`;
+      if (!journalImagePattern.test(url)) return new NextResponse("Not Found", { status: 404, headers: { "Cache-Control": "private, no-store" } });
+      const ownerId = resolvedParams.path[1];
+      const session = await auth.api.getSession({ headers: req.headers });
+      if (session?.user.id !== ownerId) {
+        const shared = await db.founderJournalEntry.findFirst({
+          where: { authorId: ownerId, visibility: "PUBLIC", approvedAt: { not: null }, publishedAt: { lte: new Date() }, mediaKeys: { has: key }, startup: { status: "LIVE", founderId: ownerId } }, select: { id: true },
+        });
+        const reviewer = session?.user.emailVerified && !session.user.banned && ["admin", "reviewer"].includes(session.user.role ?? "");
+        const submitted = !shared && reviewer ? await db.founderJournalRevision.findFirst({
+          where: {
+            status: { in: ["PENDING_REVIEW", "SCHEDULED"] },
+            entry: { authorId: ownerId, visibility: "PUBLIC" },
+            data: { path: ["contentJson", "ops"], array_contains: [{ insert: { image: url } }] },
+          }, select: { id: true },
+        }) : null;
+        if (!shared && !submitted) return new NextResponse("Not Found", { status: 404, headers: { "Cache-Control": "private, no-store", "Vary": "Cookie" } });
+      }
+    }
     if (isPitchDeck) {
       const url = `/api/uploads/serve/${key}`;
       if (!pitchDeckUrlSchema.safeParse(url).success) return new NextResponse("Not Found", { status: 404 });
@@ -43,6 +65,7 @@ export async function GET(
       headers: {
         "Content-Type": response.ContentType || "image/png",
         "Cache-Control": "public, max-age=31536000, immutable",
+        ...(isFounderJournal ? { "Cache-Control": "private, no-store", "Vary": "Cookie", "X-Content-Type-Options": "nosniff" } : {}),
         ...(isPitchDeck ? {
           "Content-Type": "application/pdf",
           "Content-Disposition": 'attachment; filename="pitch-deck.pdf"',

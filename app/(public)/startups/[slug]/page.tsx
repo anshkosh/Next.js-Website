@@ -14,6 +14,9 @@ import CorePropositionSection from "@/components/startup/CorePropositionSection"
 import { SITE_URL, absoluteUrl, startupOrganizationSchema } from "@/lib/seo";
 import { pitchDeckUrlSchema } from "@/lib/validators/pitch-deck.schema";
 import { publicPitchDeck } from "@/lib/pitch-deck-access";
+import { publicFounderEntries } from "@/lib/founder-journal-queries";
+import { journalPage } from "@/lib/founder-journal";
+import FounderJournalSection from "@/components/startup/FounderJournalSection";
 
 // Visitor-specific cookies must be read at request time, including for new slugs.
 export const dynamic = "force-dynamic";
@@ -134,6 +137,7 @@ export async function generateMetadata(props: {
 
 export default async function StartupDetailPage(props: {
   params: Promise<{ slug: string }>;
+  searchParams: Promise<{ journalPage?: string }>;
 }) {
   const params = await props.params;
   if (!process.env.DATABASE_URL) notFound();
@@ -179,6 +183,9 @@ export default async function StartupDetailPage(props: {
     notFound();
   }
 
+  const publicJournalPage = journalPage((await props.searchParams).journalPage);
+  const publicEntries = await publicFounderEntries(startup.id, startup.founderId, publicJournalPage);
+
   // Fetch initial approved comments for the discussion section (server-side for SEO)
   const [initialComments, totalApprovedCount] = await Promise.all([
     db.comment.findMany({
@@ -220,6 +227,7 @@ export default async function StartupDetailPage(props: {
     { id: "section-overview", label: "Overview" },
     { id: "section-proposition", label: "Core Proposition" },
     { id: "section-updates", label: "Updates", count: startup.updates.length },
+    { id: "section-founder-journal", label: "Founder Journal" },
     { id: "section-questions", label: "Questions", count: totalApprovedCount },
   ];
 
@@ -353,6 +361,10 @@ export default async function StartupDetailPage(props: {
         {/* ── Updates Section ── */}
         <div id="section-updates" className="scroll-mt-32">
           <UpdatesSection updates={updates} />
+        </div>
+
+        <div id="section-founder-journal" className="scroll-mt-32">
+          <FounderJournalSection entries={publicEntries} slug={startup.slug} page={publicJournalPage} />
         </div>
 
         {/* ── Questions / Discussion Section ── */}

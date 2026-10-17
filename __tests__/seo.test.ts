@@ -4,16 +4,17 @@ import { resolveSiteUrl, absoluteUrl, DEFAULT_SOCIAL_IMAGE, seoMetadata, organiz
 import { FOUNDER_TOOLS } from "../lib/founder-toolkit";
 
 const queries = vi.hoisted(() => ({
-  startup: vi.fn(), category: vi.fn(), journalPost: vi.fn(), redirect: vi.fn(),
+  startup: vi.fn(), category: vi.fn(), journalPost: vi.fn(), redirect: vi.fn(), founderEntry: vi.fn(),
 }));
 vi.mock("@/lib/db", () => ({ db: {
   startup: { findMany: queries.startup },
   category: { findMany: queries.category },
   journalPost: { findMany: queries.journalPost },
+  founderJournalEntry: { findMany: queries.founderEntry },
   slugRedirect: { findUnique: queries.redirect },
 } }));
 
-beforeEach(() => vi.stubEnv("DATABASE_URL", ""));
+beforeEach(() => { vi.stubEnv("DATABASE_URL", ""); queries.founderEntry.mockResolvedValue([]); });
 afterEach(() => { vi.unstubAllEnvs(); vi.clearAllMocks(); });
 
 describe("canonical URL policy", () => {

@@ -27,7 +27,7 @@ export default async function AdminJournalPage(props: {
 
   const where: Record<string, unknown> = {};
   if (q) where.title = { contains: q, mode: "insensitive" };
-  if (status === "DRAFT" || status === "PUBLISHED") where.status = status;
+  if (["DRAFT", "PUBLISHED", "SCHEDULED"].includes(status)) where.status = status;
   if (categoryId) where.categoryId = categoryId;
 
   const [posts, totalCount, categories] = await Promise.all([
@@ -45,6 +45,7 @@ export default async function AdminJournalPage(props: {
   const totalPages = Math.ceil(totalCount / take);
 
   const getStatusBadge = (status: string) => {
+    if (status === "SCHEDULED") return <span className="bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full text-xs font-semibold">SCHEDULED</span>;
     if (status === "PUBLISHED") {
       return <span className="bg-green-100 text-green-700 px-2 py-0.5 rounded-full text-xs font-semibold">PUBLISHED</span>;
     }
@@ -84,7 +85,7 @@ export default async function AdminJournalPage(props: {
           />
         </form>
         <div className="flex gap-1.5">
-          {(["", "DRAFT", "PUBLISHED"] as const).map(s => (
+          {(["", "DRAFT", "PUBLISHED", "SCHEDULED"] as const).map(s => (
             <Link
               key={s}
               href={buildQuery({ status: s, page: "1" })}
@@ -141,7 +142,7 @@ export default async function AdminJournalPage(props: {
                     {post.isFeatured && <Star size={14} className="text-amber-400 fill-amber-400" />}
                   </TableCell>
                   <TableCell className="text-sm text-gray-500">
-                    {(post.publishedAt ?? post.createdAt).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}
+                    {post.status === "SCHEDULED" && post.scheduledAt ? `${post.scheduledAt.toLocaleString("en-IN", { timeZone: "Asia/Kolkata", day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" })} IST` : (post.publishedAt ?? post.createdAt).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric", timeZone: "Asia/Kolkata" })}
                   </TableCell>
                   <TableCell className="text-right">
                     <div className="flex justify-end items-center gap-1.5">

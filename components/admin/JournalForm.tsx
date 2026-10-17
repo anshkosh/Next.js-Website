@@ -8,7 +8,8 @@ import {
   Upload, X, Plus, ChevronDown, ChevronUp, Loader2,
   Eye, EyeOff, Save, Trash2, Globe
 } from "lucide-react";
-import { createJournalPost, updateJournalPost, publishJournalPost, unpublishJournalPost, deleteJournalPost } from "@/app/actions/journal.actions";
+import { createJournalPost, updateJournalPost, publishJournalPost, unpublishJournalPost, deleteJournalPost, scheduleJournalPost } from "@/app/actions/journal.actions";
+import { istDateTimeInput, parseJournalSchedule } from "@/lib/journal-scheduling";
 
 const QuillEditor = dynamic(() => import("./QuillEditor"), { ssr: false, loading: () => (
   <div className="border border-gray-200 rounded-lg flex items-center justify-center min-h-[400px] bg-gray-50">
@@ -27,7 +28,8 @@ interface JournalPost {
   coverImageUrl?: string | null;
   contentJson?: unknown;
   contentHtml?: string | null;
-  status: "DRAFT" | "PUBLISHED";
+  status: "DRAFT" | "PUBLISHED" | "SCHEDULED";
+  scheduledAt?: string | null;
   isFeatured: boolean;
   tags: string[];
   metaTitle?: string | null;
@@ -58,6 +60,7 @@ export default function JournalForm({ categories, post }: JournalFormProps) {
   const [tagInput, setTagInput] = useState("");
   const [coverImageUrl, setCoverImageUrl] = useState(post?.coverImageUrl ?? "");
   const [coverUploading, setCoverUploading] = useState(false);
+  const [inlineUploading, setInlineUploading] = useState(false);
 
   // Content
   const [contentJson, setContentJson] = useState<unknown>(post?.contentJson ?? null);
@@ -73,6 +76,7 @@ export default function JournalForm({ categories, post }: JournalFormProps) {
 
   const [error, setError] = useState("");
   const [successMsg, setSuccessMsg] = useState("");
+  const [scheduledFor, setScheduledFor] = useState(post?.scheduledAt ? istDateTimeInput(post.scheduledAt) : "");
 
   // Auto-generate slug from title
   const handleTitleChange = (val: string) => {
@@ -140,7 +144,7 @@ export default function JournalForm({ categories, post }: JournalFormProps) {
       if ("error" in result && result.error) {
         setError(result.error);
       } else {
-        setSuccessMsg("Saved as draft");
+        setSuccessMsg(post?.status === "SCHEDULED" ? "Changes saved. Scheduled publication retained." : "Changes saved");
         if (!post && "id" in result) {
           router.push(`/admin/journal/${result.id as string}/edit`);
         }
@@ -192,6 +196,21 @@ export default function JournalForm({ categories, post }: JournalFormProps) {
     });
   };
 
+  const handleSchedule = () => {
+    setError(""); setSuccessMsg("");
+    try { parseJournalSchedule(scheduledFor); } catch (error) { setError((error as Error).message); return; }
+    startTransition(async () => {
+      const saved = post ? await updateJournalPost(post.id, buildFormData()) : await createJournalPost(buildFormData());
+      if (saved.error) { setError(saved.error); return; }
+      const id = post?.id ?? ("id" in saved && typeof saved.id === "string" ? saved.id : undefined);
+      if (!id) { setError("Save the draft before scheduling."); return; }
+      const result = await scheduleJournalPost(id, scheduledFor);
+      if (result.error) { setError(result.error); return; }
+      setSuccessMsg("Publication scheduled in IST. You can change the time or cancel it here.");
+      if (!post) router.push(`/admin/journal/${id}/edit`); else router.refresh();
+    });
+  };
+
   const handleDelete = () => {
     if (!post) return;
     if (!confirm("Delete this post permanently?")) return;
@@ -216,18 +235,18 @@ export default function JournalForm({ categories, post }: JournalFormProps) {
               <Trash2 size={16} /> Delete
             </button>
           )}
-          <button onClick={handleSaveDraft} disabled={isPending}
+            <button onClick={handleSaveDraft} disabled={isPending || coverUploading || inlineUploading}
             className="flex items-center gap-1 px-4 py-2 text-sm bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition-colors font-medium">
             {isPending ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />}
             Save Draft
           </button>
-          {post?.status === "PUBLISHED" ? (
+          {post?.status === "PUBLISHED" || post?.status === "SCHEDULED" ? (
             <button onClick={handleUnpublish} disabled={isPending}
               className="flex items-center gap-1 px-4 py-2 text-sm bg-gray-800 text-white rounded-md hover:bg-gray-700 transition-colors font-medium">
-              <EyeOff size={16} /> Unpublish
+              <EyeOff size={16} /> {post?.status === "SCHEDULED" ? "Cancel schedule" : "Unpublish"}
             </button>
           ) : (
-            <button onClick={handlePublish} disabled={isPending}
+            <button onClick={handlePublish} disabled={isPending || coverUploading || inlineUploading}
               className="flex items-center gap-1 px-4 py-2 text-sm bg-coral-500 text-white rounded-md hover:bg-coral-600 transition-colors font-medium">
               <Eye size={16} /> Publish
             </button>
@@ -275,6 +294,8 @@ export default function JournalForm({ categories, post }: JournalFormProps) {
             <label className="block text-sm font-semibold text-gray-700 mb-3">Content</label>
             <QuillEditor
               value={contentJson}
+              readOnly={isPending || inlineUploading}
+              onUploadStateChange={setInlineUploading}
               onChange={(delta, html) => {
                 setContentJson(delta);
                 setContentHtml(html);
@@ -302,12 +323,17 @@ export default function JournalForm({ categories, post }: JournalFormProps) {
           <div className="bg-white border border-gray-200 rounded-lg p-4">
             <h3 className="text-sm font-semibold text-gray-700 mb-3">Status</h3>
             <div className="flex items-center gap-2">
-              {post?.status === "PUBLISHED" ? (
+              {post?.status === "SCHEDULED" ? <span className="bg-blue-100 text-blue-700 px-2.5 py-1 rounded-full text-xs font-semibold">SCHEDULED</span> : post?.status === "PUBLISHED" ? (
                 <span className="bg-green-100 text-green-700 px-2.5 py-1 rounded-full text-xs font-semibold">PUBLISHED</span>
               ) : (
                 <span className="bg-gray-100 text-gray-600 px-2.5 py-1 rounded-full text-xs font-semibold">DRAFT</span>
               )}
             </div>
+            {post?.status !== "PUBLISHED" && <div className="mt-4 space-y-3">
+              <label className="block text-sm font-medium">Publication date and time (IST)<input type="datetime-local" value={scheduledFor} onChange={event => setScheduledFor(event.target.value)} className="mt-2 block w-full rounded-lg border border-gray-300 p-2 text-sm" /></label>
+              <p className="text-xs leading-relaxed text-gray-500">India Standard Time (UTC+05:30). Scheduled posts stay hidden until publication. The publisher checks every minute; outages may delay publication.</p>
+              <button type="button" onClick={handleSchedule} disabled={isPending || coverUploading || inlineUploading} className="min-h-11 rounded-lg bg-blue-700 px-4 py-2 text-sm font-semibold text-white disabled:opacity-50">{post?.status === "SCHEDULED" ? "Reschedule publication" : "Schedule publication"}</button>
+            </div>}
           </div>
 
           {/* Cover Image */}

@@ -2,12 +2,15 @@
 
 import { ArrowUp, MessageCircle, X } from "lucide-react";
 import { useEffect, useState } from "react";
+import { usePathname } from "next/navigation";
 
 const UTM_KEYS = ["utm_source", "utm_medium", "utm_campaign", "utm_term", "utm_content", "gclid", "fbclid"];
 const UTM_STORAGE_KEY = "anshkosh-utm-context";
 const COOKIE_STORAGE_KEY = "anshkosh-cookie-consent";
 
 export function SiteEnhancements() {
+  const pathname = usePathname();
+  const isFounderWorkspace = pathname === "/dashboard" || pathname?.startsWith("/dashboard/");
   const [showTop, setShowTop] = useState(false);
   const [progress, setProgress] = useState(0);
   const [cookiesVisible, setCookiesVisible] = useState(false);
@@ -76,14 +79,14 @@ export function SiteEnhancements() {
         <div className="h-full bg-coral-500 transition-[width] duration-150" style={{ width: `${progress}%` }} />
       </div>
 
-      <div className="fixed bottom-5 right-5 z-40 flex flex-col gap-3 print:hidden">
+      {!isFounderWorkspace && <div className="fixed bottom-5 right-5 z-40 flex flex-col gap-3 print:hidden">
         <a href="/contact" aria-label="Contact Anshkosh" className="group flex min-h-11 min-w-11 items-center justify-center gap-2 rounded-full bg-coral-600 px-4 py-3 text-sm font-semibold text-white shadow-soft transition-colors hover:bg-coral-700">
           <MessageCircle size={18} aria-hidden="true" />
           <span className="hidden sm:inline">Contact us</span>
         </a>
-      </div>
+      </div>}
 
-      {showTop && (
+      {showTop && !isFounderWorkspace && (
         <button type="button" onClick={() => window.scrollTo({ top: 0, behavior: window.matchMedia?.("(prefers-reduced-motion: reduce)").matches ? "instant" : "smooth" })} aria-label="Scroll back to top" className="fixed bottom-20 right-5 z-40 flex h-11 w-11 items-center justify-center rounded-full border border-gray-200 bg-white text-gray-700 shadow-soft transition-colors hover:border-coral-300 hover:text-coral-600 print:hidden">
           <ArrowUp size={19} aria-hidden="true" />
         </button>

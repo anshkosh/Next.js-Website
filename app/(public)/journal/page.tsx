@@ -8,6 +8,7 @@ import { calculateReadingTime } from "@/lib/journal-reading-time.mjs";
 import ErrorState, { recoveryLinkClass, secondaryRecoveryLinkClass } from "@/components/site/ErrorState";
 
 const PER_PAGE = 12;
+export const dynamic = "force-dynamic";
 
 export const metadata = seoMetadata({
   title: "Journal | Anshkosh — Startup Insights & Founder Stories",

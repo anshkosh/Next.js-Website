@@ -6,6 +6,7 @@ import { headers } from "next/headers";
 import { revalidatePath } from "next/cache";
 import { logger } from "@/lib/logger";
 import { calculateReadingTime } from "@/lib/journal-reading-time.mjs";
+import { parseJournalSchedule } from "@/lib/journal-scheduling";
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -184,6 +185,7 @@ export async function publishJournalPost(id: string) {
       data: {
         status: "PUBLISHED",
         publishedAt: new Date(),
+        scheduledAt: null,
       },
     });
 
@@ -210,6 +212,7 @@ export async function unpublishJournalPost(id: string) {
       data: {
         status: "DRAFT",
         publishedAt: null,
+        scheduledAt: null,
       },
     });
 
@@ -224,6 +227,21 @@ export async function unpublishJournalPost(id: string) {
     }
     logger.error("Unpublish journal post error:", error);
     return { error: "Failed to unpublish post" };
+  }
+}
+
+export async function scheduleJournalPost(id: string, when: string) {
+  try {
+    await requireAdmin();
+    const scheduledAt = parseJournalSchedule(when);
+    const post = await db.journalPost.findUnique({ where: { id }, select: { slug: true, status: true } });
+    if (!post || post.status === "PUBLISHED") return { error: "Only drafts or scheduled posts can be scheduled. Unpublish a live post first." };
+    const result = await db.journalPost.updateMany({ where: { id, status: { in: ["DRAFT", "SCHEDULED"] } }, data: { status: "SCHEDULED", scheduledAt, publishedAt: null } });
+    if (result.count !== 1) return { error: "Post changed. Refresh before scheduling." };
+    revalidatePath("/admin/journal"); revalidatePath(`/admin/journal/${id}/edit`); revalidatePath("/journal"); revalidatePath("/sitemap.xml");
+    return { success: true };
+  } catch (error) {
+    return { error: error instanceof Error && (error.message === "Unauthorized" || error.message.startsWith("Choose a")) ? error.message : "The post could not be scheduled. Please try again." };
   }
 }
 

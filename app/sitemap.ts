@@ -2,8 +2,10 @@ import { db } from "@/lib/db";
 import { MetadataRoute } from "next";
 import { SITE_URL } from "@/lib/seo";
 import { FOUNDER_TOOLS } from "@/lib/founder-toolkit";
+import { founderEntryPath } from "@/lib/founder-journal-seo";
 
-export const revalidate = 3600;
+// Visibility and startup status changes must not leave withdrawn titles cached.
+export const dynamic = "force-dynamic";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const staticRoutes: MetadataRoute.Sitemap = [
@@ -37,6 +39,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     where: { status: "PUBLISHED" },
     select: { slug: true, updatedAt: true },
   });
+  const founderEntries = await db.founderJournalEntry.findMany({
+    where: { visibility: "PUBLIC", approvedAt: { not: null }, publishedAt: { lte: new Date() }, startup: { status: "LIVE" } },
+    select: { id: true, title: true, updatedAt: true, authorId: true, startup: { select: { founderId: true } } },
+  });
 
   return [
     ...staticRoutes,
@@ -57,6 +63,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       lastModified: p.updatedAt,
       changeFrequency: "weekly" as const,
       priority: 0.7,
+    })),
+    ...founderEntries.filter(entry => entry.startup?.founderId === entry.authorId).map(entry => ({
+      url: `${SITE_URL}${founderEntryPath(entry)}`, lastModified: entry.updatedAt, changeFrequency: "weekly" as const, priority: 0.6,
     })),
   ];
 }
