@@ -31,8 +31,9 @@ it("escapes founder content instead of rendering supplied HTML", () => {
   const html = renderToStaticMarkup(<FounderJournalSection page={1} slug="startup" entries={[{ id: "entry", title: "<script>bad()</script>", body: '<img src=x onerror="bad()">', milestone: null, milestoneDone: false, publishedAt: new Date("2026-10-16") }]} />);
   expect(html).not.toContain("<script>"); expect(html).not.toContain("<img"); expect(html).toContain("&lt;script&gt;");
 });
-it("promotes the agreed four tools and links to the journal and full toolkit", () => {
+it("offers compact journal and all-tools buttons without separate promotional cards", () => {
   const html = renderToStaticMarkup(<Workspace />);
-  for (const id of ["validation", "mvp", "runway", "pitch"]) expect(html).toContain(`/launch-support/${id}`);
+  expect(html).toContain("Explore all 9 free tools");
+  expect(html).not.toContain("<h2");
   expect(html).toContain('/dashboard/journal'); expect(html).toContain('/launch-support#tools-heading');
 });

@@ -163,8 +163,6 @@ export default async function DashboardPage() {
           </div>
         </div>
 
-        <FounderWorkspace />
-
         {/* Section Header */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
           <div>
@@ -219,6 +217,7 @@ export default async function DashboardPage() {
             >
               Submit your first startup
             </Link>
+            <div className="mt-5 w-full max-w-md"><FounderWorkspace /></div>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
@@ -300,9 +299,7 @@ export default async function DashboardPage() {
 
                   {/* Card Footer — Status-aware actions */}
                   <div className="p-4">
-                    <Link href={`/startup/${startup.id}/launch-kit`} className="mb-3 flex items-center justify-center rounded-xl border border-coral-200 bg-coral-50 px-4 py-2.5 text-sm font-semibold text-coral-700 hover:bg-coral-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-coral-500">
-                      Open free launch kit
-                    </Link>
+                    <div className="mb-3"><FounderWorkspace /></div>
                     {/* LIVE */}
                     {startup.status === "LIVE" && (
                       <div className="space-y-2.5">
