@@ -28,6 +28,9 @@ async function reveal(page: Page) {
   if (await cookieNotice.isVisible()) await cookieNotice.click();
 }
 async function enter(page: Page, url: string) {
+  await page.addInitScript(() => {
+    try { localStorage.setItem("anshkosh-cookie-consent", "dismissed"); } catch { /* Test navigation must not be blocked by browser storage. */ }
+  });
   await page.goto(url);
   if (new URL(page.url()).pathname !== "/") {
     await expect(page.getByRole("dialog", { name: "Anshkosh is under construction." })).toHaveCount(0);
