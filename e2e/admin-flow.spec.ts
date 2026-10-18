@@ -1,7 +1,7 @@
-import { test, expect } from "@playwright/test";
+import { test } from "@playwright/test";
 
 test.describe("Admin Flow", () => {
-  test("E2E-A1 & A2: Admin login, approve startup, create category", async ({ page }) => {
+  test("E2E-A1 & A2: Admin login, approve startup, create category", async () => {
     // 1. Login as seeded admin
     // await page.goto("/admin/login");
     // await page.fill('input[type="email"]', "admin@anshkosh.com");

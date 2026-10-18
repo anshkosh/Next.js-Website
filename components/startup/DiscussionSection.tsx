@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition, useRef, useCallback } from "react";
+import { useState, useTransition, useCallback } from "react";
 import Link from "next/link";
 import { MessageSquare, ChevronDown, Send, Clock, CheckCircle2, AlertCircle } from "lucide-react";
 import TurnstileWidget from "./TurnstileWidget";
@@ -116,7 +116,7 @@ interface FormState {
   token: string;
 }
 
-function CommentForm({ startupId, startupSlug, onSubmitted }: {
+function CommentForm({ startupId, onSubmitted }: {
   startupId: string;
   startupSlug: string;
   onSubmitted: (name: string) => void;
@@ -124,7 +124,6 @@ function CommentForm({ startupId, startupSlug, onSubmitted }: {
   const [form, setForm] = useState<FormState>({ name: "", email: "", body: "", token: "" });
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
-  const turnstileRef = useRef<{ reset?: () => void }>(null);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));

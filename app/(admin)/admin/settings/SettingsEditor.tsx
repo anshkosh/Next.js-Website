@@ -73,7 +73,7 @@ export default function SettingsEditor({ initialSettings }: { initialSettings: R
           setIsSaving(prev => ({ ...prev, [key]: false }));
           return;
         }
-      } catch (e) {
+      } catch {
         setMessages(prev => ({ ...prev, [key]: { type: 'error', text: 'Invalid JSON format.' } }));
         setIsSaving(prev => ({ ...prev, [key]: false }));
         return;

@@ -6,7 +6,8 @@ function scan(bytes) {
     let response = "", settled = false;
     const finish = (error, verdict) => {
       if (settled) return;
-      settled = true; socket.destroy(); error ? reject(error) : resolve(verdict);
+      settled = true; socket.destroy();
+      if (error) reject(error); else resolve(verdict);
     };
     socket.setTimeout(15000, () => finish(new Error("Scanner timeout")));
     socket.on("error", () => finish(new Error("Scanner unavailable")));

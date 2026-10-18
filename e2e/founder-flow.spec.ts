@@ -1,7 +1,7 @@
-import { test, expect } from "@playwright/test";
+import { test } from "@playwright/test";
 
 test.describe("Founder Flow", () => {
-  test("E2E-F1 & F2: Register, Dashboard, Create, Review Resubmit", async ({ page }) => {
+  test("E2E-F1 & F2: Register, Dashboard, Create, Review Resubmit", async () => {
     // 1. Register via email
     // await page.goto("/register");
     // await page.fill('input[type="text"]', "Test Founder");

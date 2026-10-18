@@ -16,7 +16,7 @@ export default async function FounderLayout({ children }: { children: React.Reac
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
-      <FounderTopbar user={session.user} />
+      <FounderTopbar user={{ name: session.user.name, email: session.user.email }} />
       <main className="flex-1 flex flex-col">
         {children}
       </main>

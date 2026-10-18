@@ -8,6 +8,7 @@ import { getFounders, createFounder, updateFounder, deleteFounder } from "@/app/
 import { authClient } from "@/lib/auth-client";
 import { useDraftRecovery } from "./useDraftRecovery";
 import DraftRecoveryNotice from "./DraftRecoveryNotice";
+import Image from "next/image";
 
 type Founder = {
   id: string;
@@ -123,7 +124,7 @@ export default function FounderManager({ startupId, onBusyChange }: { startupId:
             <div key={founder.id} className="flex items-center justify-between p-4 border border-gray-200 rounded-xl bg-gray-50/50">
               <div className="flex items-center gap-4">
                 {founder.photoUrl ? (
-                  <img src={founder.photoUrl} alt={founder.name} className="w-12 h-12 rounded-full object-cover border border-gray-200" />
+                  <Image unoptimized width={48} height={48} src={founder.photoUrl} alt={founder.name} className="w-12 h-12 rounded-full object-cover border border-gray-200" />
                 ) : (
                   <div className="w-12 h-12 rounded-full bg-gray-200 flex items-center justify-center text-gray-500 font-bold">
                     {founder.name.charAt(0).toUpperCase()}

@@ -27,3 +27,9 @@ it("keeps draft management available to its verified owner without broadening pu
   await getFounders("draft"); await getUpdates("draft");
   for (const find of [mock.founders, mock.updates]) expect(find).toHaveBeenCalledWith(expect.objectContaining({ where: { startupId: "draft", startup: { OR: [{ status: "LIVE" }, { founderId: "owner" }] } }, select: expect.any(Object) }));
 });
+it("rejects serialized filter operators instead of accepting a string-shaped type assertion", async () => {
+  const input = { not: "anything" } as unknown as string;
+  expect(await getFounders(input)).toHaveProperty("error"); expect(await getUpdates(input)).toHaveProperty("error");
+  expect(await fetchApprovedComments(input)).toEqual({ comments: [], nextCursor: null });
+  expect(mock.founders).not.toHaveBeenCalled(); expect(mock.updates).not.toHaveBeenCalled(); expect(mock.comments).not.toHaveBeenCalled();
+});

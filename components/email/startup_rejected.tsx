@@ -71,14 +71,14 @@ export const StartupRejectedEmail = ({
           <Section style={content}>
             <Heading style={heading}>Update Needed</Heading>
             <Text style={text}>
-              We've reviewed your submission for <strong>{startupName}</strong>.
+              We&apos;ve reviewed your submission for <strong>{startupName}</strong>.
               Before we can set it live, we need you to make a few changes.
             </Text>
             <Section style={notesContainer}>
               <Text style={notesText}>{notes}</Text>
             </Section>
             <Text style={text}>
-              Don't worry! Just make the changes and resubmit your startup for
+              Don&apos;t worry! Just make the changes and resubmit your startup for
               review.
             </Text>
             <Section style={btnContainer}>

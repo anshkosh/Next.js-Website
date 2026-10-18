@@ -77,7 +77,7 @@ export default function LandingSignal() {
                 ].map((claim, idx) => (
                   <li key={idx} className="flex items-center gap-3 text-sm text-gray-400 line-through decoration-gray-300">
                     <span className="w-2 h-2 rounded-full bg-gray-300 shrink-0" />
-                    <span>"{claim}"</span>
+                    <span>&quot;{claim}&quot;</span>
                   </li>
                 ))}
               </ul>

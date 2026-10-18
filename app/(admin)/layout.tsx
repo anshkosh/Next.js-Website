@@ -1,18 +1,7 @@
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
-import Link from "next/link";
 import { db } from "@/lib/db";
-import {
-  LayoutDashboard,
-  Rocket,
-  ShieldCheck,
-  Tags,
-  Settings,
-  Users,
-  LogOut,
-  Menu
-} from "lucide-react";
 import AdminSidebar from "./AdminSidebar";
 import AdminTopbar from "./AdminTopbar";
 
@@ -46,7 +35,7 @@ export default async function AdminLayout({
       <AdminSidebar role={role} pendingReviewCount={pendingReviewCount} pendingCommentCount={pendingCommentCount} />
       
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
-        <AdminTopbar user={session.user} />
+        <AdminTopbar user={{ name: session.user.name, role: session.user.role }} />
         
         <main className="flex-1 overflow-y-auto p-4 md:p-6 lg:p-8">
           {children}

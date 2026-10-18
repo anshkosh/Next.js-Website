@@ -302,8 +302,7 @@ export default function NewStartupPage() {
     
     const res = await submitForReview(startupId);
     if (res.error) {
-      if ((res as any).details) setErrors((res as any).details as Record<string, string[]>);
-      else setErrors({ form: [res.error] });
+      setErrors({ form: [res.error] });
       setIsSaving(false);
     } else {
       if (res.notificationPending) alert("Your startup was submitted successfully. Its notification is delayed and will be retried automatically.");

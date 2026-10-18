@@ -74,3 +74,5 @@ linkedin-post-draft.md
 /deploy/cleanup-space.mjs
 /deploy/archive/cleanup-space-*.mjs
 /tools/reddit-telegram-buttons/
+# Local sample-only admin UI; never part of a production release.
+/app/featured-admin-preview/

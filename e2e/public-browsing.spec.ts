@@ -1,7 +1,7 @@
-import { test, expect } from "@playwright/test";
+import { test } from "@playwright/test";
 
 test.describe("Public Browsing Flow", () => {
-  test("E2E-P1 & P2: Homepage filtering, upvoting, searching", async ({ page }) => {
+  test("E2E-P1 & P2: Homepage filtering, upvoting, searching", async () => {
     // 1. Visit homepage
     // await page.goto("/");
     // expect(await page.title()).toContain("anshkosh");

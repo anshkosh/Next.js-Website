@@ -7,6 +7,7 @@ import { createFounderSchema, updateFounderSchema } from "@/lib/validators/found
 import { startupReadWhere } from "@/lib/startup-read-access";
 
 export async function getFounders(startupId: string) {
+  if (typeof startupId !== "string" || !startupId || startupId.length > 128) return { error: "Invalid startup ID" };
   try {
     const session = await auth.api.getSession({ headers: await headers() });
     const founders = await db.startupFounder.findMany({

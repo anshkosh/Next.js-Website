@@ -12,7 +12,7 @@ export const emailWorker = new Worker(
       const { template, to, data, subject: customSubject } = job.data as {
         template: TemplateName;
         to: string;
-        data: Record<string, any>;
+        data: Record<string, unknown>;
         subject?: string;
       };
 
@@ -20,7 +20,7 @@ export const emailWorker = new Worker(
       const subject = customSubject || getSubject(template, data);
 
       await sendEmail({ to, subject, html, text: toPlainText(html) });
-      logger.info(`Email sent successfully to ${to}`, { jobId: job.id, template });
+      logger.info("Email sent successfully", { jobId: job.id, template });
     } catch (error) {
       logger.error(`Failed to send email for job ${job.id}`, { error });
       throw error;

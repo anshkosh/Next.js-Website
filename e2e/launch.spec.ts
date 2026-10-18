@@ -65,7 +65,16 @@ async function uploadPhoto(page: Page, label: string) {
   await expect(dialog.getByLabel("Photo crop preview")).toBeVisible();
   await dialog.getByRole("slider", { name: /^Zoom/ }).fill("1.5");
   await dialog.getByRole("slider", { name: /^Straighten/ }).fill("10");
+  // Route compilation can be cold in the disposable dev server. Assert actual
+  // acceptance within the same 30-second action budget, then require the UI to
+  // close. A rejected upload must expose its response, not just a modal timeout.
+  const upload = page.waitForResponse(response => response.request().method() === "POST" &&
+    /^\/api\/uploads\/(?:logo|gallery|founder-photo)$/.test(new URL(response.url()).pathname), { timeout: 30000 });
   await dialog.getByRole("button", { name: "Apply & upload" }).click();
+  const response = await upload;
+  const payload = await response.json();
+  expect(response.status(), typeof payload.error === "string" ? payload.error : "edited image upload accepted").toBe(200);
+  expect(payload.url).toMatch(/^\/api\/uploads\/serve\/(?:logos|gallery|founders)\/[a-zA-Z0-9_-]+\.webp$/);
   await expect(dialog).toBeHidden({ timeout: 15000 });
 }
 
@@ -120,7 +129,10 @@ test("signup, real verification token, login, photo editing, private deck and st
   await expect(page.getByRole("link", { name: "Download uploaded pitch deck" })).toBeVisible({ timeout: 15000 });
   await page.getByRole("button", { name: "Next", exact: true }).click();
   await page.getByRole("button", { name: "Submit for Review" }).click();
-  await expect(page).toHaveURL(/\/dashboard/);
+  // Verify the persisted result before expecting navigation through a cold
+  // dashboard compilation. A button click alone does not establish a save.
+  await expect.poll(async () => (await db.startup.findFirst({ where: { founder: { email } } }))?.status, { timeout: 15000 }).toBe("PENDING_REVIEW");
+  await expect(page).toHaveURL(/\/dashboard/, { timeout: 15000 });
   const record = await db.startup.findFirstOrThrow({ where: { founder: { email } } });
   startupId = record.id; slug = record.slug;
   expect(record.status).toBe("PENDING_REVIEW"); expect(record.prototypeStatus).toBe("Preparing a pilot");

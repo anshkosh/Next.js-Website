@@ -4,6 +4,7 @@ import { useId, useState } from "react";
 import { useUploadActivity } from "./useUploadActivity";
 import PhotoEditor from "./PhotoEditor";
 import { Button } from "@/components/ui/button";
+import Image from "next/image";
 
 type Kind = "logo" | "gallery" | "founder-photo";
 export default function EditableImageUpload({ kind, value, onChange, onBusyChange, label, disabled = false }: {
@@ -46,7 +47,7 @@ export default function EditableImageUpload({ kind, value, onChange, onBusyChang
   }
 
   return <div className="space-y-2 rounded-xl border border-gray-200 bg-gray-50 p-3">
-    {value && <img src={value} alt={`${label} preview`} className={kind === "gallery" ? "aspect-video w-full rounded-lg object-contain" : "h-20 w-20 rounded-lg object-contain"} />}
+    {value && <Image unoptimized width={kind === "gallery" ? 1280 : 80} height={kind === "gallery" ? 720 : 80} src={value} alt={`${label} preview`} className={kind === "gallery" ? "aspect-video w-full rounded-lg object-contain" : "h-20 w-20 rounded-lg object-contain"} />}
     <div className="flex flex-wrap items-center gap-2">
       <input id={inputId} type="file" accept="image/png,image/jpeg,image/webp,image/gif" disabled={busy || disabled} aria-label={`Upload ${label.toLowerCase()}`} onChange={e => { selectFile(e.target.files?.[0]); e.target.value = ""; }} className="block w-full min-w-0 text-xs file:mr-3 file:rounded-lg file:border-0 file:bg-white file:px-3 file:py-2 file:font-medium" />
       {value && <>

@@ -8,6 +8,7 @@ import { createUpdateSchema, updateUpdateSchema } from "@/lib/validators/update.
 import { startupReadWhere } from "@/lib/startup-read-access";
 
 export async function getUpdates(startupId: string) {
+  if (typeof startupId !== "string" || !startupId || startupId.length > 128) return { error: "Invalid startup ID" };
   try {
     const session = await auth.api.getSession({ headers: await headers() });
     const updates = await db.startupUpdate.findMany({
@@ -98,12 +99,8 @@ export async function editUpdate(
       return { error: `Validation failed:\n${errorMsg}` };
     }
 
-    const { id: _id, ...updateData } = validated.data;
-    // Clean up empty imageUrl
-    const dataToUpdate: any = { ...updateData };
-    if (dataToUpdate.imageUrl === "") {
-      dataToUpdate.imageUrl = null;
-    }
+    const dataToUpdate = { title: validated.data.title, body: validated.data.body,
+      imageUrl: validated.data.imageUrl === "" ? null : validated.data.imageUrl };
 
     const update = await db.startupUpdate.update({
       where: { id },

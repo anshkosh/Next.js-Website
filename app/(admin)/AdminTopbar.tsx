@@ -1,10 +1,10 @@
 "use client";
 
-import { LogOut, Menu } from "lucide-react";
+import { LogOut } from "lucide-react";
 import { authClient } from "@/lib/auth-client";
 import { useRouter } from "next/navigation";
 
-export default function AdminTopbar({ user }: { user: any }) {
+export default function AdminTopbar({ user }: { user: { name?: string | null; role?: string | null } }) {
   const router = useRouter();
 
   const handleLogout = async () => {

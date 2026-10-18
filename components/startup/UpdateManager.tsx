@@ -1,8 +1,9 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Loader2, Plus, Trash2, UploadCloud, X, Check, Image as ImageIcon, Edit2, ChevronDown, ChevronUp } from "lucide-react";
 import { getUpdates, createUpdate, editUpdate, deleteUpdate } from "@/app/actions/update.actions";
+import Image from "next/image";
 
 type Update = {
   id: string;
@@ -33,6 +34,7 @@ function timeAgo(dateStr: Date | string) {
 export default function UpdateManager({ startupId }: { startupId: string }) {
   const [updates, setUpdates] = useState<Update[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [isEditing, setIsEditing] = useState<string | null>(null); // "new" | update id | null
   const [isSaving, setIsSaving] = useState(false);
   const [showAll, setShowAll] = useState(false);
@@ -46,18 +48,27 @@ export default function UpdateManager({ startupId }: { startupId: string }) {
   const [isUploading, setIsUploading] = useState(false);
   const [imageError, setImageError] = useState(false);
 
-  useEffect(() => {
-    loadUpdates();
+  const loadUpdates = useCallback(async () => {
+    try {
+      const res = await getUpdates(startupId);
+      if (res.data) { setUpdates(res.data); setLoadError(null); }
+      else setLoadError(res.error || "Unable to load updates.");
+    } catch { setLoadError("Unable to load updates. Please try again."); }
+    finally { setIsLoading(false); }
   }, [startupId]);
 
-  const loadUpdates = async () => {
-    setIsLoading(true);
-    const res = await getUpdates(startupId);
-    if (res.data) {
-      setUpdates(res.data as Update[]);
-    }
-    setIsLoading(false);
-  };
+  useEffect(() => {
+    let active = true;
+    getUpdates(startupId).then(res => {
+      if (!active) return;
+      if (res.data) { setUpdates(res.data); setLoadError(null); }
+      else setLoadError(res.error || "Unable to load updates.");
+      setIsLoading(false);
+    }).catch(() => {
+      if (active) { setLoadError("Unable to load updates. Please try again."); setIsLoading(false); }
+    });
+    return () => { active = false; };
+  }, [startupId]);
 
   const uploadImage = async (file: File) => {
     if (!file) return;
@@ -184,6 +195,7 @@ export default function UpdateManager({ startupId }: { startupId: string }) {
 
   return (
     <div className="space-y-6">
+      {loadError && <p role="alert" className="text-sm text-red-600">{loadError} <button type="button" onClick={() => void loadUpdates()} className="underline">Retry</button></p>}
       <div className="flex items-center justify-between">
         <div>
           <h3 className="text-lg font-semibold text-gray-900">Founder Updates</h3>
@@ -210,7 +222,7 @@ export default function UpdateManager({ startupId }: { startupId: string }) {
                   <p className="text-sm text-gray-600 line-clamp-2 ml-8">{update.body}</p>
                   {update.imageUrl && (
                     <div className="ml-8 mt-2">
-                      <img src={update.imageUrl} alt="" className="w-20 h-14 object-cover rounded-lg border border-gray-200" />
+                      <Image unoptimized width={80} height={56} src={update.imageUrl} alt="" className="w-20 h-14 object-cover rounded-lg border border-gray-200" />
                     </div>
                   )}
                   <p className="text-xs text-gray-400 mt-2 ml-8">{timeAgo(update.createdAt)}</p>
@@ -289,7 +301,7 @@ export default function UpdateManager({ startupId }: { startupId: string }) {
             {formData.imageUrl || imagePreview ? (
               <div className="flex items-center space-x-4 p-4 border border-gray-200 rounded-xl bg-white">
                 {!imageError ? (
-                  <img
+                  <Image unoptimized width={80} height={56}
                     src={imagePreview || formData.imageUrl}
                     alt="Preview"
                     onError={() => setImageError(true)}

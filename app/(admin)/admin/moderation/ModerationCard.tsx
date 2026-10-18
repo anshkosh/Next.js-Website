@@ -4,8 +4,13 @@ import { useState } from "react";
 import Image from "next/image";
 import { ExternalLink, Check, X, Eye, Play, MapPin, Calendar, Link, Building2 } from "lucide-react";
 import { approveStartup, rejectStartup } from "@/app/actions/admin.actions";
+import type { Prisma } from "@prisma/client";
+import { startupMetadataFields } from "@/lib/startup-metadata";
 
-export default function ModerationCard({ startup }: { startup: any }) {
+type ModerationStartup = Prisma.StartupGetPayload<{ include: { category: true; founder: { select: { name: true; email: true } }; founders: true } }>;
+
+export default function ModerationCard({ startup }: { startup: ModerationStartup }) {
+  const metadata = startupMetadataFields(startup.metadata);
   const [isApproving, setIsApproving] = useState(false);
   const [isRejecting, setIsRejecting] = useState(false);
   const [showRejectDialog, setShowRejectDialog] = useState(false);
@@ -180,7 +185,7 @@ export default function ModerationCard({ startup }: { startup: any }) {
             <div className="p-6 border-b border-gray-200 flex justify-between items-center bg-gray-50/50 rounded-t-2xl shrink-0">
               <div className="flex items-center gap-4">
                 {startup.logoUrl ? (
-                  <img src={startup.logoUrl} alt={startup.name} className="w-12 h-12 rounded-lg border border-gray-200 object-cover bg-white" />
+                  <Image unoptimized width={48} height={48} src={startup.logoUrl} alt={startup.name} className="w-12 h-12 rounded-lg border border-gray-200 object-cover bg-white" />
                 ) : (
                   <div className="w-12 h-12 rounded-lg bg-gray-100 flex items-center justify-center font-bold text-gray-400 border border-gray-200">
                     {startup.name.substring(0,2).toUpperCase()}
@@ -235,7 +240,7 @@ export default function ModerationCard({ startup }: { startup: any }) {
                       <div className="grid grid-cols-2 gap-4">
                         {startup.galleryImages.map((img: string, idx: number) => (
                           <div key={idx} className="aspect-video rounded-xl overflow-hidden border border-gray-200 shadow-sm">
-                            <img src={img} alt={`Gallery ${idx}`} className="w-full h-full object-cover" />
+                            <Image unoptimized width={1280} height={720} src={img} alt={`Gallery ${idx}`} className="w-full h-full object-cover" />
                           </div>
                         ))}
                       </div>
@@ -243,11 +248,11 @@ export default function ModerationCard({ startup }: { startup: any }) {
                   )}
 
                   {/* Features */}
-                  {startup.metadata?.features && startup.metadata.features.length > 0 && (
+                  {metadata.features.length > 0 && (
                     <section>
                       <h4 className="text-lg font-bold font-heading mb-3">Key Features</h4>
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        {startup.metadata.features.map((feature: any, idx: number) => (
+                        {metadata.features.map((feature, idx) => (
                           <div key={idx} className="p-4 border border-gray-100 bg-gray-50 rounded-xl flex gap-3">
                             <div className="w-8 h-8 rounded-lg bg-coral-50 text-coral-500 flex items-center justify-center shrink-0">
                               <Check size={16} /> {/* Static icon for preview */}
@@ -275,11 +280,11 @@ export default function ModerationCard({ startup }: { startup: any }) {
                       </div>
                       <div className="flex items-center justify-between">
                         <span className="text-gray-500 flex items-center gap-1.5"><MapPin size={16}/> City</span>
-                        <span className="font-medium text-right max-w-[140px] truncate">{startup.metadata?.city || "N/A"}</span>
+                        <span className="font-medium text-right max-w-[140px] truncate">{metadata.city || "N/A"}</span>
                       </div>
                       <div className="flex items-center justify-between">
                         <span className="text-gray-500 flex items-center gap-1.5"><Calendar size={16}/> Founded</span>
-                        <span className="font-medium">{startup.metadata?.foundedYear || "N/A"}</span>
+                        <span className="font-medium">{metadata.foundedYear || "N/A"}</span>
                       </div>
                     </div>
                   </div>
@@ -291,13 +296,13 @@ export default function ModerationCard({ startup }: { startup: any }) {
                       <a href={startup.websiteUrl} target="_blank" className="flex items-center gap-2 text-coral-500 hover:underline">
                         <ExternalLink size={16} /> Website URL
                       </a>
-                      {startup.metadata?.twitterUrl && (
-                        <a href={startup.metadata.twitterUrl} target="_blank" className="flex items-center gap-2 text-blue-400 hover:underline">
+                      {metadata.twitterUrl && (
+                        <a href={metadata.twitterUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-blue-400 hover:underline">
                           <Link size={16} /> Twitter Profile
                         </a>
                       )}
-                      {startup.metadata?.linkedinUrl && (
-                        <a href={startup.metadata.linkedinUrl} target="_blank" className="flex items-center gap-2 text-blue-700 hover:underline">
+                      {metadata.linkedinUrl && (
+                        <a href={metadata.linkedinUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-blue-700 hover:underline">
                           <Link size={16} /> LinkedIn Profile
                         </a>
                       )}
@@ -320,10 +325,10 @@ export default function ModerationCard({ startup }: { startup: any }) {
                       </div>
                       
                       {/* Extra Founders */}
-                      {startup.founders && startup.founders.map((f: any) => (
+                      {startup.founders.map(f => (
                         <div key={f.id} className="flex items-center gap-3 pt-3 border-t border-gray-200/60">
                           {f.photoUrl ? (
-                            <img src={f.photoUrl} alt={f.name} className="w-10 h-10 rounded-full object-cover border border-gray-200" />
+                            <Image unoptimized width={40} height={40} src={f.photoUrl} alt={f.name} className="w-10 h-10 rounded-full object-cover border border-gray-200" />
                           ) : (
                             <div className="w-10 h-10 rounded-full bg-gray-200 text-gray-600 flex items-center justify-center font-bold text-sm shrink-0">
                               {f.name.substring(0, 2).toUpperCase()}

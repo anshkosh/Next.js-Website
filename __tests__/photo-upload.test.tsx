@@ -3,7 +3,7 @@ import { createRoot, type Root } from "react-dom/client";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import EditableImageUpload from "../components/startup/EditableImageUpload";
 
-vi.mock("../components/startup/PhotoEditor", () => ({ default: ({ onCancel, onApply }: { onCancel: () => void; onApply: (file: File) => Promise<void> }) => {
+vi.mock("../components/startup/PhotoEditor", () => ({ default: function MockPhotoEditor({ onCancel, onApply }: { onCancel: () => void; onApply: (file: File) => Promise<void> }) {
   const [error, setError] = React.useState("");
   return <div role="dialog"><button type="button" onClick={onCancel}>Cancel crop</button><button type="button" onClick={() => onApply(new File(["edited"], "edited.webp", { type: "image/webp" })).catch(e => setError(e.message))}>Apply crop</button>{error && <p role="alert">{error}</p>}</div>;
 } }));

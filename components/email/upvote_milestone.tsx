@@ -74,7 +74,7 @@ export const UpvoteMilestoneEmail = ({
               anshkosh!
             </Text>
             <Text style={text}>
-              People are loving what you're building. Keep up the momentum!
+              People are loving what you&apos;re building. Keep up the momentum!
             </Text>
             <Section style={btnContainer}>
               <Button style={buttonGold} href={`${baseUrl}/startups/${slug}`}>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { X, Plus, AlertCircle, Zap } from "lucide-react";
 import EditableImageUpload from "@/components/startup/EditableImageUpload";
@@ -14,13 +14,15 @@ import Link from "next/link";
 import { STARTUP_STAGES } from "@/lib/startup-stages";
 import { useDraftRecovery } from "@/components/startup/useDraftRecovery";
 import DraftRecoveryNotice from "@/components/startup/DraftRecoveryNotice";
+import type { Startup } from "@prisma/client";
+import { startupMetadataFields } from "@/lib/startup-metadata";
 
 const availableIcons = [
   "Zap", "Shield", "Rocket", "Globe", "Users", "Smartphone", "CheckCircle", "Star", "Heart", 
   "Activity", "TrendingUp", "Award", "Key", "Lock", "Cloud", "Server", "Database", "Cpu", "Code", "Monitor"
 ];
 
-export default function EditStartupForm({ initialData, userId }: { initialData: any; userId: string }) {
+export default function EditStartupForm({ initialData, userId }: { initialData: Partial<Startup> & Pick<Startup, "id" | "status"> & { revisionStatus?: string; revisionNotes?: string | null }; userId: string }) {
   const router = useRouter();
   const [isSaving, setIsSaving] = useState(false);
   const [mediaBusy, setMediaBusy] = useState<Record<string, boolean>>({});
@@ -38,7 +40,7 @@ export default function EditStartupForm({ initialData, userId }: { initialData: 
       .catch((err) => console.error(err));
   }, []);
 
-  const scrollToFirstError = () => {
+  const scrollToFirstError = useCallback(() => {
     const errorText = document.querySelector(".text-red-500");
     if (errorText) {
       errorText.scrollIntoView({ behavior: "smooth", block: "center" });
@@ -59,7 +61,7 @@ export default function EditStartupForm({ initialData, userId }: { initialData: 
     }
 
     window.scrollTo({ top: 0, behavior: "smooth" });
-  };
+  }, [errors]);
 
   useEffect(() => {
     if (Object.keys(errors).length > 0) {
@@ -68,12 +70,12 @@ export default function EditStartupForm({ initialData, userId }: { initialData: 
       }, 100);
       return () => clearTimeout(timer);
     }
-  }, [errors]);
+  }, [errors, scrollToFirstError]);
 
   const currentYear = new Date().getFullYear();
   const years = Array.from({ length: currentYear - 1970 + 1 }, (_, i) => currentYear - i);
 
-  const metadata = initialData.metadata || {};
+  const metadata = startupMetadataFields(initialData.metadata);
 
   const [formData, setFormData] = useState({
     id: initialData.id,
