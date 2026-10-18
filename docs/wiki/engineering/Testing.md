@@ -44,6 +44,10 @@ The active browser gate is `e2e/launch.spec.ts` (eight real end-to-end scenarios
 selected by `playwright.config.ts`). Other older spec files still contain planning
 placeholders and are not claimed as coverage. The active suite uses a disposable
 database and captured email/storage services; it must never point at production.
+Photo-upload scenarios assert a successful upload response and a valid sanitized
+storage URL before requiring the editor to close. The response wait uses the
+existing 30-second browser action budget so cold dev compilation is distinct from
+an actual server rejection; a failed upload is not accepted as a successful save.
 
 The Playwright-managed development server disables source maps to reduce memory
 use during browser checks; the normal development and production commands are
