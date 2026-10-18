@@ -6,11 +6,14 @@ import UpvoteMilestoneEmail from "@/components/email/upvote_milestone";
 import NewSubmissionEmail from "@/components/email/new_submission";
 import ContactInquiryEmail from "@/components/email/contact_inquiry";
 import * as React from "react";
+import NewsletterConfirmationEmail from "@/components/email/newsletter_confirmation";
 
-export type TemplateName = "welcome" | "startup_approved" | "startup_rejected" | "upvote_milestone" | "new_submission" | "contact_inquiry";
+export type TemplateName = "welcome" | "startup_approved" | "startup_rejected" | "upvote_milestone" | "new_submission" | "contact_inquiry" | "newsletter_confirmation";
 
 export async function renderEmailTemplate(template: TemplateName, data: Record<string, any>): Promise<string> {
   switch (template) {
+    case "newsletter_confirmation":
+      return render(React.createElement(NewsletterConfirmationEmail, { confirmationUrl: String(data.confirmationUrl) }));
     case "welcome":
       return render(React.createElement(WelcomeEmail, data));
     case "startup_approved":
@@ -30,6 +33,7 @@ export async function renderEmailTemplate(template: TemplateName, data: Record<s
 
 export function getSubject(template: TemplateName, data: Record<string, any>): string {
   switch (template) {
+    case "newsletter_confirmation": return "Confirm your Anshkosh newsletter signup";
     case "welcome": return "Welcome to anshkosh! 🚀";
     case "startup_approved": return `${data.startupName} is now live on anshkosh!`;
     case "startup_rejected": return `Update needed: ${data.startupName}`;

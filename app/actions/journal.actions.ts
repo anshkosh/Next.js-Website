@@ -7,6 +7,7 @@ import { revalidatePath } from "next/cache";
 import { logger } from "@/lib/logger";
 import { calculateReadingTime } from "@/lib/journal-reading-time.mjs";
 import { parseJournalSchedule } from "@/lib/journal-scheduling";
+import { sanitizeJournalHtml } from "@/lib/journal-html";
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -28,7 +29,7 @@ function generateExcerpt(html: string, maxLength = 160): string {
 
 async function requireAdmin() {
   const session = await auth.api.getSession({ headers: await headers() });
-  if (!session || session.user.role !== "admin") {
+  if (!session?.user.emailVerified || session.user.banned || session.user.role !== "admin") {
     throw new Error("Unauthorized");
   }
   return session;
@@ -48,7 +49,7 @@ export async function createJournalPost(formData: FormData) {
     const rawSlug = (formData.get("slug") as string)?.trim();
     const slug = rawSlug ? generateSlug(rawSlug) : generateSlug(title);
 
-    const contentHtml = (formData.get("contentHtml") as string) || "";
+    const contentHtml = sanitizeJournalHtml(String(formData.get("contentHtml") || ""));
     const contentJsonRaw = formData.get("contentJson") as string;
     const contentJson = contentJsonRaw ? JSON.parse(contentJsonRaw) : null;
 
@@ -115,7 +116,7 @@ export async function updateJournalPost(id: string, formData: FormData) {
     const rawSlug = (formData.get("slug") as string)?.trim();
     const slug = rawSlug ? generateSlug(rawSlug) : generateSlug(title);
 
-    const contentHtml = (formData.get("contentHtml") as string) || "";
+    const contentHtml = sanitizeJournalHtml(String(formData.get("contentHtml") || ""));
     const contentJsonRaw = formData.get("contentJson") as string;
     const contentJson = contentJsonRaw ? JSON.parse(contentJsonRaw) : null;
 

@@ -100,7 +100,7 @@ export async function fetchApprovedComments(
 ): Promise<{ comments: PublicComment[]; nextCursor: string | null }> {
   try {
     const rows = await db.comment.findMany({
-      where: { startupId, status: "APPROVED" },
+      where: { startupId, status: "APPROVED", startup: { status: "LIVE" } },
       orderBy: { createdAt: "desc" },
       take: COMMENTS_PAGE_SIZE + 1,
       ...(cursor ? { cursor: { id: cursor }, skip: 1 } : {}),

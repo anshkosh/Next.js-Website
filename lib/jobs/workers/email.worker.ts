@@ -3,6 +3,7 @@ import { connection } from "../connection";
 import { sendEmail } from "@/lib/email/adapter";
 import { renderEmailTemplate, getSubject, TemplateName } from "@/lib/email/templates";
 import { logger } from "@/lib/logger";
+import { toPlainText } from "@react-email/components";
 
 export const emailWorker = new Worker(
   "email",
@@ -18,7 +19,7 @@ export const emailWorker = new Worker(
       const html = await renderEmailTemplate(template, data);
       const subject = customSubject || getSubject(template, data);
 
-      await sendEmail({ to, subject, html });
+      await sendEmail({ to, subject, html, text: toPlainText(html) });
       logger.info(`Email sent successfully to ${to}`, { jobId: job.id, template });
     } catch (error) {
       logger.error(`Failed to send email for job ${job.id}`, { error });

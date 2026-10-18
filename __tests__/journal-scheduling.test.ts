@@ -16,7 +16,7 @@ const now = new Date("2026-10-17T06:00:00Z");
 beforeEach(() => {
   vi.useFakeTimers({ toFake: ["Date"] }); vi.setSystemTime(now);
   vi.clearAllMocks(); m.list.mockResolvedValue([]); m.admins.mockResolvedValue({ count: 1 });
-  m.session.mockResolvedValue({ user: { id: "admin", role: "admin" } }); m.post.mockResolvedValue({ slug: "story", status: "DRAFT" });
+  m.session.mockResolvedValue({ user: { id: "admin", role: "admin", emailVerified: true } }); m.post.mockResolvedValue({ slug: "story", status: "DRAFT" });
   m.postUpdate.mockResolvedValue({ slug: "story" });
 });
 afterEach(() => vi.useRealTimers());

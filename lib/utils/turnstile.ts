@@ -22,6 +22,7 @@ export async function verifyTurnstileToken(token: string): Promise<boolean> {
         method: "POST",
         headers: { "Content-Type": "application/x-www-form-urlencoded" },
         body: new URLSearchParams({ secret: secretKey, response: token }),
+        signal: AbortSignal.timeout(10000),
       }
     );
 
