@@ -48,6 +48,9 @@ cannot turn a committed save into an error response.
 `scripts/test-recheck-invariants-postgres.ts` verifies concurrent team/feature
 allocations and real insert/delete rollback on counter failure. It refuses any
 database except loopback `anshkosh_e2e` and cleans only its own fixtures.
+URL query overrides/fragments are rejected before connecting, and the startup and
+featured tables must be empty before fixtures are created so the latest-startup
+test cannot feature an unrelated listing. The URL guard has direct offline tests.
 No test-startup labels, bot identities, scoring weights or existing activity are
 changed by these repairs.
 

@@ -4,14 +4,15 @@ import { Prisma, PrismaClient } from "@prisma/client";
 import { createTeamFounder, TeamFounderError } from "../lib/startup-team-store";
 import { createStartupUpdate, removeStartupUpdate } from "../lib/startup-update-store";
 import { featurePermanentStartup, featureLatestLiveStartup, removeFeaturedEntry, FeaturedStartupError } from "../lib/featured-startup-store";
+import { invariantTestDatabaseUrl } from "./invariant-test-database";
 
 async function main() {
-  const url = new URL(process.env.INVARIANTS_TEST_DATABASE_URL || "http://invalid");
-  if (!['postgres:', 'postgresql:'].includes(url.protocol) || !["localhost", "127.0.0.1"].includes(url.hostname) || url.pathname !== "/anshkosh_e2e") throw new Error("Disposable local anshkosh_e2e database required");
-  const client = new PrismaClient({ datasourceUrl: url.toString() });
+  const datasourceUrl = invariantTestDatabaseUrl(process.env.INVARIANTS_TEST_DATABASE_URL);
+  const client = new PrismaClient({ datasourceUrl });
   const suffix = randomUUID(); let owner: string | undefined; let category: string | undefined;
   try {
     assert.equal(await client.featuredStartup.count(), 0, "Invariant fixtures require an empty featured list in the disposable DB");
+    assert.equal(await client.startup.count(), 0, "Invariant fixtures require an empty startup table; never feature an unrelated listing");
     owner = (await client.user.create({ data: { name: "Invariant fixture", email: `invariants-${suffix}@example.test`, emailVerified: true } })).id;
     category = (await client.category.create({ data: { name: `Invariants ${suffix}`, slug: `invariants-${suffix}` } })).id;
     const startups = [];
