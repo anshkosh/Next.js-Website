@@ -70,12 +70,12 @@ export const WelcomeEmail = ({
               Welcome to anshkosh, {founderName}!
             </Heading>
             <Text style={text}>
-              We're thrilled to have you join India's premier startup showcase
+              We&apos;re thrilled to have you join India&apos;s premier startup showcase
               platform. anshkosh is the best place to launch, discover, and
               upvote the most exciting startups in the country.
             </Text>
             <Text style={text}>
-              Ready to show the world what you're building?
+              Ready to show the world what you&apos;re building?
             </Text>
             <Section style={btnContainer}>
               <Button style={button} href={targetUrl}>

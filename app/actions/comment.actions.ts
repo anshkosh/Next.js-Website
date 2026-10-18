@@ -98,6 +98,7 @@ export async function fetchApprovedComments(
   startupId: string,
   cursor?: string
 ): Promise<{ comments: PublicComment[]; nextCursor: string | null }> {
+  if (typeof startupId !== "string" || !startupId || startupId.length > 128 || (cursor !== undefined && (typeof cursor !== "string" || !cursor || cursor.length > 128))) return { comments: [], nextCursor: null };
   try {
     const rows = await db.comment.findMany({
       where: { startupId, status: "APPROVED", startup: { status: "LIVE" } },

@@ -12,7 +12,7 @@ export async function checkRateLimit(key: string, limit: number, windowSeconds: 
     const count = Number(await limiter.eval("local n=redis.call('INCR',KEYS[1]); if n==1 then redis.call('EXPIRE',KEYS[1],ARGV[1]) end; return n", 1, key, windowSeconds));
     return count <= limit;
   } catch {
-    limiter.disconnect(); limiter = undefined;
+    limiter?.disconnect(); limiter = undefined;
     return false;
   }
 }

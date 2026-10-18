@@ -5,7 +5,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { UserPlus, ShieldOff } from "lucide-react";
 import { setAdminRole, removeAdminRole } from "@/app/actions/user.actions";
 
-export default function AdminManager({ admins, currentUserId }: { admins: any[], currentUserId: string }) {
+export default function AdminManager({ admins, currentUserId }: { admins: { id: string; name: string; email: string; role: string; createdAt: Date }[]; currentUserId: string }) {
   const [isAddOpen, setIsAddOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");

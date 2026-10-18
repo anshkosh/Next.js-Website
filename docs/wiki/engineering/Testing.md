@@ -40,7 +40,10 @@ configurable two-startup allowance. The script refuses production/remote databas
 npx playwright test
 ```
 
-Specs in `e2e/` cover public browsing, auth, the founder flow, the admin flow and later feature phases. They need a running app with a seeded database.
+The active browser gate is `e2e/launch.spec.ts` (eight real end-to-end scenarios,
+selected by `playwright.config.ts`). Other older spec files still contain planning
+placeholders and are not claimed as coverage. The active suite uses a disposable
+database and captured email/storage services; it must never point at production.
 
 The Playwright-managed development server disables source maps to reduce memory
 use during browser checks; the normal development and production commands are
@@ -54,8 +57,23 @@ Before navigating after a mutation, wait for its persisted result. A voting butt
 `.github/workflows/deploy-vps.yml` runs on every pull request into `main` and every push to `main`:
 
 1. `npm ci`
-2. `npm test -- --maxWorkers=2`
-3. `python3 -m unittest` for `deploy/test_upload_limit.py`
+2. `npm run lint` (zero warnings, no application-rule suppression)
+3. `npm run typecheck`
+4. `npm run audit:dependencies` (new/critical findings, changed exception versions,
+   service errors and expired reviews block CI; known findings remain visible)
+5. `npm test -- --maxWorkers=2`
+6. `python3 -m unittest` for `deploy/test_upload_limit.py`
+
+The browser job applies migrations to isolated PostgreSQL, checks signal scoring
+and concurrent quotas, then runs all eight launch scenarios. Submission tests
+verify the persisted pending-review status before navigation; cold compilation
+does not replace the state assertion. Failed browser runs retain traces/screenshots
+and the report for three days. Release builds also run TypeScript on the VPS.
+
+The lint scope excludes generated builds, third-party installed design tooling and
+local-only agent scratch/preview artifacts; tracked application source, workers,
+scripts and tests are checked. The untracked admin sample is Git-ignored and must
+never be deployed.
 
 On pull requests the `deploy` job is skipped. On `main` it runs only after tests pass and only when `VPS_DEPLOY_ENABLED=true`. GitHub auto-merge is disabled for this repository, so merge manually after checks pass.
 

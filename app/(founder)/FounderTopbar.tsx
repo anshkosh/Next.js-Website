@@ -7,7 +7,7 @@ import { useRouter } from "next/navigation";
 import { LogOut, LayoutDashboard, Settings, Menu, X } from "lucide-react";
 import { authClient } from "@/lib/auth-client";
 
-export default function FounderTopbar({ user }: { user: any }) {
+export default function FounderTopbar({ user }: { user: { name?: string | null; email?: string | null } }) {
   const router = useRouter();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);

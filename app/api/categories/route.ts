@@ -8,7 +8,7 @@ export async function GET() {
       select: { id: true, name: true, iconName: true }
     });
     return NextResponse.json(categories);
-  } catch (error) {
+  } catch {
     return NextResponse.json({ error: "Failed to fetch categories" }, { status: 500 });
   }
 }

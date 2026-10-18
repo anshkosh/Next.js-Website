@@ -9,7 +9,6 @@ import {
   Tags,
   Settings,
   Users,
-  LogOut,
   Menu,
   Star,
   BookOpen,

@@ -120,7 +120,10 @@ test("signup, real verification token, login, photo editing, private deck and st
   await expect(page.getByRole("link", { name: "Download uploaded pitch deck" })).toBeVisible({ timeout: 15000 });
   await page.getByRole("button", { name: "Next", exact: true }).click();
   await page.getByRole("button", { name: "Submit for Review" }).click();
-  await expect(page).toHaveURL(/\/dashboard/);
+  // Verify the persisted result before expecting navigation through a cold
+  // dashboard compilation. A button click alone does not establish a save.
+  await expect.poll(async () => (await db.startup.findFirst({ where: { founder: { email } } }))?.status, { timeout: 15000 }).toBe("PENDING_REVIEW");
+  await expect(page).toHaveURL(/\/dashboard/, { timeout: 15000 });
   const record = await db.startup.findFirstOrThrow({ where: { founder: { email } } });
   startupId = record.id; slug = record.slug;
   expect(record.status).toBe("PENDING_REVIEW"); expect(record.prototypeStatus).toBe("Preparing a pilot");

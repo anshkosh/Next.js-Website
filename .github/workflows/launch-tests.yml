@@ -58,3 +58,12 @@ jobs:
       - run: sudo apt-get update -qq && sudo apt-get install -y -qq qpdf && qpdf --version
       - run: npx playwright install --with-deps chromium
       - run: npx playwright test
+      - name: Preserve browser failure evidence
+        if: failure()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: browser-failure-evidence
+          path: |
+            test-results/
+            playwright-report/
+          retention-days: 3

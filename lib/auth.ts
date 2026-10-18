@@ -3,6 +3,7 @@ import { prismaAdapter } from "@better-auth/prisma-adapter";
 import { admin, type Role } from "better-auth/plugins";
 import { db } from "./db";
 import { getTrustedAuthOrigins } from "./auth-origins";
+import { escapeEmailHtml } from "./email/escape";
 
 const statements = {
   startup: ["create", "read", "update", "delete", "moderate"],
@@ -24,7 +25,8 @@ export const auth = betterAuth({
       await sendEmail({
         to: user.email,
         subject: "Reset your Anshkosh password",
-        html: `<p>Hi ${user.name || "there"},</p><p>Use the link below to choose a new Anshkosh password:</p><p><a href="${url}">Reset your password</a></p><p>If you did not request this, you can ignore this email.</p>`,
+        html: `<p>Hi ${escapeEmailHtml(user.name || "there")},</p><p>Use the link below to choose a new Anshkosh password:</p><p><a href="${escapeEmailHtml(url)}">Reset your password</a></p><p>If you did not request this, you can ignore this email.</p>`,
+        text: `Hi ${user.name || "there"},\nReset your Anshkosh password: ${url}\nIf you did not request this, ignore this email.`,
       });
     },
   },

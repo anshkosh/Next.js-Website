@@ -64,6 +64,44 @@ unsubscribe links/headers and confirm the company's complete postal address.
 
 ## Secrets
 
+Email rendering escapes account-name/link interpolation, sends plain-text
+alternatives, and bounds provider requests. Routine success/failure logs exclude
+recipient addresses and provider response bodies.
+
 - Production secrets live only in `/var/www/anshkosh-shared/.env` (mode 600) and in each release's private copy. GitHub Actions holds only the restricted deploy key (`VPS_SSH_KEY`) and pinned host keys (`VPS_KNOWN_HOSTS`).
 - Never commit `.env`, private keys or database dumps. Never paste secret values into issues, PRs, chat or agent messages; refer to the variable name or file path instead.
 - `pm2 jlist`, `pm2 env`, `dump.pm2` and raw logs can contain secrets. Filter them before sharing.
+
+## Dependency remediation and residual risk (18 October 2026)
+
+Compatible dependency refresh reduced the audit inventory from 27 original package
+entries to 14 (12 high, 2 moderate), with no critical findings. The remaining entries
+are chains rooted in three unresolved advisories; they are **not fixed or a clean
+audit**:
+
+- [braces GHSA-vfj7-8cjw-p6xm](https://github.com/advisories/GHSA-vfj7-8cjw-p6xm):
+  no published patch; glob tooling used by CLI/lint/build dependencies. Do not feed
+  untrusted remote patterns to build or component-generation tools.
+- [deepmerge-ts GHSA-ggr8-5vv4-36mx](https://github.com/advisories/GHSA-ggr8-5vv4-36mx):
+  Prisma 6 configuration dependency; fixed on a different major. A Prisma 7/config
+  migration needs its own reviewed compatibility work. No application handler
+  imports this merger or accepts cyclic configuration objects.
+- [postcss-selector-parser GHSA-rj75-hqrm-r3gf](https://github.com/advisories/GHSA-rj75-hqrm-r3gf):
+  typography's v6 parser remains affected; forcing parser v7/downgrading typography
+  is not compatible remediation. It processes trusted build styles, not submitted
+  journal HTML. Reassess if dynamic user-supplied CSS is ever introduced.
+
+`security/dependency-exceptions.json` pins these exact advisories and installed
+versions through 18 November 2026, with rationale. CI reports them unresolved and
+fails on any new/critical advisory, changed vulnerable version or expired review.
+Do not silently extend reviews or use blanket audit suppression. Better Auth's
+optional peer links can make CLI/test packages appear in `--omit=dev` audit output;
+dependency placement alone is not a reachability argument. Prisma/shadcn are now
+declared development tools, and no forced major upgrades/downgrades were used.
+
+The local npm 10 resolver hit a documented optional-peer graph crash during the
+Vitest-family patch update ([upstream issue](https://github.com/npm/cli/issues/9787)).
+A one-off npm 12 invocation resolved the compatible lockfile; a fresh normal npm
+10 `npm ci`, generated Prisma client and full checks verify reproducibility without
+changing the server/global package manager. Lifecycle scripts still run normally
+in the existing CI/deploy pipeline.

@@ -14,6 +14,13 @@ const eslintConfig = defineConfig([
     "next-env.d.ts",
     // Installed design tooling ships third-party scripts, not application code.
     ".github/skills/**",
+    // Local-only agent scratch files, sample preview and generated test builds.
+    ".codex-*/**",
+    ".next-e2e/**",
+    ".next-e2e-build/**",
+    "playwright-report/**",
+    "test-results/**",
+    "app/featured-admin-preview/**",
   ]),
 ]);
 

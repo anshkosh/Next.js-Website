@@ -29,13 +29,14 @@ export async function sendEmail(params: SendEmailParams): Promise<void> {
       htmlContent: params.html,
       textContent: params.text,
     }),
+    signal: AbortSignal.timeout(10000),
   });
 
   if (!response.ok) {
-    const text = await response.text();
-    throw new Error(`Brevo API error: ${response.status} - ${text}`);
+    await response.body?.cancel();
+    throw new Error(`Email provider request failed (${response.status})`);
   }
 
   const result = await response.json().catch(() => ({}));
-  console.log(`[Brevo] Email sent successfully to ${params.to}. MessageId:`, result.messageId || "ok");
+  console.log("[Brevo] Email sent successfully. MessageId:", result.messageId || "ok");
 }

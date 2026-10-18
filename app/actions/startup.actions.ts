@@ -163,12 +163,8 @@ export async function updateStartup(formData: FormData) {
     };
 
     // Remove undefined values so partial schema works correctly
-    Object.keys(rawData).forEach(
-      (key) =>
-        (rawData as any)[key] === undefined && delete (rawData as any)[key],
-    );
-
-    const validatedData = updateStartupSchema.safeParse(rawData);
+    const definedData = Object.fromEntries(Object.entries(rawData).filter(([, value]) => value !== undefined));
+    const validatedData = updateStartupSchema.safeParse(definedData);
 
     if (!validatedData.success) {
       const errorMsg = validatedData.error.issues
@@ -351,7 +347,7 @@ export async function submitForReview(id: string) {
       };
     }
 
-    const metadata = existingStartup.metadata as any;
+    const metadata = existingStartup.metadata && typeof existingStartup.metadata === "object" && !Array.isArray(existingStartup.metadata) ? existingStartup.metadata : null;
     if (!metadata || !metadata.city) {
       return { error: "Please provide your City before submitting." };
     }

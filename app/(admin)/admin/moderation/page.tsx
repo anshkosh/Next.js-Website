@@ -48,7 +48,7 @@ export default async function ModerationPage() {
       ) : (
         <div className="space-y-6">
           {pendingStartups.map((startup) => (
-            <ModerationCard key={startup.id} startup={startup as any} />
+            <ModerationCard key={startup.id} startup={startup} />
           ))}
         </div>
       )}

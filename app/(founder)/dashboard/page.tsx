@@ -112,8 +112,10 @@ export default async function DashboardPage() {
   const liveStartup = startups.find(startup => startup.status === "LIVE");
   const incomplete = liveStartup && (!liveStartup.logoUrl || !liveStartup.problemStatement || !liveStartup.solutionStatement);
   const liveStartupIds = startups.filter(startup => startup.status === "LIVE").map(startup => startup.id);
-  const activitySince = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
-  const journalDueSince = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+  // Request-time server snapshot: auth/headers make this page dynamic.
+  const requestTime = new Date();
+  const activitySince = new Date(requestTime.getTime() - 30 * 24 * 60 * 60 * 1000);
+  const journalDueSince = new Date(requestTime.getTime() - 7 * 24 * 60 * 60 * 1000);
   const [latestJournal, recentMilestone, latestUpdate, recentFounderReply, communityStartup] = await Promise.all([
     db.founderJournalEntry.findFirst({ where: { authorId: session.user.id }, select: { updatedAt: true }, orderBy: { updatedAt: "desc" } }),
     db.founderJournalEntry.findFirst({ where: { authorId: session.user.id, milestoneDone: true, updatedAt: { gte: activitySince } }, select: { id: true } }),

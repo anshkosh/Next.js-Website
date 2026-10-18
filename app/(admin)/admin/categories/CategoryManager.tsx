@@ -5,6 +5,10 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Plus, Edit2, Trash2, Search, X } from "lucide-react";
 import * as LucideIcons from "lucide-react";
 import { createCategory, updateCategory, deleteCategory } from "@/app/actions/category.actions";
+import type { Prisma } from "@prisma/client";
+import type { LucideProps } from "lucide-react";
+
+type ManagedCategory = Prisma.CategoryGetPayload<{ include: { _count: { select: { startups: true } } } }>;
 
 const CURATED_ICONS = [
   "Banknote", "GraduationCap", "HeartPulse", "ShoppingCart", "Cloud",
@@ -14,8 +18,8 @@ const CURATED_ICONS = [
   "Server", "Shield", "Users", "Zap", "Monitor", "Code", "Cpu", "Database"
 ];
 
-function DynamicIcon({ name, ...props }: { name: string, [key: string]: any }) {
-  const Icon = (LucideIcons as any)[name];
+function DynamicIcon({ name, ...props }: { name: string } & LucideProps) {
+  const Icon = LucideIcons.icons[name as keyof typeof LucideIcons.icons];
   return Icon ? <Icon {...props} /> : <span>{name}</span>;
 }
 
@@ -23,7 +27,7 @@ function IconPickerModal({ isOpen, onClose, onSelect }: { isOpen: boolean, onClo
   const [search, setSearch] = useState("");
   
   const allIconNames = useMemo(() => {
-    return Object.keys(LucideIcons).filter(key => /^[A-Z]/.test(key) && key !== 'LucideProps' && key !== 'IconNode' && key !== 'Icon');
+    return Object.keys(LucideIcons.icons);
   }, []);
 
   const otherIconNames = useMemo(() => {
@@ -85,7 +89,7 @@ function IconPickerModal({ isOpen, onClose, onSelect }: { isOpen: boolean, onClo
           {searchedIcons ? (
             <>
               {searchedIcons.length > 0 ? renderIconList(searchedIcons) : (
-                <div className="text-center text-gray-500 py-8">No icons found for "{search}"</div>
+                <div className="text-center text-gray-500 py-8">No icons found for &quot;{search}&quot;</div>
               )}
             </>
           ) : (
@@ -103,11 +107,11 @@ function IconPickerModal({ isOpen, onClose, onSelect }: { isOpen: boolean, onClo
   );
 }
 
-export default function CategoryManager({ initialCategories }: { initialCategories: any[] }) {
-  const [categories, setCategories] = useState(initialCategories);
+export default function CategoryManager({ initialCategories }: { initialCategories: ManagedCategory[] }) {
+  const categories = initialCategories;
   const [isAddOpen, setIsAddOpen] = useState(false);
-  const [editCategory, setEditCategory] = useState<any>(null);
-  const [deleteCategoryObj, setDeleteCategoryObj] = useState<any>(null);
+  const [editCategory, setEditCategory] = useState<ManagedCategory | null>(null);
+  const [deleteCategoryObj, setDeleteCategoryObj] = useState<ManagedCategory | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
 
@@ -205,7 +209,7 @@ export default function CategoryManager({ initialCategories }: { initialCategori
               return (
                 <TableRow key={cat.id}>
                   <TableCell className="text-gray-700">
-                    <DynamicIcon name={cat.iconName} size={24} />
+                    <DynamicIcon name={cat.iconName || "Rocket"} size={24} />
                   </TableCell>
                   <TableCell className="font-medium">{cat.name}</TableCell>
                   <TableCell className="text-gray-500 text-sm">{cat.slug}</TableCell>
@@ -307,14 +311,14 @@ export default function CategoryManager({ initialCategories }: { initialCategori
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Icon</label>
-                <input type="hidden" name="iconName" value={editCategory.iconName} />
+                <input type="hidden" name="iconName" value={editCategory.iconName || ""} />
                 <button
                   type="button"
                   onClick={() => setIconPickerTarget('edit')}
                   className="w-full border rounded-md p-2 flex items-center justify-between outline-none focus:border-coral-500 hover:bg-gray-50 transition-colors bg-white text-left"
                 >
                   <span className="flex items-center gap-2">
-                    <DynamicIcon name={editCategory.iconName} size={20} className="text-gray-600" />
+                    <DynamicIcon name={editCategory.iconName || "Rocket"} size={20} className="text-gray-600" />
                     <span className="text-gray-700">{editCategory.iconName}</span>
                   </span>
                   <Edit2 size={14} className="text-gray-400" />
@@ -322,7 +326,7 @@ export default function CategoryManager({ initialCategories }: { initialCategori
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
-                <textarea name="description" defaultValue={editCategory.description} className="w-full border rounded-md p-2 h-24 outline-none focus:border-coral-500"></textarea>
+                <textarea name="description" defaultValue={editCategory.description || ""} className="w-full border rounded-md p-2 h-24 outline-none focus:border-coral-500"></textarea>
               </div>
               
               <div className="flex justify-end gap-3 mt-6">
@@ -341,7 +345,7 @@ export default function CategoryManager({ initialCategories }: { initialCategori
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-xl max-w-sm w-full p-6 shadow-xl text-center">
             <h3 className="text-xl font-bold mb-2">Delete Category</h3>
-            <p className="text-gray-500 mb-6">Are you sure you want to delete the "{deleteCategoryObj.name}" category? This action cannot be undone.</p>
+            <p className="text-gray-500 mb-6">Are you sure you want to delete the &quot;{deleteCategoryObj.name}&quot; category? This action cannot be undone.</p>
             
             <div className="flex justify-center gap-3">
               <button type="button" onClick={() => setDeleteCategoryObj(null)} className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-md font-medium w-full">Cancel</button>
