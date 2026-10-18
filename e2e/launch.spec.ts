@@ -171,7 +171,8 @@ test("password reset uses a delivered token and mobile forms fit the viewport", 
 test("public founder search and bidirectional voting share accurate signals across pages", async ({ page }) => {
   await enter(page, "/search?q=test%20founder");
   await expect(page.getByRole("heading", { name: startupName, exact: true })).toBeVisible();
-  await expect(page.getByText("Founders: Test Founder", { exact: true })).toBeVisible();
+  const startupResult = page.getByRole("link").filter({ has: page.getByRole("heading", { name: startupName, exact: true }) });
+  await expect(startupResult.getByText("Founders: Test Founder", { exact: true })).toBeVisible();
   await enter(page, `/discover?q=${encodeURIComponent("test founder")}`);
   await expect(page.getByRole("heading", { name: startupName, exact: true })).toBeVisible();
   await enter(page, `/startups/${slug}`);
