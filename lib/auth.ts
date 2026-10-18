@@ -1,16 +1,10 @@
 import { betterAuth } from "better-auth";
 import { prismaAdapter } from "@better-auth/prisma-adapter";
-import { admin, type Role } from "better-auth/plugins";
+import { admin } from "better-auth/plugins";
 import { db } from "./db";
 import { getTrustedAuthOrigins } from "./auth-origins";
 import { escapeEmailHtml } from "./email/escape";
-
-const statements = {
-  startup: ["create", "read", "update", "delete", "moderate"],
-  category: ["create", "read", "update", "delete"],
-  settings: ["read", "update"],
-  admin: ["create", "read", "delete"],
-} as const;
+import { accountAdminOptions } from "./auth-roles";
 
 export const auth = betterAuth({
   trustedOrigins: getTrustedAuthOrigins,
@@ -51,25 +45,6 @@ export const auth = betterAuth({
     },
   },
   plugins: [
-    admin({
-      adminRoles: ["admin", "reviewer"],
-      statements,
-      roles: {
-        user: {
-          startup: ["create", "read", "update"],
-          category: ["read"],
-        },
-        reviewer: {
-          startup: ["read", "moderate"],
-          category: ["read", "create", "update"],
-        },
-        admin: {
-          startup: ["create", "read", "update", "delete", "moderate"],
-          category: ["create", "read", "update", "delete"],
-          settings: ["read", "update"],
-          admin: ["create", "read", "delete"],
-        },
-      } as unknown as Record<string, Role>,
-    }),
+    admin(accountAdminOptions),
   ],
 });

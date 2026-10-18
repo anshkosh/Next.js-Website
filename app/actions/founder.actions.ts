@@ -5,6 +5,7 @@ import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { createFounderSchema, updateFounderSchema } from "@/lib/validators/founder.schema";
 import { startupReadWhere } from "@/lib/startup-read-access";
+import { createTeamFounder, TeamFounderError } from "@/lib/startup-team-store";
 
 export async function getFounders(startupId: string) {
   if (typeof startupId !== "string" || !startupId || startupId.length > 128) return { error: "Invalid startup ID" };
@@ -31,26 +32,11 @@ export async function createFounder(input: unknown) {
     if (!parsed.success) return { error: "Invalid founder details" };
     const data = parsed.data;
 
-    const startup = await db.startup.findUnique({ where: { id: data.startupId } });
-    if (!startup || startup.founderId !== session.user.id) return { error: "Unauthorized" };
-
-    const count = await db.startupFounder.count({ where: { startupId: data.startupId } });
-    if (count >= 3) return { error: "Maximum of 3 founders allowed" };
-
-    const founder = await db.startupFounder.create({
-      data: {
-        startupId: data.startupId,
-        name: data.name,
-        role: data.role,
-        photoUrl: data.photoUrl,
-        linkedinUrl: data.linkedinUrl,
-        twitterUrl: data.twitterUrl,
-        sortOrder: count,
-      }
-    });
+    const founder = await createTeamFounder(session.user.id, data);
 
     return { data: founder };
   } catch (error) {
+    if (error instanceof TeamFounderError) return { error: error.message };
     logger.error("Create founder error:", error);
     return { error: "Internal server error" };
   }

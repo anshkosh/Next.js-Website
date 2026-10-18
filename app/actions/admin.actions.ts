@@ -6,6 +6,7 @@ import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { revalidateSavedPath as revalidatePath } from "@/lib/cache-after-save";
 import { storeNotification, deliverNotification } from "@/lib/notification-outbox";
+import { addFeaturedStartup, unfeatureStartupById, setFeaturedStartupSortOrder } from "./featured";
 
 export async function approveStartup(id: string) {
   const session = await auth.api.getSession({
@@ -155,81 +156,16 @@ export async function unsuspendStartup(id: string) {
   }
 }
 
+// Old clients use these names; all feature writes share the same checked service.
 export async function featureStartup(startupId: string, sortOrder: number = 0) {
-  const session = await auth.api.getSession({
-    headers: await headers(),
-  });
-
-  if (!session || (session.user.role !== "admin" && session.user.role !== "reviewer")) {
-    return { error: "Unauthorized" };
-  }
-
-  try {
-    await db.featuredStartup.upsert({
-      where: { startupId },
-      create: { startupId, sortOrder },
-      update: { sortOrder, featuredUntil: null },
-    });
-
-    revalidatePath("/");
-    revalidatePath("/discover");
-    revalidatePath("/admin/featured");
-
-    return { success: true };
-  } catch (error) {
-    logger.error("Feature startup error:", error);
-    return { error: "Failed to feature startup" };
-  }
+  return addFeaturedStartup(startupId, sortOrder);
 }
 
 export async function unfeatureStartup(startupId: string) {
-  const session = await auth.api.getSession({
-    headers: await headers(),
-  });
-
-  if (!session || (session.user.role !== "admin" && session.user.role !== "reviewer")) {
-    return { error: "Unauthorized" };
-  }
-
-  try {
-    await db.featuredStartup.deleteMany({
-      where: { startupId },
-    });
-
-    revalidatePath("/");
-    revalidatePath("/discover");
-    revalidatePath("/admin/featured");
-
-    return { success: true };
-  } catch (error) {
-    logger.error("Unfeature startup error:", error);
-    return { error: "Failed to unfeature startup" };
-  }
+  return unfeatureStartupById(startupId);
 }
 
 export async function updateFeaturedSortOrder(featuredId: string, sortOrder: number) {
-  const session = await auth.api.getSession({
-    headers: await headers(),
-  });
-
-  if (!session || (session.user.role !== "admin" && session.user.role !== "reviewer")) {
-    return { error: "Unauthorized" };
-  }
-
-  try {
-    await db.featuredStartup.update({
-      where: { id: featuredId },
-      data: { sortOrder },
-    });
-
-    revalidatePath("/");
-    revalidatePath("/discover");
-    revalidatePath("/admin/featured");
-
-    return { success: true };
-  } catch (error) {
-    logger.error("Update featured sort order error:", error);
-    return { error: "Failed to update sort order" };
-  }
+  return setFeaturedStartupSortOrder(featuredId, sortOrder);
 }
 

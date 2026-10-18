@@ -3,9 +3,10 @@ import { logger } from "@/lib/logger";
 import { db } from "@/lib/db";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
-import { revalidatePath } from "next/cache";
+import { revalidateSavedPath as revalidatePath } from "@/lib/cache-after-save";
 import { createUpdateSchema, updateUpdateSchema } from "@/lib/validators/update.schema";
 import { startupReadWhere } from "@/lib/startup-read-access";
+import { createStartupUpdate, removeStartupUpdate, StartupUpdateError } from "@/lib/startup-update-store";
 
 export async function getUpdates(startupId: string) {
   if (typeof startupId !== "string" || !startupId || startupId.length > 128) return { error: "Invalid startup ID" };
@@ -33,13 +34,6 @@ export async function createUpdate(data: {
     const session = await auth.api.getSession({ headers: await headers() });
     if (!session || !session.user) return { error: "Unauthorized" };
 
-    const startup = await db.startup.findUnique({ where: { id: data.startupId } });
-    if (!startup || startup.founderId !== session.user.id) return { error: "Unauthorized" };
-
-    if (startup.status !== "LIVE") {
-      return { error: "Updates can only be posted on live startups" };
-    }
-
     const validated = createUpdateSchema.safeParse(data);
     if (!validated.success) {
       const errorMsg = validated.error.issues
@@ -48,27 +42,15 @@ export async function createUpdate(data: {
       return { error: `Validation failed:\n${errorMsg}` };
     }
 
-    const update = await db.startupUpdate.create({
-      data: {
-        startupId: validated.data.startupId,
-        title: validated.data.title,
-        body: validated.data.body,
-        imageUrl: validated.data.imageUrl || null,
-      },
-    });
+    const { update, slug } = await createStartupUpdate(session.user.id, validated.data);
 
-    // Increment denormalized count
-    await db.startup.update({
-      where: { id: data.startupId },
-      data: { updateCount: { increment: 1 } },
-    });
-
-    revalidatePath(`/startups/${startup.slug}`);
+    revalidatePath(`/startups/${slug}`);
     revalidatePath("/dashboard");
     revalidatePath("/");
     revalidatePath("/leaderboard");
     return { data: update };
   } catch (error) {
+    if (error instanceof StartupUpdateError) return { error: error.message };
     logger.error("Create update error:", error);
     return { error: "Internal server error" };
   }
@@ -122,29 +104,16 @@ export async function deleteUpdate(id: string) {
     const session = await auth.api.getSession({ headers: await headers() });
     if (!session || !session.user) return { error: "Unauthorized" };
 
-    const existing = await db.startupUpdate.findUnique({
-      where: { id },
-      include: { startup: true },
-    });
+    if (typeof id !== "string" || !id || id.length > 128) return { error: "Invalid update ID" };
+    const { slug } = await removeStartupUpdate(session.user.id, id);
 
-    if (!existing || existing.startup.founderId !== session.user.id) {
-      return { error: "Unauthorized" };
-    }
-
-    await db.startupUpdate.delete({ where: { id } });
-
-    // Decrement denormalized count
-    await db.startup.update({
-      where: { id: existing.startupId },
-      data: { updateCount: { decrement: 1 } },
-    });
-
-    revalidatePath(`/startups/${existing.startup.slug}`);
+    revalidatePath(`/startups/${slug}`);
     revalidatePath("/dashboard");
     revalidatePath("/");
     revalidatePath("/leaderboard");
     return { success: true };
   } catch (error) {
+    if (error instanceof StartupUpdateError) return { error: error.message };
     logger.error("Delete update error:", error);
     return { error: "Internal server error" };
   }

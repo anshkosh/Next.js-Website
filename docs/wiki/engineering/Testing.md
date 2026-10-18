@@ -34,6 +34,26 @@ malformed/encoded pagination and bounded beta retention. The browser CI also run
 simultaneous creates cannot exceed either the default one-startup limit or a
 configurable two-startup allowance. The script refuses production/remote databases.
 
+The recheck adds real Better Auth endpoint tests in `auth-admin-permissions.test.ts`:
+admins may manage users/sessions, reviewers retain content moderation but cannot
+manage accounts, and ordinary/anonymous users are denied. These use an isolated
+memory adapter and the actual production access-control role factory, not a mocked
+permission comparison. No role type-casts hide missing runtime methods.
+
+Team creation serializes on the parent startup row; every manual, one-day and
+legacy feature-allocation path uses the same global advisory lock and six-slot
+capacity check. Reordering is an atomic exact-list operation. Startup-update
+create/delete and counter recount commit together, while cache refresh failures
+cannot turn a committed save into an error response.
+`scripts/test-recheck-invariants-postgres.ts` verifies concurrent team/feature
+allocations and real insert/delete rollback on counter failure. It refuses any
+database except loopback `anshkosh_e2e` and cleans only its own fixtures.
+URL query overrides/fragments are rejected before connecting, and the startup and
+featured tables must be empty before fixtures are created so the latest-startup
+test cannot feature an unrelated listing. The URL guard has direct offline tests.
+No test-startup labels, bot identities, scoring weights or existing activity are
+changed by these repairs.
+
 ## End-to-end tests (Playwright)
 
 ```bash

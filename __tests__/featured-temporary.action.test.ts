@@ -3,6 +3,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 const mocks = vi.hoisted(() => ({
   getSession: vi.fn(),
   startupFindFirst: vi.fn(),
+  startupFindUnique: vi.fn(),
   featuredFindUnique: vi.fn(),
   featuredCount: vi.fn(),
   featuredAggregate: vi.fn(),
@@ -16,7 +17,8 @@ vi.mock("next/cache", () => ({ revalidatePath: mocks.revalidatePath }));
 vi.mock("@/lib/db", () => ({
   db: {
     $transaction: (callback: (tx: unknown) => unknown) => callback({
-      startup: { findFirst: mocks.startupFindFirst },
+      $queryRaw: async () => [],
+      startup: { findFirst: mocks.startupFindFirst, findUnique: mocks.startupFindUnique },
       featuredStartup: {
         findUnique: mocks.featuredFindUnique,
         count: mocks.featuredCount,
@@ -33,8 +35,9 @@ describe("feature newest live startup for one day", () => {
   beforeEach(() => {
     vi.useFakeTimers();
     vi.setSystemTime(new Date("2026-10-18T10:00:00.000Z"));
-    mocks.getSession.mockResolvedValue({ user: { role: "admin" } });
+    mocks.getSession.mockResolvedValue({ user: { role: "admin", emailVerified: true, banned: false } });
     mocks.startupFindFirst.mockResolvedValue({ id: "latest", name: "Latest startup" });
+    mocks.startupFindUnique.mockResolvedValue({ id: "latest", name: "Latest startup" });
     mocks.featuredFindUnique.mockResolvedValue(null);
     mocks.featuredCount.mockResolvedValue(2);
     mocks.featuredAggregate.mockResolvedValue({ _min: { sortOrder: 0 } });
