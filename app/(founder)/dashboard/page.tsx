@@ -183,7 +183,7 @@ export default async function DashboardPage() {
             </div>
             <div>
               <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-0.5">
-                Total Signals
+                Total Net Votes
               </p>
               <p className="text-3xl font-bold text-gray-900 leading-none">
                 {totalSignals}
@@ -305,7 +305,7 @@ export default async function DashboardPage() {
                       <div className="flex items-center gap-2 flex-wrap">
                         <span className="inline-flex items-center gap-1 text-xs font-semibold text-gray-600 bg-gray-50 border border-gray-100 px-2.5 py-1 rounded-full">
                           <Star size={11} className="text-coral-400" />
-                          {startup.signalCount} signals
+                          {startup.signalCount} net votes
                         </span>
                         <span className="inline-flex items-center gap-1 text-xs font-medium text-gray-500 bg-gray-50 border border-gray-100 px-2.5 py-1 rounded-full">
                           {startup.category.name}

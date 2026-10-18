@@ -14,6 +14,6 @@ it("searches published founder names without querying private accounts or showin
   expect(args.where.OR).toContainEqual({ founders: { some: { name: { contains: "rinu", mode: "insensitive" } } } });
   expect(args.where.OR).not.toContainEqual(expect.objectContaining({ founder: expect.anything() }));
   expect(args.orderBy).toEqual({ signalCount: "desc" });
-  expect(html).toContain("-2 signals"); expect(html).toContain("3 upvotes − 5 downvotes");
+  expect(html).toContain("-2 net votes"); expect(html).toContain("3 upvotes − 5 downvotes");
   expect(html).toContain("Rinu &lt;script&gt;"); expect(html).not.toContain("<script>");
 });

@@ -17,7 +17,7 @@ const sections = [
     "The pilot does not present progress updates as independently verified milestone logs. Read the available evidence, ask questions and consider what remains uncertain.",
   ] },
   { title: "Votes and their limits", paragraphs: [
-    "Signals are all-time upvotes minus downvotes. A visitor can have one active vote per startup, switch it or remove it. Votes reflect community opinion; they do not verify a startup’s claims or establish demand, revenue or product-market fit.",
+    "Net votes are all-time upvotes minus downvotes. Leaderboard signals additionally include capped points for public founder progress, approved community participation and founder replies. Repeated comments, reply edits and same-day publishing do not add extra activity points. Private and unapproved journal entries are excluded. See the leaderboard for the exact formula and each startup’s breakdown. A visitor can have one active vote per startup, switch it or remove it. Participation signals do not verify identities or establish demand, revenue or product-market fit.",
     "Visitor cookies, a hash derived from request IP address and browser user-agent, and rate limits help reduce duplicate voting and abuse. These controls have limits and do not prove that every vote comes from a unique person. Do not buy, fabricate or automate votes.",
   ] },
   { title: "Discussion and conduct", paragraphs: [

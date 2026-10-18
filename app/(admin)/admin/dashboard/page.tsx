@@ -150,7 +150,7 @@ export default async function AdminDashboardPage() {
         {/* Top Startups */}
         <Card>
           <CardHeader>
-            <CardTitle className="text-sm font-medium text-gray-500">Top 5 Startups</CardTitle>
+            <CardTitle className="text-sm font-medium text-gray-500">Top 5 Startups by Net Votes</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
@@ -163,7 +163,7 @@ export default async function AdminDashboardPage() {
                       <span className="text-[10px] px-1.5 py-0.5 bg-gray-100 rounded text-gray-500">{startup.status}</span>
                     )}
                   </div>
-                  <div className="font-medium text-coral-500">{startup.signalCount} signals</div>
+                  <div className="font-medium text-coral-500">{startup.signalCount} net votes</div>
                 </div>
               )) : (
                 <p className="text-sm text-gray-500">No startups yet.</p>

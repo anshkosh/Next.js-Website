@@ -93,7 +93,7 @@ export default async function AdminStartupsPage(props: {
               <TableHead>Status</TableHead>
               <TableHead>Upvotes</TableHead>
               <TableHead>Downvotes</TableHead>
-              <TableHead>Signals</TableHead>
+              <TableHead>Net votes</TableHead>
               <TableHead>Founder</TableHead>
               <TableHead>Created</TableHead>
               <TableHead className="text-right">Actions</TableHead>
