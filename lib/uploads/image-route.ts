@@ -5,13 +5,15 @@ import { authorizeUpload, uploadFailure, UploadError } from "./safety";
 import { scanIfEnabled } from "./scan";
 import { storeUpload } from "./store";
 
-export async function imageUpload(req: NextRequest, kind: "logos" | "gallery" | "founders") {
+export async function imageUpload(req: NextRequest, kind: "logos" | "gallery" | "founders" | "update-images" | "journal") {
   try {
-    const maxBytes = (kind === "gallery" ? 5 : 2) * 1024 * 1024;
+    const large = ["gallery", "update-images", "journal"].includes(kind);
+    const maxBytes = (large ? 5 : 2) * 1024 * 1024;
     const user = await authorizeUpload(req, maxBytes);
+    if (kind === "journal" && user.role !== "admin") throw new UploadError("Unauthorized", 403);
     const file = (await req.formData()).get("file");
     if (!(file instanceof File)) throw new UploadError("Choose an image file.", 400);
-    const types = kind === "gallery" ? ["image/png", "image/jpeg", "image/webp", "image/gif"] : ["image/png", "image/jpeg", "image/webp"];
+    const types = large ? ["image/png", "image/jpeg", "image/webp", "image/gif"] : ["image/png", "image/jpeg", "image/webp"];
     if (!types.includes(file.type) || !file.size) throw new UploadError("Choose a PNG, JPG or WebP image.", 400);
     if (file.size > maxBytes) throw new UploadError(`This image must be smaller than ${maxBytes / 1024 / 1024} MB.`, 413);
     const original = Buffer.from(await file.arrayBuffer());
@@ -19,7 +21,7 @@ export async function imageUpload(req: NextRequest, kind: "logos" | "gallery" | 
     let bytes: Buffer;
     try {
       const pipeline = sharp(original, { limitInputPixels: 40_000_000 }).rotate();
-      bytes = await (kind === "gallery" ? pipeline.resize({ width: 1280, height: 1280, fit: "inside", withoutEnlargement: true }).webp({ quality: 80 })
+      bytes = await (large ? pipeline.resize({ width: 1280, height: 1280, fit: "inside", withoutEnlargement: true }).webp({ quality: 80 })
         : pipeline.resize({ width: 512, height: 512, fit: "inside", withoutEnlargement: true }).webp({ quality: 88 })).toBuffer();
     } catch { throw new UploadError("This image could not be read. Try another PNG, JPG or WebP image.", 400); }
     const key = `${kind}/${randomUUID()}.webp`;

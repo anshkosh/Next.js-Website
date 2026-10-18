@@ -1,13 +1,16 @@
 import { ImageResponse } from 'next/og';
 import { db } from '@/lib/db';
 import { NextRequest } from 'next/server';
+import { ogLogo } from '@/lib/og-logo';
 
 export async function GET(req: NextRequest, props: { params: Promise<{ slug: string }> }) {
   const params = await props.params;
   const startup = await db.startup.findUnique({
-    where: { slug: params.slug },
+    where: { slug: params.slug, status: 'LIVE' },
     select: { name: true, tagline: true, logoUrl: true, category: { select: { name: true, iconName: true } } },
   });
+  if (!startup) return new Response('Not Found', { status: 404 });
+  const logo = await ogLogo(startup.logoUrl);
 
   return new ImageResponse(
     (
@@ -26,11 +29,11 @@ export async function GET(req: NextRequest, props: { params: Promise<{ slug: str
           position: 'relative'
         }}
       >
-        {startup?.logoUrl && (
+        {logo && (
           <div style={{ display: 'flex', marginBottom: '24px' }}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img 
-              src={startup.logoUrl} 
+              src={logo}
               alt="Logo" 
               width={100} 
               height={100} 
