@@ -16,7 +16,7 @@ export default async function TopRankedStartups() {
   if (topStartups.length === 0) return null;
 
   return (
-    <section aria-labelledby="home-startups-title" className="overflow-hidden border-b border-gray-100 bg-white py-16 md:py-20">
+    <section aria-labelledby="home-startups-title" className="overflow-hidden border-b border-gray-100 bg-white pt-8 pb-16 md:pt-10 md:pb-20">
       <div className="mx-auto max-w-6xl px-4 sm:px-6">
         <div className="mb-8 flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
           <div>

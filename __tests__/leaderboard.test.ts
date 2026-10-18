@@ -20,16 +20,22 @@ it("does not fabricate rankings when the database is missing", async () => {
   expect(await getLeaderboard()).toEqual({ entries: [], totalCount: 0, page: 1, totalPages: 1 });
   expect(mock.transaction).not.toHaveBeenCalled();
 });
-it("ranks globally before pagination, sharing ties across page boundaries", async () => {
+it("uses dense global ranks before pagination, sharing ties across page boundaries", async () => {
   mock.snapshot.mockResolvedValue([
     row("first", 100), row("second-a", 84), row("second-b", 84),
     ...Array.from({ length: 18 }, (_, i) => row(`tied-${String(i).padStart(2, "0")}`, 32)), row("zero-a", 0), row("zero-b", 0),
   ]);
   const result = await getLeaderboard(2);
-  expect(result.entries.map(entry => entry.rank)).toEqual([4, 22, 22]);
+  expect(result.entries.map(entry => entry.rank)).toEqual([3, 4, 4]);
   expect(result).toMatchObject({ totalCount: 23, totalPages: 2, page: 2 });
   expect(mock.rows.mock.calls[0][0].where).toEqual({ status: "LIVE", id: { in: ["tied-17", "zero-a", "zero-b"] } });
   expect(mock.transaction).toHaveBeenCalledWith(expect.any(Function), { isolationLevel: "RepeatableRead" });
+});
+it("continues with the next place after a tied rank", async () => {
+  mock.snapshot.mockResolvedValue([row("first", 12), row("second-a", 10), row("second-b", 10), row("farmgate", 9), row("marginmitra", 8)]);
+  expect((await getLeaderboard()).entries.map(entry => [entry.id, entry.rank])).toEqual([
+    ["first", 1], ["second-a", 2], ["second-b", 2], ["farmgate", 3], ["marginmitra", 4],
+  ]);
 });
 it("uses aggregate counts, not stale counters, and returns no private vote records", async () => {
   mock.snapshot.mockResolvedValue([{ ...row("active", 4), founderDays: 2, backers: 3, discussions: 1 }, row("passive", 10)]);
