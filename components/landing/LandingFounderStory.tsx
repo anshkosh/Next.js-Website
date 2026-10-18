@@ -9,7 +9,7 @@ const steps = [
 
 export default function LandingFounderStory() {
   return (
-    <section aria-labelledby="founder-story-title" className="bg-white py-16 md:py-24">
+    <section aria-labelledby="founder-story-title" className="bg-white py-16 md:pt-16 md:pb-8">
       <div className="mx-auto grid max-w-6xl gap-10 px-4 sm:px-6 lg:grid-cols-[1fr_1.15fr] lg:gap-x-20 lg:gap-y-7">
         <div>
           <p className="mb-4 text-xs font-semibold uppercase tracking-[0.16em] text-coral-700">For founders, wherever you’re starting</p>
