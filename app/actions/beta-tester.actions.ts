@@ -8,6 +8,7 @@ import { generateFingerprint } from "@/lib/utils/fingerprint";
 import { checkRateLimit } from "@/lib/utils/rate-limit";
 import { verifyTurnstileToken } from "@/lib/utils/turnstile";
 import { daysAgo, BETA_PENDING_DAYS } from "@/lib/beta-retention";
+import { clientIp } from "@/lib/utils/client-ip";
 import {
   BETA_TESTER_CONSENT_VERSION,
   betaTesterProgramSchema,
@@ -31,9 +32,7 @@ export async function submitBetaTesterRequest(input: unknown): Promise<{ success
 
   try {
     const requestHeaders = await headers();
-    const forwardedFor = requestHeaders.get("x-forwarded-for");
-    const ip = forwardedFor ? forwardedFor.split(",")[0].trim() : "127.0.0.1";
-    const fingerprint = generateFingerprint(ip, requestHeaders.get("user-agent") || "unknown");
+    const fingerprint = generateFingerprint(clientIp(requestHeaders), "beta-tester-v2");
     if (!(await checkRateLimit(`rate-limit:beta-tester:${fingerprint}`, 3, 3600))) {
       return { error: "Too many beta requests from this connection. Please try again later." };
     }

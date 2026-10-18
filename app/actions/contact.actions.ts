@@ -10,6 +10,8 @@ import { verifyTurnstileToken } from "@/lib/utils/turnstile";
 import { contactSchema } from "@/lib/validators/contact.schema";
 import { sendEmail } from "@/lib/email/adapter";
 import { renderEmailTemplate } from "@/lib/email/templates";
+import { clientIp } from "@/lib/utils/client-ip";
+import { escapeEmailHtml } from "@/lib/email/escape";
 
 // ──────────────────────────────────────────────────────────────────────────────
 // Public — Submit a contact form inquiry
@@ -38,10 +40,7 @@ export async function submitContactForm(formData: {
 
     // 3. Rate limiting: 3 submissions per IP per hour
     const headersList = await headers();
-    const forwardedFor = headersList.get("x-forwarded-for");
-    const ip = forwardedFor ? forwardedFor.split(",")[0].trim() : "127.0.0.1";
-    const userAgent = headersList.get("user-agent") || "unknown";
-    const fingerprint = generateFingerprint(ip, userAgent);
+    const fingerprint = generateFingerprint(clientIp(headersList), "contact-v2");
     const rateLimitKey = `rate-limit:contact:${fingerprint}`;
     const isAllowed = await checkRateLimit(rateLimitKey, 3, 3600);
     if (!isAllowed) {
@@ -95,7 +94,7 @@ export async function submitContactForm(formData: {
           <h1 style="color: #fff; margin: 0; font-size: 24px; letter-spacing: 0.05em;">ANSH<span style="color: #FFD6C4;">KOSH</span></h1>
         </div>
         <div style="background: #fff; border: 1px solid #e5e7eb; border-top: none; border-radius: 0 0 12px 12px; padding: 28px;">
-          <p style="color: #111827; font-size: 16px; margin: 0 0 12px;">Hi ${name},</p>
+          <p style="color: #111827; font-size: 16px; margin: 0 0 12px;">Hi ${escapeEmailHtml(name)},</p>
           <p style="color: #374151; font-size: 15px; line-height: 1.7; margin: 0 0 16px;">
             Thanks for reaching out! We've received your message about <strong>${subject}</strong>. ${CONTACT_RESPONSE_TARGET}
           </p>

@@ -58,7 +58,7 @@ Before navigating after a mutation, wait for its persisted result. A voting butt
 
 1. `npm ci`
 2. `npm run lint` (zero warnings, no application-rule suppression)
-3. `npm run typecheck`
+3. `npm run typecheck` (generates Next route/environment types first, including on clean CI checkouts)
 4. `npm run audit:dependencies` (new/critical findings, changed exception versions,
    service errors and expired reviews block CI; known findings remain visible)
 5. `npm test -- --maxWorkers=2`

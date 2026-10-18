@@ -40,6 +40,7 @@ bounded first-party logo storage keys and LIVE parents, not remote profile URLs.
 
 - Anonymous votes: one network identity per startup (trusted nginx `X-Real-IP`), with a 10-attempt/hour network budget. User-agent/cookie rotation and client-prepended forwarded headers do not reset it. Shared networks can share identities; this is not one-person verification.
 - Comments and the contact form use Cloudflare Turnstile and Zod validation; comments are moderated before they appear.
+- Comments, contact and beta requests also use the trusted proxy address without user-agent/forwarded-header input for their three-request/hour network limits. Rotating browser headers cannot reset those budgets.
 
 ## Moderation and public data boundaries
 

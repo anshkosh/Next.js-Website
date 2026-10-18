@@ -8,6 +8,7 @@ import { logger } from "@/lib/logger";
 import { generateFingerprint } from "@/lib/utils/fingerprint";
 import { checkRateLimit } from "@/lib/utils/rate-limit";
 import { verifyTurnstileToken } from "@/lib/utils/turnstile";
+import { clientIp } from "@/lib/utils/client-ip";
 import {
   submitCommentSchema,
   replyToCommentSchema,
@@ -42,10 +43,7 @@ export async function submitComment(formData: {
 
     // Rate limiting: 3 comments per IP per hour
     const headersList = await headers();
-    const forwardedFor = headersList.get("x-forwarded-for");
-    const ip = forwardedFor ? forwardedFor.split(",")[0].trim() : "127.0.0.1";
-    const userAgent = headersList.get("user-agent") || "unknown";
-    const fingerprint = generateFingerprint(ip, userAgent);
+    const fingerprint = generateFingerprint(clientIp(headersList), "comment-v2");
     const rateLimitKey = `rate-limit:comment:${fingerprint}`;
     const isAllowed = await checkRateLimit(rateLimitKey, 3, 3600);
     if (!isAllowed) {
