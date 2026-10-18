@@ -17,6 +17,7 @@ import { publicPitchDeck } from "@/lib/pitch-deck-access";
 import { publicFounderEntries } from "@/lib/founder-journal-queries";
 import { journalPage } from "@/lib/founder-journal";
 import FounderJournalSection from "@/components/startup/FounderJournalSection";
+import BetaTesterSignup from "@/components/startup/BetaTesterSignup";
 
 // Visitor-specific cookies must be read at request time, including for new slugs.
 export const dynamic = "force-dynamic";
@@ -165,6 +166,7 @@ export default async function StartupDetailPage(props: {
       updates: {
         orderBy: { createdAt: "desc" },
       },
+      betaTesterProgram: { select: { id: true, enabled: true, description: true, reward: true } },
     },
   });
 
@@ -228,6 +230,7 @@ export default async function StartupDetailPage(props: {
     { id: "section-proposition", label: "Core Proposition" },
     { id: "section-updates", label: "Updates", count: startup.updates.length },
     { id: "section-founder-journal", label: "Founder Journal" },
+    ...(startup.betaTesterProgram?.enabled ? [{ id: "section-beta-testers", label: "Beta testers" }] : []),
     { id: "section-questions", label: "Questions", count: totalApprovedCount },
   ];
 
@@ -366,6 +369,17 @@ export default async function StartupDetailPage(props: {
         <div id="section-founder-journal" className="scroll-mt-32">
           <FounderJournalSection entries={publicEntries} slug={startup.slug} page={publicJournalPage} />
         </div>
+
+        {startup.betaTesterProgram?.enabled && (
+          <div id="section-beta-testers" className="scroll-mt-32">
+            <BetaTesterSignup
+              startupId={startup.id}
+              startupName={startup.name}
+              description={startup.betaTesterProgram.description}
+              reward={startup.betaTesterProgram.reward}
+            />
+          </div>
+        )}
 
         {/* ── Questions / Discussion Section ── */}
         <div id="section-questions" className="scroll-mt-32">

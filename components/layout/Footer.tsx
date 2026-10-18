@@ -41,6 +41,7 @@ export default function Footer() {
               <li><Link href="/about" className="hover:text-gray-900 transition-colors">About Anshkosh</Link></li>
               <li><Link href="/faq" className="hover:text-gray-900 transition-colors">FAQ</Link></li>
               <li><Link href="/privacy" className="hover:text-gray-900 transition-colors">Privacy Notice</Link></li>
+              <li><Link href="/beta-consent" className="hover:text-gray-900 transition-colors">Beta Tester Consent</Link></li>
               <li><Link href="/terms" className="hover:text-gray-900 transition-colors">Terms of Service</Link></li>
               <li><Link href="/trust-safety" className="hover:text-gray-900 transition-colors">Trust & Safety</Link></li>
             </ul>

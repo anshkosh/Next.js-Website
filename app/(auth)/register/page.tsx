@@ -213,7 +213,7 @@ export default function RegisterPage() {
                   >
                     Terms of Service
                   </Link>{" "}
-                  and{" "}
+                  and confirm I have read the{" "}
                   <Link
                     href="/privacy"
                     className="font-medium text-coral-600 hover:text-coral-500"

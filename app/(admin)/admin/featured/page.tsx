@@ -15,7 +15,9 @@ export default async function AdminFeaturedPage() {
     redirect("/login");
   }
 
+  const now = new Date();
   const featuredEntries = await db.featuredStartup.findMany({
+    where: { OR: [{ featuredUntil: null }, { featuredUntil: { gt: now } }] },
     include: {
       startup: {
         select: {
@@ -27,6 +29,7 @@ export default async function AdminFeaturedPage() {
         },
       },
     },
+    // Temporary entries are placed first; all other entries retain their manual order.
     orderBy: { sortOrder: "asc" },
   });
 
@@ -37,8 +40,9 @@ export default async function AdminFeaturedPage() {
       name: true,
       slug: true,
       logoUrl: true,
+      createdAt: true,
     },
-    orderBy: { name: "asc" },
+    orderBy: [{ createdAt: "desc" }, { id: "desc" }],
   });
 
   return (
@@ -55,6 +59,7 @@ export default async function AdminFeaturedPage() {
       <FeaturedManager
         featuredList={featuredEntries}
         availableStartups={liveStartups}
+        latestLiveStartup={liveStartups[0] ?? null}
       />
     </div>
   );

@@ -160,7 +160,7 @@ export async function featureStartup(startupId: string, sortOrder: number = 0) {
     await db.featuredStartup.upsert({
       where: { startupId },
       create: { startupId, sortOrder },
-      update: { sortOrder },
+      update: { sortOrder, featuredUntil: null },
     });
 
     revalidatePath("/");

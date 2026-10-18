@@ -13,6 +13,6 @@ it("keeps net votes distinct from the combined score", () => {
 it("parameterizes the clock and restricts eligibility at the database boundary", () => {
   const now = new Date("2026-10-18T00:00:00Z");
   const query = signalSnapshotQuery(now);
-  expect(query.values).toEqual([now, now, now, now]);
-  for (const condition of ["s.status = 'LIVE'", "c.status = 'APPROVED'", "j.visibility = 'PUBLIC'", 'j."approvedAt" IS NOT NULL', 'j."authorId" = s."founderId"', 'LOWER(BTRIM(c."authorEmail")) <> LOWER(BTRIM(founder.email))', 'COUNT(DISTINCT participant.key)', "AT TIME ZONE 'UTC'", 'u."createdAt"::date', 'j."publishedAt"::date']) expect(query.text).toContain(condition);
+  expect(query.values).toEqual([now, now, now, now, now]);
+  for (const condition of ["s.status = 'LIVE'", "c.status = 'APPROVED'", "j.visibility = 'PUBLIC'", 'j."approvedAt" IS NOT NULL', 'j."authorId" = s."founderId"', 'LOWER(BTRIM(c."authorEmail")) <> LOWER(BTRIM(founder.email))', 'COUNT(DISTINCT participant.key)', "AT TIME ZONE 'UTC'", 'u."createdAt"::date', 'j."publishedAt"::date', 'f."featuredUntil" IS NULL OR f."featuredUntil" >']) expect(query.text).toContain(condition);
 });

@@ -41,7 +41,7 @@ describe("canonical URL policy", () => {
     const { default: sitemap } = await import("../app/sitemap");
     const { default: robots } = await import("../app/robots");
     const entries = await sitemap();
-    expect(entries).toHaveLength(21);
+    expect(entries).toHaveLength(22);
     expect(entries.some(entry => entry.url === absoluteUrl("/leaderboard"))).toBe(true);
     expect(readFileSync("public/llms.txt", "utf8")).toContain(absoluteUrl("/leaderboard"));
     expect(entries.some(entry => entry.url === absoluteUrl("/launch-support"))).toBe(true);
@@ -66,7 +66,7 @@ describe("canonical URL policy", () => {
     queries.journalPost.mockResolvedValue([{ slug: "published-story", updatedAt }]);
     const { default: sitemap } = await import("../app/sitemap");
     const entries = await sitemap();
-    expect(entries).toHaveLength(24);
+    expect(entries).toHaveLength(25);
     expect(queries.startup).toHaveBeenCalledWith(expect.objectContaining({ where: { status: "LIVE" } }));
     expect(queries.journalPost).toHaveBeenCalledWith(expect.objectContaining({ where: { status: "PUBLISHED" } }));
     expect(entries.find(entry => entry.url.endsWith("/journal/published-story"))?.lastModified).toEqual(updatedAt);

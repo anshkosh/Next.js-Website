@@ -3,7 +3,7 @@ import { seoMetadata } from "@/lib/seo";
 
 export const metadata = seoMetadata({
   title: "Privacy Notice — Anshkosh",
-  description: "How Anshkosh handles accounts, public comments, voting and browser-only founder tool drafts during the pilot.",
+  description: "How Anshkosh handles accounts, startup profiles, beta tester requests, public comments, voting, and browser-only founder tool drafts.",
   path: "/privacy",
 });
 
@@ -11,6 +11,12 @@ const sections = [
   { title: "Information sent to Anshkosh", paragraphs: [
     "Account registration and sign-in handle your name, email, credentials and session information. Startup submissions include the profile, founding team, links, media and contact details you provide. These records are stored on our servers for account, review and publishing workflows.",
     "Discussion forms send your display name, email and comment text for moderation. Contact forms send your contact details and message. Newsletter signups send your email so we can send the updates you request. These submissions are separate from the browser-only planning tools.",
+  ] },
+  { title: "Beta tester requests", paragraphs: [
+    "When you request to beta test a startup, Anshkosh collects your name, email address, any optional note you provide, the startup you selected, and a record of the consent notice you accepted and when. CAPTCHA and rate-limit checks may also process browser or request information to prevent abuse. Beta requests are currently limited to people aged 18 or older.",
+    "The startup’s founder sees your name and optional note while reviewing your request. Your email address is kept private from the founder until they approve you; after approval, it is shown to that founder so they can contact you. It is not published on your profile or shared with other founders. The email address is entered by you and is not independently verified by Anshkosh.",
+    "Anshkosh uses these details only to record and route your interest, support the founder’s review, prevent abuse, and handle privacy or support requests. The founder decides whether to accept you and is responsible for contacting approved testers and arranging product access, onboarding, support, and any reward they describe. Anshkosh does not guarantee selection, access, or a reward, and does not run the founder’s beta program.",
+    "You can ask us to withdraw or delete a pending request by emailing hello@anshkosh.com with the startup name and email address used. If a founder has already approved you, contact both the founder and Anshkosh if you no longer want to take part. Declined requests have their name, email, and note removed; an approved request can be deleted by the founder or on a valid privacy request. A founder may already have copied contact details outside Anshkosh, which we cannot remove from their separate records.",
   ] },
   { title: "What becomes public", paragraphs: [
     "Published startup profiles, listed founder names and roles, public media, links and founder progress updates can be viewed by visitors and found through site search. Only the published profile is used for public discovery; pending profile revisions are not shown as published changes.",
@@ -31,11 +37,11 @@ const sections = [
   ] },
   { title: "How information is used", paragraphs: [
     "We use submitted information to operate accounts, review and publish startup profiles and comments, deliver requested updates, respond to messages, maintain voting totals and prevent abuse. Staff responsible for these workflows can access the records needed to carry them out.",
-    "Public comments are published after approval rather than treated only as anonymous, aggregated feedback. The planning tools help you work with your own notes locally; they do not automatically collect survey respondents, waitlists or preorder requests for a startup. Payments and preorders are not open during the pilot.",
+    "Public comments are published after approval rather than treated only as anonymous, aggregated feedback. The planning tools help you work with your own notes locally. Beta tester requests are a separate, optional feature described above; they do not create an order, payment, investment, or entitlement. Payments and preorders are not open during the pilot.",
   ] },
   { title: "Retention, access and choices", paragraphs: [
-    "Server records are retained for account and platform operation, moderation, legal requirements and abuse prevention. We do not state a fixed deletion period for every record. Local drafts remain in your browser until you clear them or the browser removes its storage; downloaded copies remain wherever you save them.",
-    "Contact us to request access to, correction of or deletion of account information or submitted comments, or to ask about newsletter preferences. Tell us which record or account your request concerns. We may need to confirm your identity, and some records may need to be retained for legal or security reasons. Removal from Anshkosh cannot remove copies someone else has already saved or shared.",
+    "We keep personal information only while it is needed for the purpose described in this notice, to operate your account or requested service, to address safety or legal issues, or as otherwise permitted or required by law. Declined beta requests have their identifying details removed. Founders can remove approved request records from their dashboard; you can also contact us to request withdrawal, access, correction, or deletion. Local drafts remain in your browser until you clear them or the browser removes its storage; downloaded copies remain wherever you save them.",
+    "You may contact us to exercise privacy rights available to you under applicable law, including asking about your personal information, requesting correction or erasure, withdrawing consent where consent is the basis for processing, or raising a grievance. Tell us which account or record your request concerns. We may need to verify your identity and may retain information where law requires or permits it. Removing information from Anshkosh cannot remove copies a founder or another recipient has already saved outside the platform.",
   ] },
   { title: "Do not submit sensitive material", paragraphs: [
     "Do not put passwords, financial credentials, private health information, confidential trade secrets or other highly sensitive material into public profile fields or discussions. Use only media and personal details you have permission to share. On a shared device, take care with locally saved tool drafts too.",
@@ -48,16 +54,17 @@ export default function PrivacyPage() {
       <div className="mx-auto max-w-3xl px-4">
         <span className="mb-4 block text-xs font-semibold uppercase tracking-widest text-coral-500">Pilot privacy notice</span>
         <h1 className="mb-4 font-heading text-4xl font-bold tracking-tight text-gray-900 md:text-5xl">Privacy Notice</h1>
-        <p className="mb-8 text-sm text-gray-600">Updated: 9 October 2026 · Operator: Anshkosh</p>
-        <p className="mb-8 text-base leading-relaxed text-gray-600">This notice describes the current startup discovery pilot, accounts, discussions, voting and free founder tools. It distinguishes information sent to Anshkosh from drafts kept in your browser.</p>
+        <p className="mb-8 text-sm text-gray-600">Updated: 18 October 2026 · Data fiduciary/operator: Anshkosh Pvt Ltd · Grievance contact: Hyderabad, Telangana, India · <a className="font-medium text-coral-700 underline" href="mailto:hello@anshkosh.com">hello@anshkosh.com</a></p>
+        <p className="mb-8 text-base leading-relaxed text-gray-600">This notice describes personal information used for the Anshkosh startup discovery pilot, including accounts, discussions, voting, beta tester requests and free founder tools. The beta tester consent notice gives the specific details shown when you submit a tester request.</p>
         <div className="space-y-12">
           {sections.map(section => <section key={section.title} className="border-t border-gray-100 pt-8">
             <h2 className="mb-4 font-heading text-2xl font-bold text-gray-900">{section.title}</h2>
             <div className="space-y-4 text-base leading-relaxed text-gray-600">{section.paragraphs.map(paragraph => <p key={paragraph}>{paragraph}</p>)}</div>
           </section>)}
           <section className="border-t border-gray-100 pt-8">
-            <h2 className="mb-4 font-heading text-2xl font-bold text-gray-900">Contact</h2>
-            <p className="text-base leading-relaxed text-gray-600">For privacy questions or requests, email <a href="mailto:hello@anshkosh.com" className="font-semibold text-coral-700 underline underline-offset-4">hello@anshkosh.com</a>. You can also use our <Link href="/contact" className="font-semibold text-coral-700 underline underline-offset-4">contact page</Link>.</p>
+            <h2 className="mb-4 font-heading text-2xl font-bold text-gray-900">Privacy requests and grievances</h2>
+            <p className="text-base leading-relaxed text-gray-600">Anshkosh Pvt Ltd’s designated grievance contact is based in Hyderabad, Telangana, India and can answer questions about how your information is handled and receive requests or grievances. Email <a href="mailto:hello@anshkosh.com" className="font-semibold text-coral-700 underline underline-offset-4">hello@anshkosh.com</a> or use our <Link href="/contact" className="font-semibold text-coral-700 underline underline-offset-4">contact page</Link>. If you are writing about a beta tester request, include the startup name and the email address you used. We will respond within the period required by applicable law.</p>
+            <p className="mt-4 text-base leading-relaxed text-gray-600">Read the <Link href="/beta-consent" className="font-semibold text-coral-700 underline underline-offset-4">Beta Tester Consent Notice</Link> for the specific information collected and shared for that feature.</p>
           </section>
         </div>
       </div>

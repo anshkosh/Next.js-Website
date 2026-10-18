@@ -2,6 +2,7 @@
 
 import { FormEvent, useState, useTransition } from "react";
 import { Mail, Loader2, CheckCircle2 } from "lucide-react";
+import Link from "next/link";
 import { subscribeToNewsletter } from "@/app/actions/newsletter.actions";
 
 export default function NewsletterSignup() {
@@ -29,6 +30,7 @@ export default function NewsletterSignup() {
     <div className="max-w-sm">
       <p className="mb-2 text-sm font-semibold text-gray-900 dark:text-white">Get the next signal</p>
       <p className="mb-3 text-xs text-gray-600 dark:text-gray-400">Occasional founder stories and pilot updates. No noise.</p>
+      <p className="mb-3 text-xs text-gray-500 dark:text-gray-400">Your email is used to send these updates. Unsubscribe any time. See our <Link href="/privacy" className="underline underline-offset-2">Privacy Notice</Link>.</p>
       <form onSubmit={submit} className="flex gap-2">
         <label htmlFor="newsletter-email" className="sr-only">Email for newsletter</label>
         <div className="relative min-w-0 flex-1"><Mail size={15} className="pointer-events-none absolute left-3 top-3.5 text-gray-400" aria-hidden="true" /><input id="newsletter-email" name="email" type="email" autoComplete="email" required value={email} onChange={(event) => setEmail(event.target.value)} placeholder="you@example.com" className="min-h-11 w-full rounded-xl border border-gray-300 bg-white py-2.5 pl-9 pr-3 text-sm text-gray-900 placeholder:text-gray-500 focus:border-coral-500 dark:border-gray-600 dark:bg-gray-900 dark:text-white" /></div>

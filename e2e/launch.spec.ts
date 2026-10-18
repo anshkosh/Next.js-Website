@@ -24,10 +24,13 @@ let categoryId: string, startupId: string, slug: string;
 async function reveal(page: Page) {
   const peek = page.getByRole("button", { name: "Sneak peek", exact: true });
   if (await peek.isVisible()) { await peek.click(); await expect(peek).toBeHidden({ timeout: 15000 }); }
-  const cookieNotice = page.getByRole("button", { name: "Close cookie notice", exact: true });
+  const cookieNotice = page.getByRole("button", { name: "Dismiss cookie and browser storage notice", exact: true });
   if (await cookieNotice.isVisible()) await cookieNotice.click();
 }
 async function enter(page: Page, url: string) {
+  await page.addInitScript(() => {
+    try { localStorage.setItem("anshkosh-cookie-consent", "dismissed"); } catch { /* Test navigation must not be blocked by browser storage. */ }
+  });
   await page.goto(url);
   if (new URL(page.url()).pathname !== "/") {
     await expect(page.getByRole("dialog", { name: "Anshkosh is under construction." })).toHaveCount(0);

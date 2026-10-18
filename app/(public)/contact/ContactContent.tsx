@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition, useCallback } from "react";
+import Link from "next/link";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import {
   Mail,
@@ -410,6 +411,11 @@ export default function ContactContent({ initialSubject = "" }: { initialSubject
                     onToken={handleToken}
                     onExpire={handleExpire}
                   />
+
+                  <p className="text-xs leading-relaxed text-gray-500">
+                    We use these details to respond to your message and handle support requests. See our{" "}
+                    <Link href="/privacy" className="font-medium text-coral-700 underline underline-offset-2">Privacy Notice</Link>.
+                  </p>
 
                   {/* Error */}
                   <AnimatePresence>

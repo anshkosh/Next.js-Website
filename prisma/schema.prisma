@@ -20,10 +20,10 @@ model User {
   banReason     String?
   banExpires    DateTime?
 
-  sessions      Session[]
-  accounts      Account[]
-  startups      Startup[]
-  journalPosts  JournalPost[]
+  sessions       Session[]
+  accounts       Account[]
+  startups       Startup[]
+  journalPosts   JournalPost[]
   founderEntries FounderJournalEntry[]
 }
 
@@ -103,7 +103,7 @@ model Startup {
   createdAt     DateTime      @default(now())
   updatedAt     DateTime      @updatedAt
   // Founder contact
-  startupPhone      String?
+  startupPhone  String?
 
   // Core Proposition
   problemStatement  String?
@@ -112,17 +112,18 @@ model Startup {
   prototypeStatus   String?
   tractionEvidence  String?
 
-  searchVector  Unsupported("tsvector")?
+  searchVector Unsupported("tsvector")?
 
-  upvotes       Upvote[]
-  downvotes     Downvote[]
-  slugRedirects SlugRedirect[]
-  founders      StartupFounder[]
-  featuredEntry FeaturedStartup?
-  updates       StartupUpdate[]
-  comments      Comment[]
-  revision      StartupRevision?
+  upvotes        Upvote[]
+  downvotes      Downvote[]
+  slugRedirects  SlugRedirect[]
+  founders       StartupFounder[]
+  featuredEntry  FeaturedStartup?
+  updates        StartupUpdate[]
+  comments       Comment[]
+  revision       StartupRevision?
   founderEntries FounderJournalEntry[]
+  betaTesterProgram BetaTesterProgram?
 
   @@index([founderId])
   @@index([categoryId])
@@ -134,14 +135,14 @@ model Startup {
 
 // Pending changes never replace the published Startup until a reviewer approves.
 model StartupRevision {
-  id            String   @id @default(cuid())
-  startupId     String   @unique
-  startup       Startup  @relation(fields: [startupId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  data          Json
-  status        String   @default("PENDING_REVIEW")
-  notes         String?
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  id        String   @id @default(cuid())
+  startupId String   @unique
+  startup   Startup  @relation(fields: [startupId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  data      Json
+  status    String   @default("PENDING_REVIEW")
+  notes     String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([status, updatedAt])
 }
@@ -166,21 +167,21 @@ model StartupFounder {
   linkedinUrl String?
   twitterUrl  String?
   sortOrder   Int     @default(0)
-  
+
   @@index([startupId])
 }
 
 model Category {
-  id          String    @id @default(cuid())
-  name        String    @unique
-  slug        String    @unique
+  id          String   @id @default(cuid())
+  name        String   @unique
+  slug        String   @unique
   description String?
   iconName    String?
-  sortOrder   Int       @default(0)
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+  sortOrder   Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
-  startups    Startup[]
+  startups Startup[]
 }
 
 model Upvote {
@@ -224,14 +225,50 @@ model AppSetting {
 }
 
 model FeaturedStartup {
-  id        String   @id @default(cuid())
-  startupId String
-  startup   Startup  @relation(fields: [startupId], references: [id], onDelete: Cascade)
-  sortOrder Int      @default(0)
-  createdAt DateTime @default(now())
+  id            String    @id @default(cuid())
+  startupId     String
+  startup       Startup   @relation(fields: [startupId], references: [id], onDelete: Cascade)
+  sortOrder     Int       @default(0)
+  featuredUntil DateTime?
+  createdAt     DateTime  @default(now())
 
   @@unique([startupId])
   @@index([sortOrder])
+}
+
+model BetaTesterProgram {
+  id          String               @id @default(cuid())
+  startupId   String               @unique
+  startup     Startup              @relation(fields: [startupId], references: [id], onDelete: Cascade)
+  enabled     Boolean              @default(false)
+  description String               @db.VarChar(1000)
+  reward      String?              @db.VarChar(500)
+  requests    BetaTesterRequest[]
+  createdAt   DateTime             @default(now())
+  updatedAt   DateTime             @updatedAt
+}
+
+model BetaTesterRequest {
+  id             String                    @id @default(cuid())
+  programId      String
+  program        BetaTesterProgram          @relation(fields: [programId], references: [id], onDelete: Cascade)
+  name           String?
+  email          String?
+  message        String?                    @db.VarChar(500)
+  status         BetaTesterRequestStatus    @default(PENDING)
+  consentedAt    DateTime
+  consentVersion String                    @db.VarChar(40)
+  createdAt      DateTime                  @default(now())
+  reviewedAt     DateTime?
+
+  @@unique([programId, email])
+  @@index([programId, status, createdAt])
+}
+
+enum BetaTesterRequestStatus {
+  PENDING
+  APPROVED
+  DECLINED
 }
 
 enum JournalPostStatus {
@@ -240,49 +277,49 @@ enum JournalPostStatus {
 }
 
 model JournalCategory {
-  id          String         @id @default(cuid())
-  name        String         @unique
-  slug        String         @unique
+  id          String   @id @default(cuid())
+  name        String   @unique
+  slug        String   @unique
   description String?
-  sortOrder   Int            @default(0)
-  createdAt   DateTime       @default(now())
-  updatedAt   DateTime       @updatedAt
+  sortOrder   Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
-  posts       JournalPost[]
+  posts JournalPost[]
 }
 
 model JournalPost {
   id                 String            @id @default(cuid())
   title              String
   slug               String            @unique
-  excerpt            String?           // Optional manual excerpt; if null, auto-generated at read time
+  excerpt            String? // Optional manual excerpt; if null, auto-generated at read time
   authorName         String            @default("Anshkosh Team")
-  coverImageUrl      String?           // Featured/cover image stored in R2
-  contentJson        Json?             // Quill Delta JSON for editor re-hydration
-  contentHtml        String?           // Rendered HTML for fast public display
+  coverImageUrl      String? // Featured/cover image stored in R2
+  contentJson        Json? // Quill Delta JSON for editor re-hydration
+  contentHtml        String? // Rendered HTML for fast public display
   status             JournalPostStatus @default(DRAFT)
   isFeatured         Boolean           @default(false)
-  tags               String[]          // Free-form tags
+  tags               String[] // Free-form tags
   readingTimeMinutes Int               @default(1)
 
   // SEO fields
-  metaTitle          String?
-  metaDescription    String?
-  metaKeywords       String[]
-  canonicalUrl       String?
+  metaTitle       String?
+  metaDescription String?
+  metaKeywords    String[]
+  canonicalUrl    String?
 
   // Category
-  categoryId         String?
-  category           JournalCategory?  @relation(fields: [categoryId], references: [id])
+  categoryId String?
+  category   JournalCategory? @relation(fields: [categoryId], references: [id])
 
   // Author (linked to admin user for display, but name is free-text)
-  authorId           String?
-  author             User?             @relation(fields: [authorId], references: [id])
+  authorId String?
+  author   User?   @relation(fields: [authorId], references: [id])
 
-  publishedAt        DateTime?
-  scheduledAt        DateTime?
-  createdAt          DateTime          @default(now())
-  updatedAt          DateTime          @updatedAt
+  publishedAt DateTime?
+  scheduledAt DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
 
   @@index([status])
   @@index([categoryId])
@@ -291,24 +328,24 @@ model JournalPost {
 }
 
 model FounderJournalEntry {
-  id            String @id @default(cuid())
+  id            String                  @id @default(cuid())
   authorId      String
-  author        User @relation(fields: [authorId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  author        User                    @relation(fields: [authorId], references: [id], onDelete: NoAction, onUpdate: NoAction)
   startupId     String?
-  startup       Startup? @relation(fields: [startupId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  title         String @db.VarChar(180)
-  body          String @db.VarChar(12000)
+  startup       Startup?                @relation(fields: [startupId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  title         String                  @db.VarChar(180)
+  body          String                  @db.VarChar(12000)
   contentJson   Json?
-  mediaKeys     String[] @default([])
-  prompt        String @default("FREE_WRITE") @db.VarChar(30)
-  visibility    String @default("PRIVATE") @db.VarChar(10)
-  milestone     String? @db.VarChar(180)
-  milestoneDone Boolean @default(false)
+  mediaKeys     String[]                @default([])
+  prompt        String                  @default("FREE_WRITE") @db.VarChar(30)
+  visibility    String                  @default("PRIVATE") @db.VarChar(10)
+  milestone     String?                 @db.VarChar(180)
+  milestoneDone Boolean                 @default(false)
   publishedAt   DateTime?
   approvedAt    DateTime?
   revision      FounderJournalRevision?
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  createdAt     DateTime                @default(now())
+  updatedAt     DateTime                @updatedAt
 
   @@index([authorId, updatedAt(sort: Desc)])
   @@index([startupId, visibility, publishedAt(sort: Desc)])
@@ -316,18 +353,18 @@ model FounderJournalEntry {
 }
 
 model FounderJournalRevision {
-  id            String @id @default(cuid())
-  entryId       String @unique
+  id            String              @id @default(cuid())
+  entryId       String              @unique
   entry         FounderJournalEntry @relation(fields: [entryId], references: [id], onDelete: NoAction, onUpdate: NoAction)
   data          Json
-  status        String @default("PENDING_REVIEW") @db.VarChar(30)
-  version       Int @default(1)
+  status        String              @default("PENDING_REVIEW") @db.VarChar(30)
+  version       Int                 @default(1)
   scheduledAt   DateTime?
-  reviewerNotes String? @db.VarChar(2000)
+  reviewerNotes String?             @db.VarChar(2000)
   reviewedBy    String?
   reviewedAt    DateTime?
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  createdAt     DateTime            @default(now())
+  updatedAt     DateTime            @updatedAt
 
   @@index([status, scheduledAt])
 }
@@ -347,29 +384,29 @@ model StartupUpdate {
 }
 
 enum CommentStatus {
-  PENDING   // awaiting admin approval
-  APPROVED  // visible publicly
-  REJECTED  // hidden
+  PENDING // awaiting admin approval
+  APPROVED // visible publicly
+  REJECTED // hidden
 }
 
 model Comment {
-  id          String        @id @default(cuid())
-  startupId   String
-  startup     Startup       @relation(fields: [startupId], references: [id], onDelete: Cascade)
+  id        String  @id @default(cuid())
+  startupId String
+  startup   Startup @relation(fields: [startupId], references: [id], onDelete: Cascade)
 
   // Public commenter (anonymous)
   authorName  String
-  authorEmail String        // stored privately, never shown publicly
+  authorEmail String // stored privately, never shown publicly
   body        String        @db.VarChar(2000)
   status      CommentStatus @default(PENDING)
 
   // Founder reply (one level deep, posted from authenticated dashboard)
-  reply       String?       @db.VarChar(2000)
-  repliedAt   DateTime?
-  repliedBy   String?       // display name shown on reply card (e.g. "Priya · Founder")
+  reply     String?   @db.VarChar(2000)
+  repliedAt DateTime?
+  repliedBy String? // display name shown on reply card (e.g. "Priya · Founder")
 
-  createdAt   DateTime      @default(now())
-  updatedAt   DateTime      @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([startupId, createdAt(sort: Desc)])
   @@index([status])

@@ -22,6 +22,7 @@ import {
   Zap,
   BookOpen,
   MoreHorizontal,
+  UsersRound,
 } from "lucide-react";
 
 const statusConfig = {
@@ -71,6 +72,7 @@ export default async function DashboardPage() {
     include: {
       category: true,
       revision: { select: { status: true, notes: true } },
+      betaTesterProgram: { select: { enabled: true } },
       _count: {
         select: {
           comments: { where: { status: "APPROVED" } },
@@ -296,6 +298,7 @@ export default async function DashboardPage() {
                           {cfg.label}
                         </span>
                         {startup.revision && <span className="rounded-full bg-amber-50 px-2 py-1 text-xs font-medium text-amber-800">{startup.revision.status === "REJECTED" ? "Changes need attention" : "Changes awaiting review"}</span>}
+                        {startup.betaTesterProgram?.enabled && <span className="rounded-full bg-violet-50 px-2 py-1 text-xs font-medium text-violet-700">Beta signups open</span>}
                       </div>
                       <p className="text-sm text-gray-400 truncate mb-3">
                         {startup.tagline}
@@ -347,7 +350,7 @@ export default async function DashboardPage() {
                           >
                             <Edit2 size={13} /> Edit
                           </Link>
-                          <div className="col-span-2 grid grid-cols-3 gap-2">
+                          <div className="col-span-2 grid grid-cols-2 gap-2 sm:grid-cols-4">
                           <Link
                             href={`/startup/${startup.id}/updates`}
                             className="flex items-center justify-center gap-1.5 py-2.5 bg-coral-50 border border-coral-200 text-coral-700 rounded-xl text-xs font-semibold hover:bg-coral-100 transition-colors relative"
@@ -372,6 +375,12 @@ export default async function DashboardPage() {
                                 {startup._count.comments}
                               </span>
                             )}
+                          </Link>
+                          <Link
+                            href={`/startup/${startup.id}/beta-testers`}
+                            className="flex min-h-11 items-center justify-center gap-1.5 rounded-xl border border-violet-200 bg-violet-50 py-2.5 text-xs font-semibold text-violet-700 transition-colors hover:bg-violet-100"
+                          >
+                            <UsersRound size={13} /> Beta testers
                           </Link>
                           </div>
                         </div>
