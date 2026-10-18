@@ -60,6 +60,25 @@ These are root-owned on the server and change only through a deliberate install 
 - `/usr/local/libexec/anshkosh-ops`, `anshkosh-prune-releases` and the systemd units
 - `/etc/nginx/conf.d/anshkosh.conf`
 
+## Reviewed migration exceptions
+
+The beta tester migration `20261018150000_beta_tester_signups` creates a new enum,
+two tables with row-level security, indexes and foreign keys. The conservative
+automatic scanner rejects enum creation and security changes even though this
+migration only adds schema. `deploy/deployment-policy.mjs` permits this reviewed
+migration only when both its name and its exact SHA-256 content hash match. Changed
+SQL or another migration name still goes through the original screening rules.
+
+Before deploying this release, install the reviewed policy file as root on the
+VPS. Hold `state/deploy.lock`, back up the installed policy, verify the candidate
+file against the reviewed Git commit, run Node's syntax check, then atomically
+replace `/usr/local/libexec/deployment-policy.mjs` with root:root ownership and
+mode 644. Verify it accepts the exact beta migration and rejects altered SQL.
+Restore the backup if verification fails. Application uploads cannot perform
+this privileged installation. After releasing the lock, merge the passing PR
+or rerun the main deployment through GitHub Actions; the normal validated
+database backup, migration and blue/green release steps still apply.
+
 ## Release retention
 
 Each release is about 2 GB. `anshkosh-prune-releases.timer` runs daily at 03:30 server time (America/Denver) as `deploy`. It keeps the live release and the newest 3, deletes older ones, skips the run while a deploy holds the lock, and never deletes a directory a process is using. See [Runbooks](Runbooks.md#release-cleanup).

@@ -13,6 +13,15 @@ it("keeps the founder journal release migrations within the automatic deploy gat
   }
 });
 
+it("allows the exact reviewed beta tester migration, but blocks modified SQL", () => {
+  const name = "20261018150000_beta_tester_signups";
+  const sql = readFileSync(`prisma/migrations/${name}/migration.sql`, "utf8");
+  expect(() => assertAdditiveMigration(sql, name)).not.toThrow();
+  expect(() => assertAdditiveMigration(`${sql}\nDROP TABLE \"Startup\";`, name)).toThrow();
+  expect(() => assertAdditiveMigration(sql, "unreviewed_migration")).toThrow();
+  expect(() => assertAdditiveMigration(sql.replace("ENABLE ROW", "DISABLE ROW"), name)).toThrow();
+});
+
 it("allows additive tables, indexes, nullable columns and defaulted columns", () => {
   for (const sql of [
     'CREATE TABLE "NewTable" ("id" TEXT NOT NULL); CREATE UNIQUE INDEX "NewTable_id" ON "NewTable"("id");',

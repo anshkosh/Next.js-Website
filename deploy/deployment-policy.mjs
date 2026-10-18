@@ -1,5 +1,19 @@
 // Conservative automatic migration gate. Anything else needs a reviewed deployment.
+import { createHash } from "node:crypto";
+
+// Exact SQL reviewed for this release. Pinning the content keeps advanced but
+// additive operations from broadening the automatic-deploy allowlist.
+const REVIEWED_MIGRATIONS = new Map([
+  [
+    "20261018150000_beta_tester_signups",
+    "7c6c04824dd1f58822f539ebc7e0473714e7adba9b1bbab0d372dc50c9e930df",
+  ],
+]);
+
 export function assertAdditiveMigration(sql, name = "migration") {
+  const reviewedHash = REVIEWED_MIGRATIONS.get(name);
+  if (reviewedHash && createHash("sha256").update(sql).digest("hex") === reviewedHash) return;
+
   const normalized = sql.replace(/'(?:''|[^'])*'|"(?:""|[^"])*"|--[^\n]*|\/\*[\s\S]*?\*\//g, token =>
     token.startsWith("'") ? "'value'" : token.startsWith('"') ? '"identifier"' : " ");
   const statements = normalized.split(";").map(value => value.trim()).filter(Boolean);
