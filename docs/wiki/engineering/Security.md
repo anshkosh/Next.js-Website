@@ -31,12 +31,36 @@ Grant an admin role only with the owner's explicit approval.
 
 ClamAV was planned but is not installed: the VPS has 3.66 GiB RAM and the scanner needs at least 5 GiB free. The in-app PDF checks replace it. If signature-based malware scanning becomes a requirement, use a hosted scanning API or a larger VPS.
 
-**Known gap:** the admin-only journal image upload (`app/api/uploads/journal`) stores files as uploaded, trusting the browser's MIME type, without `sharp` re-encoding. Fix it before giving journal access to anyone other than trusted admins.
+All seven upload entry points use the shared origin, verified/non-banned account,
+attempt and storage-quota controls. Journal images remain admin-only; every image
+path decodes/re-encodes pixels with an input-pixel bound. OG rendering accepts only
+bounded first-party logo storage keys and LIVE parents, not remote profile URLs.
 
 ## Abuse controls
 
-- Upvotes: one per visitor per startup, enforced by a fingerprint hash (IP + user agent), a visitor cookie (`anshkosh_vid`) and a rate limit of 10 upvotes per hour per fingerprint.
+- Anonymous votes: one network identity per startup (trusted nginx `X-Real-IP`), with a 10-attempt/hour network budget. User-agent/cookie rotation and client-prepended forwarded headers do not reset it. Shared networks can share identities; this is not one-person verification.
 - Comments and the contact form use Cloudflare Turnstile and Zod validation; comments are moderated before they appear.
+
+## Moderation and public data boundaries
+
+Approval/rejection updates require a verified, non-banned moderator and encode
+PENDING_REVIEW in the database predicate. They cannot unsuspend a startup.
+Team/update helper reads constrain the parent to LIVE, or a verified owner/reviewer
+management scope. Public approved-comment reads always require a LIVE parent.
+Journal HTML is allowlist-sanitized on save and display (including old content);
+JSON-LD escapes script-closing markup. Active embeds and inline styles/events are
+not accepted. See the [sanitizer's documented configuration](https://github.com/apostrophecms/apostrophe/tree/main/packages/sanitize-html).
+
+## Newsletter
+
+An unchecked, specific consent choice plus Turnstile and network/address limits
+protect capture. Pending requests use hashed, 24-hour tokens in Verification;
+confirmation requires an explicit POST, not a GET opened by a mail scanner.
+Only confirmed, non-withdrawn subscribers (`activeNewsletterWhere`) may receive
+marketing. Legacy entries remain unconfirmed. Confirmation records consent version
+and request/confirmation timestamps. Secret unsubscribe links do not require login.
+There is no bulk newsletter sender: before adding one, enforce suppression, include
+unsubscribe links/headers and confirm the company's complete postal address.
 
 ## Secrets
 

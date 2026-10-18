@@ -9,6 +9,7 @@ import CopyButton from "@/components/content/CopyButton";
 import { cache } from "react";
 import { DEFAULT_SOCIAL_IMAGE, SITE_URL, absoluteUrl } from "@/lib/seo";
 import { calculateReadingTime } from "@/lib/journal-reading-time.mjs";
+import { sanitizeJournalHtml, serializeJsonLd } from "@/lib/journal-html";
 
 const BASE_URL = SITE_URL;
 export const dynamic = "force-dynamic";
@@ -116,7 +117,7 @@ export default async function JournalArticlePage({ params }: Props) {
       {/* JSON-LD */}
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        dangerouslySetInnerHTML={{ __html: serializeJsonLd(jsonLd) }}
       />
 
       <article className="min-h-screen bg-gray-50/30">
@@ -199,7 +200,7 @@ export default async function JournalArticlePage({ params }: Props) {
           {/* Content */}
           <div
             className="journal-content max-w-none mb-12"
-            dangerouslySetInnerHTML={{ __html: post.contentHtml || "" }}
+            dangerouslySetInnerHTML={{ __html: sanitizeJournalHtml(post.contentHtml || "") }}
           />
 
           {/* Tags */}

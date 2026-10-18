@@ -12,13 +12,13 @@ export async function approveStartup(id: string) {
     headers: await headers(),
   });
 
-  if (!session || (session.user.role !== "admin" && session.user.role !== "reviewer")) {
+  if (!session?.user.emailVerified || session.user.banned || (session.user.role !== "admin" && session.user.role !== "reviewer")) {
     return { error: "Unauthorized" };
   }
 
   try {
     const startup = await db.startup.update({
-      where: { id },
+      where: { id, status: "PENDING_REVIEW" },
       data: {
         status: "LIVE",
         reviewedBy: session.user.id,
@@ -51,7 +51,7 @@ export async function rejectStartup(formData: FormData) {
     headers: await headers(),
   });
 
-  if (!session || (session.user.role !== "admin" && session.user.role !== "reviewer")) {
+  if (!session?.user.emailVerified || session.user.banned || (session.user.role !== "admin" && session.user.role !== "reviewer")) {
     return { error: "Unauthorized" };
   }
 
@@ -64,7 +64,7 @@ export async function rejectStartup(formData: FormData) {
 
   try {
     const startup = await db.startup.update({
-      where: { id },
+      where: { id, status: "PENDING_REVIEW" },
       data: {
         status: "REJECTED",
         adminNotes,

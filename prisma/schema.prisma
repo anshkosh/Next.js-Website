@@ -416,4 +416,8 @@ model NewsletterSubscriber {
   id           String   @id @default(cuid())
   email        String   @unique
   subscribedAt DateTime @default(now())
+  confirmedAt DateTime?
+  unsubscribedAt DateTime?
+  unsubscribeTokenHash String? @unique
+  consentVersion String?
 }

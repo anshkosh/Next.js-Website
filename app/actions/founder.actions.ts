@@ -4,12 +4,15 @@ import { db } from "@/lib/db";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { createFounderSchema, updateFounderSchema } from "@/lib/validators/founder.schema";
+import { startupReadWhere } from "@/lib/startup-read-access";
 
 export async function getFounders(startupId: string) {
   try {
+    const session = await auth.api.getSession({ headers: await headers() });
     const founders = await db.startupFounder.findMany({
-      where: { startupId },
+      where: { startupId, startup: startupReadWhere(session?.user) },
       orderBy: { sortOrder: "asc" },
+      select: { id: true, name: true, role: true, photoUrl: true, linkedinUrl: true, twitterUrl: true, sortOrder: true },
     });
     return { data: founders };
   } catch (error) {

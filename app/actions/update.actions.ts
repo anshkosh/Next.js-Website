@@ -5,12 +5,15 @@ import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { revalidatePath } from "next/cache";
 import { createUpdateSchema, updateUpdateSchema } from "@/lib/validators/update.schema";
+import { startupReadWhere } from "@/lib/startup-read-access";
 
 export async function getUpdates(startupId: string) {
   try {
+    const session = await auth.api.getSession({ headers: await headers() });
     const updates = await db.startupUpdate.findMany({
-      where: { startupId },
+      where: { startupId, startup: startupReadWhere(session?.user) },
       orderBy: { createdAt: "desc" },
+      select: { id: true, title: true, body: true, imageUrl: true, createdAt: true, updatedAt: true },
     });
     return { data: updates };
   } catch (error) {
