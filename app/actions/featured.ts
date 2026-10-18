@@ -33,7 +33,6 @@ export async function addFeaturedStartup(startupId: string) {
     });
 
     revalidatePath("/admin/featured");
-    revalidatePath("/");
     revalidatePath("/discover");
 
     return { success: true };
@@ -58,7 +57,6 @@ export async function removeFeaturedStartup(id: string) {
     });
 
     revalidatePath("/admin/featured");
-    revalidatePath("/");
     revalidatePath("/discover");
 
     return { success: true };
@@ -86,7 +84,6 @@ export async function reorderFeaturedStartups(orderedIds: string[]) {
     }
 
     revalidatePath("/admin/featured");
-    revalidatePath("/");
     revalidatePath("/discover");
 
     return { success: true };

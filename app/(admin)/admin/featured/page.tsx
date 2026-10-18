@@ -48,7 +48,7 @@ export default async function AdminFeaturedPage() {
           Manage Featured Startups
         </h1>
         <p className="text-sm text-gray-500 mt-1">
-          Add up to 6 live startups to display in the Featured Startups section on the home page.
+          Add up to 6 live startups to spotlight in the Featured Startups section on Discover.
         </p>
       </div>
 
