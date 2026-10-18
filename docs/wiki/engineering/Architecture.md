@@ -57,3 +57,22 @@ Internet ──► nginx (TLS, www canonical, /_next/static from the shared stat
 | `sync` | upvote actions | `upvote-count-sync`: reconciles `Startup.upvoteCount` |
 
 The email queue retries 3 times with exponential backoff and keeps failed jobs for 7 days.
+
+Startup submission, profile-revision and moderation delivery intents are stored
+in NotificationOutbox within the same PostgreSQL transaction as the state change.
+The immediate attempt is bounded; failure returns a saved result with
+`notificationPending` rather than pretending the mutation failed. The sync worker
+retries due intents every minute with a stable BullMQ job ID. This is durable
+at-least-once delivery with queue deduplication, not a claim of provider-level
+exactly-once email. Delivered intents are removed after seven days; failures remain
+available for investigation/retry. Logs contain event IDs, not payloads.
+
+The hourly request-retention job processes up to 500 expired beta contacts and
+500 old closed records per run. Pending requests expire at 90 days; approved
+contacts at 180 days after review (creation time for legacy undated approvals).
+Expiry erases name/email/note and closes the request. Minimal closed consent
+records are removed after a further year. The founder dashboard filters expiry
+immediately, pages 20 requests at a time and provides an owner-scoped control to
+clear pending requests older than 30 days. Newsletter confirmation tokens expire
+after 24 hours; expired tokens and 180-day withdrawn/unconfirmed addresses are
+cleaned by the same job. No account/startup records or server backups are purged.

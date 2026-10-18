@@ -7,6 +7,7 @@ import { revalidatePath } from "next/cache";
 import { generateFingerprint } from "@/lib/utils/fingerprint";
 import { checkRateLimit } from "@/lib/utils/rate-limit";
 import { verifyTurnstileToken } from "@/lib/utils/turnstile";
+import { daysAgo, BETA_PENDING_DAYS } from "@/lib/beta-retention";
 import {
   BETA_TESTER_CONSENT_VERSION,
   betaTesterProgramSchema,
@@ -115,6 +116,7 @@ export async function reviewBetaTesterRequest(
 ): Promise<{ success?: true; error?: string }> {
   const user = await founderSession();
   if (!user) return { error: "Sign in with a verified founder account to review requests." };
+  if (decision !== "APPROVED" && decision !== "DECLINED") return { error: "Invalid review decision." };
 
   const request = await db.betaTesterRequest.findFirst({
     where: { id: requestId, program: { startup: { founderId: user.id } } },
@@ -124,7 +126,7 @@ export async function reviewBetaTesterRequest(
   if (request.status !== "PENDING") return { error: "This request has already been reviewed." };
 
   const result = await db.betaTesterRequest.updateMany({
-    where: { id: request.id, status: "PENDING" },
+    where: { id: request.id, status: "PENDING", createdAt: { gte: daysAgo(BETA_PENDING_DAYS) }, program: { startup: { founderId: user.id } } },
     data: {
       status: decision,
       reviewedAt: new Date(),
@@ -150,4 +152,15 @@ export async function deleteBetaTesterRequest(requestId: string): Promise<{ succ
   await db.betaTesterRequest.delete({ where: { id: request.id } });
   revalidatePath(`/startup/${request.program.startup.id}/beta-testers`);
   return { success: true };
+}
+
+export async function clearOldBetaRequests(startupId: string) {
+  const user = await founderSession();
+  if (!user) return { error: "Sign in with a verified founder account to remove requests." };
+  const result = await db.betaTesterRequest.updateMany({
+    where: { program: { startupId, startup: { founderId: user.id } }, status: "PENDING", createdAt: { lt: daysAgo(30) } },
+    data: { name: null, email: null, message: null, status: "DECLINED", reviewedAt: new Date() },
+  });
+  revalidatePath(`/startup/${startupId}/beta-testers`);
+  return { success: true as const, removed: result.count };
 }

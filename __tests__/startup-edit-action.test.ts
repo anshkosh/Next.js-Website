@@ -6,6 +6,7 @@ vi.mock("@/lib/db", () => { const tx = { startup: { findUnique: mock.find, findU
 vi.mock("next/headers", () => ({ headers: async () => new Headers() }));
 vi.mock("next/cache", () => ({ revalidatePath: mock.revalidate }));
 vi.mock("@/lib/jobs/queues", () => ({ notificationQueue: { add: mock.queue } }));
+vi.mock("@/lib/notification-outbox", () => ({ storeNotification: async () => ({ id: "event" }), deliverNotification: async () => { try { await mock.queue(); return true; } catch { return false; } } }));
 vi.mock("@/lib/logger", () => ({ logger: { error: vi.fn() } }));
 vi.mock("@/app/actions/settings.actions", () => ({ getSettingValue: vi.fn() }));
 import { updateStartup } from "../app/actions/startup.actions";

@@ -7,6 +7,8 @@ it("keeps the founder journal release migrations within the automatic deploy gat
     "20261016160000_founder_journal",
     "20261017120000_founder_journal_rich_text",
     "20261017130000_journal_review_and_scheduling",
+    "20261018200000_newsletter_confirmation",
+    "20261018210000_notification_outbox",
   ]) {
     const sql = readFileSync(`prisma/migrations/${name}/migration.sql`, "utf8");
     expect(() => assertAdditiveMigration(sql, name)).not.toThrow();

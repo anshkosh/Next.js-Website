@@ -4,8 +4,8 @@ import { logger } from "@/lib/logger";
 import { db } from "@/lib/db";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
-import { revalidatePath } from "next/cache";
-import { emailQueue } from "@/lib/jobs/queues";
+import { revalidateSavedPath as revalidatePath } from "@/lib/cache-after-save";
+import { storeNotification, deliverNotification } from "@/lib/notification-outbox";
 
 export async function approveStartup(id: string) {
   const session = await auth.api.getSession({
@@ -17,7 +17,8 @@ export async function approveStartup(id: string) {
   }
 
   try {
-    const startup = await db.startup.update({
+    const { event } = await db.$transaction(async tx => {
+    const startup = await tx.startup.update({
       where: { id, status: "PENDING_REVIEW" },
       data: {
         status: "LIVE",
@@ -27,7 +28,7 @@ export async function approveStartup(id: string) {
       include: { founder: true }
     });
 
-    await emailQueue.add("startup_approved", {
+    const event = await storeNotification(tx, "email", "startup_approved", {
       template: "startup_approved",
       to: startup.founder.email,
       data: {
@@ -36,10 +37,13 @@ export async function approveStartup(id: string) {
       }
     });
 
+    return { event };
+    });
+    const delivered = await deliverNotification(event.id);
     revalidatePath("/admin/moderation");
     revalidatePath("/");
     
-    return { success: true };
+    return { success: true, ...(!delivered ? { notificationPending: true } : {}) };
   } catch (error) {
     logger.error("Approve startup error:", error);
     return { error: "Failed to approve startup" };
@@ -63,7 +67,8 @@ export async function rejectStartup(formData: FormData) {
   }
 
   try {
-    const startup = await db.startup.update({
+    const { event } = await db.$transaction(async tx => {
+    const startup = await tx.startup.update({
       where: { id, status: "PENDING_REVIEW" },
       data: {
         status: "REJECTED",
@@ -74,7 +79,7 @@ export async function rejectStartup(formData: FormData) {
       include: { founder: true }
     });
 
-    await emailQueue.add("startup_rejected", {
+    const event = await storeNotification(tx, "email", "startup_rejected", {
       template: "startup_rejected",
       to: startup.founder.email,
       data: {
@@ -84,9 +89,12 @@ export async function rejectStartup(formData: FormData) {
       }
     });
 
+    return { event };
+    });
+    const delivered = await deliverNotification(event.id);
     revalidatePath("/admin/moderation");
     
-    return { success: true };
+    return { success: true, ...(!delivered ? { notificationPending: true } : {}) };
   } catch (error) {
     logger.error("Reject startup error:", error);
     return { error: "Failed to reject startup" };

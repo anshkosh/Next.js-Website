@@ -13,8 +13,12 @@ export default function ModerationCard({ startup }: { startup: any }) {
 
   const handleApprove = async () => {
     setIsApproving(true);
-    await approveStartup(startup.id);
-    setIsApproving(false);
+    try {
+      const result = await approveStartup(startup.id);
+      if (result.error) alert(result.error);
+      else if ("notificationPending" in result && result.notificationPending) alert("Startup approved. Its notification is delayed and will be retried automatically.");
+    } catch { alert("Unable to confirm the result. Refresh before trying again."); }
+    finally { setIsApproving(false); }
   };
 
   const handleReject = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -22,9 +26,15 @@ export default function ModerationCard({ startup }: { startup: any }) {
     setIsRejecting(true);
     const formData = new FormData(e.currentTarget);
     formData.append("id", startup.id);
-    await rejectStartup(formData);
-    setIsRejecting(false);
-    setShowRejectDialog(false);
+    try {
+      const result = await rejectStartup(formData);
+      if (result.error) alert(result.error);
+      else {
+        if ("notificationPending" in result && result.notificationPending) alert("Review saved. Its notification is delayed and will be retried automatically.");
+        setShowRejectDialog(false);
+      }
+    } catch { alert("Unable to confirm the result. Refresh before trying again."); }
+    finally { setIsRejecting(false); }
   };
 
   return (

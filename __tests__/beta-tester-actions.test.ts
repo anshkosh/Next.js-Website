@@ -28,7 +28,7 @@ vi.mock("@/lib/utils/rate-limit", () => ({ checkRateLimit: mocks.checkRateLimit 
 vi.mock("@/lib/utils/turnstile", () => ({ verifyTurnstileToken: mocks.verifyTurnstileToken }));
 vi.mock("@/lib/utils/fingerprint", () => ({ generateFingerprint: () => "test-fingerprint" }));
 
-import { deleteBetaTesterRequest, reviewBetaTesterRequest, saveBetaTesterProgram, submitBetaTesterRequest } from "@/app/actions/beta-tester.actions";
+import { clearOldBetaRequests, deleteBetaTesterRequest, reviewBetaTesterRequest, saveBetaTesterProgram, submitBetaTesterRequest } from "@/app/actions/beta-tester.actions";
 import { BETA_TESTER_CONSENT_VERSION } from "@/lib/validators/beta-tester.schema";
 
 describe("beta tester signup and founder review", () => {
@@ -82,7 +82,7 @@ describe("beta tester signup and founder review", () => {
     const result = await reviewBetaTesterRequest("request-1", "APPROVED");
     expect(result).toEqual({ success: true });
     expect(mocks.requestFindFirst).toHaveBeenCalledWith(expect.objectContaining({ where: { id: "request-1", program: { startup: { founderId: "founder-1" } } } }));
-    expect(mocks.requestUpdateMany).toHaveBeenCalledWith(expect.objectContaining({ where: { id: "request-1", status: "PENDING" }, data: { status: "APPROVED", reviewedAt: new Date("2026-10-18T10:00:00.000Z") } }));
+    expect(mocks.requestUpdateMany).toHaveBeenCalledWith(expect.objectContaining({ where: { id: "request-1", status: "PENDING", createdAt: { gte: new Date("2026-07-20T10:00:00.000Z") }, program: { startup: { founderId: "founder-1" } } }, data: { status: "APPROVED", reviewedAt: new Date("2026-10-18T10:00:00.000Z") } }));
   });
 
   it("erases applicant contact details when the founder declines", async () => {
@@ -98,6 +98,11 @@ describe("beta tester signup and founder review", () => {
     const result = await saveBetaTesterProgram("not-owned", { enabled: false, description: "", reward: "" });
     expect(result.error).toMatch(/not found/i);
     expect(mocks.programUpsert).not.toHaveBeenCalled();
+  });
+
+  it("scopes the bulk retention control to the verified owner's old pending requests", async () => {
+    expect(await clearOldBetaRequests("startup-1")).toEqual({ success: true, removed: 1 });
+    expect(mocks.requestUpdateMany).toHaveBeenCalledWith({ where: { program: { startupId: "startup-1", startup: { founderId: "founder-1" } }, status: "PENDING", createdAt: { lt: new Date("2026-09-18T10:00:00.000Z") } }, data: { name: null, email: null, message: null, status: "DECLINED", reviewedAt: new Date("2026-10-18T10:00:00.000Z") } });
   });
 
   it("allows an owner to erase an approved request from the dashboard", async () => {

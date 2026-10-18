@@ -9,6 +9,7 @@ import Link from "next/link";
 import { seoMetadata } from "@/lib/seo";
 import ErrorState, { recoveryLinkClass, secondaryRecoveryLinkClass } from "@/components/site/ErrorState";
 import FeaturedStartups from "@/components/landing/FeaturedStartups";
+import { pageNumber, pageHref, searchText } from "@/lib/pagination";
 
 export const dynamic = "force-dynamic";
 
@@ -26,9 +27,9 @@ export default async function DiscoverPage(props: {
   }>;
 }) {
   const searchParams = await props.searchParams;
-  const categorySlug = searchParams?.category;
-  const query = searchParams?.q;
-  const page = parseInt(searchParams?.page || "1", 10);
+  const categorySlug = searchText(searchParams?.category, 100);
+  const query = searchText(searchParams?.q);
+  const page = pageNumber(searchParams?.page);
   const pageSize = 20;
 
   if (!process.env.DATABASE_URL) {
@@ -148,7 +149,7 @@ export default async function DiscoverPage(props: {
           <div className="mt-12 flex justify-center gap-2">
             {page > 1 && (
               <Link
-                href={`/discover?page=${page - 1}${query ? `&q=${query}` : ""}${categorySlug ? `&category=${categorySlug}` : ""}`}
+                href={pageHref("/discover", page - 1, { q: query, category: categorySlug })}
                 className="px-4 py-2 border border-gray-200 rounded-md text-gray-600 hover:bg-gray-50 font-medium"
               >
                 Previous
@@ -159,7 +160,7 @@ export default async function DiscoverPage(props: {
             </span>
             {page < totalPages && (
               <Link
-                href={`/discover?page=${page + 1}${query ? `&q=${query}` : ""}${categorySlug ? `&category=${categorySlug}` : ""}`}
+                href={pageHref("/discover", page + 1, { q: query, category: categorySlug })}
                 className="px-4 py-2 border border-gray-200 rounded-md text-gray-600 hover:bg-gray-50 font-medium"
               >
                 Next

@@ -12,9 +12,10 @@ import {
   updateStartupSchema,
 } from "@/lib/validators/startup.schema";
 import { generateUniqueSlug } from "@/lib/utils/slug";
-import { revalidatePath } from "next/cache";
-import { notificationQueue } from "@/lib/jobs/queues";
+import { revalidateSavedPath as revalidatePath } from "@/lib/cache-after-save";
 import { getSettingValue } from "@/app/actions/settings.actions";
+import { createWithinStartupQuota, StartupQuotaError } from "@/lib/startup-quota";
+import { storeNotification, deliverNotification } from "@/lib/notification-outbox";
 
 export async function createStartup(formData: FormData) {
   try {
@@ -33,16 +34,6 @@ export async function createStartup(formData: FormData) {
     // Check configurable limit from app settings (admin-controlled)
     const limitSetting = await getSettingValue("max_startups_per_user", "1");
     const limit = Math.max(1, parseInt(limitSetting, 10) || 1);
-
-    const startupCount = await db.startup.count({
-      where: { founderId: session.user.id },
-    });
-
-    if (startupCount >= limit) {
-      return {
-        error: `You can only create up to ${limit} startup${limit === 1 ? "" : "s"}.`,
-      };
-    }
 
     // Parse form data
     const rawData = {
@@ -108,19 +99,18 @@ export async function createStartup(formData: FormData) {
       return existing !== null;
     });
 
-    const startup = await db.startup.create({
-      data: {
+    const startup = await createWithinStartupQuota(session.user.id, limit, {
         ...data,
         founderName: data.founderName || session.user.name || "Unknown Founder",
         slug,
         founderId: session.user.id,
         status: "DRAFT",
-      },
     });
 
     revalidatePath("/dashboard");
     return { data: startup };
   } catch (error) {
+    if (error instanceof StartupQuotaError) return { error: error.message };
     logger.error("Create startup error:", error);
     return { error: "Internal server error" };
   }
@@ -219,41 +209,43 @@ export async function updateStartup(formData: FormData) {
     const { id, ...updateData } = data;
 
     if (existingStartup.status === "LIVE") {
-      const published = await db.$transaction(tx => savePublishedRevision(tx, existingStartup, updateData));
-      // Saving succeeds even if notification delivery is temporarily unavailable.
-      await notificationQueue.add("new_submission", {
-        startupName: existingStartup.name,
-        founderName: session.user.name,
-        category: "Profile changes",
-      }).catch(error => logger.error("Revision notification failed", error));
+      const { published, event } = await db.$transaction(async tx => {
+        const published = await savePublishedRevision(tx, existingStartup, updateData);
+        const event = await storeNotification(tx, "notification", "new_submission", {
+          startupName: existingStartup.name, founderName: session.user.name, category: "Profile changes",
+        });
+        return { published, event };
+      });
+      const notificationDelivered = await deliverNotification(event.id);
       revalidatePath("/dashboard");
       revalidatePath("/admin/moderation");
       revalidatePath(`/startups/${published.slug}`);
-      return { data: published, pendingRevision: true };
+      return { data: published, pendingRevision: true, notificationPending: !notificationDelivered };
     }
 
     const isSubmitting = existingStartup.status === "REJECTED";
 
-    const updatedStartup = await db.startup.update({
-      where: { id },
+    const { updatedStartup, event } = await db.$transaction(async tx => {
+      const updatedStartup = await tx.startup.update({
+      where: { id, founderId: session.user.id, status: existingStartup.status },
       data: {
         ...updateData,
         metadata: mergeStartupMetadata(existingStartup.metadata, updateData.metadata),
         status: isSubmitting ? "PENDING_REVIEW" : existingStartup.status,
       },
       include: { founder: true, category: true },
-    });
-
-    if (isSubmitting) {
-      await notificationQueue.add("new_submission", {
+      });
+      const event = isSubmitting ? await storeNotification(tx, "notification", "new_submission", {
         startupName: updatedStartup.name,
         founderName: updatedStartup.founder.name,
         category: updatedStartup.category.name,
-      });
-    }
+      }) : null;
+      return { updatedStartup, event };
+    });
+    const notificationDelivered = event ? await deliverNotification(event.id) : true;
 
     revalidatePath("/dashboard");
-    return { data: updatedStartup };
+    return { data: updatedStartup, notificationPending: !notificationDelivered };
   } catch (error) {
     logger.error("Update startup error:", error);
     return { error: "Internal server error" };
@@ -398,23 +390,26 @@ export async function submitForReview(id: string) {
       };
     }
 
-    const updatedStartup = await db.startup.update({
-      where: { id },
+    const { updatedStartup, event } = await db.$transaction(async tx => {
+      const updatedStartup = await tx.startup.update({
+      where: { id, founderId: session.user.id, status: existingStartup.status },
       data: {
         status: "PENDING_REVIEW",
         publishedAt: existingStartup.publishedAt ? undefined : new Date(), // Set publishedAt if first submission
       },
       include: { founder: true, category: true },
-    });
-
-    await notificationQueue.add("new_submission", {
+      });
+      const event = await storeNotification(tx, "notification", "new_submission", {
       startupName: updatedStartup.name,
       founderName: updatedStartup.founder.name,
       category: updatedStartup.category.name,
+      });
+      return { updatedStartup, event };
     });
+    const notificationDelivered = await deliverNotification(event.id);
 
     revalidatePath("/dashboard");
-    return { data: updatedStartup };
+    return { data: updatedStartup, notificationPending: !notificationDelivered };
   } catch (error) {
     logger.error("Submit for review error:", error);
     return { error: "Internal server error" };

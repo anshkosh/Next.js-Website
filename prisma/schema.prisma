@@ -421,3 +421,17 @@ model NewsletterSubscriber {
   unsubscribeTokenHash String? @unique
   consentVersion String?
 }
+
+// Internal server-only delivery intent, committed with the business mutation.
+model NotificationOutbox {
+  id String @id @default(cuid())
+  queue String
+  name String
+  payload Json
+  attempts Int @default(0)
+  nextAttemptAt DateTime @default(now())
+  deliveredAt DateTime?
+  createdAt DateTime @default(now())
+
+  @@index([deliveredAt, nextAttemptAt])
+}

@@ -10,7 +10,7 @@ export const metadata = seoMetadata({
 const sections = [
   { title: "Newsletter consent and confirmation", paragraphs: [
     "Newsletter signup is optional and uses a separate, unchecked consent choice. We verify your request by an email confirmation link valid for 24 hours. A submitted address is not an active subscriber until confirmed; older unconfirmed entries are not automatically activated. We record the request time, confirmation time and consent-notice version. Security checks and network/email request limits help prevent automated signups.",
-    "You can withdraw newsletter consent without an account using your unsubscribe link, or email hello@anshkosh.com. Withdrawal excludes the address from newsletter delivery. Expired confirmation records are removed by scheduled housekeeping; withdrawn subscriber records are retained only for the documented operational period before removal. We do not use beta tester applications as newsletter consent.",
+    "You can withdraw newsletter consent without an account using your unsubscribe link, or email hello@anshkosh.com. Withdrawal excludes the address from newsletter delivery. Hourly housekeeping removes expired confirmation records; withdrawn and never-confirmed subscriber records are removed after 180 days. We do not use beta tester applications as newsletter consent.",
   ] },
   { title: "Information sent to Anshkosh", paragraphs: [
     "Account registration and sign-in handle your name, email, credentials and session information. Startup submissions include the profile, founding team, links, media and contact details you provide. These records are stored on our servers for account, review and publishing workflows.",

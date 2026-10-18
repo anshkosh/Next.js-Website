@@ -28,6 +28,12 @@ abuse resistance, not proof of one person. Production nginx must overwrite
 `X-Real-IP` with `$remote_addr`, and Next must remain loopback-only. Rate limiter
 increment/expiry is atomic and unavailable protection fails closed.
 
+Reliability regressions cover durable notification retries, saved-result reporting,
+malformed/encoded pagination and bounded beta retention. The browser CI also runs
+`scripts/test-startup-quotas-postgres.ts` against its disposable loopback database:
+simultaneous creates cannot exceed either the default one-startup limit or a
+configurable two-startup allowance. The script refuses production/remote databases.
+
 ## End-to-end tests (Playwright)
 
 ```bash

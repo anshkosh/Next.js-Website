@@ -27,6 +27,7 @@ export default function SubmitReviewButton({
           router.push(`/startup/${startupId}/edit`);
         }
       } else {
+        if (res.notificationPending) alert("Your startup was submitted successfully. The notification is delayed and will be retried automatically.");
         router.refresh();
       }
     } catch (err) {
