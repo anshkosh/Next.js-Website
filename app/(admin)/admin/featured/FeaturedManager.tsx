@@ -1,10 +1,12 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
 import Image from "next/image";
-import { ArrowUp, ArrowDown, Trash2, Plus, Star } from "lucide-react";
+import { ArrowUp, ArrowDown, Trash2, Plus, Star, Clock3, Zap } from "lucide-react";
 import {
   addFeaturedStartup,
+  featureLatestStartupForOneDay,
   removeFeaturedStartup,
   reorderFeaturedStartups,
 } from "@/app/actions/featured";
@@ -12,6 +14,7 @@ import {
 type FeaturedItem = {
   id: string;
   sortOrder: number;
+  featuredUntil: Date | string | null;
   startup: {
     id: string;
     name: string;
@@ -26,21 +29,34 @@ type LiveStartup = {
   name: string;
   slug: string;
   logoUrl?: string | null;
+  createdAt: Date | string;
 };
+
+const formatFeatureEnd = (value: Date | string) => new Intl.DateTimeFormat("en-IN", {
+  dateStyle: "medium",
+  timeStyle: "short",
+  timeZone: "Asia/Kolkata",
+}).format(new Date(value));
 
 export default function FeaturedManager({
   featuredList,
   availableStartups,
+  latestLiveStartup,
 }: {
   featuredList: FeaturedItem[];
   availableStartups: LiveStartup[];
+  latestLiveStartup: LiveStartup | null;
 }) {
+  const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [selectedStartupId, setSelectedStartupId] = useState("");
   const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
 
   const featuredStartupIds = new Set(featuredList.map((item) => item.startup.id));
   const dropdownOptions = availableStartups.filter((s) => !featuredStartupIds.has(s.id));
+  const latestFeatured = latestLiveStartup
+    ? featuredList.find((item) => item.startup.id === latestLiveStartup.id)
+    : null;
 
   const handleAdd = () => {
     if (!selectedStartupId) return;
@@ -86,6 +102,19 @@ export default function FeaturedManager({
     });
   };
 
+  const handleFeatureLatest = () => {
+    setMessage(null);
+    startTransition(async () => {
+      const res = await featureLatestStartupForOneDay();
+      if ("error" in res) {
+        setMessage({ type: "error", text: res.error });
+      } else {
+        setMessage({ type: "success", text: `${res.startupName} is featured on Discover for 24 hours.` });
+        router.refresh();
+      }
+    });
+  };
+
   return (
     <div className="space-y-8">
       {/* Header Slot Status */}
@@ -110,6 +139,44 @@ export default function FeaturedManager({
           {message.text}
         </div>
       )}
+
+      <section className="rounded-2xl border border-coral-200 bg-gradient-to-br from-coral-50 via-white to-white p-5 shadow-2xs sm:p-6" aria-labelledby="feature-latest-title">
+        <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex items-start gap-3">
+            <span className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-coral-100 text-coral-700">
+              <Zap className="h-5 w-5" aria-hidden="true" />
+            </span>
+            <div>
+              <h2 id="feature-latest-title" className="font-heading text-base font-bold text-gray-900">Feature the newest startup for 24 hours</h2>
+              {latestLiveStartup ? (
+                <p className="mt-1 text-sm text-gray-600">
+                  Newest live listing: <span className="font-semibold text-gray-900">{latestLiveStartup.name}</span>
+                  {latestFeatured?.featuredUntil && (
+                    <span className="mt-1 flex items-center gap-1.5 text-xs text-amber-800">
+                      <Clock3 className="h-3.5 w-3.5" aria-hidden="true" />
+                      Current one-day feature ends {formatFeatureEnd(latestFeatured.featuredUntil)} IST.
+                    </span>
+                  )}
+                </p>
+              ) : (
+                <p className="mt-1 text-sm text-gray-600">A live startup will appear here when one is published.</p>
+              )}
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={handleFeatureLatest}
+            disabled={!latestLiveStartup || isPending || (featuredList.length >= 6 && !latestFeatured)}
+            className="inline-flex min-h-11 shrink-0 items-center justify-center gap-2 rounded-xl bg-coral-600 px-5 py-2.5 text-sm font-semibold text-white shadow-2xs transition-colors hover:bg-coral-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-coral-600 disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            <Zap className="h-4 w-4" aria-hidden="true" />
+            {isPending ? "Updating feature…" : latestFeatured ? "Restart 24-hour feature" : "Feature for 24 hours"}
+          </button>
+        </div>
+        {featuredList.length >= 6 && !latestFeatured && (
+          <p className="mt-4 border-t border-coral-200 pt-3 text-xs text-gray-600">All six slots are in use. Remove a featured startup to make room for the newest listing.</p>
+        )}
+      </section>
 
       {/* Featured List */}
       <div className="bg-white rounded-2xl border border-gray-200 shadow-2xs overflow-hidden">
@@ -152,6 +219,12 @@ export default function FeaturedManager({
                     <p className="text-xs text-gray-500 truncate max-w-xs sm:max-w-md">
                       {item.startup.tagline}
                     </p>
+                    {item.featuredUntil && (
+                      <p className="mt-1 inline-flex items-center gap-1 text-[11px] font-medium text-amber-800">
+                        <Clock3 className="h-3 w-3" aria-hidden="true" />
+                        Temporary · ends {formatFeatureEnd(item.featuredUntil)} IST
+                      </p>
+                    )}
                   </div>
                 </div>
 

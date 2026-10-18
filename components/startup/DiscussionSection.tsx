@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition, useRef, useCallback } from "react";
+import Link from "next/link";
 import { MessageSquare, ChevronDown, Send, Clock, CheckCircle2, AlertCircle } from "lucide-react";
 import TurnstileWidget from "./TurnstileWidget";
 import { submitComment, fetchApprovedComments } from "@/app/actions/comment.actions";
@@ -262,6 +263,10 @@ function CommentForm({ startupId, startupSlug, onSubmitted }: {
             Comments are reviewed before appearing publicly
           </p>
         </div>
+        <p className="text-xs leading-relaxed text-gray-500">
+          Your name and comment may be published after moderation. Your email stays private. See our{" "}
+          <Link href="/privacy" className="font-medium text-coral-700 underline underline-offset-2">Privacy Notice</Link>.
+        </p>
       </form>
     </div>
   );

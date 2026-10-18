@@ -1,7 +1,7 @@
 import { cookies } from "next/headers";
 import Link from "next/link";
 import { ArrowRight, Sparkles } from "lucide-react";
-import StartupCard from "@/components/startup/StartupCard";
+import FeaturedStartupsCarousel from "@/components/landing/FeaturedStartupsCarousel";
 import { db } from "@/lib/db";
 import { publicStartupCard, publicStartupCardSelect } from "@/lib/public-startup-card";
 
@@ -9,8 +9,12 @@ export default async function FeaturedStartups({ cookieId }: { cookieId?: string
   if (!process.env.DATABASE_URL) return null;
 
   const visitorCookieId = cookieId ?? (await cookies()).get("anshkosh_vid")?.value;
+  const now = new Date();
   const rows = await db.featuredStartup.findMany({
-    where: { startup: { status: "LIVE" } },
+    where: {
+      startup: { status: "LIVE" },
+      OR: [{ featuredUntil: null }, { featuredUntil: { gt: now } }],
+    },
     orderBy: { sortOrder: "asc" },
     select: { startup: { select: publicStartupCardSelect(visitorCookieId) } },
   });
@@ -39,13 +43,7 @@ export default async function FeaturedStartups({ cookieId }: { cookieId?: string
           </Link>
         </div>
 
-        <ul className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {startups.map((startup) => (
-            <li key={startup.id} className="relative">
-              <StartupCard startup={startup} />
-            </li>
-          ))}
-        </ul>
+        <FeaturedStartupsCarousel startups={startups} />
       </div>
     </section>
   );

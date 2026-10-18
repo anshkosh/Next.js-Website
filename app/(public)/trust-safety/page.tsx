@@ -30,6 +30,10 @@ const sections = [
   { title: "Current pilot limits", paragraphs: [
     "The pilot supports startup profiles, progress, discovery, feedback and free founder tools. Payments and preorders are not open during the pilot. Investments are not offered. A profile, vote or expression of interest creates no financial obligation or order entitlement.",
   ] },
+  { title: "Beta tester requests", paragraphs: [
+    "Beta tester requests share interest with a startup founder; they do not guarantee selection, product access, onboarding, support, or a reward. The founder reviews requests and contacts approved testers directly. Anshkosh does not provide or verify the product being tested, and does not manage access or rewards.",
+    "Founders should describe the test and any reward accurately, avoid asking testers to submit sensitive information, and use tester contact details only to review and coordinate that beta opportunity. Tester names and optional notes are shared for review; email addresses are shown to the founder only after approval. The beta signup is currently limited to adults aged 18 or older. See the Beta Tester Consent Notice for details.",
+  ] },
 ];
 
 export default function TrustSafetyPage() {
@@ -39,7 +43,7 @@ export default function TrustSafetyPage() {
         <span className="text-xs font-semibold text-coral-500 tracking-widest uppercase mb-4 block">TRUST & SAFETY</span>
         <h1 className="text-4xl md:text-5xl font-bold font-heading text-gray-900 mb-4 tracking-tight">Trust & Safety</h1>
         <p className="text-xl text-gray-500 mb-4">Clear profiles, responsible feedback and an honest view of the pilot’s limits.</p>
-        <p className="text-sm text-gray-600 mb-8">Updated: 9 October 2026 · Operator: Anshkosh</p>
+        <p className="text-sm text-gray-600 mb-8">Updated: 18 October 2026 · Operator: Anshkosh Pvt Ltd · Hyderabad, Telangana, India</p>
         <div className="space-y-12">
           {sections.map(section => (
             <section key={section.title} className="pt-8 border-t border-gray-100">
@@ -47,6 +51,7 @@ export default function TrustSafetyPage() {
               <div className="space-y-4 text-gray-600 leading-relaxed text-base">
                 {section.paragraphs.map(paragraph => <p key={paragraph}>{paragraph}</p>)}
               </div>
+              {section.title === "Beta tester requests" && <p className="mt-4"><Link href="/beta-consent" className="font-semibold text-coral-700 underline">Read the Beta Tester Consent Notice.</Link></p>}
             </section>
           ))}
           <section className="pt-8 border-t border-gray-100">

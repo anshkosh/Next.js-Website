@@ -26,11 +26,15 @@ beforeEach(() => {
 afterEach(() => { vi.unstubAllEnvs(); vi.clearAllMocks(); });
 
 describe("homepage public content", () => {
-  it("shows admin-selected featured startups on Discover and preserves visitor vote state", async () => {
-    queries.featured.mockResolvedValue([featuredRow()]);
+  it("shows one admin-selected featured startup at a time on Discover and preserves visitor vote state", async () => {
+    queries.featured.mockResolvedValue([featuredRow(), featuredRow({ id: "next-startup", slug: "next-startup", name: "Next startup" })]);
     const html = renderToStaticMarkup(await FeaturedStartups());
     expect(queries.featured).toHaveBeenCalledWith(expect.objectContaining({
-      where: { startup: { status: "LIVE" } }, orderBy: { sortOrder: "asc" },
+      where: expect.objectContaining({
+        startup: { status: "LIVE" },
+        OR: [{ featuredUntil: null }, { featuredUntil: { gt: expect.any(Date) } }],
+      }),
+      orderBy: { sortOrder: "asc" },
     }));
     expect(html).toContain('href="/startups/public-startup"');
     expect(html).toContain('aria-labelledby="discover-featured-title"');
@@ -38,6 +42,9 @@ describe("homepage public content", () => {
     expect(html).toContain('aria-label="Remove upvote for Public startup, 12 upvotes"');
     expect(html).toContain('aria-pressed="true"');
     expect(html).toContain("SaaS");
+    expect(html).not.toContain('href="/startups/next-startup"');
+    expect(html).toContain('aria-label="Show next featured startup"');
+    expect(html).toContain("Changes every 30 seconds");
   });
 
   it("shows live featured profiles with zero votes without inventing activity", async () => {
