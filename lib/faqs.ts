@@ -25,7 +25,7 @@ export const faqData = [
   },
   {
     question: "How are startup signals calculated?",
-    answer: "Signals are a startup’s all-time upvotes minus its all-time downvotes. You can have one active vote per startup: click the same arrow to remove it, or the other arrow to switch. A net score can be negative. Equal scores share a leaderboard rank. Votes reflect community opinion, not verified traction or product-market fit.",
+    answer: "Leaderboard signals combine all-time net votes (upvotes minus downvotes), 2 points per founder publishing day (up to 10 UTC days), 2 per approved community participant (up to 20), and 3 per participant with a founder reply (up to 10). Publishing days combine startup updates and approved, published public founder journal entries. Participants are grouped by email, or commenter name for legacy imported comments without email. Repeated comments and reply edits do not add points; owner comments, private, pending, rejected, and future journal entries are excluded. Equal scores share a global rank. Directory vote controls show net votes separately. Comment emails and legacy names are not verified identities. These signals reflect participation, not verified traction, investment, or product-market fit. See the leaderboard for each startup’s breakdown.",
   },
   {
     question: "What counts as evidence in a validation test?",

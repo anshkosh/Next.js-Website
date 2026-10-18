@@ -27,6 +27,7 @@ This wiki lives in the repository so it is reviewed with the code it describes. 
 - [Architecture](engineering/Architecture.md): stack, runtime processes, data flow
 - [Codebase map](engineering/Codebase-Map.md): where things live
 - [Data model](engineering/Data-Model.md): Prisma models and statuses
+- [Leaderboard signals](engineering/Leaderboard-Signals.md): scoring, eligible activity, privacy, shared ranks
 - [Local development](engineering/Local-Development.md): setup and environment variables
 - [Testing](engineering/Testing.md): Vitest, Playwright, CI
 - [Security](engineering/Security.md): auth, roles, uploads, origins

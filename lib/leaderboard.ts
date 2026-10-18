@@ -1,8 +1,9 @@
 import { db } from "@/lib/db";
+import { rankSignals, signalSnapshotQuery, type SignalSnapshot, type SignalActivity } from "@/lib/startup-signals";
 
 export const LEADERBOARD_PAGE_SIZE = 20;
 
-export type LeaderboardEntry = {
+export type LeaderboardEntry = SignalActivity & {
   id: string;
   slug: string;
   name: string;
@@ -12,6 +13,8 @@ export type LeaderboardEntry = {
   upvoteCount: number;
   downvoteCount: number;
   signalCount: number;
+  activitySignals: number;
+  leaderboardScore: number;
   updateCount: number;
   rank: number;
   hasUpvoted: boolean;
@@ -24,33 +27,27 @@ export function leaderboardPageNumber(value?: string | string[]) {
   return Number.isSafeInteger(page) ? page : 1;
 }
 
-export async function getLeaderboard(requestedPage = 1, cookieId?: string) {
+export async function getLeaderboard(requestedPage = 1, cookieId?: string, featuredOnly = false) {
   if (!process.env.DATABASE_URL) {
     return { entries: [] as LeaderboardEntry[], totalCount: 0, page: 1, totalPages: 1 };
   }
 
-  // Keep the global ranks and paginated rows in the same voting snapshot.
+  // Aggregate only counts/IDs globally; load profile fields for the current page.
+  // RepeatableRead keeps activity, ranks, and visitor votes in one snapshot.
   return db.$transaction(async (tx) => {
-    const groups = await tx.startup.groupBy({
-      by: ["signalCount"],
-      where: { status: "LIVE" },
-      _count: { _all: true },
-      orderBy: { signalCount: "desc" },
-    });
-    const rankByVotes = new Map<number, number>();
-    let totalCount = 0;
-    for (const group of groups) {
-      rankByVotes.set(group.signalCount, totalCount + 1);
-      totalCount += group._count._all;
-    }
+    const ranked = rankSignals(await tx.$queryRaw<SignalSnapshot[]>(signalSnapshotQuery()));
+    const eligible = featuredOnly ? ranked.filter(row => row.featured) : ranked;
+    const totalCount = eligible.length;
     const totalPages = Math.max(1, Math.ceil(totalCount / LEADERBOARD_PAGE_SIZE));
     const page = Number.isSafeInteger(requestedPage) && requestedPage > 0
       ? Math.min(requestedPage, totalPages)
       : 1;
     if (!totalCount) return { entries: [] as LeaderboardEntry[], totalCount, page, totalPages };
+    const selected = featuredOnly ? eligible.slice(0, 6)
+      : eligible.slice((page - 1) * LEADERBOARD_PAGE_SIZE, page * LEADERBOARD_PAGE_SIZE);
 
     const startups = await tx.startup.findMany({
-      where: { status: "LIVE" },
+      where: { status: "LIVE", id: { in: selected.map(row => row.id) } },
       select: {
         id: true, slug: true, name: true, tagline: true, logoUrl: true,
         upvoteCount: true, downvoteCount: true, signalCount: true, updateCount: true,
@@ -58,16 +55,14 @@ export async function getLeaderboard(requestedPage = 1, cookieId?: string) {
         upvotes: cookieId ? { where: { cookieId }, select: { id: true } } : false,
         downvotes: cookieId ? { where: { cookieId }, select: { id: true } } : false,
       },
-      orderBy: [{ signalCount: "desc" }, { name: "asc" }, { id: "asc" }],
-      skip: (page - 1) * LEADERBOARD_PAGE_SIZE,
-      take: LEADERBOARD_PAGE_SIZE,
     });
-    const entries: LeaderboardEntry[] = startups.map(({ upvotes, downvotes, ...startup }) => ({
-      ...startup,
-      rank: rankByVotes.get(startup.signalCount)!,
-      hasUpvoted: Boolean(upvotes?.length),
-      hasDownvoted: Boolean(downvotes?.length),
-    }));
+    const byId = new Map(startups.map(startup => [startup.id, startup]));
+    const entries: LeaderboardEntry[] = selected.map(({ featured: _featured, ...signals }) => {
+      void _featured;
+      const { upvotes, downvotes, slug, tagline, logoUrl, category } = byId.get(signals.id)!;
+      return { slug, tagline, logoUrl, category, ...signals,
+        hasUpvoted: Boolean(upvotes?.length), hasDownvoted: Boolean(downvotes?.length) };
+    });
     return { entries, totalCount, page, totalPages };
   }, { isolationLevel: "RepeatableRead" });
 }

@@ -12,6 +12,8 @@ import { lockFounderEntry } from "@/lib/journal-publication";
 
 function invalidate(slugs: (string | null | undefined)[]) {
   revalidatePath("/dashboard");
+  revalidatePath("/");
+  revalidatePath("/leaderboard");
   revalidatePath("/dashboard/journal");
   revalidatePath("/founder-journal/[id]/[slug]", "page");
   revalidatePath("/sitemap.xml");
