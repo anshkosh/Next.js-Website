@@ -3,6 +3,7 @@ import { logger } from "@/lib/logger";
 import { db } from "@/lib/db";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
+import { createFounderSchema, updateFounderSchema } from "@/lib/validators/founder.schema";
 
 export async function getFounders(startupId: string) {
   try {
@@ -17,17 +18,14 @@ export async function getFounders(startupId: string) {
   }
 }
 
-export async function createFounder(data: {
-  startupId: string;
-  name: string;
-  role?: string;
-  photoUrl?: string;
-  linkedinUrl?: string;
-  twitterUrl?: string;
-}) {
+export async function createFounder(input: unknown) {
   try {
     const session = await auth.api.getSession({ headers: await headers() });
-    if (!session || !session.user) return { error: "Unauthorized" };
+    if (!session?.user || !session.user.emailVerified || session.user.banned) return { error: "Unauthorized" };
+
+    const parsed = createFounderSchema.safeParse(input);
+    if (!parsed.success) return { error: "Invalid founder details" };
+    const data = parsed.data;
 
     const startup = await db.startup.findUnique({ where: { id: data.startupId } });
     if (!startup || startup.founderId !== session.user.id) return { error: "Unauthorized" };
@@ -37,7 +35,12 @@ export async function createFounder(data: {
 
     const founder = await db.startupFounder.create({
       data: {
-        ...data,
+        startupId: data.startupId,
+        name: data.name,
+        role: data.role,
+        photoUrl: data.photoUrl,
+        linkedinUrl: data.linkedinUrl,
+        twitterUrl: data.twitterUrl,
         sortOrder: count,
       }
     });
@@ -49,17 +52,14 @@ export async function createFounder(data: {
   }
 }
 
-export async function updateFounder(id: string, data: {
-  name?: string;
-  role?: string;
-  photoUrl?: string;
-  linkedinUrl?: string;
-  twitterUrl?: string;
-  sortOrder?: number;
-}) {
+export async function updateFounder(id: string, input: unknown) {
   try {
     const session = await auth.api.getSession({ headers: await headers() });
-    if (!session || !session.user) return { error: "Unauthorized" };
+    if (!session?.user || !session.user.emailVerified || session.user.banned) return { error: "Unauthorized" };
+    if (typeof id !== "string" || !id || id.length > 128) return { error: "Invalid founder ID" };
+    const parsed = updateFounderSchema.safeParse(input);
+    if (!parsed.success) return { error: "Invalid founder details" };
+    const data = parsed.data;
 
     const existing = await db.startupFounder.findUnique({
       where: { id },
@@ -71,8 +71,15 @@ export async function updateFounder(id: string, data: {
     }
 
     const founder = await db.startupFounder.update({
-      where: { id },
-      data,
+      where: { id, startup: { founderId: session.user.id } },
+      data: {
+        name: data.name,
+        role: data.role,
+        photoUrl: data.photoUrl,
+        linkedinUrl: data.linkedinUrl,
+        twitterUrl: data.twitterUrl,
+        sortOrder: data.sortOrder,
+      },
     });
 
     return { data: founder };
@@ -85,7 +92,7 @@ export async function updateFounder(id: string, data: {
 export async function deleteFounder(id: string) {
   try {
     const session = await auth.api.getSession({ headers: await headers() });
-    if (!session || !session.user) return { error: "Unauthorized" };
+    if (!session?.user || !session.user.emailVerified || session.user.banned) return { error: "Unauthorized" };
 
     const existing = await db.startupFounder.findUnique({
       where: { id },
@@ -96,7 +103,7 @@ export async function deleteFounder(id: string) {
       return { error: "Unauthorized" };
     }
 
-    await db.startupFounder.delete({ where: { id } });
+    await db.startupFounder.delete({ where: { id, startup: { founderId: session.user.id } } });
 
     return { success: true };
   } catch (error) {

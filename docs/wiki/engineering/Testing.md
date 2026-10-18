@@ -11,6 +11,13 @@ Tests live in `__tests__/`. Route-handler tests run in the Node environment (`//
 
 When you fix a bug, add a test that fails without the fix. When a test fails, fix the code or correct a wrong fixture. Do not loosen an assertion to get a pass.
 
+Founder mutations accept strict runtime profile schemas, never raw Prisma input.
+`founder-actions.test.ts` attempts nested account-role escalation, relation changes
+and scalar operators, and verifies rejection before any write. Profile `role`
+means the displayed team title (for example CEO), not an account permission.
+All founder mutations require a verified, non-banned owner; update/delete also
+include ownership in the mutation predicate.
+
 ## End-to-end tests (Playwright)
 
 ```bash
