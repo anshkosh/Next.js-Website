@@ -34,11 +34,13 @@ export function signalSnapshotQuery(now = new Date()) {
       EXISTS (SELECT 1 FROM "FeaturedStartup" f WHERE f."startupId" = s.id) AS featured,
       (SELECT COUNT(DISTINCT activity.day)::int FROM (
         SELECT u."createdAt"::date AS day FROM "StartupUpdate" u
-          WHERE u."startupId" = s.id AND u."createdAt" <= (${now}::timestamptz AT TIME ZONE 'UTC')
+          WHERE u."startupId" = s.id AND NULLIF(BTRIM(u.body), '') IS NOT NULL
+            AND u."createdAt" <= (${now}::timestamptz AT TIME ZONE 'UTC')
         UNION
         SELECT j."publishedAt"::date AS day FROM "FounderJournalEntry" j
           WHERE j."startupId" = s.id AND j."authorId" = s."founderId"
             AND j.visibility = 'PUBLIC' AND j."approvedAt" IS NOT NULL
+            AND NULLIF(BTRIM(j.body), '') IS NOT NULL
             AND j."publishedAt" <= (${now}::timestamptz AT TIME ZONE 'UTC')
       ) activity) AS "founderDays",
       COALESCE(comments.backers, 0)::int AS backers,
