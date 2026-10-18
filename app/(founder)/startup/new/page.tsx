@@ -306,6 +306,7 @@ export default function NewStartupPage() {
       else setErrors({ form: [res.error] });
       setIsSaving(false);
     } else {
+      if (res.notificationPending) alert("Your startup was submitted successfully. Its notification is delayed and will be retried automatically.");
       draft.markSaved();
       router.push("/dashboard");
     }

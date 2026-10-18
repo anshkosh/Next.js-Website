@@ -4,7 +4,7 @@ import { useState, useTransition, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Check, ExternalLink, Mail, Trash2, X } from "lucide-react";
-import { deleteBetaTesterRequest, reviewBetaTesterRequest, saveBetaTesterProgram } from "@/app/actions/beta-tester.actions";
+import { clearOldBetaRequests, deleteBetaTesterRequest, reviewBetaTesterRequest, saveBetaTesterProgram } from "@/app/actions/beta-tester.actions";
 
 type RequestRow = {
   id: string;
@@ -22,6 +22,7 @@ export default function BetaTesterManager({
   startupLive,
   initialProgram,
   requests,
+  pendingTotal,
 }: {
   startupId: string;
   startupName: string;
@@ -29,6 +30,7 @@ export default function BetaTesterManager({
   startupLive: boolean;
   initialProgram: { enabled: boolean; description: string; reward: string | null } | null;
   requests: RequestRow[];
+  pendingTotal?: number;
 }) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
@@ -36,7 +38,7 @@ export default function BetaTesterManager({
   const [description, setDescription] = useState(initialProgram?.description ?? "");
   const [reward, setReward] = useState(initialProgram?.reward ?? "");
   const [feedback, setFeedback] = useState<{ type: "success" | "error"; text: string } | null>(null);
-  const pendingRequests = requests.filter((request) => request.status === "PENDING").length;
+  const pendingRequests = pendingTotal ?? requests.filter((request) => request.status === "PENDING").length;
 
   const handleSave = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -117,6 +119,17 @@ export default function BetaTesterManager({
       </form>
 
       <section className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm" aria-labelledby="beta-requests-title">
+        <div className="space-y-3 border-b border-gray-100 p-5 text-sm text-gray-600">
+          <p>Pending requests expire after 90 days. Approved contact details are removed 180 days after approval. Contact details are erased on expiry; minimal closed consent records are removed after a further year. You can remove requests sooner.</p>
+          <button type="button" disabled={isPending} className="rounded-lg border border-gray-300 px-3 py-2 text-gray-900 disabled:opacity-50" onClick={() => {
+            if (!window.confirm("Remove personal details from pending requests older than 30 days? This cannot be undone.")) return;
+            startTransition(async () => {
+              const result = await clearOldBetaRequests(startupId);
+              setFeedback(result.error ? { type: "error", text: result.error } : { type: "success", text: `${result.removed} old pending requests closed and contact details removed.` });
+              router.refresh();
+            });
+          }}>Clear pending requests older than 30 days</button>
+        </div>
         <div className="flex items-center justify-between gap-4 border-b border-gray-100 bg-gray-50 px-5 py-4">
           <div><h2 id="beta-requests-title" className="font-heading text-lg font-bold text-gray-900">Tester requests</h2><p className="mt-0.5 text-xs text-gray-500">{pendingRequests} awaiting your review · email appears only after approval</p></div>
         </div>

@@ -8,16 +8,17 @@ import { ExternalLink, ShieldAlert, ShieldCheck } from "lucide-react";
 import StartupsClientFilters from "./StartupsClientFilters";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
+import { pageNumber, pageHref, searchText } from "@/lib/pagination";
 
 export default async function AdminStartupsPage(props: {
   searchParams: Promise<{ q?: string; status?: string; categoryId?: string; sort?: string; page?: string }>
 }) {
   const searchParams = await props.searchParams;
-  const q = searchParams.q || "";
-  const status = searchParams.status || "";
-  const categoryId = searchParams.categoryId || "";
-  const sort = searchParams.sort || "date_desc";
-  const page = parseInt(searchParams.page || "1");
+  const q = searchText(searchParams.q);
+  const status = searchText(searchParams.status, 30);
+  const categoryId = searchText(searchParams.categoryId, 100);
+  const sort = searchText(searchParams.sort, 30) || "date_desc";
+  const page = pageNumber(searchParams.page);
   const take = 20;
   const skip = (page - 1) * take;
 
@@ -168,13 +169,13 @@ export default async function AdminStartupsPage(props: {
 
       {totalPages > 1 && (
         <div className="flex justify-center gap-2 mt-6">
-          {Array.from({ length: totalPages }).map((_, i) => (
+          {Array.from({ length: Math.min(7, totalPages) }, (_, i) => Math.max(1, Math.min(page - 3, totalPages - 6)) + i).map(number => (
             <Link 
-              key={i} 
-              href={`?q=${q}&status=${status}&categoryId=${categoryId}&sort=${sort}&page=${i + 1}`}
-              className={`px-3 py-1 rounded-md text-sm font-medium ${page === i + 1 ? "bg-coral-500 text-white" : "bg-white border text-gray-700 hover:bg-gray-50"}`}
+              key={number}
+              href={pageHref("/admin/startups", number, { q, status, categoryId, sort })}
+              className={`px-3 py-1 rounded-md text-sm font-medium ${page === number ? "bg-coral-500 text-white" : "bg-white border text-gray-700 hover:bg-gray-50"}`}
             >
-              {i + 1}
+              {number}
             </Link>
           ))}
         </div>
