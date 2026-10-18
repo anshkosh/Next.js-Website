@@ -9,17 +9,19 @@ import { emailQueue } from "@/lib/jobs/queues";
 import { revalidatePath } from "next/cache";
 import { v4 as uuidv4 } from "uuid";
 import { recordVote } from "@/lib/vote-store";
+import { clientIp } from "@/lib/utils/client-ip";
 
 export async function toggleVote(startupId: string, direction: -1 | 1) {
   if (typeof startupId !== "string" || !startupId || startupId.length > 128 || (direction !== 1 && direction !== -1)) return { success: false as const, error: "Invalid vote." };
   try {
     const headersList = await headers();
-    const ip = headersList.get("x-forwarded-for")?.split(",")[0].trim() || "127.0.0.1";
-    const fingerprintHash = generateFingerprint(ip, headersList.get("user-agent") || "unknown");
+    const ip = clientIp(headersList);
+    // Network identity excludes client-controlled user agents and cookies.
+    const fingerprintHash = generateFingerprint(ip, "anonymous-vote-v2");
     if (!await checkRateLimit(`rate-limit:upvote:${fingerprintHash}`, 10, 3600)) return { success: false as const, error: "Rate limit exceeded. Please try again later." };
     const cookieStore = await cookies();
     let cookieId = cookieStore.get("anshkosh_vid")?.value;
-    if (!cookieId) {
+    if (!cookieId || !/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(cookieId)) {
       cookieId = uuidv4();
       cookieStore.set("anshkosh_vid", cookieId, { maxAge: 60 * 60 * 24 * 365, httpOnly: true, sameSite: "lax", secure: process.env.NODE_ENV === "production", path: "/" });
     }

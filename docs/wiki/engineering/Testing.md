@@ -18,6 +18,16 @@ means the displayed team title (for example CEO), not an account permission.
 All founder mutations require a verified, non-banned owner; update/delete also
 include ownership in the mutation predicate.
 
+Security boundary regressions: `og-security.test.ts` denies arbitrary/internal
+logo destinations and unpublished parents; `upload-entrypoints.test.ts` covers
+all seven upload handlers, shared authorization/rate checks and image re-encoding;
+`vote-action.test.ts` rotates user agents, cookies and forwarded addresses.
+Anonymous votes use one identity per server-observed IP per startup and a shared
+10-attempt/hour network budget. Shared networks can share that identity; this is
+abuse resistance, not proof of one person. Production nginx must overwrite
+`X-Real-IP` with `$remote_addr`, and Next must remain loopback-only. Rate limiter
+increment/expiry is atomic and unavailable protection fails closed.
+
 ## End-to-end tests (Playwright)
 
 ```bash
