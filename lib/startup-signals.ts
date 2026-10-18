@@ -79,7 +79,7 @@ export function rankSignals(rows: SignalSnapshot[]) {
     || a.name.localeCompare(b.name, "en") || a.id.localeCompare(b.id, "en"));
   for (let i = 0; i < ranked.length; i++) {
     ranked[i].rank = i > 0 && ranked[i].leaderboardScore === ranked[i - 1].leaderboardScore
-      ? ranked[i - 1].rank : i + 1;
+      ? ranked[i - 1].rank : i === 0 ? 1 : ranked[i - 1].rank + 1;
   }
   return ranked;
 }
