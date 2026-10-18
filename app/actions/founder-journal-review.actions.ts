@@ -10,6 +10,7 @@ async function reviewer() {
   return session?.user.emailVerified && !session.user.banned && ["admin", "reviewer"].includes(session.user.role ?? "") ? session.user : null;
 }
 function refreshJournal() {
+  revalidatePath("/"); revalidatePath("/leaderboard");
   revalidatePath("/admin/founder-journal"); revalidatePath("/dashboard/journal"); revalidatePath("/sitemap.xml");
   revalidatePath("/founder-journal/[id]/[slug]", "page"); revalidatePath("/startups/[slug]", "page");
 }

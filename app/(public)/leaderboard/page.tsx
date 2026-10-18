@@ -25,7 +25,7 @@ export default async function LeaderboardPage({ searchParams }: {
       <section className="page-intro-spacing border-b border-gray-100 bg-white">
         <div className="mx-auto max-w-5xl px-4 text-center sm:px-6">
           <h1 className="page-title">Startup <span className="text-coral-500">leaderboard</span></h1>
-          <p className="mx-auto mt-4 max-w-2xl text-lg leading-relaxed text-gray-600">Discover the Indian startups earning community interest. Ranked by all-time signals: upvotes minus downvotes.</p>
+          <p className="mx-auto mt-4 max-w-2xl text-lg leading-relaxed text-gray-600">Discover the Indian startups earning community interest. Signals combine net votes, founder progress, approved feedback, and founder–community discussions.</p>
           <Link href="/discover" className="mt-4 inline-flex min-h-11 items-center gap-2 font-semibold text-coral-700 underline underline-offset-4">Browse all startups <ArrowRight aria-hidden="true" className="h-4 w-4" /></Link>
         </div>
       </section>
@@ -34,7 +34,12 @@ export default async function LeaderboardPage({ searchParams }: {
           <>
             <p className="mb-4 text-sm text-gray-600">Showing {(page - 1) * LEADERBOARD_PAGE_SIZE + 1}–{Math.min(page * LEADERBOARD_PAGE_SIZE, totalCount)} of {totalCount.toLocaleString("en-IN")} published {totalCount === 1 ? "startup" : "startups"}</p>
             <LeaderboardList entries={entries} />
-            <p className="mt-4 text-sm leading-relaxed text-gray-600">Signals = upvotes − downvotes. Equal net totals share a rank. Votes reflect community opinion, not verified traction.</p>
+            <details className="mt-4 text-sm leading-relaxed text-gray-600">
+              <summary className="cursor-pointer font-semibold underline underline-offset-4">How signals and ranks work</summary>
+              <p className="mt-2">All-time signals = upvotes − downvotes + 2 points per founder publishing day (up to 10 days) + 2 per community participant (up to 20) + 3 per participant with a founder reply (up to 10). Equal scores share a global rank.</p>
+              <p className="mt-2">Publishing days combine startup updates and approved, published public founder journal entries, counted once per UTC day. Only approved, non-empty comments count; participants are deduplicated by email per startup, excluding its owner’s email. Legacy imported comments without an email are grouped by commenter name, excluding the owner’s name. Repeat comments and reply edits do not earn extra points. Private, pending, rejected, and future journal entries do not count. Removing eligible activity removes its points.</p>
+              <p className="mt-2">Email addresses are not shown. Comment emails are not verified identities, and votes are anonymous: these signals reflect participation, not unique verified backers, investment, or verified traction. Other directory vote controls show net votes separately.</p>
+            </details>
             {totalPages > 1 && (
               <nav aria-label="Leaderboard pages" className="mt-8 flex flex-wrap items-center justify-center gap-4 text-sm">
                 {page > 1 && <Link href={page === 2 ? "/leaderboard" : `/leaderboard?page=${page - 1}`} className="inline-flex min-h-11 items-center rounded-xl border border-gray-200 bg-white px-4 font-medium text-gray-700 transition-colors hover:bg-gray-100">Previous page</Link>}

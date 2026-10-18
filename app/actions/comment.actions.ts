@@ -154,6 +154,8 @@ export async function approveComment(commentId: string) {
 
     revalidatePath(`/startups/${comment.startup.slug}`);
     revalidatePath("/admin/comments");
+    revalidatePath("/");
+    revalidatePath("/leaderboard");
     return { success: true };
   } catch (err) {
     logger.error("approveComment error:", err);
@@ -182,6 +184,8 @@ export async function rejectComment(commentId: string) {
 
     revalidatePath(`/startups/${comment.startup.slug}`);
     revalidatePath("/admin/comments");
+    revalidatePath("/");
+    revalidatePath("/leaderboard");
     return { success: true };
   } catch (err) {
     logger.error("rejectComment error:", err);
@@ -228,6 +232,8 @@ export async function replyToComment(data: {
     });
 
     revalidatePath(`/startups/${comment.startup.slug}`);
+    revalidatePath("/");
+    revalidatePath("/leaderboard");
     return { success: true };
   } catch (err) {
     logger.error("replyToComment error:", err);
@@ -264,6 +270,8 @@ export async function deleteReply(commentId: string) {
     });
 
     revalidatePath(`/startups/${comment.startup.slug}`);
+    revalidatePath("/");
+    revalidatePath("/leaderboard");
     return { success: true };
   } catch (err) {
     logger.error("deleteReply error:", err);

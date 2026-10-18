@@ -11,12 +11,20 @@ function compactCount(value: number) {
     : value.toLocaleString("en-IN");
 }
 
-export default function UpvoteButton({ startupId, startupName, initialCount, initialDownvotes, initialUpvoted, initialDownvoted }: {
+export default function UpvoteButton({ startupId, startupName, initialCount, initialDownvotes, initialUpvoted, initialDownvoted, activitySignals }: {
   startupId: string; startupName?: string; initialCount: number; initialDownvotes: number;
   initialUpvoted: boolean; initialDownvoted: boolean;
+  activitySignals?: number;
 }) {
   const [isPending, startTransition] = useTransition();
   const [saved, setSaved] = useState({ upvoteCount: initialCount, downvoteCount: initialDownvotes, vote: (initialUpvoted ? 1 : initialDownvoted ? -1 : 0) as VoteDirection });
+  const incomingVote = (initialUpvoted ? 1 : initialDownvoted ? -1 : 0) as VoteDirection;
+  const [previous, setPrevious] = useState({ initialCount, initialDownvotes, incomingVote });
+  // A refreshed server row can change without remounting this client control.
+  if (previous.initialCount !== initialCount || previous.initialDownvotes !== initialDownvotes || previous.incomingVote !== incomingVote) {
+    setPrevious({ initialCount, initialDownvotes, incomingVote });
+    setSaved({ upvoteCount: initialCount, downvoteCount: initialDownvotes, vote: incomingVote });
+  }
   const [error, setError] = useState<string | null>(null);
   const errorId = useId();
   const [optimistic, addOptimistic] = useOptimistic(saved, (state, direction: -1 | 1) => {
@@ -46,8 +54,8 @@ export default function UpvoteButton({ startupId, startupName, initialCount, ini
           <ChevronUp aria-hidden="true" className="h-4 w-4" />
           <span aria-hidden="true" className="text-[10px] font-medium tabular-nums">{compactCount(optimistic.upvoteCount)}</span>
         </button>
-        <span role="status" aria-live="polite" aria-atomic="true" className="min-w-0 flex-1 text-center text-sm font-semibold tabular-nums text-gray-900" title={`${optimistic.upvoteCount} upvotes − ${optimistic.downvoteCount} downvotes`}>
-          <span className="sr-only">{startupName ? `${startupName}: ` : ""}</span>{compactCount(signalCount(optimistic))}<span className="sr-only"> signals, {optimistic.upvoteCount} upvotes minus {optimistic.downvoteCount} downvotes</span>
+        <span role="status" aria-live="polite" aria-atomic="true" className="min-w-0 flex-1 text-center text-sm font-semibold tabular-nums text-gray-900" title={`${optimistic.upvoteCount} upvotes − ${optimistic.downvoteCount} downvotes${activitySignals === undefined ? "" : ` + ${activitySignals} activity points`}`}>
+          <span className="sr-only">{startupName ? `${startupName}: ` : ""}</span>{compactCount(signalCount(optimistic) + (activitySignals ?? 0))}<span className="sr-only"> {activitySignals === undefined ? "net votes" : "signals"}, {optimistic.upvoteCount} upvotes minus {optimistic.downvoteCount} downvotes{activitySignals === undefined ? "" : ` plus ${activitySignals} activity points`}</span>
         </span>
         <button type="button" onClick={event => vote(event, -1)} disabled={isPending} aria-pressed={optimistic.vote === -1} aria-busy={isPending} aria-describedby={error ? errorId : undefined}
           aria-label={`${optimistic.vote === -1 ? "Remove downvote" : "Downvote"}${name}, ${optimistic.downvoteCount} downvotes`}
@@ -56,7 +64,7 @@ export default function UpvoteButton({ startupId, startupName, initialCount, ini
           <span aria-hidden="true" className="text-[10px] font-medium tabular-nums">{compactCount(optimistic.downvoteCount)}</span>
         </button>
       </div>
-      <span className="text-[11px] text-gray-600">Signals</span>
+      <span className="text-[11px] text-gray-600">{activitySignals === undefined ? "Net votes" : "Signals"}</span>
       {error && <p id={errorId} role="alert" className="text-center text-xs leading-relaxed text-red-600">{error}</p>}
     </div>
   );

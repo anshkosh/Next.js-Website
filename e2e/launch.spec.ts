@@ -201,6 +201,54 @@ test("public founder search and bidirectional voting share accurate signals acro
   await expect(page.getByRole("heading", { name: startupName, exact: true })).toHaveCount(0);
 });
 
+test("leaderboard and featured rows combine activity without leaking private or pending content", async ({ page }) => {
+  const owner = await db.user.findUniqueOrThrow({ where: { email } });
+  const token = randomUUID();
+  const name = `Activity Test ${token.slice(0, 8)}`;
+  const fixture = await db.startup.create({ data: { name, slug: `activity-${token}`, tagline: "A disposable community activity fixture", description: "For scoring tests only", websiteUrl: "https://example.test", founderName: owner.name, founderId: owner.id, categoryId, status: "LIVE" } });
+  const when = new Date("2026-01-01T12:00:00Z");
+  const commenter = `private-${token}@example.test`;
+  try {
+    await db.featuredStartup.create({ data: { startupId: fixture.id } });
+    await db.startupUpdate.createMany({ data: [1, 2].map(i => ({ startupId: fixture.id, title: `Progress ${i}`, body: "Same-day progress should only count once.", createdAt: when })) });
+    await db.founderJournalEntry.createMany({ data: [
+      { startupId: fixture.id, authorId: owner.id, title: "Public progress", body: "Approved progress", visibility: "PUBLIC", publishedAt: when, approvedAt: when },
+      { startupId: fixture.id, authorId: owner.id, title: "PRIVATE-SIGNAL-FIXTURE", body: "Private progress must never count", visibility: "PRIVATE", publishedAt: new Date("2026-01-02"), approvedAt: when },
+    ] });
+    await db.comment.createMany({ data: [
+      { startupId: fixture.id, authorName: "Community fixture", authorEmail: commenter, body: "Approved feedback", status: "APPROVED", reply: "Founder reply", repliedAt: when, createdAt: when },
+      { startupId: fixture.id, authorName: "Community fixture", authorEmail: commenter.toUpperCase(), body: "Repeat feedback", status: "APPROVED", reply: "Another reply", repliedAt: when, createdAt: when },
+      { startupId: fixture.id, authorName: "Pending fixture", authorEmail: `pending-${token}@example.test`, body: "PENDING-SIGNAL-FIXTURE", status: "PENDING", createdAt: when },
+    ] });
+    const row = () => page.getByRole("listitem").filter({ has: page.getByRole("heading", { name, exact: true }) });
+    await enter(page, "/leaderboard");
+    await expect(row().getByRole("status")).toContainText("7 signals");
+    await row().getByText("Signal breakdown", { exact: false }).click();
+    await expect(row().getByText("Founder publishing days: 1 · 2 points", { exact: true })).toBeVisible();
+    await expect(row().getByText("Community participants: 1 · 2 points", { exact: true })).toBeVisible();
+    await expect(row().getByText("Founder–community discussions: 1 · 3 points", { exact: true })).toBeVisible();
+    const rank = await row().getByRole("link").innerText();
+    expect(await page.content()).not.toContain(commenter);
+    expect(await page.content()).not.toContain("PRIVATE-SIGNAL-FIXTURE");
+    expect(await page.content()).not.toContain("PENDING-SIGNAL-FIXTURE");
+    await enter(page, "/");
+    await expect(row().getByRole("status")).toContainText("7 signals");
+    expect(await row().getByRole("link").innerText()).toContain(rank.split("\n")[0]);
+    await row().getByRole("button", { name: /^Upvote/ }).click();
+    await expect.poll(async () => (await db.startup.findUniqueOrThrow({ where: { id: fixture.id } })).signalCount).toBe(1);
+    await expect(row().getByRole("status")).toContainText("8 signals");
+    await enter(page, "/leaderboard");
+    await expect(row().getByRole("status")).toContainText("8 signals");
+    await page.setViewportSize({ width: 320, height: 740 });
+    await row().getByText("Signal breakdown", { exact: false }).click();
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+    await row().screenshot({ path: "test-results/activity-signals-mobile.png" });
+  } finally {
+    await db.founderJournalEntry.deleteMany({ where: { startupId: fixture.id } });
+    await db.startup.delete({ where: { id: fixture.id } });
+  }
+});
+
 test("concurrent vote switches and reconciliation preserve one vote and correct counters", async () => {
   const { recordVote, recountVotes } = await import("../lib/vote-store");
   const fixture = await db.startup.create({ data: { name: "Concurrent vote fixture", slug: `concurrent-${randomUUID()}`, tagline: "Isolated voting fixture", description: "For concurrency testing only", websiteUrl: "https://example.test", founderName: "Test Founder", founderId: (await db.user.findUniqueOrThrow({ where: { email } })).id, categoryId, status: "LIVE" } });

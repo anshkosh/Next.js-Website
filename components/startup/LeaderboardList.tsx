@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import UpvoteButton from "@/components/upvote/UpvoteButton";
 import type { LeaderboardEntry } from "@/lib/leaderboard";
+import SignalBreakdown from "@/components/startup/SignalBreakdown";
 
 export default function LeaderboardList({ entries }: { entries: LeaderboardEntry[] }) {
   return (
@@ -14,7 +15,7 @@ export default function LeaderboardList({ entries }: { entries: LeaderboardEntry
         {entries.map(startup => (
           <li key={startup.id} className="flex items-center gap-3 px-4 py-5 sm:gap-5 sm:px-6">
             <Link href={`/startups/${startup.slug}`} className="group flex min-w-0 flex-1 items-center gap-3 rounded-lg sm:gap-5">
-              <span className={`w-6 shrink-0 text-center font-heading text-xl font-semibold tabular-nums sm:w-8 sm:text-2xl ${startup.rank <= 3 && startup.signalCount > 0 ? "text-coral-700" : "text-gray-500"}`}>
+              <span className={`w-6 shrink-0 text-center font-heading text-xl font-semibold tabular-nums sm:w-8 sm:text-2xl ${startup.rank <= 3 && startup.leaderboardScore > 0 ? "text-coral-700" : "text-gray-500"}`}>
                 <span className="sr-only">Rank </span>{startup.rank}
               </span>
               <div className="relative hidden h-14 w-32 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-gray-200 bg-gray-50 sm:flex">
@@ -30,7 +31,8 @@ export default function LeaderboardList({ entries }: { entries: LeaderboardEntry
               </div>
             </Link>
             <div className="shrink-0">
-              <UpvoteButton startupId={startup.id} startupName={startup.name} initialCount={startup.upvoteCount} initialUpvoted={startup.hasUpvoted} initialDownvoted={startup.hasDownvoted} initialDownvotes={startup.downvoteCount} />
+              <UpvoteButton startupId={startup.id} startupName={startup.name} initialCount={startup.upvoteCount} initialUpvoted={startup.hasUpvoted} initialDownvoted={startup.hasDownvoted} initialDownvotes={startup.downvoteCount} activitySignals={startup.activitySignals} />
+              <div className="w-32"><SignalBreakdown startup={startup} /></div>
             </div>
           </li>
         ))}

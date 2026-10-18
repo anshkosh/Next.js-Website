@@ -1,4 +1,5 @@
-import { db } from "@/lib/db";
+import { getLeaderboard } from "@/lib/leaderboard";
+import SignalBreakdown from "@/components/startup/SignalBreakdown";
 import UpvoteButton from "@/components/upvote/UpvoteButton";
 import { cookies } from "next/headers";
 import Link from "next/link";
@@ -7,32 +8,7 @@ import { ArrowRight, Sparkles, Trophy } from "lucide-react";
 
 export default async function FeaturedStartups() {
   const cookieId = process.env.DATABASE_URL ? (await cookies()).get("anshkosh_vid")?.value : undefined;
-  const featured = process.env.DATABASE_URL ? await db.featuredStartup.findMany({
-    where: { startup: { status: "LIVE" } },
-    include: {
-      startup: {
-        include: {
-          category: true,
-          upvotes: cookieId
-            ? {
-                where: { cookieId },
-              }
-            : false,
-          downvotes: cookieId
-            ? {
-                where: { cookieId },
-              }
-            : false,
-        },
-      },
-    },
-    orderBy: [
-      { startup: { signalCount: "desc" } },
-      { sortOrder: "asc" },
-      { id: "asc" },
-    ],
-    take: 6,
-  }) : [];
+  const { entries: featured } = await getLeaderboard(1, cookieId, true);
 
   if (featured.length === 0) return null;
 
@@ -66,7 +42,7 @@ export default async function FeaturedStartups() {
               <Trophy aria-hidden="true" className="h-4 w-4 text-coral-600" />
               <span>Community favourites</span>
             </div>
-            <span className="text-right text-xs text-gray-600">Ranked by net signals</span>
+            <span className="text-right text-xs text-gray-600">Ranked by votes and activity · global ranks</span>
           </div>
 
               <div aria-hidden="true" className="hidden items-center gap-6 border-b border-gray-100 px-6 py-3 text-[11px] font-semibold uppercase tracking-wider text-gray-500 md:flex">
@@ -76,14 +52,14 @@ export default async function FeaturedStartups() {
                 <span className="w-32 shrink-0 text-center">Signals</span>
               </div>
               <ol aria-label="Featured startups ranked by signals" className="divide-y divide-gray-100">
-                {featured.map(({ id, startup }, index) => {
-                  const isLeader = index === 0 && startup.signalCount > 0;
+                {featured.map((startup) => {
+                  const isLeader = startup.rank === featured[0].rank && startup.leaderboardScore > 0;
 
                   return (
-                    <li key={id} className={`flex items-center gap-3 px-4 py-5 sm:gap-6 sm:px-6 ${isLeader ? "bg-coral-50/60" : "bg-white"}`}>
+                    <li key={startup.id} className={`flex items-center gap-3 px-4 py-5 sm:gap-6 sm:px-6 ${isLeader ? "bg-coral-50/60" : "bg-white"}`}>
                       <Link href={`/startups/${startup.slug}`} className="group flex min-w-0 flex-1 items-center gap-3 rounded-lg sm:gap-6">
                         <span className={`hidden h-8 w-8 shrink-0 items-center justify-center rounded-full text-sm font-bold tabular-nums sm:flex ${isLeader ? "bg-coral-500 text-white" : "text-gray-500"}`}>
-                          <span className="sr-only">Rank </span>{index + 1}
+                          <span className="sr-only">Rank </span>{startup.rank}
                         </span>
                         <div className="flex min-w-0 flex-1 items-center gap-3 sm:gap-4">
                           <div className="relative shrink-0">
@@ -95,7 +71,7 @@ export default async function FeaturedStartups() {
                               )}
                             </div>
                             <span className={`absolute -bottom-1 -left-1 flex h-5 w-5 items-center justify-center rounded-full border-2 border-white text-[10px] font-bold tabular-nums sm:hidden ${isLeader ? "bg-coral-500 text-white" : "bg-gray-100 text-gray-600"}`}>
-                              <span className="sr-only">Rank </span>{index + 1}
+                              <span className="sr-only">Rank </span>{startup.rank}
                             </span>
                           </div>
                           <div className="min-w-0">
@@ -114,10 +90,12 @@ export default async function FeaturedStartups() {
                           startupId={startup.id}
                           startupName={startup.name}
                           initialCount={startup.upvoteCount}
-                          initialUpvoted={Boolean(startup.upvotes?.length)}
-                          initialDownvoted={Boolean(startup.downvotes?.length)}
+                          initialUpvoted={startup.hasUpvoted}
+                          initialDownvoted={startup.hasDownvoted}
                           initialDownvotes={startup.downvoteCount}
+                          activitySignals={startup.activitySignals}
                         />
+                        <div className="w-32"><SignalBreakdown startup={startup} /></div>
                       </div>
                     </li>
                   );

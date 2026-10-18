@@ -61,6 +61,8 @@ export async function createUpdate(data: {
 
     revalidatePath(`/startups/${startup.slug}`);
     revalidatePath("/dashboard");
+    revalidatePath("/");
+    revalidatePath("/leaderboard");
     return { data: update };
   } catch (error) {
     logger.error("Create update error:", error);
@@ -106,6 +108,8 @@ export async function editUpdate(
     });
 
     revalidatePath(`/startups/${existing.startup.slug}`);
+    revalidatePath("/");
+    revalidatePath("/leaderboard");
     return { data: update };
   } catch (error) {
     logger.error("Edit update error:", error);
@@ -137,6 +141,8 @@ export async function deleteUpdate(id: string) {
 
     revalidatePath(`/startups/${existing.startup.slug}`);
     revalidatePath("/dashboard");
+    revalidatePath("/");
+    revalidatePath("/leaderboard");
     return { success: true };
   } catch (error) {
     logger.error("Delete update error:", error);
