@@ -4,11 +4,11 @@ import UpvoteButton from "@/components/upvote/UpvoteButton";
 import type { LeaderboardEntry } from "@/lib/leaderboard";
 import SignalBreakdown from "@/components/startup/SignalBreakdown";
 
-export default function LeaderboardList({ entries }: { entries: LeaderboardEntry[] }) {
+export default function LeaderboardList({ entries, title = "All-time rankings" }: { entries: LeaderboardEntry[]; title?: string }) {
   return (
     <div className="overflow-hidden rounded-xl border border-gray-200 bg-white">
       <div className="flex items-center justify-between gap-4 border-b border-gray-200 px-4 py-4 sm:px-6">
-        <h2 className="font-heading text-xl font-semibold text-gray-900">All-time rankings</h2>
+        <h2 className="font-heading text-xl font-semibold text-gray-900">{title}</h2>
         <span className="w-32 shrink-0 text-center text-sm font-medium text-gray-600">Signals</span>
       </div>
       <ol aria-label="Startups ranked by all-time signals" className="divide-y divide-gray-100">

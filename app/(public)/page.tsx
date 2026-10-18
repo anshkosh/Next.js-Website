@@ -3,7 +3,7 @@ import { seoMetadata } from "@/lib/seo";
 import LandingHero from "@/components/landing/LandingHero";
 import LandingMission from "@/components/landing/LandingMission";
 import LandingFounderStory from "@/components/landing/LandingFounderStory";
-import FeaturedStartups from "@/components/landing/FeaturedStartups";
+import TopRankedStartups from "@/components/landing/TopRankedStartups";
 import LandingParticipation from "@/components/landing/LandingParticipation";
 import LandingFAQTeaser from "@/components/landing/LandingFAQTeaser";
 import LandingCTA from "@/components/landing/LandingCTA";
@@ -20,7 +20,7 @@ export default async function HomePage() {
     <div className="w-full">
       <LandingHero />
       <LandingFounderStory />
-      <FeaturedStartups />
+      <TopRankedStartups />
       <LandingParticipation />
       <LandingMission />
       <LandingFAQTeaser />

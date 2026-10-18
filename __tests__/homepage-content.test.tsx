@@ -1,16 +1,23 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { renderToStaticMarkup } from "react-dom/server";
 import FeaturedStartups from "../components/landing/FeaturedStartups";
+import TopRankedStartups from "../components/landing/TopRankedStartups";
 import LandingFounderStory from "../components/landing/LandingFounderStory";
 
-const queries = vi.hoisted(() => ({ featured: vi.fn(), categories: vi.fn(), cookies: vi.fn() }));
+const queries = vi.hoisted(() => ({ featured: vi.fn(), leaderboard: vi.fn(), cookies: vi.fn() }));
 vi.mock("@/lib/db", () => ({ db: {
   featuredStartup: { findMany: queries.featured },
-  category: { findMany: queries.categories },
 } }));
 vi.mock("next/headers", () => ({ cookies: queries.cookies }));
-vi.mock("@/lib/leaderboard", () => ({ getLeaderboard: queries.featured }));
+vi.mock("@/lib/leaderboard", () => ({ getLeaderboard: queries.leaderboard }));
 vi.mock("@/app/actions/upvote.actions", () => ({ toggleVote: vi.fn() }));
+
+const featuredRow = (overrides: Record<string, unknown> = {}) => ({ startup: {
+  id: "startup", slug: "public-startup", name: "Public startup", tagline: "Built for founders",
+  logoUrl: null, upvoteCount: 12, downvoteCount: 0, updateCount: 2,
+  category: { name: "SaaS", iconName: null }, metadata: null,
+  upvotes: [{ id: "visitor-vote" }], downvotes: [], ...overrides,
+} });
 
 beforeEach(() => {
   vi.stubEnv("DATABASE_URL", "postgresql://test.example/db");
@@ -19,42 +26,59 @@ beforeEach(() => {
 afterEach(() => { vi.unstubAllEnvs(); vi.clearAllMocks(); });
 
 describe("homepage public content", () => {
-  it("limits featured listings to public startups and preserves the visitor's upvote lookup", async () => {
-    queries.featured.mockResolvedValue({ entries: [{ id: "startup", name: "Public startup", slug: "public-startup", tagline: "Built for founders", category: { name: "SaaS" }, upvoteCount: 12, downvoteCount: 0, signalCount: 12, hasDownvoted: false, hasUpvoted: true, rank: 2, leaderboardScore: 19, activitySignals: 7, founderDays: 1, backers: 1, discussions: 1 }] });
+  it("shows admin-selected featured startups on Discover and preserves visitor vote state", async () => {
+    queries.featured.mockResolvedValue([featuredRow()]);
     const html = renderToStaticMarkup(await FeaturedStartups());
-    expect(queries.featured).toHaveBeenCalledWith(1, "visitor", true);
+    expect(queries.featured).toHaveBeenCalledWith(expect.objectContaining({
+      where: { startup: { status: "LIVE" } }, orderBy: { sortOrder: "asc" },
+    }));
     expect(html).toContain('href="/startups/public-startup"');
-    expect(html).toContain('aria-label="Featured startups ranked by signals"');
-    expect(html).toContain("Top featured");
+    expect(html).toContain('aria-labelledby="discover-featured-title"');
+    expect(html).toContain("Selected for Discover");
     expect(html).toContain('aria-label="Remove upvote for Public startup, 12 upvotes"');
     expect(html).toContain('aria-pressed="true"');
     expect(html).toContain("SaaS");
-    expect(html).toContain("19<span");
-    expect(html).toContain("global ranks");
-    expect(html).not.toContain("Featured by Anshkosh. Ranked by the community.");
   });
 
-  it("shows real zero-vote profiles without claiming a community leader", async () => {
+  it("shows live featured profiles with zero votes without inventing activity", async () => {
     queries.cookies.mockResolvedValue({ get: () => undefined });
-    queries.featured.mockResolvedValue({ entries: [{ id: "new-startup", name: "New builder", slug: "new-builder", tagline: "<script>test</script>", logoUrl: null, category: { name: "Education" }, upvoteCount: 0, downvoteCount: 0, signalCount: 0, rank: 1, leaderboardScore: 0, activitySignals: 0, founderDays: 0, backers: 0, discussions: 0 }] });
+    queries.featured.mockResolvedValue([featuredRow({ id: "new-startup", name: "New builder", slug: "new-builder", tagline: "<script>test</script>", upvoteCount: 0, downvoteCount: 0, upvotes: [], downvotes: [] })]);
     const html = renderToStaticMarkup(await FeaturedStartups());
-    expect(queries.featured).toHaveBeenCalledWith(1, undefined, true);
+    expect(queries.featured).toHaveBeenCalled();
     expect(html).toContain('href="/startups/new-builder"');
     expect(html).toContain("&lt;script&gt;test&lt;/script&gt;");
-    expect(html).not.toContain("Top featured");
     expect(html).toContain('aria-label="Upvote for New builder, 0 upvotes"');
     expect(html).toContain('aria-pressed="false"');
   });
 
   it("renders no placeholder card when there are no featured startups", async () => {
     vi.stubEnv("DATABASE_URL", "");
-    queries.featured.mockResolvedValue({ entries: [] });
+    queries.featured.mockResolvedValue([]);
     const html = renderToStaticMarkup(await FeaturedStartups());
-    expect(queries.featured).toHaveBeenCalledWith(1, undefined, true);
+    expect(queries.featured).not.toHaveBeenCalled();
     expect(queries.cookies).not.toHaveBeenCalled();
     expect(html).not.toContain("Make room");
     expect(html).not.toContain('href="/startup/new"');
     expect(html).not.toContain('href="/startups/');
+  });
+
+  it("shows exactly the first five global leaderboard entries on the homepage", async () => {
+    const entries = Array.from({ length: 6 }, (_, index) => ({
+      id: `startup-${index + 1}`, slug: `startup-${index + 1}`, name: `Startup ${index + 1}`,
+      tagline: "A real startup", logoUrl: null, category: { name: "SaaS" },
+      upvoteCount: 6 - index, downvoteCount: 0, signalCount: 6 - index,
+      updateCount: 0, founderDays: 0, backers: 0, discussions: 0,
+      activitySignals: 0, leaderboardScore: 6 - index, rank: index + 1,
+      hasUpvoted: false, hasDownvoted: false,
+    }));
+    queries.leaderboard.mockResolvedValue({ entries, totalCount: 6, page: 1, totalPages: 1 });
+
+    const html = renderToStaticMarkup(await TopRankedStartups());
+
+    expect(queries.leaderboard).toHaveBeenCalledWith(1, "visitor");
+    expect(html).toContain("Top five by signals");
+    expect(html).toContain('href="/startups/startup-5"');
+    expect(html).not.toContain('href="/startups/startup-6"');
   });
 
   it("keeps the founder section focused on the founder steps without a profile excerpt", async () => {

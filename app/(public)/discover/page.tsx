@@ -8,6 +8,7 @@ import { cookies } from "next/headers";
 import Link from "next/link";
 import { seoMetadata } from "@/lib/seo";
 import ErrorState, { recoveryLinkClass, secondaryRecoveryLinkClass } from "@/components/site/ErrorState";
+import FeaturedStartups from "@/components/landing/FeaturedStartups";
 
 export const dynamic = "force-dynamic";
 
@@ -107,6 +108,8 @@ export default async function DiscoverPage(props: {
           <Link href="/leaderboard" className="ml-3 mt-6 inline-flex min-h-11 items-center rounded-full border border-gray-200 px-5 py-2 text-sm font-medium text-gray-700 transition-colors hover:border-coral-500 hover:text-coral-600">View leaderboard</Link>
         </div>
       </section>
+
+      {!categorySlug && !query && page === 1 && <FeaturedStartups cookieId={cookieId} />}
 
       {/* Main Content */}
       <section className="container mx-auto px-4 py-12 max-w-7xl">
