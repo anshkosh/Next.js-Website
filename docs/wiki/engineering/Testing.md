@@ -19,6 +19,11 @@ npx playwright test
 
 Specs in `e2e/` cover public browsing, auth, the founder flow, the admin flow and later feature phases. They need a running app with a seeded database.
 
+The Playwright-managed development server disables source maps to reduce memory
+use during browser checks; the normal development and production commands are
+unchanged. CI prints line-by-line test progress and retains the HTML report
+without opening a report server.
+
 Before navigating after a mutation, wait for its persisted result. A voting button's optimistic `aria-pressed` state does not confirm that the server has saved the vote; leaving immediately can cancel the request and make cross-page signal checks race with the save.
 
 ## CI
