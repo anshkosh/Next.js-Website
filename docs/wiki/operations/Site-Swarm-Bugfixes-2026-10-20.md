@@ -2,15 +2,15 @@
 
 Owner requested review and fixes in the Codex chat. Source reports: Jerry's
 post-office messages #298 and #309, thread `anshkosh-site-bugs`. Work starts from
-production/main `1d18154`. These statuses describe the proposed change, not a
-production deployment. The existing worktree's unfinished basics/journal changes
+production/main `1d18154`. Website statuses describe the proposed release; completed production log cleanup is
+explicitly identified below. The existing worktree's unfinished basics/journal changes
 were left alone; this work uses `codex/site-swarm-bugfixes`.
 
 ## Findings and disposition
 
 | # | Report | Result |
 |---|---|---|
-| 1 | Credentials appear in early form-submit URLs | Confirmed. Login, registration, admin login, password reset and recovery use explicit POST, including before hydration. Eight credential-bearing records were found in the active nginx access log; only counts were inspected. `deploy/redact_auth_log.py` previews without printing values. Explicit apply rotates/reopens logging, preserves all records in a redacted archive, verifies it and removes the private raw temporary. No redaction has been applied yet. No external analytics integration was found in the source. Browser/tool history outside the VPS was not inspected or purged. |
+| 1 | Credentials appear in early form-submit URLs | Confirmed. Login, registration, admin login, password reset and recovery use explicit POST, including before hydration. Eight credential-bearing records were found in the active nginx access log; only counts were inspected. `deploy/redact_auth_log.py` previews without printing values. Explicit apply rotates/reopens logging, preserves all records in a redacted archive, verifies it and removes the private raw temporary. Follow-up cleanup redacted all eight affected rows in the rotated archive while preserving its 13,447 records. Independent count-only checks of the active log and all ten retained archives found zero exposed records. No external analytics integration was found in the source. Browser/tool history outside the VPS was not inspected or purged. |
 | 2 | Test passwords exposed | Rotation remains deferred while Jerry's Round 3 is running. No password, session or account permission changes are part of this fix. Coordinate a separate reset after the test ends. |
 | 3 | `/waitlist?role=founder` is 404 | Confirmed. Legacy founder links redirect to `/startup/new`; the existing auth guard sends anonymous visitors to registration. |
 | 4 | Homepage and leaderboard disagree | Not reproducible on the current release. Both use `getLeaderboard`, and public reads returned Cane Theory, DroneHire, GST Saathi, Kabadiwala Connect and MarginMitra in the same order. The reported “ranked by net signals” and “Top featured” strings are absent from the homepage section. No scoring or test-activity treatment changed. |
@@ -28,7 +28,7 @@ were left alone; this work uses `codex/site-swarm-bugfixes`.
 | 16 | Password paste blocked | No paste-prevention handler was found in the password component or auth forms. Browser-native paste remains allowed; admin inputs now also have password-manager autocomplete/name attributes. Native form regression checks cover all five forms. |
 | 17 | No article sharing | Existing copy-link control is retained; an explicit share button invokes native sharing or copies the link with useful failure feedback. |
 | 18 | Turnstile CSP warnings | The current public response has neither CSP nor report-only headers and no CSP meta tag. No application policy block was reproduced, so no security policy was weakened and no CAPTCHA bypass added. Widget recovery improves actual load failures. Provider-owned frame messages still need an exact error code/screenshot if they persist. |
-| 19 | Bluelearn copy/layout glitches | Public rendering suppresses an excerpt repeated at the start, preserves citation superscripts, orders numeric citation groups, and provides full-size image links. Sharing is explicit. A reviewed content script aligns the H1 with the existing SEO title and replaces the nonexistent article-comment CTA with a link to the real footer newsletter form, updating HTML and Quill together. The source preserves sourced facts. Data corrections have only been previewed. A once-blank cover was not reproduced; no screenshot was available. |
+| 19 | Bluelearn copy/layout glitches | Public rendering suppresses an excerpt repeated at the start, preserves citation superscripts, orders numeric citation groups, and provides full-size image links. Sharing is explicit. A reviewed content script aligns the H1 with the existing SEO title and replaces the nonexistent article-comment CTA with a link to the real footer newsletter form, updating HTML and Quill together. The source preserves sourced facts. Data corrections have only been previewed. The original intermittent blank-cover cause was not reproduced; original and resized image responses returned 200. Source now includes a visible load-error fallback and retry. |
 | 20 | Fundraising-style category labels | Optional reviewed names: Campaign Notes → Pilot Notes; Funding Fundamentals → Startup Finance Basics; Capital Explained → Startup Costs Explained; Backer Field Guide → Supporter Field Guide. Existing slugs and article assignments are preserved. Changes require the explicit `--rename-categories` apply flag; preview succeeded, no database names changed yet. |
 
 ## Release and manual steps
