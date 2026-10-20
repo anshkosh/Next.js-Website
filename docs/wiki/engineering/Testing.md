@@ -79,6 +79,8 @@ Only the isolated development test server enables Webpack memory optimizations
 and disables Next's early 80%-heap restart, which otherwise interrupts the serial
 browser session during compilation. V8's heap limit remains enforced; actual
 memory exhaustion still fails CI. Production configuration is unchanged.
+The Next development test process has a bounded 5-GiB heap; the expanded Quill
+journey exceeded the previous 4-GiB limit. Other test services retain their defaults.
 The serial fixture journey fails on its first attempt and preserves evidence;
 replaying it against existing vote/rate-limit state can mask the original failure.
 Photo-upload scenarios assert a successful upload response and a valid sanitized
