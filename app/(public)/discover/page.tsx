@@ -30,7 +30,8 @@ export default async function DiscoverPage(props: {
   const categorySlug = searchText(searchParams?.category, 100);
   const query = searchText(searchParams?.q);
   const page = pageNumber(searchParams?.page);
-  const pageSize = 20;
+  // Fill complete rows in both the two- and three-column layouts.
+  const pageSize = 24;
 
   if (!process.env.DATABASE_URL) {
     return (
