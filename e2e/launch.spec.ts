@@ -426,7 +426,7 @@ test("founder lesson submission, update feedback and direct sign-out work togeth
     await expect(page.getByRole("status"), (await page.getByRole("alert").allTextContents()).join("; ")).toContainText("Submitted for review");
     await expect.poll(async () => db.founderJournalRevision.count({ where: { entry: { title, startupId }, status: "PENDING_REVIEW" } })).toBe(1);
     await page.reload();
-    await expect(page.getByText(title, { exact: true })).toBeVisible();
+    await expect(page.getByRole("heading", { name: title, exact: true })).toBeVisible();
     await enter(page, `/startup/${startupId}/updates`);
     await page.getByRole("button", { name: "Post a New Update", exact: true }).click();
     await page.locator('input[type="text"]').fill(updateTitle);
@@ -439,6 +439,7 @@ test("founder lesson submission, update feedback and direct sign-out work togeth
     await page.goto("/dashboard");
     await expect(page).toHaveURL(/\/login$/);
   } finally {
+    await db.founderJournalRevision.deleteMany({ where: { entry: { startupId, title } } });
     await db.founderJournalEntry.deleteMany({ where: { startupId, title } });
     await db.startupUpdate.deleteMany({ where: { startupId, title: updateTitle } });
     await db.startup.update({ where: { id: startupId }, data: { updateCount: await db.startupUpdate.count({ where: { startupId } }) } });
