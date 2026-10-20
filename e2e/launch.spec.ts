@@ -106,7 +106,9 @@ test.beforeEach(async ({ page }) => {
   // The isolated development server has no Turnstile verification secret.
   await page.addInitScript(fixtureWidget);
 });
-test.describe.configure({ mode: "serial" });
+// This serial journey shares persisted votes and network limits. Replaying it in
+// the same database can obscure the first failure with leftover fixture state.
+test.describe.configure({ mode: "serial", retries: 0 });
 test.setTimeout(180000);
 
 test("signup, real verification token, login, photo editing, private deck and startup submission", async ({ page }) => {
@@ -421,7 +423,7 @@ test("founder lesson submission, update feedback and direct sign-out work togeth
     await page.getByRole("radio", { name: /Public/ }).check();
     await page.getByRole("combobox").nth(1).selectOption(startupId);
     await page.getByRole("button", { name: "Submit for review", exact: true }).click();
-    await expect(page.getByRole("status")).toContainText("Submitted for review");
+    await expect(page.getByRole("status"), (await page.getByRole("alert").allTextContents()).join("; ")).toContainText("Submitted for review");
     await expect.poll(async () => db.founderJournalRevision.count({ where: { entry: { title, startupId }, status: "PENDING_REVIEW" } })).toBe(1);
     await page.reload();
     await expect(page.getByText(title, { exact: true })).toBeVisible();
