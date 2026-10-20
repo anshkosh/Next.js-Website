@@ -28,6 +28,10 @@ Reading times use `lib/journal-reading-time.mjs`: visible article text at 200 wo
 
 ## Listings and backlinks
 
+Discover paginates matching LIVE startups in batches of 24, filling complete rows
+in both its two-column tablet and three-column desktop grids. Only the final page
+may have an incomplete row. Search and category filters persist between pages.
+
 Anshkosh is listed on Product Hunt, TechBaseDirectory and Crunchbase; the home page shows their badges. Directory submissions and backlink outreach are in progress. Keep what the site says ("planned") in line with what actually exists.
 
 ## Copy rules
