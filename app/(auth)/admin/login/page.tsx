@@ -55,7 +55,7 @@ export default function AdminLoginPage() {
 
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
         <div className="bg-gray-800 py-8 px-4 shadow-2xl shadow-black/50 sm:rounded-2xl sm:px-10 border border-gray-700">
-          <form className="space-y-5" onSubmit={handleAdminLogin}>
+          <form method="post" className="space-y-5" onSubmit={handleAdminLogin}>
             {error && (
               <div className="bg-red-900/50 border border-red-800 text-red-200 text-sm p-3 rounded-lg text-center">
                 {error}
@@ -63,13 +63,16 @@ export default function AdminLoginPage() {
             )}
             
             <div>
-              <label className="block text-sm font-medium text-gray-300">Admin Email</label>
+              <label htmlFor="admin-email" className="block text-sm font-medium text-gray-300">Admin Email</label>
               <div className="mt-1 relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                   <Mail className="h-5 w-5 text-gray-500" />
                 </div>
                 <input
+                  id="admin-email"
+                  name="email"
                   type="email"
+                  autoComplete="email"
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
@@ -84,7 +87,9 @@ export default function AdminLoginPage() {
               <div className="mt-1">
                 <PasswordField
                   id="admin-password"
+                  name="password"
                   label="Admin password"
+                  autoComplete="current-password"
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}

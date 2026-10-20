@@ -37,6 +37,7 @@ jobs:
       R2_BUCKET_NAME: uploads
       R2_ACCOUNT_ID: testing
       E2E_TEST_MODE: '1'
+      NEXT_PUBLIC_TURNSTILE_SITE_KEY: isolated-browser-fixture
       CLAMAV_PORT: '33101'
     steps:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803

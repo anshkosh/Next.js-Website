@@ -56,6 +56,14 @@ changed by these repairs.
 
 ## End-to-end tests (Playwright)
 
+Site-swarm regressions add native POST submission before hydration, signed-in
+prefills and homepage gate bypass, and private pending-comment receipt isolation
+across browsers. The CI widget is a captured API, with a fixture-only public key;
+it makes no real Cloudflare challenge requests. Unit tests exercise receipt
+forgery/expiry, early allowance checks, atomic limit races, saved-result reporting,
+widget retry, and article presentation. `deploy/test_auth_log_redaction.py` tests
+redaction using synthetic strings and temporary local files, never production logs.
+
 ```bash
 npx playwright test
 ```

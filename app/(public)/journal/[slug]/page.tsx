@@ -5,11 +5,11 @@ import Image from "next/image";
 import Link from "next/link";
 import { Clock, Calendar, ArrowLeft, Tag } from "lucide-react";
 import JournalCard from "@/components/landing/JournalCard";
-import CopyButton from "@/components/content/CopyButton";
+import ArticleShare from "@/components/content/ArticleShare";
 import { cache } from "react";
 import { DEFAULT_SOCIAL_IMAGE, SITE_URL, absoluteUrl } from "@/lib/seo";
 import { calculateReadingTime } from "@/lib/journal-reading-time.mjs";
-import { sanitizeJournalHtml, serializeJsonLd } from "@/lib/journal-html";
+import { publicJournalHtml, showJournalExcerpt, serializeJsonLd } from "@/lib/journal-html";
 
 const BASE_URL = SITE_URL;
 export const dynamic = "force-dynamic";
@@ -185,13 +185,13 @@ export default async function JournalArticlePage({ params }: Props) {
                 {post.updatedAt && post.publishedAt && post.updatedAt.getTime() > post.publishedAt.getTime() && (
                   <span>Updated {post.updatedAt.toLocaleDateString("en-IN", { day: "numeric", month: "long", year: "numeric" })}</span>
                 )}
-                <CopyButton value={`${BASE_URL}/journal/${post.slug}`} label="Copy article link" />
+                <ArticleShare title={post.title} url={`${BASE_URL}/journal/${post.slug}`} />
               </div>
             </div>
           </header>
 
           {/* Excerpt (if cover image present, show below header) */}
-          {post.excerpt && (
+          {showJournalExcerpt(post.excerpt, post.contentHtml) && (
             <p className="text-xl text-gray-600 leading-relaxed border-l-4 border-coral-500 pl-5 mb-10 italic">
               {post.excerpt}
             </p>
@@ -200,7 +200,7 @@ export default async function JournalArticlePage({ params }: Props) {
           {/* Content */}
           <div
             className="journal-content max-w-none mb-12"
-            dangerouslySetInnerHTML={{ __html: sanitizeJournalHtml(post.contentHtml || "") }}
+            dangerouslySetInnerHTML={{ __html: publicJournalHtml(post.contentHtml || "") }}
           />
 
           {/* Tags */}

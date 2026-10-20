@@ -100,7 +100,7 @@ export default function RegisterPage() {
 
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
         <div className="bg-white py-8 px-4 shadow-xl shadow-gray-200/50 sm:rounded-2xl sm:px-10 border border-gray-100">
-          <form className="space-y-5" onSubmit={handleRegister}>
+          <form method="post" className="space-y-5" onSubmit={handleRegister}>
             {error && (
               <div className="bg-red-50 border border-red-100 text-red-600 text-sm p-3 rounded-lg text-center">
                 {error}

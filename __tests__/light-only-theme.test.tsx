@@ -9,6 +9,7 @@ import RootLayout from "../app/layout";
 vi.mock("next/navigation", () => ({ useRouter: () => ({ push: vi.fn() }), usePathname: () => "/" }));
 vi.mock("next/font/google", () => ({ Inter: () => ({ variable: "inter" }), Oswald: () => ({ variable: "oswald" }) }));
 vi.mock("@/components/site/PreEntryCurtain", () => ({ PreEntryCurtain: () => null }));
+vi.mock("@/lib/viewer-session", () => ({ viewerSession: async () => null }));
 
 let root: Root, host: HTMLDivElement;
 beforeEach(() => {
@@ -45,9 +46,9 @@ it("keeps mobile navigation and search working without a theme switch", async ()
   expect(host.querySelector('nav[aria-label="Mobile navigation"]')).toBeNull();
 });
 
-it("renders a light-only root without a script restoring dark preferences", () => {
+it("renders a light-only root without a script restoring dark preferences", async () => {
   window.localStorage.setItem("anshkosh-theme", "dark");
-  const html = renderToStaticMarkup(<RootLayout><main>Page content</main></RootLayout>);
+  const html = renderToStaticMarkup(await RootLayout({ children: <main>Page content</main> }));
   expect(html).toContain('color-scheme:light');
   expect(html).not.toContain('classList.add("dark")');
   expect(html).not.toContain("anshkosh-theme");

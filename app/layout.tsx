@@ -5,6 +5,7 @@ import { SiteEnhancements } from "@/components/site/SiteEnhancements";
 import { UnderConstructionBanner } from "@/components/site/UnderConstructionBanner";
 import { PreEntryCurtain } from "@/components/site/PreEntryCurtain";
 import { DEFAULT_SOCIAL_IMAGE, SITE_URL, absoluteUrl, PILOT_DESCRIPTION } from "@/lib/seo";
+import { viewerSession } from "@/lib/viewer-session";
 
 const BASE_URL = SITE_URL;
 
@@ -42,11 +43,12 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const authenticated = Boolean(await viewerSession());
   return (
     <html
       lang="en"
@@ -55,9 +57,9 @@ export default function RootLayout({
       suppressHydrationWarning
     >
       <body className="min-h-full flex flex-col">
-        <PreEntryCurtain />
+        <PreEntryCurtain authenticated={authenticated} />
         <div id="site-content" className="flex min-h-full flex-1 flex-col">
-          <UnderConstructionBanner />
+          <UnderConstructionBanner authenticated={authenticated} />
           {children}
           <SiteEnhancements />
         </div>

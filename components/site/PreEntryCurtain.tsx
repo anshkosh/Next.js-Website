@@ -4,9 +4,9 @@ import { useEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
 import { requestPreviewMotion } from "@/lib/preview-motion";
 
-export function PreEntryCurtain() {
+export function PreEntryCurtain({ authenticated = false }: { authenticated?: boolean }) {
   const pathname = usePathname();
-  return pathname === "/" ? <HomeCurtain /> : null;
+  return pathname === "/" && !authenticated ? <HomeCurtain /> : null;
 }
 
 function HomeCurtain() {

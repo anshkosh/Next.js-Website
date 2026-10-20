@@ -1,6 +1,20 @@
 import { describe, expect, it } from "vitest";
-import { sanitizeJournalHtml, serializeJsonLd } from "@/lib/journal-html";
+import { sanitizeJournalHtml, serializeJsonLd, showJournalExcerpt, publicJournalHtml } from "@/lib/journal-html";
 describe("journal markup boundary", () => {
+  it("does not repeat an excerpt that already opens the article", () => {
+    expect(showJournalExcerpt("Bluelearn raised a seed round.", "<p>Bluelearn raised a seed round. It later closed.</p>")).toBe(false);
+    expect(showJournalExcerpt("A separate summary.", "<p>Bluelearn raised a seed round.</p>")).toBe(true);
+    expect(showJournalExcerpt(null, "<p>Article</p>")).toBe(false);
+  });
+  it("preserves and orders citation links and provides safe full-size image access", () => {
+    const html = publicJournalHtml('<p>Evidence<sup><a href="https://source.example/three">[3]</a> <a href="https://source.example/two">[2]</a></sup></p><img src="/api/uploads/serve/journal/exhibit.webp" onerror="alert(1)">');
+    const element = document.createElement("div"); element.innerHTML = html;
+    expect(element.querySelector("sup")?.textContent).toBe("[2] [3]");
+    const fullSize = element.querySelector('a[href="/api/uploads/serve/journal/exhibit.webp"]');
+    expect(fullSize?.textContent).toBe("Open full-size image");
+    expect(fullSize?.getAttribute("rel")).toBe("noopener noreferrer");
+    expect(element.querySelector("[onerror]")).toBeNull();
+  });
   it.each([
     '<script>alert(1)</script><p onclick="alert(1)">Hello</p>',
     '<svg><a href="javascript:alert(1)">x</a></svg>',

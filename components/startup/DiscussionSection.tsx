@@ -4,8 +4,11 @@ import { useState, useTransition, useCallback } from "react";
 import Link from "next/link";
 import { MessageSquare, ChevronDown, Send, Clock, CheckCircle2, AlertCircle } from "lucide-react";
 import TurnstileWidget from "./TurnstileWidget";
-import { submitComment, fetchApprovedComments } from "@/app/actions/comment.actions";
-import type { PublicComment } from "@/app/actions/comment.actions";
+import { submitComment, fetchApprovedComments, getCommentAvailability } from "@/app/actions/comment.actions";
+import type { PublicComment, PendingComment } from "@/app/actions/comment.actions";
+
+type CommentAvailability = Awaited<ReturnType<typeof getCommentAvailability>>;
+type CommentViewer = { name: string; email: string };
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -116,14 +119,22 @@ interface FormState {
   token: string;
 }
 
-function CommentForm({ startupId, onSubmitted }: {
+function CommentForm({ startupId, viewer, availability, setAvailability, onSubmitted }: {
   startupId: string;
-  startupSlug: string;
-  onSubmitted: (name: string) => void;
+  viewer?: CommentViewer;
+  availability: CommentAvailability;
+  setAvailability: (status: CommentAvailability) => void;
+  onSubmitted: (comment: PendingComment) => void;
 }) {
-  const [form, setForm] = useState<FormState>({ name: "", email: "", body: "", token: "" });
+  const [form, setForm] = useState<FormState>({ name: viewer?.name ?? "", email: viewer?.email ?? "", body: "", token: "" });
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
+  const [captchaAttempt, setCaptchaAttempt] = useState(0);
+
+  const checkAvailability = () => startTransition(async () => {
+    try { setAvailability(await getCommentAvailability()); }
+    catch { setError("Could not check comment availability. Please try again."); }
+  });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
@@ -142,21 +153,28 @@ function CommentForm({ startupId, onSubmitted }: {
     }
 
     startTransition(async () => {
-      const result = await submitComment({
-        startupId,
-        authorName: form.name.trim(),
-        authorEmail: form.email.trim(),
-        body: form.body.trim(),
-        turnstileToken: form.token,
-      });
+      try {
+        const result = await submitComment({
+          startupId,
+          authorName: form.name.trim(),
+          authorEmail: form.email.trim(),
+          body: form.body.trim(),
+          turnstileToken: form.token,
+        });
 
-      if (result.error) {
-        setError(result.error);
-        // Reset token so user can retry
-        setForm((prev) => ({ ...prev, token: "" }));
-      } else {
-        onSubmitted(form.name.trim());
-        setForm({ name: "", email: "", body: "", token: "" });
+        if (result.error) {
+          setError(result.error);
+          setAvailability(await getCommentAvailability());
+        } else if (result.pendingComment) {
+          onSubmitted(result.pendingComment);
+          setForm({ name: viewer?.name ?? "", email: viewer?.email ?? "", body: "", token: "" });
+        }
+      } catch {
+        setError("We could not confirm your submission. Refresh to check your pending comments before trying again.");
+      } finally {
+        // Turnstile tokens are single-use, including after a failed submission.
+        setForm(prev => ({ ...prev, token: "" }));
+        setCaptchaAttempt(attempt => attempt + 1);
       }
     });
   };
@@ -165,7 +183,8 @@ function CommentForm({ startupId, onSubmitted }: {
     <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
       <h3 className="text-lg font-bold text-gray-900 mb-5">Leave a Comment</h3>
 
-      <form onSubmit={handleSubmit} className="space-y-4">
+      {viewer && <p className="mb-4 text-sm text-gray-600">Signed in as <strong>{viewer.name}</strong>. Your email stays private.</p>}
+      <form method="post" onSubmit={handleSubmit} className="space-y-4">
         {/* Name + Email row */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
@@ -225,14 +244,20 @@ function CommentForm({ startupId, onSubmitted }: {
         </div>
 
         {/* Turnstile */}
-        <TurnstileWidget
+        <p className="text-xs text-gray-500">Up to 3 comments per hour from this network. Each comment is reviewed before publication.</p>
+        {availability.allowed ? <TurnstileWidget
+          key={captchaAttempt}
           onToken={(token) => setForm((prev) => ({ ...prev, token }))}
           onExpire={() => setForm((prev) => ({ ...prev, token: "" }))}
-        />
+        /> : <div role="status" className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
+          <p>{availability.message}</p>
+          {availability.available && <p className="mt-1">Try again in about {Math.ceil(availability.retryAfterSeconds / 60)} minutes.</p>}
+          <button type="button" disabled={isPending} onClick={checkAvailability} className="mt-2 min-h-11 font-semibold underline">Check availability again</button>
+        </div>}
 
         {/* Error */}
         {error && (
-          <div className="flex items-center gap-2 text-sm text-red-600 bg-red-50 border border-red-200 rounded-xl px-4 py-3">
+          <div role="alert" className="flex items-center gap-2 text-sm text-red-600 bg-red-50 border border-red-200 rounded-xl px-4 py-3">
             <AlertCircle className="w-4 h-4 flex-shrink-0" />
             {error}
           </div>
@@ -242,7 +267,7 @@ function CommentForm({ startupId, onSubmitted }: {
         <div className="flex items-center gap-4 flex-wrap">
           <button
             type="submit"
-            disabled={isPending || !form.token}
+            disabled={isPending || !form.token || !availability.allowed}
             className="inline-flex items-center gap-2 px-6 py-2.5 bg-coral-500 hover:bg-coral-600 disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-semibold rounded-xl transition-colors shadow-sm"
           >
             {isPending ? (
@@ -279,19 +304,26 @@ interface DiscussionSectionProps {
   initialComments: PublicComment[];
   initialNextCursor: string | null;
   totalApprovedCount: number;
+  viewer?: CommentViewer;
+  initialAvailability: CommentAvailability;
+  initialPendingComments: PendingComment[];
 }
 
 export default function DiscussionSection({
   startupId,
-  startupSlug,
   initialComments,
   initialNextCursor,
   totalApprovedCount,
+  viewer,
+  initialAvailability,
+  initialPendingComments,
 }: DiscussionSectionProps) {
   const [comments, setComments] = useState<PublicComment[]>(initialComments);
   const [nextCursor, setNextCursor] = useState<string | null>(initialNextCursor);
   const [isLoadingMore, startLoadMore] = useTransition();
   const [submitted, setSubmitted] = useState<string | null>(null); // commenter name after success
+  const [pendingComments, setPendingComments] = useState(initialPendingComments);
+  const [availability, setAvailability] = useState(initialAvailability);
 
   const handleLoadMore = useCallback(() => {
     if (!nextCursor) return;
@@ -303,14 +335,17 @@ export default function DiscussionSection({
     });
   }, [startupId, nextCursor]);
 
-  const handleSubmitted = (name: string) => {
-    setSubmitted(name);
+  const handleSubmitted = (comment: PendingComment) => {
+    setSubmitted(comment.authorName);
+    setPendingComments(previous => [comment, ...previous.filter(item => item.id !== comment.id)]);
+    setAvailability({ allowed: false, available: false, retryAfterSeconds: 1, message: "Checking comment availability…" });
+    getCommentAvailability().then(setAvailability).catch(() => setAvailability({ allowed: false, available: false, retryAfterSeconds: 60, message: "Could not check comment availability. Please try again." }));
   };
 
   return (
     <div className="bg-gray-50/80 rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
       {/* Header */}
-      <div className="flex items-center gap-3 px-8 py-6 border-b border-gray-100 bg-white">
+      <div className="flex items-center gap-3 px-4 py-6 sm:px-8 border-b border-gray-100 bg-white">
         <div className="w-10 h-10 rounded-xl bg-coral-50 flex items-center justify-center flex-shrink-0">
           <MessageSquare className="w-5 h-5 text-coral-500" />
         </div>
@@ -324,9 +359,17 @@ export default function DiscussionSection({
         </div>
       </div>
 
-      <div className="p-8 space-y-6">
+      <div className="p-4 sm:p-8 space-y-6">
+        {pendingComments.length > 0 && <section aria-label="Your pending comments" className="space-y-3">
+          <h3 className="font-semibold text-gray-900">Your pending comments</h3>
+          <p className="text-xs text-gray-600">Visible only in the browser you used to submit them. They will appear publicly after review.</p>
+          {pendingComments.map(comment => <div key={comment.id} className="rounded-xl border border-amber-200 bg-amber-50 p-4">
+            <p className="text-sm font-semibold text-amber-900">{comment.authorName} · Awaiting review</p>
+            <p className="mt-2 whitespace-pre-wrap break-words text-sm text-gray-700">{comment.body}</p>
+          </div>)}
+        </section>}
         {/* Comments feed */}
-        {comments.length === 0 && !submitted ? (
+        {comments.length === 0 && !submitted && pendingComments.length === 0 ? (
           <div className="text-center py-10 text-gray-400">
             <MessageSquare className="w-10 h-10 mx-auto mb-3 opacity-30" />
             <p className="font-medium text-gray-500">No comments yet</p>
@@ -371,8 +414,11 @@ export default function DiscussionSection({
         {/* Comment form */}
         {!submitted && (
           <CommentForm
+            key={viewer?.email ?? "guest"}
             startupId={startupId}
-            startupSlug={startupSlug}
+            viewer={viewer}
+            availability={availability}
+            setAvailability={setAvailability}
             onSubmitted={handleSubmitted}
           />
         )}

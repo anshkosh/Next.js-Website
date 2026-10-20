@@ -9,6 +9,20 @@ const route = vi.hoisted(() => ({ pathname: "/" }));
 vi.mock("next/navigation", () => ({ usePathname: () => route.pathname }));
 beforeEach(() => { route.pathname = "/"; });
 
+it("keeps signed-in visitors out of the preview gate without locking the page", async () => {
+  vi.stubGlobal("IS_REACT_ACT_ENVIRONMENT", true);
+  const host = document.createElement("div");
+  const content = document.createElement("div"); content.id = "site-content";
+  document.body.append(host, content);
+  const root = createRoot(host);
+  try {
+    await act(async () => root.render(<><PreEntryCurtain authenticated /><UnderConstructionBanner authenticated /></>));
+    expect(host.querySelector('[role="dialog"]')).toBeNull();
+    expect(host.querySelector('aside')).toBeNull();
+    expect(content.inert).not.toBe(true);
+  } finally { await act(async () => root.unmount()); host.remove(); content.remove(); vi.unstubAllGlobals(); }
+});
+
 it("removes homepage preview on navigation and releases content and scrolling", async () => {
   vi.stubGlobal("IS_REACT_ACT_ENVIRONMENT", true);
   const container = document.createElement("div");
