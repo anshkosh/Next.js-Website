@@ -1,4 +1,4 @@
-import { test, expect, type Page } from "@playwright/test";
+import { test, expect, type Page, type Browser } from "@playwright/test";
 import { PrismaClient } from "@prisma/client";
 import sharp from "sharp";
 import { randomUUID } from "node:crypto";
@@ -20,6 +20,20 @@ const adminEmail = `reviewer-${randomUUID()}@example.test`;
 const originalTagline = "A pilot-ready startup built for real customers";
 const startupName = `Launch Test ${randomUUID().slice(0, 8)}`;
 let categoryId: string, startupId: string, slug: string;
+
+function fixtureWidget() {
+  window.turnstile = {
+    render: (_container, options) => {
+      setTimeout(() => { if (typeof options.callback === "function") options.callback("isolated-browser-token"); }, 0);
+      return "isolated-widget";
+    }, reset: () => {}, remove: () => {},
+  };
+}
+async function isolatedContext(browser: Browser, options: Parameters<Browser["newContext"]>[0] = {}) {
+  const context = await browser.newContext(options);
+  await context.addInitScript(fixtureWidget);
+  return context;
+}
 
 async function reveal(page: Page) {
   const peek = page.getByRole("button", { name: "Sneak peek", exact: true });
@@ -86,7 +100,15 @@ test.beforeAll(async ({ request }) => {
   await db.user.update({ where: { email: adminEmail }, data: { role: "admin", emailVerified: true } });
 });
 test.afterAll(async () => { await db.$disconnect(); });
-test.describe.configure({ mode: "serial" });
+
+test.beforeEach(async ({ page }) => {
+  // Captured widget API; no Cloudflare connection or real challenge in tests.
+  // The isolated development server has no Turnstile verification secret.
+  await page.addInitScript(fixtureWidget);
+});
+// This serial journey shares persisted votes and network limits. Replaying it in
+// the same database can obscure the first failure with leftover fixture state.
+test.describe.configure({ mode: "serial", retries: 0 });
 test.setTimeout(180000);
 
 test("signup, real verification token, login, photo editing, private deck and startup submission", async ({ page }) => {
@@ -143,7 +165,7 @@ test("admin approves, edits remain unpublished, recovery survives refresh, revis
   await enter(page, "/admin/moderation");
   await page.getByRole("button", { name: "Approve", exact: true }).click();
   await expect.poll(async () => (await db.startup.findUniqueOrThrow({ where: { id: startupId } })).status).toBe("LIVE");
-  const ownerContext = await browser.newContext(); const ownerPage = await ownerContext.newPage();
+  const ownerContext = await isolatedContext(browser); const ownerPage = await ownerContext.newPage();
   await login(ownerPage, email);
   await enter(ownerPage, `/startup/${startupId}/edit`);
   await ownerPage.locator('[name="tagline"]').fill("Updated pilot evidence from real customer feedback");
@@ -156,7 +178,7 @@ test("admin approves, edits remain unpublished, recovery survives refresh, revis
   expect(published.status).toBe("LIVE"); expect(published.tagline).toBe(originalTagline);
   const metadata = published.metadata as { pitchDeckUrl: string };
   expect((await page.request.get(metadata.pitchDeckUrl)).status()).toBe(200); // Reviewer may read private decks.
-  const anonymous = await browser.newContext();
+  const anonymous = await isolatedContext(browser);
   expect((await anonymous.request.get(`http://127.0.0.1:3100${metadata.pitchDeckUrl}`)).status()).toBe(404);
   const publicPage = await anonymous.newPage(); await enter(publicPage, `/startups/${slug}`);
   await expect(publicPage.getByRole("link", { name: /pitch deck/i })).toHaveCount(0);
@@ -185,6 +207,8 @@ test("public founder search and bidirectional voting share accurate signals acro
   await expect(page.getByRole("heading", { name: startupName, exact: true })).toBeVisible();
   const startupResult = page.getByRole("link").filter({ has: page.getByRole("heading", { name: startupName, exact: true }) });
   await expect(startupResult.getByText("Founders: Test Founder", { exact: true })).toBeVisible();
+  await enter(page, "/search?q=office%20workers");
+  await expect(page.getByRole("heading", { name: startupName, exact: true })).toBeVisible();
   await enter(page, `/discover?q=${encodeURIComponent("test founder")}`);
   await expect(page.getByRole("heading", { name: startupName, exact: true })).toBeVisible();
   await enter(page, `/startups/${slug}`);
@@ -340,5 +364,84 @@ test("journal titles and bylines remain readable with and without a cover at nar
     }
   } finally {
     await db.journalPost.delete({ where: { id: post.id } });
+  }
+});
+
+test("an unhydrated login submits credentials in a POST body", async ({ browser }) => {
+  const context = await isolatedContext(browser, { javaScriptEnabled: false });
+  try {
+    const page = await context.newPage();
+    await page.goto("http://127.0.0.1:3100/login");
+    await page.getByLabel("Email address", { exact: true }).fill("native-form@example.test");
+    await page.locator('input[name="password"]').fill("SyntheticNativeForm123!");
+    const submission = page.waitForRequest(request => request.isNavigationRequest() && request.method() === "POST" && new URL(request.url()).pathname === "/login");
+    await page.getByRole("button", { name: "Sign In", exact: true }).click();
+    const request = await submission;
+    expect(new URL(request.url()).search).toBe("");
+    expect(request.postData()).toContain("password=");
+    expect(page.url()).not.toContain("SyntheticNativeForm123");
+  } finally { await context.close(); }
+});
+
+test("signed-in comments prefill identity and remain privately visible while pending", async ({ page, browser }) => {
+  await login(page, adminEmail, password, true);
+  await page.goto("/");
+  await expect(page.getByRole("dialog", { name: "Anshkosh is under construction." })).toHaveCount(0);
+  await expect(page.getByRole("navigation", { name: "Primary navigation" }).getByRole("link", { name: /Dashboard.*Test Reviewer/ })).toBeVisible();
+  const body = `Private pending receipt ${randomUUID()}`;
+  try {
+    await enter(page, `/startups/${slug}`);
+    await expect(page.locator("#comment-name")).toHaveValue("Test Reviewer");
+    await expect(page.locator("#comment-email")).toHaveValue(adminEmail);
+    await page.locator("#comment-body").fill(body);
+    await expect(page.getByRole("button", { name: "Post Comment", exact: true })).toBeEnabled();
+    await page.getByRole("button", { name: "Post Comment", exact: true }).click();
+    await expect(page.getByRole("region", { name: "Your pending comments" }).getByText(body, { exact: true })).toBeVisible();
+    await page.reload();
+    await expect(page.getByRole("region", { name: "Your pending comments" }).getByText(body, { exact: true })).toBeVisible();
+    const stranger = await isolatedContext(browser);
+    try {
+      const other = await stranger.newPage(); await enter(other, `/startups/${slug}`);
+      await expect(other.getByText(body, { exact: true })).toHaveCount(0);
+    } finally { await stranger.close(); }
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
+    await expect(page.getByRole("link", { name: "Contact Anshkosh", exact: true })).toBeHidden();
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+  } finally { await db.comment.deleteMany({ where: { startupId, body, status: "PENDING" } }); }
+});
+
+test("founder lesson submission, update feedback and direct sign-out work together", async ({ page }) => {
+  await login(page, email, "ChangedTesting123!");
+  const title = `Journal regression ${randomUUID()}`;
+  const updateTitle = `Update regression ${randomUUID()}`;
+  try {
+    await enter(page, "/dashboard/journal");
+    await page.getByLabel("Entry style").selectOption("LESSON");
+    await page.locator("#entry-title").fill(title);
+    await page.getByRole("textbox", { name: "Your entry", exact: true }).fill("A synthetic lesson from our isolated pilot. ".repeat(15));
+    await page.getByRole("radio", { name: /Public/ }).check();
+    await page.getByRole("combobox").nth(1).selectOption(startupId);
+    await page.getByRole("button", { name: "Submit for review", exact: true }).click();
+    await expect(page.getByRole("status"), (await page.getByRole("alert").allTextContents()).join("; ")).toContainText("Submitted for review");
+    await expect.poll(async () => db.founderJournalRevision.count({ where: { entry: { title, startupId }, status: "PENDING_REVIEW" } })).toBe(1);
+    await page.reload();
+    await expect(page.getByRole("heading", { name: title, exact: true })).toBeVisible();
+    await enter(page, `/startup/${startupId}/updates`);
+    await page.getByRole("button", { name: "Post a New Update", exact: true }).click();
+    await page.locator('input[type="text"]').fill(updateTitle);
+    await page.locator("textarea").fill("A synthetic progress update for an isolated fixture.");
+    await page.getByRole("button", { name: "Publish Update", exact: true }).click();
+    await expect(page.getByRole("status")).toContainText("Update published successfully");
+    await expect.poll(async () => db.startupUpdate.count({ where: { startupId, title: updateTitle } })).toBe(1);
+    await enter(page, "/logout");
+    await expect(page).toHaveURL(/\/login$/);
+    await page.goto("/dashboard");
+    await expect(page).toHaveURL(/\/login$/);
+  } finally {
+    await db.founderJournalRevision.deleteMany({ where: { entry: { startupId, title } } });
+    await db.founderJournalEntry.deleteMany({ where: { startupId, title } });
+    await db.startupUpdate.deleteMany({ where: { startupId, title: updateTitle } });
+    await db.startup.update({ where: { id: startupId }, data: { updateCount: await db.startupUpdate.count({ where: { startupId } }) } });
   }
 });

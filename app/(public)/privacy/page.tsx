@@ -35,6 +35,7 @@ const sections = [
     "Copy and download controls create materials you can save or share yourself. Use a tool’s clear or reset control where provided, or remove this site’s storage in your browser settings. Clear drafts before changing startups or sharing a device. Clearing browser drafts does not delete your account, submitted profiles or saved downloads.",
   ] },
   { title: "Cookies, votes and abuse prevention", paragraphs: [
+    "A private comment-receipt cookie lets the submitting browser display comments that are awaiting review. It stores up to 20 comment identifiers for seven days, with no email address or comment text. Anyone using that browser can see its pending comments. Clearing the cookie removes that browser access without deleting the submitted comments; receipts do not sync to other devices.",
     "Session cookies support sign-in. The visitor cookie anshkosh_vid helps remember your active vote for a startup and is set for up to one year. It is not a public voter name and does not require an account. You can remove cookies through your browser settings; doing so may sign you out or remove remembered voting state.",
     "Voting and some public forms use a hash derived from the request’s IP address and browser user-agent to help limit duplicate submissions and abuse. Security checks and rate limits may also process request information. These identifiers help enforce voting controls; they are not proof that every vote comes from a unique person.",
     "Where a CAPTCHA is shown, its provider may process browser and request information to check for automated activity. Hosting, database, file storage and email services process the information needed to deliver their respective functions.",
@@ -58,7 +59,7 @@ export default function PrivacyPage() {
       <div className="mx-auto max-w-3xl px-4">
         <span className="mb-4 block text-xs font-semibold uppercase tracking-widest text-coral-500">Pilot privacy notice</span>
         <h1 className="mb-4 font-heading text-4xl font-bold tracking-tight text-gray-900 md:text-5xl">Privacy Notice</h1>
-        <p className="mb-8 text-sm text-gray-600">Updated: 18 October 2026 · Data fiduciary/operator: Anshkosh Pvt Ltd · Grievance contact: Hyderabad, Telangana, India · <a className="font-medium text-coral-700 underline" href="mailto:hello@anshkosh.com">hello@anshkosh.com</a></p>
+        <p className="mb-8 text-sm text-gray-600">Updated: 20 October 2026 · Data fiduciary/operator: Anshkosh Pvt Ltd · Grievance contact: Hyderabad, Telangana, India · <a className="font-medium text-coral-700 underline" href="mailto:hello@anshkosh.com">hello@anshkosh.com</a></p>
         <p className="mb-8 text-base leading-relaxed text-gray-600">This notice describes personal information used for the Anshkosh startup discovery pilot, including accounts, discussions, voting, beta tester requests and free founder tools. The beta tester consent notice gives the specific details shown when you submit a tester request.</p>
         <div className="space-y-12">
           {sections.map(section => <section key={section.title} className="border-t border-gray-100 pt-8">

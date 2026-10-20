@@ -15,7 +15,8 @@ export function safeJournalVideo(value: string) {
 export const journalImagePattern = /^\/api\/uploads\/serve\/founder-journal\/([a-zA-Z0-9_-]+)\/[0-9a-f-]{36}\.webp$/;
 const attributes = z.object({
   bold: z.boolean().optional(), italic: z.boolean().optional(), underline: z.boolean().optional(), strike: z.boolean().optional(),
-  header: z.union([z.literal(2), z.literal(3), z.literal(4)]).optional(),
+  // Quill paste can produce any standard heading, even those absent from the toolbar.
+  header: z.number().int().min(1).max(6).optional(),
   blockquote: z.boolean().optional(), "code-block": z.union([z.boolean(), z.string().max(40)]).optional(),
   list: z.enum(["ordered", "bullet"]).optional(),
   link: z.string().max(2048).refine(safeJournalLink, "Use an http, https, or email link.").optional(),

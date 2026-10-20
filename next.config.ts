@@ -6,6 +6,14 @@ const nextConfig: NextConfig = {
   serverExternalPackages: ["bullmq"],
   compress: true,
   poweredByHeader: false,
+  ...(process.env.E2E_TEST_MODE === "1" && process.env.NODE_ENV !== "production" ? {
+    experimental: {
+      // Keep the isolated browser session alive through on-demand compilation.
+      // V8's heap limit still fails the job on a real out-of-memory condition.
+      devMemoryThresholdRestart: false,
+      webpackMemoryOptimizations: true,
+    },
+  } : {}),
   images: {
     formats: ["image/webp"],
     qualities: [75, 85],

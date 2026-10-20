@@ -46,7 +46,7 @@ export default function JournalRichContent({ content, fallback }: { content?: un
       index--;
       blocks.push(createElement(style === "ordered" ? "ol" : "ul", { key: `list-${index}`, className: `my-3 space-y-1 pl-6 ${style === "ordered" ? "list-decimal" : "list-disc"}` }, items));
     } else if (line.attributes.header) {
-      blocks.push(createElement(`h${line.attributes.header}`, { key: index, className: "mb-2 mt-5 font-heading text-xl font-bold text-gray-900" }, line.children));
+      blocks.push(createElement(`h${Math.max(2, line.attributes.header)}`, { key: index, className: "mb-2 mt-5 font-heading text-xl font-bold text-gray-900" }, line.children));
     } else if (line.attributes.blockquote) {
       blocks.push(<blockquote key={index} className="my-3 border-l-4 border-coral-200 pl-4 italic text-gray-600">{line.children}</blockquote>);
     } else if (line.attributes["code-block"]) {

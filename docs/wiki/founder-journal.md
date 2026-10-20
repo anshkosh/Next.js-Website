@@ -2,6 +2,13 @@
 
 Founders open their journal at `/dashboard/journal` or from the dashboard and founder navigation. The writing area uses the same shared Quill editor as the admin Journal, including headings, bold/italic/underline/strike, lists, quotations, code blocks, links, images and video. Entries support free writing, progress/challenge/lesson prompts, a weekly review, and one optional milestone with a completion checkbox. Prompts are optional and adding one preserves existing formatting. Private entries do not require a startup. Existing plain-text entries open in the rich editor without a destructive conversion.
 
+Validation errors identify the field without including private submitted values.
+Pasted standard heading levels are supported; an H1 inside an entry renders as H2
+so the page keeps one title. The editor submits a schema-parsed plain payload,
+keeps text after failures and never reports a committed write as failed merely
+because a cache refresh is unavailable. Founder Updates show an explicit success
+notice, and `/logout` completes Better Auth sign-out with retry on failure.
+
 ## Visibility and ownership
 
 - New entries default to `PRIVATE` in the database, server validation, and editor. They are account-backed; unsaved text is not written to browser storage.

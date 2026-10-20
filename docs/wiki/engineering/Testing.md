@@ -56,14 +56,33 @@ changed by these repairs.
 
 ## End-to-end tests (Playwright)
 
+Site-swarm regressions add native POST submission before hydration, signed-in
+prefills and homepage gate bypass, and private pending-comment receipt isolation
+across browsers. The CI widget is a captured API, with a fixture-only public key;
+it makes no real Cloudflare challenge requests. Unit tests exercise receipt
+forgery/expiry, early allowance checks, atomic limit races, saved-result reporting,
+widget retry, and article presentation. `deploy/test_auth_log_redaction.py` tests
+redaction using synthetic strings and temporary local files, never production logs.
+
 ```bash
 npx playwright test
 ```
 
-The active browser gate is `e2e/launch.spec.ts` (eight real end-to-end scenarios,
+The active browser gate is `e2e/launch.spec.ts` (eleven real end-to-end scenarios,
 selected by `playwright.config.ts`). Other older spec files still contain planning
 placeholders and are not claimed as coverage. The active suite uses a disposable
 database and captured email/storage services; it must never point at production.
+The additional founder regression submits a rich-text public lesson for review,
+checks pending persistence, publishes a startup update with visible feedback and
+visits `/logout` before verifying the dashboard requires login again.
+Only the isolated development test server enables Webpack memory optimizations
+and disables Next's early 80%-heap restart, which otherwise interrupts the serial
+browser session during compilation. V8's heap limit remains enforced; actual
+memory exhaustion still fails CI. Production configuration is unchanged.
+The Next development test process has a bounded 5-GiB heap; the expanded Quill
+journey exceeded the previous 4-GiB limit. Other test services retain their defaults.
+The serial fixture journey fails on its first attempt and preserves evidence;
+replaying it against existing vote/rate-limit state can mask the original failure.
 Photo-upload scenarios assert a successful upload response and a valid sanitized
 storage URL before requiring the editor to close. The response wait uses the
 existing 30-second browser action budget so cold dev compilation is distinct from

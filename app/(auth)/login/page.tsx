@@ -100,7 +100,7 @@ export default function LoginPage() {
             </div>
           </div>
 
-          <form className="space-y-5 mt-6" onSubmit={handleEmailLogin}>
+          <form method="post" className="space-y-5 mt-6" onSubmit={handleEmailLogin}>
             {error && (
               <div role="alert" className="bg-red-50 border border-red-100 text-red-600 text-sm p-3 rounded-lg text-center">
                 {error}

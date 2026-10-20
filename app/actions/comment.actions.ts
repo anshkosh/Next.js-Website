@@ -2,19 +2,47 @@
 
 import { db } from "@/lib/db";
 import { auth } from "@/lib/auth";
-import { headers } from "next/headers";
-import { revalidatePath } from "next/cache";
+import { cookies, headers } from "next/headers";
+import { revalidateSavedPath as revalidatePath } from "@/lib/cache-after-save";
 import { logger } from "@/lib/logger";
 import { generateFingerprint } from "@/lib/utils/fingerprint";
-import { checkRateLimit } from "@/lib/utils/rate-limit";
+import { checkRateLimit, readRateLimit } from "@/lib/utils/rate-limit";
 import { verifyTurnstileToken } from "@/lib/utils/turnstile";
 import { clientIp } from "@/lib/utils/client-ip";
+import { startupIdSchema } from "@/lib/validators/id.schema";
+import { addCommentReceipt, readCommentReceipts, COMMENT_RECEIPT_COOKIE, COMMENT_RECEIPT_TTL } from "@/lib/comment-receipts";
 import {
   submitCommentSchema,
   replyToCommentSchema,
 } from "@/lib/validators/comment.schema";
 
 const COMMENTS_PAGE_SIZE = 10;
+const COMMENT_LIMIT_MESSAGE = "This network has reached its limit of 3 comments per hour. Please try again later.";
+
+export async function getCommentAvailability() {
+  const fingerprint = generateFingerprint(clientIp(await headers()), "comment-v2");
+  const status = await readRateLimit(`rate-limit:comment:${fingerprint}`, 3);
+  return { ...status, message: status.allowed ? "" : status.available ? COMMENT_LIMIT_MESSAGE : "Comment protection is temporarily unavailable. Please try again shortly." };
+}
+
+export interface PendingComment {
+  id: string;
+  authorName: string;
+  body: string;
+  createdAt: string;
+}
+
+export async function fetchOwnPendingComments(startupId: string): Promise<PendingComment[]> {
+  if (!startupIdSchema.safeParse(startupId).success) return [];
+  const ids = readCommentReceipts((await cookies()).get(COMMENT_RECEIPT_COOKIE)?.value, process.env.BETTER_AUTH_SECRET);
+  if (!ids.length) return [];
+  const rows = await db.comment.findMany({
+    where: { id: { in: ids }, startupId, status: "PENDING", startup: { status: "LIVE" } },
+    orderBy: { createdAt: "desc" }, take: 20,
+    select: { id: true, authorName: true, body: true, createdAt: true },
+  });
+  return rows.map(row => ({ ...row, createdAt: row.createdAt.toISOString() }));
+}
 
 // ──────────────────────────────────────────────────────────────────────────────
 // Public — Submit a new comment (pending admin approval)
@@ -35,6 +63,10 @@ export async function submitComment(formData: {
     const { startupId, authorName, authorEmail, body, turnstileToken } =
       parsed.data;
 
+    // Read without consuming the allowance before asking the visitor for CAPTCHA.
+    const availability = await getCommentAvailability();
+    if (!availability.allowed) return { error: availability.message };
+
     // Verify Turnstile CAPTCHA
     const tokenValid = await verifyTurnstileToken(turnstileToken);
     if (!tokenValid) {
@@ -48,7 +80,7 @@ export async function submitComment(formData: {
     const isAllowed = await checkRateLimit(rateLimitKey, 3, 3600);
     if (!isAllowed) {
       return {
-        error: "You've posted too many comments recently. Please try again later.",
+        error: COMMENT_LIMIT_MESSAGE,
       };
     }
 
@@ -61,7 +93,7 @@ export async function submitComment(formData: {
       return { error: "Startup not found." };
     }
 
-    await db.comment.create({
+    const comment = await db.comment.create({
       data: {
         startupId,
         authorName,
@@ -69,10 +101,19 @@ export async function submitComment(formData: {
         body,
         status: "PENDING",
       },
+      select: { id: true, authorName: true, body: true, createdAt: true },
     });
 
+    // A private, signed receipt allows reloads without exposing pending comments
+    // to anyone who knows (or guesses) the author's unverified email address.
+    try {
+      const jar = await cookies();
+      const receipt = addCommentReceipt(jar.get(COMMENT_RECEIPT_COOKIE)?.value, comment.id, process.env.BETTER_AUTH_SECRET);
+      if (receipt) jar.set(COMMENT_RECEIPT_COOKIE, receipt, { httpOnly: true, secure: process.env.NODE_ENV === "production", sameSite: "lax", path: "/", maxAge: COMMENT_RECEIPT_TTL });
+    } catch { logger.warn("Comment saved; private browser receipt unavailable"); }
+
     revalidatePath(`/startups/${startup.slug}`);
-    return { success: true };
+    return { success: true, pendingComment: { ...comment, createdAt: comment.createdAt.toISOString() } };
   } catch (err) {
     logger.error("submitComment error:", err);
     return { error: "Something went wrong. Please try again." };

@@ -18,6 +18,8 @@ import { publicFounderEntries } from "@/lib/founder-journal-queries";
 import { journalPage } from "@/lib/founder-journal";
 import FounderJournalSection from "@/components/startup/FounderJournalSection";
 import BetaTesterSignup from "@/components/startup/BetaTesterSignup";
+import { viewerSession } from "@/lib/viewer-session";
+import { fetchOwnPendingComments, getCommentAvailability } from "@/app/actions/comment.actions";
 
 // Visitor-specific cookies must be read at request time, including for new slugs.
 export const dynamic = "force-dynamic";
@@ -189,7 +191,7 @@ export default async function StartupDetailPage(props: {
   const publicEntries = await publicFounderEntries(startup.id, startup.founderId, publicJournalPage);
 
   // Fetch initial approved comments for the discussion section (server-side for SEO)
-  const [initialComments, totalApprovedCount] = await Promise.all([
+  const [initialComments, totalApprovedCount, session, initialPendingComments, initialAvailability] = await Promise.all([
     db.comment.findMany({
       where: { startupId: startup.id, status: "APPROVED" },
       orderBy: { createdAt: "desc" },
@@ -207,6 +209,9 @@ export default async function StartupDetailPage(props: {
     db.comment.count({
       where: { startupId: startup.id, status: "APPROVED" },
     }),
+    viewerSession(),
+    fetchOwnPendingComments(startup.id),
+    getCommentAvailability(),
   ]);
 
   // Determine if there is a next cursor for the comments
@@ -393,6 +398,9 @@ export default async function StartupDetailPage(props: {
             }))}
             initialNextCursor={initialNextCursor}
             totalApprovedCount={totalApprovedCount}
+            viewer={session ? { name: session.user.name, email: session.user.email } : undefined}
+            initialAvailability={initialAvailability}
+            initialPendingComments={initialPendingComments}
           />
         </div>
 

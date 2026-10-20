@@ -20,6 +20,13 @@ Use `seoMetadata()` from `lib/seo.ts` on every new public page so it gets a titl
 
 ## Journal
 
+Journal detail pages avoid showing an excerpt twice when it already opens the
+body, preserve numeric superscript citations, and expose full-size illustration
+links for small screens. Share uses the browser's share sheet or a copy fallback.
+The footer newsletter form has the stable `#newsletter-signup` anchor. Reviewed
+Bluelearn/category data corrections and their apply guards are documented in the
+[site-swarm review](../operations/Site-Swarm-Bugfixes-2026-10-20.md).
+
 Admins write journal posts at `/admin/journal` (rich text via Quill), grouped by `JournalCategory`. Topics so far: regional ecosystems (Hyderabad, Bengaluru, Delhi-NCR), government support for startups, founder playbooks, campaign notes and case studies of listed startups.
 
 Articles with cover images use a white header panel with dark title, breadcrumb and byline text. The panel grows with wrapped titles and metadata, so readability does not depend on fitting everything inside the cover's fixed height. Articles without a cover keep their plain header.

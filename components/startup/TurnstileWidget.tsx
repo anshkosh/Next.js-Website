@@ -63,9 +63,12 @@ function loadTurnstile(): Promise<void> {
     newScript.addEventListener("load", handleLoad, { once: true });
     newScript.addEventListener("error", handleError, { once: true });
     document.head.appendChild(newScript);
+  }).then(() => {
+    turnstileLoadPromise = null;
   }).catch((error) => {
     // Allow a later mount to retry after a transient network failure.
     turnstileLoadPromise = null;
+    if (!window.turnstile) document.getElementById(TURNSTILE_SCRIPT_ID)?.remove();
     throw error;
   });
 
@@ -82,6 +85,7 @@ export default function TurnstileWidget({
   const onTokenRef = useRef(onToken);
   const onExpireRef = useRef(onExpire);
   const [loadError, setLoadError] = useState(false);
+  const [attempt, setAttempt] = useState(0);
   const siteKey = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
 
   useEffect(() => {
@@ -112,9 +116,18 @@ export default function TurnstileWidget({
         widgetIdRef.current = window.turnstile.render(containerRef.current, {
           sitekey: siteKey,
           callback: (token: string) => onTokenRef.current(token),
-          "expired-callback": () => onExpireRef.current?.(),
+          "expired-callback": () => {
+            onExpireRef.current?.();
+            if (widgetIdRef.current) window.turnstile?.reset(widgetIdRef.current);
+          },
+          "timeout-callback": () => onExpireRef.current?.(),
+          "error-callback": () => {
+            if (disposed) return;
+            onExpireRef.current?.();
+            setLoadError(true);
+          },
           theme: "light",
-          size: "normal",
+          size: "flexible",
         });
       } catch (error) {
         console.error("[TurnstileWidget] Failed to render widget:", error);
@@ -142,7 +155,7 @@ export default function TurnstileWidget({
         widgetIdRef.current = null;
       }
     };
-  }, [siteKey]);
+  }, [siteKey, attempt]);
 
   if (!siteKey) {
     if (process.env.NODE_ENV === "development") {
@@ -162,9 +175,10 @@ export default function TurnstileWidget({
 
   if (loadError) {
     return (
-      <p className={`text-sm text-red-600 ${className ?? ""}`} role="alert">
-        CAPTCHA could not load. Please refresh and try again.
-      </p>
+      <div className={`text-sm text-red-600 ${className ?? ""}`} role="alert">
+        <p>CAPTCHA could not complete. Check your connection or browser settings, then try again.</p>
+        <button type="button" className="mt-1 min-h-11 font-semibold underline" onClick={() => { setLoadError(false); setAttempt(value => value + 1); }}>Retry CAPTCHA</button>
+      </div>
     );
   }
 

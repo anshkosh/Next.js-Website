@@ -2,9 +2,9 @@
 
 import { usePathname } from "next/navigation";
 
-export function UnderConstructionBanner() {
+export function UnderConstructionBanner({ authenticated = false }: { authenticated?: boolean }) {
   const pathname = usePathname();
-  if (pathname !== "/") return null;
+  if (pathname !== "/" || authenticated) return null;
 
   return (
     <aside

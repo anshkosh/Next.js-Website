@@ -21,7 +21,6 @@ import {
   MessageSquare,
   Zap,
   BookOpen,
-  MoreHorizontal,
   UsersRound,
 } from "lucide-react";
 
@@ -261,13 +260,12 @@ export default async function DashboardPage() {
                   className={`bg-white rounded-2xl border border-gray-100 border-t-4 ${cfg.borderCls} shadow-sm hover:shadow-lg transition-all duration-200 flex flex-col overflow-hidden relative group`}
                 >
                   {/* Delete button */}
-                  <details className="absolute top-3 right-3 z-10">
-                    <summary aria-label={`More actions for ${startup.name}`} className="flex min-h-11 min-w-11 cursor-pointer list-none items-center justify-center rounded-lg text-gray-500 hover:bg-gray-100 focus-visible:outline-2 focus-visible:outline-coral-500 [&::-webkit-details-marker]:hidden"><MoreHorizontal size={20} aria-hidden="true" /></summary>
-                    <div className="absolute right-0 flex items-center gap-3 whitespace-nowrap rounded-xl border border-gray-200 bg-white p-3 text-xs text-gray-600 shadow-lg">Delete startup<DeleteStartupButton
+                  <div className="flex justify-end px-3 pt-2">
+                    <DeleteStartupButton
                       startupId={startup.id}
                       startupName={startup.name}
-                    /></div>
-                  </details>
+                    />
+                  </div>
 
                   {/* Card Body */}
                   <div className="p-5 flex items-start gap-4">

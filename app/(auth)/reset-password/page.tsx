@@ -36,7 +36,7 @@ export default function ResetPasswordPage() {
         {success ? (
           <div className="space-y-4 text-center"><h1 className="text-3xl font-extrabold tracking-tight text-gray-900 font-heading">Password updated</h1><p className="text-gray-600">Your password has been changed successfully.</p><Link href="/login" className="inline-flex font-medium text-coral-600 hover:text-coral-500">Continue to login</Link></div>
         ) : (
-          <form onSubmit={submit} className="space-y-5">
+          <form method="post" onSubmit={submit} className="space-y-5">
             <h1 className="text-center text-3xl font-extrabold tracking-tight text-gray-900 font-heading">Choose a new password</h1>
             {error && <p role="alert" className="rounded-lg border border-red-100 bg-red-50 p-3 text-center text-sm text-red-600">{error}</p>}
             <div><label htmlFor="reset-password" className="block text-sm font-medium text-gray-700">New password</label><PasswordField id="reset-password" name="password" label="New password" autoComplete="new-password" minLength={8} required value={password} onChange={(event) => setPassword(event.target.value)} className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm focus:border-coral-500 focus:outline-none focus:ring-coral-500" /><p className="mt-2 text-xs text-gray-500">Use at least 8 characters, including one uppercase letter and one number.</p></div>

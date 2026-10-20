@@ -32,7 +32,7 @@ export default function NewsletterSignup() {
   if (success) return <p role="status" className="flex items-center gap-2 text-sm text-green-700 dark:text-green-400"><CheckCircle2 size={16} aria-hidden="true" /> Check your inbox to confirm. You are not subscribed until you confirm.</p>;
 
   return (
-    <div className="max-w-sm">
+    <div id="newsletter-signup" className="max-w-sm scroll-mt-24">
       <p className="mb-2 text-sm font-semibold text-gray-900 dark:text-white">Get the next signal</p>
       <p className="mb-3 text-xs text-gray-600 dark:text-gray-400">Occasional founder stories and pilot updates. No noise.</p>
       <p className="mb-3 text-xs text-gray-500 dark:text-gray-400">Your email is used to send these updates. Unsubscribe any time. See our <Link href="/privacy" className="underline underline-offset-2">Privacy Notice</Link>.</p>

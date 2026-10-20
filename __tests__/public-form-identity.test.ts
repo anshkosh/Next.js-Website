@@ -1,7 +1,7 @@
 // @vitest-environment node
 import { beforeEach, expect, it, vi } from "vitest";
 const mock = vi.hoisted(() => ({ headers: vi.fn(), rate: vi.fn(), send: vi.fn(), comment: vi.fn(), request: vi.fn() }));
-vi.mock("next/headers", () => ({ headers: mock.headers }));
+vi.mock("next/headers", () => ({ headers: mock.headers, cookies: async () => ({ get: () => undefined, set: vi.fn() }) }));
 vi.mock("next/cache", () => ({ revalidatePath: vi.fn() }));
 vi.mock("@/lib/auth", () => ({ auth: { api: { getSession: vi.fn() } } }));
 vi.mock("@/lib/db", () => ({ db: {
@@ -10,11 +10,11 @@ vi.mock("@/lib/db", () => ({ db: {
   betaTesterRequest: { findUnique: async () => null, create: mock.request },
   appSetting: { findUnique: async () => null },
 } }));
-vi.mock("@/lib/utils/rate-limit", () => ({ checkRateLimit: mock.rate }));
+vi.mock("@/lib/utils/rate-limit", () => ({ checkRateLimit: mock.rate, readRateLimit: async () => ({ allowed: true, available: true, retryAfterSeconds: 1 }) }));
 vi.mock("@/lib/utils/turnstile", () => ({ verifyTurnstileToken: async () => true }));
 vi.mock("@/lib/email/adapter", () => ({ sendEmail: mock.send }));
 vi.mock("@/lib/email/templates", () => ({ renderEmailTemplate: async () => "<p>Test</p>" }));
-vi.mock("@/lib/logger", () => ({ logger: { error: vi.fn() } }));
+vi.mock("@/lib/logger", () => ({ logger: { error: vi.fn(), warn: vi.fn() } }));
 import { submitComment } from "@/app/actions/comment.actions";
 import { submitContactForm } from "@/app/actions/contact.actions";
 import { submitBetaTesterRequest } from "@/app/actions/beta-tester.actions";
@@ -24,7 +24,7 @@ const calls = [
   () => submitContactForm({ name: "<b>Tester</b>", email: "tester@example.test", subject: "General", message: "A useful test message that exceeds twenty characters.", turnstileToken: "valid" }),
   () => submitBetaTesterRequest({ startupId, name: "Tester", email: "tester@example.test", message: "Interested", consent: true, adultConfirmed: true, turnstileToken: "valid" }),
 ];
-beforeEach(() => { vi.clearAllMocks(); mock.send.mockResolvedValue(undefined); });
+beforeEach(() => { vi.clearAllMocks(); mock.send.mockResolvedValue(undefined); mock.comment.mockResolvedValue({ id: "cmvddwy1h0001zgy2oi9d66n4", authorName: "Tester", body: "Useful feedback", createdAt: new Date() }); });
 it.each(calls)("rotating user-agent and client-prepended forwarded addresses cannot reset a public form budget", async action => {
   let attempts = 0; mock.rate.mockImplementation(async () => ++attempts <= 3);
   for (let index = 0; index < 5; index++) {
