@@ -1,9 +1,17 @@
 import { afterEach, expect, it, vi } from "vitest";
 import { renderToStaticMarkup } from "react-dom/server";
 import SearchPage from "../app/(public)/search/page";
+import { startupSearchWhere } from "../lib/startup-search";
 const queries = vi.hoisted(() => ({ startups: vi.fn(), articles: vi.fn(), categories: vi.fn() }));
 vi.mock("@/lib/db", () => ({ db: { startup: { findMany: queries.startups }, journalPost: { findMany: queries.articles }, category: { findMany: queries.categories } } }));
 afterEach(() => { vi.unstubAllEnvs(); vi.clearAllMocks(); });
+it("matches published audience text as well as descriptions and cities", () => {
+  const where = startupSearchWhere("  Kerala  ");
+  expect(where.status).toBe("LIVE");
+  expect(where.OR).toContainEqual({ targetAudience: { contains: "Kerala", mode: "insensitive" } });
+  expect(where.OR).toContainEqual({ description: { contains: "Kerala", mode: "insensitive" } });
+  expect(where.OR).toContainEqual({ metadata: { path: ["city"], string_contains: "Kerala", mode: "insensitive" } });
+});
 it("searches published founder names without querying private accounts or showing vote identifiers", async () => {
   vi.stubEnv("DATABASE_URL", "postgresql://test.invalid/fixture");
   queries.startups.mockResolvedValue([{ id: "test", slug: "test", name: "Test startup", tagline: "Fixture", logoUrl: null, category: { name: "Food" }, upvoteCount: 3, downvoteCount: 5, signalCount: -2, founders: [{ name: "Rinu <script>" }] }]);

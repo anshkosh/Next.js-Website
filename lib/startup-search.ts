@@ -8,6 +8,7 @@ export function startupSearchWhere(query: string): Prisma.StartupWhereInput {
     status: "LIVE",
     OR: [
       { name: contains }, { tagline: contains }, { description: contains },
+      { targetAudience: contains },
       { founders: { some: { name: contains } } },
       { category: { name: contains } },
       { metadata: { path: ["city"], string_contains: query.trim(), mode: "insensitive" } },

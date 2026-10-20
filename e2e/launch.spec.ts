@@ -205,6 +205,8 @@ test("public founder search and bidirectional voting share accurate signals acro
   await expect(page.getByRole("heading", { name: startupName, exact: true })).toBeVisible();
   const startupResult = page.getByRole("link").filter({ has: page.getByRole("heading", { name: startupName, exact: true }) });
   await expect(startupResult.getByText("Founders: Test Founder", { exact: true })).toBeVisible();
+  await enter(page, "/search?q=office%20workers");
+  await expect(page.getByRole("heading", { name: startupName, exact: true })).toBeVisible();
   await enter(page, `/discover?q=${encodeURIComponent("test founder")}`);
   await expect(page.getByRole("heading", { name: startupName, exact: true })).toBeVisible();
   await enter(page, `/startups/${slug}`);

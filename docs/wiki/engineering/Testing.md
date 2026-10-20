@@ -68,7 +68,7 @@ redaction using synthetic strings and temporary local files, never production lo
 npx playwright test
 ```
 
-The active browser gate is `e2e/launch.spec.ts` (eight real end-to-end scenarios,
+The active browser gate is `e2e/launch.spec.ts` (ten real end-to-end scenarios,
 selected by `playwright.config.ts`). Other older spec files still contain planning
 placeholders and are not claimed as coverage. The active suite uses a disposable
 database and captured email/storage services; it must never point at production.
