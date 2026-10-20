@@ -3,8 +3,8 @@
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { headers } from "next/headers";
-import { revalidatePath } from "next/cache";
-import { founderEntrySchema } from "@/lib/founder-journal";
+import { revalidateSavedPath as revalidatePath } from "@/lib/cache-after-save";
+import { founderEntrySchema, founderEntryError } from "@/lib/founder-journal";
 import { journalMediaKeys, journalPlainText } from "@/lib/journal-rich-text";
 import { Prisma } from "@prisma/client";
 import { parseJournalSchedule } from "@/lib/journal-scheduling";
@@ -24,7 +24,7 @@ export async function saveFounderEntry(id: string | null, input: unknown) {
   const session = await auth.api.getSession({ headers: await headers() });
   if (!session?.user || !session.user.emailVerified || session.user.banned) return { error: "Sign in with a verified account to save an entry." };
   const parsed = founderEntrySchema.safeParse(input);
-  if (!parsed.success) return { error: parsed.error.issues[0].message };
+  if (!parsed.success) return { error: founderEntryError(parsed.error) };
   if (id !== null && (typeof id !== "string" || !id || id.length > 100)) return { error: "Entry not found." };
 
   try {

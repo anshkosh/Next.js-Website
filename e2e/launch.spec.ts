@@ -408,3 +408,37 @@ test("signed-in comments prefill identity and remain privately visible while pen
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
   } finally { await db.comment.deleteMany({ where: { startupId, body, status: "PENDING" } }); }
 });
+
+test("founder lesson submission, update feedback and direct sign-out work together", async ({ page }) => {
+  await login(page, email, "ChangedTesting123!");
+  const title = `Journal regression ${randomUUID()}`;
+  const updateTitle = `Update regression ${randomUUID()}`;
+  try {
+    await enter(page, "/dashboard/journal");
+    await page.getByLabel("Entry style").selectOption("LESSON");
+    await page.locator("#entry-title").fill(title);
+    await page.getByRole("textbox", { name: "Your entry", exact: true }).fill("A synthetic lesson from our isolated pilot. ".repeat(15));
+    await page.getByRole("radio", { name: /Public/ }).check();
+    await page.getByRole("combobox").nth(1).selectOption(startupId);
+    await page.getByRole("button", { name: "Submit for review", exact: true }).click();
+    await expect(page.getByRole("status")).toContainText("Submitted for review");
+    await expect.poll(async () => db.founderJournalRevision.count({ where: { entry: { title, startupId }, status: "PENDING_REVIEW" } })).toBe(1);
+    await page.reload();
+    await expect(page.getByText(title, { exact: true })).toBeVisible();
+    await enter(page, `/startup/${startupId}/updates`);
+    await page.getByRole("button", { name: "Post a New Update", exact: true }).click();
+    await page.locator('input[type="text"]').fill(updateTitle);
+    await page.locator("textarea").fill("A synthetic progress update for an isolated fixture.");
+    await page.getByRole("button", { name: "Publish Update", exact: true }).click();
+    await expect(page.getByRole("status")).toContainText("Update published successfully");
+    await expect.poll(async () => db.startupUpdate.count({ where: { startupId, title: updateTitle } })).toBe(1);
+    await enter(page, "/logout");
+    await expect(page).toHaveURL(/\/login$/);
+    await page.goto("/dashboard");
+    await expect(page).toHaveURL(/\/login$/);
+  } finally {
+    await db.founderJournalEntry.deleteMany({ where: { startupId, title } });
+    await db.startupUpdate.deleteMany({ where: { startupId, title: updateTitle } });
+    await db.startup.update({ where: { id: startupId }, data: { updateCount: await db.startupUpdate.count({ where: { startupId } }) } });
+  }
+});

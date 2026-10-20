@@ -1,7 +1,7 @@
 import { db } from "@/lib/db";
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
-import Image from "next/image";
+import JournalCover from "@/components/journal/JournalCover";
 import Link from "next/link";
 import { Clock, Calendar, ArrowLeft, Tag } from "lucide-react";
 import JournalCard from "@/components/landing/JournalCard";
@@ -123,17 +123,7 @@ export default async function JournalArticlePage({ params }: Props) {
       <article className="min-h-screen bg-gray-50/30">
         {/* Cover Hero */}
         {post.coverImageUrl && (
-          <div className="relative h-[420px] md:h-[520px] w-full bg-gray-900">
-            <Image
-              src={post.coverImageUrl}
-              alt={post.title}
-              fill
-              className="object-cover opacity-70"
-              priority
-              sizes="100vw"
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-gray-900/80 via-gray-900/20 to-transparent" />
-          </div>
+          <JournalCover key={post.coverImageUrl} src={post.coverImageUrl} title={post.title} />
         )}
 
         {/* Article Container */}

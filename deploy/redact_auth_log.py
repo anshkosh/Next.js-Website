@@ -6,6 +6,7 @@ No log history is discarded. Do not apply without the owner's approval.
 """
 import argparse
 import hashlib
+import gzip
 import json
 import os
 from pathlib import Path
@@ -32,12 +33,60 @@ def redact_line(line):
 def inspect_log(path):
     digest = hashlib.sha256()
     records = exposed = 0
-    with path.open("rb") as source:
+    opener = gzip.open if path.suffix == ".gz" else open
+    with opener(path, "rb") as source:
         for raw in source:
             digest.update(raw)
             records += 1
             exposed += redact_line(raw.decode("utf-8", errors="surrogateescape"))[1]
     return {"records": records, "exposed_records": exposed, "sha256": digest.hexdigest()}
+
+
+def write_redacted_archive(source_path, target_path):
+    records = redacted = 0
+    with gzip.open(source_path, "rb") as source, target_path.open("xb") as output:
+        os.chmod(target_path, 0o600)
+        with gzip.GzipFile(filename="", mode="wb", fileobj=output, mtime=0) as target:
+            for raw in source:
+                clean, changed = redact_line(raw.decode("utf-8", errors="surrogateescape"))
+                target.write(clean.encode("utf-8", errors="surrogateescape"))
+                records += 1
+                redacted += changed
+        output.flush()
+        os.fsync(output.fileno())
+    return records, redacted
+
+
+def apply_archive_redaction(path, expected_lines, expected_sha256):
+    if (path.parent != ACTIVE_LOG.parent or not re.fullmatch(r"access\.log-\d{8}\.gz", path.name)
+            or path.is_symlink() or path.resolve() != path or os.geteuid() != 0):
+        raise RuntimeError("Expected an exact regular rotated nginx archive")
+    import fcntl
+    with Path("/var/log/nginx/.auth-redaction.lock").open("a") as lock:
+        os.chmod(lock.name, 0o600)
+        fcntl.flock(lock.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
+        info = path.stat()
+        if not stat.S_ISREG(info.st_mode) or nginx_writes_inode(info.st_dev, info.st_ino):
+            raise RuntimeError("Archive is not an inactive regular file")
+        before = inspect_log(path)
+        if before["exposed_records"] != expected_lines or expected_lines < 1 or before["sha256"] != expected_sha256:
+            raise RuntimeError("Archive changed; obtain a fresh preview")
+        target = path.with_name(".auth-redacted-" + uuid.uuid4().hex + ".gz")
+        records, redacted = write_redacted_archive(path, target)
+        after = inspect_log(target)
+        if after["records"] != before["records"] or records != before["records"] or after["exposed_records"] or redacted != expected_lines:
+            raise RuntimeError("Redacted archive verification failed; original retained")
+        if path.stat() != info:
+            raise RuntimeError("Archive changed during redaction; original retained")
+        os.chown(target, info.st_uid, info.st_gid)
+        os.chmod(target, stat.S_IMODE(info.st_mode))
+        os.replace(target, path)
+        descriptor = os.open(path.parent, os.O_RDONLY)
+        try:
+            os.fsync(descriptor)
+        finally:
+            os.close(descriptor)
+        return {"mode": "applied", "records_preserved": records, "redacted_records": redacted, "archive": str(path), "remaining_exposed_records": inspect_log(path)["exposed_records"]}
 
 
 def nginx_writes_inode(device, inode):
@@ -114,13 +163,21 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--apply", action="store_true")
     parser.add_argument("--expected-lines", type=int)
+    parser.add_argument("--archive", type=Path)
+    parser.add_argument("--expected-sha256")
     args = parser.parse_args()
     if args.apply:
         if args.expected_lines is None:
             parser.error("--apply requires --expected-lines from a fresh preview")
-        result = apply_redaction(ACTIVE_LOG, args.expected_lines)
+        if args.archive:
+            if not args.expected_sha256:
+                parser.error("Archive apply requires --expected-sha256 from a fresh preview")
+            result = apply_archive_redaction(args.archive, args.expected_lines, args.expected_sha256)
+        else:
+            result = apply_redaction(ACTIVE_LOG, args.expected_lines)
     else:
-        result = {"mode": "preview", "path": str(ACTIVE_LOG), **inspect_log(ACTIVE_LOG)}
+        path = args.archive or ACTIVE_LOG
+        result = {"mode": "preview", "path": str(path), **inspect_log(path)}
     print(json.dumps(result))
 
 

@@ -38,6 +38,8 @@ export default function UpdateManager({ startupId }: { startupId: string }) {
   const [isEditing, setIsEditing] = useState<string | null>(null); // "new" | update id | null
   const [isSaving, setIsSaving] = useState(false);
   const [showAll, setShowAll] = useState(false);
+  const [status, setStatus] = useState("");
+  const [saveError, setSaveError] = useState("");
 
   const [formData, setFormData] = useState({
     title: "",
@@ -111,6 +113,7 @@ export default function UpdateManager({ startupId }: { startupId: string }) {
   };
 
   const startAdd = () => {
+    setStatus(""); setSaveError("");
     setFormData({ title: "", body: "", imageUrl: "" });
     setImagePreview("");
     setImageError(false);
@@ -118,6 +121,7 @@ export default function UpdateManager({ startupId }: { startupId: string }) {
   };
 
   const startEdit = (update: Update) => {
+    setStatus(""); setSaveError("");
     setFormData({
       title: update.title,
       body: update.body,
@@ -129,45 +133,51 @@ export default function UpdateManager({ startupId }: { startupId: string }) {
   };
 
   const handleSave = async () => {
-    if (!formData.title.trim()) {
-      alert("Title is required (min 3 characters)");
+    if (isSaving) return;
+    setStatus(""); setSaveError("");
+    if (formData.title.trim().length < 3) {
+      setSaveError("Title needs at least 3 characters.");
       return;
     }
     if (!formData.body.trim() || formData.body.trim().length < 10) {
-      alert("Body is required (min 10 characters)");
+      setSaveError("Body needs at least 10 characters.");
       return;
     }
 
     setIsSaving(true);
-
-    if (isEditing === "new") {
-      const res = await createUpdate({
-        startupId,
-        title: formData.title.trim(),
-        body: formData.body.trim(),
-        imageUrl: formData.imageUrl || undefined,
-      });
-      if (res.error) {
-        alert(res.error);
-      } else if (res.data) {
-        setUpdates([res.data as Update, ...updates]);
-        setIsEditing(null);
+    try {
+      if (isEditing === "new") {
+        const res = await createUpdate({
+          startupId,
+          title: formData.title.trim(),
+          body: formData.body.trim(),
+          imageUrl: formData.imageUrl || undefined,
+        });
+        if (res.error) {
+          setSaveError(res.error);
+        } else if (res.data) {
+          setUpdates([res.data as Update, ...updates]);
+          setIsEditing(null);
+          setStatus("Update published successfully.");
+        }
+      } else if (isEditing) {
+        const res = await editUpdate(isEditing, {
+          title: formData.title.trim(),
+          body: formData.body.trim(),
+          imageUrl: formData.imageUrl || undefined,
+        });
+        if (res.error) {
+          setSaveError(res.error);
+        } else if (res.data) {
+          setUpdates(updates.map((u) => (u.id === isEditing ? (res.data as Update) : u)));
+          setIsEditing(null);
+          setStatus("Update changes saved.");
+        }
       }
-    } else if (isEditing) {
-      const res = await editUpdate(isEditing, {
-        title: formData.title.trim(),
-        body: formData.body.trim(),
-        imageUrl: formData.imageUrl || undefined,
-      });
-      if (res.error) {
-        alert(res.error);
-      } else if (res.data) {
-        setUpdates(updates.map((u) => (u.id === isEditing ? (res.data as Update) : u)));
-        setIsEditing(null);
-      }
-    }
 
-    setIsSaving(false);
+    } catch {
+      setSaveError("Could not confirm the save. Your text is still here; check your updates before trying again.");
+    } finally { setIsSaving(false); }
   };
 
   const handleDelete = async (id: string) => {
@@ -195,6 +205,8 @@ export default function UpdateManager({ startupId }: { startupId: string }) {
 
   return (
     <div className="space-y-6">
+      {status && <p role="status" className="rounded-lg bg-green-50 p-3 text-sm text-green-800">{status}</p>}
+      {saveError && <p role="alert" className="rounded-lg bg-red-50 p-3 text-sm text-red-700">{saveError}</p>}
       {loadError && <p role="alert" className="text-sm text-red-600">{loadError} <button type="button" onClick={() => void loadUpdates()} className="underline">Retry</button></p>}
       <div className="flex items-center justify-between">
         <div>

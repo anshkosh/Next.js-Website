@@ -1,11 +1,30 @@
 import tempfile
+import gzip
 from pathlib import Path
 import unittest
 
-from redact_auth_log import inspect_log, redact_line
+from redact_auth_log import inspect_log, redact_line, write_redacted_archive, apply_archive_redaction
 
 
 class AuthLogRedactionTests(unittest.TestCase):
+    def test_rotated_archive_preserves_all_records_and_compression(self):
+        with tempfile.TemporaryDirectory() as folder:
+            source = Path(folder) / "original.gz"
+            target = Path(folder) / "redacted.gz"
+            original = b'/discover?q=normal\n/login?email=fixture&password=synthetic HTTP/1.1\n'
+            with gzip.open(source, "wb") as output:
+                output.write(original)
+            self.assertEqual(inspect_log(source)["exposed_records"], 1)
+            self.assertEqual(write_redacted_archive(source, target), (2, 1))
+            self.assertEqual(inspect_log(target)["exposed_records"], 0)
+            with gzip.open(target, "rb") as result:
+                self.assertEqual(result.read(), b'/discover?q=normal\n/login?email=REDACTED&password=REDACTED HTTP/1.1\n')
+            self.assertEqual(inspect_log(source)["exposed_records"], 1)
+
+    def test_archive_apply_rejects_paths_outside_exact_log_directory(self):
+        for value in ["/tmp/access.log-20261020.gz", "/var/log/nginx/access.log", "/var/log/nginx/other.gz", "/var/log/nginx/../access.log-20261020.gz"]:
+            with self.assertRaises(RuntimeError):
+                apply_archive_redaction(Path(value), 1, "fixture")
     def test_preserves_records_and_redacts_only_credentials_on_exposed_lines(self):
         line = '192.0.2.1 - - [date] "GET /login?email=test%40example.test&password=synthetic&next=%2Fdashboard HTTP/1.1" 200 42 "-" "Browser"\n'
         clean, changed = redact_line(line)

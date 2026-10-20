@@ -6,6 +6,13 @@ import JournalRichContent from "../components/journal/JournalRichContent";
 
 const image = "/api/uploads/serve/founder-journal/owner/12345678-1234-1234-1234-123456789abc.webp";
 describe("founder rich text boundaries", () => {
+  it.each([1, 2, 3, 4, 5, 6])("accepts pasted Quill heading level %s without adding another page title", header => {
+    const content = { ops: [{ insert: "Pasted heading" }, { insert: "\n", attributes: { header } }] };
+    expect(founderEntrySchema.safeParse({ title: "A lesson", prompt: "LESSON", visibility: "PUBLIC", startupId: "owned", contentJson: content }).success).toBe(true);
+    const html = renderToStaticMarkup(<JournalRichContent content={content} fallback="" />);
+    expect(html).toContain(`<h${Math.max(2, header)}`);
+    expect(html).not.toContain("<h1");
+  });
   it("preserves supported formatting, list structure, headings and links without supplied HTML", () => {
     const delta = { ops: [
       { insert: "A heading" }, { insert: "\n", attributes: { header: 2 } },

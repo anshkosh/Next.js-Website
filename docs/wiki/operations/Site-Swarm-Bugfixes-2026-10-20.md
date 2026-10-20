@@ -61,6 +61,49 @@ writers, verifies a record-preserving redacted archive and removes the raw
 temporary. A failure retains private recovery material; investigate on-server
 without exporting logs. The archive name ends in `.log` for the existing rotation.
 
+## Follow-up owner request: remaining items
+
+The owner asked to fix the outstanding items as well. A fresh count-only scan
+found that nginx had rotated the affected log: the active log and nine older
+compressed archives had no password-query exposure; `access.log-20261020.gz`
+contained the eight affected records. After synthetic archive-preservation tests,
+the reviewed archive path was redacted under the deploy lock using its fresh
+record count and SHA-256 precondition. All 13,447 records were preserved and the
+rewritten compressed archive has zero credential-bearing records. No raw log or
+credential values were exported. This does not purge external browser/tool history.
+
+Jerry's newer reports (#315/#326) are included in the follow-up source changes:
+
+- Founder Update creation/editing displays a visible success notice. Lost save
+  responses retain the draft, restore the button and advise checking existing
+  updates before retrying.
+- `/logout` calls Better Auth's POST sign-out and returns to login with refreshed
+  session UI. Failures offer retry.
+- Founder Journal returns field-specific errors without echoing submitted values.
+  The client validates before sending a plain schema-parsed payload; pasted Quill
+  heading levels 1–6 are accepted, with level 1 rendered as a content heading.
+  Cache refresh failures preserve committed save/delete success. A real browser
+  regression exercises a public lesson submission and pending-review persistence.
+  Pasted unsupported headings reproduced the old generic error, but Ananya's
+  exact rejected input has not been established; safe formatting details were
+  requested from Jerry.
+- Bluelearn's original image and 640/1080/1920 resized responses returned 200.
+  A cover-load failure now displays retry instead of leaving an unexplained blank.
+  The original intermittent network/provider cause remains unconfirmed.
+
+The CSP report is still not an application policy block: the public site does not
+send a CSP header or meta policy. Provider-owned frame warnings cannot be repaired
+by weakening the site's security. Existing widget recovery is covered; an exact
+provider error remains requested. Password resets for Arjun, Ananya and Suresh
+remain deferred until after Round 3, without interrupting active test sessions.
+No account reset or test-entry hiding/labelling has been applied.
+
+Jerry separately requested a stored founder waitlist and test-entry options in
+#317. The legacy URL redirect in this PR fixes the 404 and sends founders through
+the existing account/startup submission flow. A separate contact-only waitlist is
+additional product scope; it needs its own consent, retention, abuse protection
+and storage design. It is not silently implemented as newsletter consent.
+
 ## Verification
 
 Local lint/type checks, unit regressions, dependency-policy checks and offline

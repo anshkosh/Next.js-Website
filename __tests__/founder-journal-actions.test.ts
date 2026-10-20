@@ -18,6 +18,17 @@ beforeEach(() => {
   m.update.mockResolvedValue({ count: 1 }); m.remove.mockResolvedValue({ count: 1 });
 });
 describe("founder journal authorization and visibility", () => {
+  it("names rejected fields without disclosing submitted text", async () => {
+    const result = await saveFounderEntry(null, { ...entry, contentJson: { ops: [{ insert: { unknown: "PRIVATE-FIXTURE" } }] } });
+    expect(result.error).toMatch(/^Entry formatting:/);
+    expect(result.error).not.toContain("PRIVATE-FIXTURE");
+    expect(m.create).not.toHaveBeenCalled();
+  });
+  it("keeps a committed save successful when cache refresh fails", async () => {
+    m.revalidate.mockImplementationOnce(() => { throw new Error("cache unavailable"); });
+    expect(await saveFounderEntry(null, entry)).toEqual({ success: true });
+    expect(m.create).toHaveBeenCalledOnce();
+  });
   it.each([null, { user: { id: "owner", emailVerified: false } }, { user: { id: "owner", emailVerified: true, banned: true } }])("rejects unauthenticated, unverified and banned writes", async session => {
     m.session.mockResolvedValue(session);
     expect(await saveFounderEntry(null, entry)).toHaveProperty("error");

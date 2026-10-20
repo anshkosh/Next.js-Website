@@ -28,6 +28,15 @@ export const founderEntrySchema = z.object({
 });
 
 export type FounderEntryInput = z.input<typeof founderEntrySchema>;
+
+// Never return the submitted value (journal text can be private) in validation errors.
+export function founderEntryError(error: z.ZodError) {
+  const issue = error.issues[0];
+  const field = String(issue?.path[0] ?? "entry");
+  const label: Record<string, string> = { title: "Title", body: "Entry text", contentJson: "Entry formatting", prompt: "Entry style", visibility: "Visibility", startupId: "Startup", milestone: "Milestone", milestoneDone: "Milestone completion", scheduledFor: "Publication time" };
+  const generic = !issue || ["invalid_union", "invalid_type", "invalid_value"].includes(issue.code);
+  return `${label[field] ?? "Entry"}: ${generic ? (field === "contentJson" ? "Some formatting is unsupported. Remove that formatting or use the editor toolbar and try again." : "Choose a valid value and try again.") : issue.message}`;
+}
 export function journalPage(value?: string) {
   const page = Number(value);
   return Number.isSafeInteger(page) && page > 0 && page <= 10000 ? page : 1;

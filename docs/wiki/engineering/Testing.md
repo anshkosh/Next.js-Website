@@ -68,10 +68,13 @@ redaction using synthetic strings and temporary local files, never production lo
 npx playwright test
 ```
 
-The active browser gate is `e2e/launch.spec.ts` (ten real end-to-end scenarios,
+The active browser gate is `e2e/launch.spec.ts` (eleven real end-to-end scenarios,
 selected by `playwright.config.ts`). Other older spec files still contain planning
 placeholders and are not claimed as coverage. The active suite uses a disposable
 database and captured email/storage services; it must never point at production.
+The additional founder regression submits a rich-text public lesson for review,
+checks pending persistence, publishes a startup update with visible feedback and
+visits `/logout` before verifying the dashboard requires login again.
 Photo-upload scenarios assert a successful upload response and a valid sanitized
 storage URL before requiring the editor to close. The response wait uses the
 existing 30-second browser action budget so cold dev compilation is distinct from

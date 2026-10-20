@@ -6,7 +6,7 @@ import { useEffect, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { BookOpen, Globe, LockKeyhole } from "lucide-react";
 import { saveFounderEntry, deleteFounderEntry } from "@/app/actions/founder-journal.actions";
-import { JOURNAL_PROMPTS } from "@/lib/founder-journal";
+import { JOURNAL_PROMPTS, founderEntrySchema, founderEntryError } from "@/lib/founder-journal";
 import { journalDeltaSchema, journalPlainText, plainTextDelta } from "@/lib/journal-rich-text";
 import JournalRichContent from "@/components/journal/JournalRichContent";
 import { founderEntryPath } from "@/lib/founder-journal-seo";
@@ -63,9 +63,11 @@ export default function FounderJournal({ entries, startups }: { entries: Entry[]
   }
   function save() {
     if (uploading) return;
+    const parsed = founderEntrySchema.safeParse({ ...draft, startupId: draft.startupId || null });
+    if (!parsed.success) { setError(founderEntryError(parsed.error)); return; }
     startTransition(async () => {
       try {
-        const result = await saveFounderEntry(editing, { ...draft, startupId: draft.startupId || null });
+        const result = await saveFounderEntry(editing, parsed.data);
         if (result.error) { setError(result.error); return; }
         const wasPublic = draft.visibility === "PUBLIC";
         reset(); setStatus(wasPublic ? "Submitted for review. Your approved version, if any, stays live until the replacement is approved and published." : "Private entry saved. Only you can view it. Any pending review or schedule has been cancelled.");
