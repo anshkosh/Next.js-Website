@@ -531,6 +531,8 @@ test("founder mode hides every owned startup publicly and restores approved visi
     status: status as "LIVE" | "DRAFT" | "SUSPENDED",
   } })));
   const [live] = fixtures;
+  const teamName = `Visibility team ${randomUUID()}`;
+  await db.startupFounder.create({ data: { startupId: live.id, name: teamName } });
   const reviewer = await db.user.findUniqueOrThrow({ where: { email: adminEmail } });
   const control = await db.startup.create({ data: { name: "Visible control startup", slug: `control-${randomUUID()}`, tagline: "A different owner remains visible", description: "An isolated public visibility control.", websiteUrl: "https://example.test", founderName: reviewer.name, founderId: reviewer.id, categoryId, status: "LIVE" } });
   // A historical address can be reused by a current startup. Hiding the
@@ -554,6 +556,9 @@ test("founder mode hides every owned startup publicly and restores approved visi
       expect((await visitor.request.get(direct(fixture.slug))).status()).toBe(200);
     }
     expect((await visitor.request.get(storyPath)).status()).toBe(200);
+    const publicTeam = await visitor.request.get(`/api/startups/${live.id}/founders`);
+    expect(publicTeam.headers()["cache-control"]).toContain("no-store");
+    expect((await publicTeam.json()).data).toEqual([expect.objectContaining({ name: teamName })]);
     expect((await visitor.request.get(direct(oldSlug))).url()).toContain(direct(live.slug));
     expect(await (await visitor.request.get("/discover")).text()).toContain(`href="${direct(live.slug)}"`);
     expect(await (await visitor.request.get("/sitemap.xml")).text()).toContain(storyPath);
@@ -570,6 +575,8 @@ test("founder mode hides every owned startup publicly and restores approved visi
     }
     expect((await visitor.request.get(direct(oldSlug))).status()).toBe(404);
     expect((await visitor.request.get(storyPath)).status()).toBe(404);
+    expect((await (await visitor.request.get(`/api/startups/${live.id}/founders`)).json()).data).toEqual([]);
+    expect((await (await page.request.get(`/api/startups/${live.id}/founders`)).json()).data).toEqual([expect.objectContaining({ name: teamName })]);
     expect((await visitor.request.get(direct(control.slug))).status()).toBe(200);
     // The storage action must reject a mutation from a previously open page too.
     const { recordVote } = await import("../lib/vote-store");

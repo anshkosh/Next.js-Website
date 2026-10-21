@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Image from "next/image";
-import { getFounders } from "@/app/actions/founder.actions";
+import { fetchStartupFounders } from "@/lib/startup-team-client";
 import type { wizardFields } from "@/lib/startup-wizard";
 import { safeLaunchUrl } from "@/lib/launch-resources";
 
@@ -31,7 +31,8 @@ export default function StartupReview({
   const [teamError, setTeamError] = useState(false);
   useEffect(() => {
     let alive = true;
-    getFounders(startupId)
+    const controller = new AbortController();
+    fetchStartupFounders(startupId, controller.signal)
       .then((result) => {
         if (!alive) return;
         setTeam(result.data || []);
@@ -42,6 +43,7 @@ export default function StartupReview({
       });
     return () => {
       alive = false;
+      controller.abort();
     };
   }, [startupId, version]);
   const sections = [

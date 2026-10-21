@@ -8,9 +8,18 @@ vi.mock("@/lib/db", () => ({ db: { startupFounder: { findMany: mock.founders }, 
 vi.mock("@/lib/logger", () => ({ logger: { error: vi.fn() } }));
 vi.mock("@/lib/utils/rate-limit", () => ({ checkRateLimit: vi.fn() }));
 import { getFounders } from "@/app/actions/founder.actions";
+import { GET as teamRoute } from "@/app/api/startups/[id]/founders/route";
 import { getUpdates } from "@/app/actions/update.actions";
 import { fetchApprovedComments } from "@/app/actions/comment.actions";
 beforeEach(() => { vi.clearAllMocks(); mock.session.mockResolvedValue(null); mock.comments.mockResolvedValue([]); });
+it("keeps background team reads uncached and within the public visibility boundary", async () => {
+  mock.founders.mockResolvedValue([]);
+  const response = await teamRoute(new Request("http://localhost/api/startups/known-id/founders"), { params: Promise.resolve({ id: "known-id" }) });
+  expect(response.status).toBe(200);
+  expect(response.headers.get("cache-control")).toBe("private, no-store");
+  expect(await response.json()).toEqual({ data: [] });
+  expect(mock.founders).toHaveBeenCalledWith(expect.objectContaining({ where: { startupId: "known-id", startup: { status: "LIVE", founder: { founderMode: true } } } }));
+});
 it.each(["DRAFT", "PENDING_REVIEW", "REJECTED", "SUSPENDED"])("does not expose %s helpers anonymously", async status => {
   // A minimal predicate-aware fixture, not a mock that returns private rows
   // regardless of the query's publication boundary.
