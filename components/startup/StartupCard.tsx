@@ -3,7 +3,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import UpvoteButton from "@/components/upvote/UpvoteButton";
-import { Rocket, MessageSquare } from "lucide-react";
+import { MessageSquare } from "lucide-react";
 
 type StartupCardProps = {
   startup: {
@@ -22,6 +22,9 @@ type StartupCardProps = {
     hasUpvoted: boolean;
     hasDownvoted: boolean;
     updateCount?: number;
+    activitySignals?: number;
+    problemStatement?: string | null;
+    latestUpdate?: { title: string; date: string } | null;
   };
 };
 
@@ -31,75 +34,55 @@ export default function StartupCard({ startup }: StartupCardProps) {
   const city = typeof metadata.city === "string" ? metadata.city : undefined;
   const foundedYear = typeof metadata.foundedYear === "string" || typeof metadata.foundedYear === "number" ? metadata.foundedYear : undefined;
 
+  // The startup name's link stretches over the whole card; the vote control sits above it.
   return (
-    <div className="flex flex-col bg-white border border-gray-200 rounded-xl shadow-sm hover:shadow-md transition-shadow h-full group relative">
-      {/* Top Border */}
-      <div className="h-1.5 w-full bg-coral-500 rounded-t-xl absolute top-0 left-0 right-0" />
-
-      <div className="p-6 pt-8 flex-1 flex flex-col">
-        {/* Header: Logo and Category */}
-        <div className="flex justify-between items-start mb-5">
-          <div className="w-16 h-16 relative rounded-xl overflow-hidden border border-gray-100 bg-gray-50 flex-shrink-0 shadow-sm">
-            {startup.logoUrl ? (
-              <Image
-                src={startup.logoUrl}
-                alt={`${startup.name} logo`}
-                fill
-                className="object-cover"
-                sizes="64px"
-              />
-            ) : (
-              <div className="w-full h-full flex items-center justify-center text-2xl bg-gray-100 text-gray-400 font-bold">
-                {startup.name.charAt(0)}
-              </div>
-            )}
-          </div>
-          <span className="text-xs font-medium text-gray-500 truncate max-w-[140px] text-right">
-            {startup.category.name}
-          </span>
+    <article className="group relative flex h-full flex-col rounded-xl border border-gray-200 bg-white p-6 shadow-sm transition-[border-color,box-shadow] duration-(--duration-quick) hover:border-coral-300 hover:shadow-md">
+      <div className="flex items-start gap-4">
+        <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-xl border border-gray-100 bg-gray-50">
+          {startup.logoUrl ? (
+            <Image src={startup.logoUrl} alt="" fill className="object-cover" sizes="48px" />
+          ) : (
+            <div aria-hidden="true" className="flex h-full w-full items-center justify-center bg-gray-100 text-xl font-bold text-gray-500">
+              {startup.name.charAt(0)}
+            </div>
+          )}
         </div>
-
-        {/* Title */}
-        <div className="flex items-center gap-1.5 mb-2">
-          <h3 className="text-xl font-bold text-gray-900 group-hover:text-coral-500 transition-colors truncate">
-            <Link href={`/startups/${startup.slug}`}>{startup.name}</Link>
+        <div className="min-w-0">
+          <h3 className="truncate font-heading text-xl font-bold text-gray-900 transition-colors duration-(--duration-quick) group-hover:text-coral-700">
+            <Link href={`/startups/${startup.slug}`} className="after:absolute after:inset-0 after:rounded-xl">{startup.name}</Link>
           </h3>
-        </div>
-
-        {/* Tagline */}
-        <p className="text-sm text-gray-500 mb-6 line-clamp-2 leading-relaxed flex-1">
-          {startup.tagline}
-        </p>
-
-        {/* Badges / Location */}
-        <div className="flex flex-wrap items-center gap-2 mb-2">
-          {city && (
-            <span className="text-[11px] font-semibold text-blue-600 bg-blue-50 px-2.5 py-1 rounded-full">
-              📍 {city}
-            </span>
-          )}
-          {foundedYear && (
-            <span className="text-[11px] font-semibold text-purple-600 bg-purple-50 px-2.5 py-1 rounded-full">
-              Est. {foundedYear}
-            </span>
-          )}
-          {startup.updateCount != null && startup.updateCount > 0 && (
-            <span className="text-[11px] font-semibold text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-full inline-flex items-center gap-1">
-              <MessageSquare className="w-3 h-3" /> {startup.updateCount} Update{startup.updateCount !== 1 ? "s" : ""}
-            </span>
-          )}
+          <p className="truncate text-xs font-medium text-coral-700">{startup.category.name}</p>
         </div>
       </div>
 
-      {/* Footer Actions */}
-      <div className="px-6 pb-6 flex gap-3">
-        <Link
-          href={`/startups/${startup.slug}`}
-          className="flex-1 flex justify-center items-center gap-2 bg-coral-500 hover:bg-coral-600 text-white rounded-lg font-medium transition-colors text-sm"
-        >
-          View {startup.name} <Rocket className="w-4 h-4 transition-all duration-300 ease-out group-hover:translate-x-1 group-hover:-translate-y-1 group-hover:text-orange-400" />
-        </Link>
-        <div className="shrink-0 flex items-stretch">
+      <p className="mt-3 line-clamp-2 text-sm leading-relaxed text-gray-600">{startup.tagline}</p>
+
+      {startup.problemStatement && (
+        <p className="mt-4 line-clamp-3 text-sm leading-relaxed text-gray-800">
+          <span className="font-semibold text-gray-900">Problem: </span>{startup.problemStatement}
+        </p>
+      )}
+
+      {startup.latestUpdate && (
+        <p className="mt-4 flex min-w-0 items-start gap-2 text-xs leading-relaxed text-gray-600">
+          <MessageSquare aria-hidden="true" className="mt-0.5 h-3.5 w-3.5 shrink-0 text-coral-600" />
+          <span className="line-clamp-1"><span className="font-semibold text-gray-800">Update · {startup.latestUpdate.date}:</span> {startup.latestUpdate.title}</span>
+        </p>
+      )}
+
+      <div className="mt-auto flex items-end justify-between gap-3 pt-5">
+        <div className="flex min-w-0 flex-wrap items-center gap-2">
+          {city && (
+            <span className="rounded-full bg-blue-50 px-2.5 py-1 text-[11px] font-semibold text-blue-600">📍 {city}</span>
+          )}
+          {foundedYear && (
+            <span className="rounded-full bg-purple-50 px-2.5 py-1 text-[11px] font-semibold text-purple-600">Est. {foundedYear}</span>
+          )}
+          {startup.updateCount != null && startup.updateCount > 1 && (
+            <span className="rounded-full bg-emerald-50 px-2.5 py-1 text-[11px] font-semibold text-emerald-700">{startup.updateCount} updates</span>
+          )}
+        </div>
+        <div className="relative z-10 shrink-0">
           <UpvoteButton
             startupId={startup.id}
             initialCount={startup.upvoteCount}
@@ -107,9 +90,10 @@ export default function StartupCard({ startup }: StartupCardProps) {
             initialDownvotes={startup.downvoteCount}
             initialDownvoted={startup.hasDownvoted}
             startupName={startup.name}
+            activitySignals={startup.activitySignals}
           />
         </div>
       </div>
-    </div>
+    </article>
   );
 }

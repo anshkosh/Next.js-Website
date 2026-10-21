@@ -4,6 +4,7 @@ import { viewerSession } from "@/lib/viewer-session";
 import MobileNav from "./MobileNav";
 import FullSiteSearch from "./FullSiteSearch";
 import NavigationLinks from "./NavigationLinks";
+import AccountMenu from "./AccountMenu";
 
 export default async function Header() {
   const session = await viewerSession();
@@ -18,22 +19,18 @@ export default async function Header() {
             <span className="text-coral-500">KOSH</span>
           </span>
         </Link>
-        <nav aria-label="Primary navigation" className="hidden xl:flex items-center gap-3 text-sm 2xl:gap-5 2xl:text-base">
+        <nav aria-label="Primary navigation" className="hidden lg:flex items-center gap-3 text-sm xl:gap-5 2xl:text-base">
           <NavigationLinks />
           <FullSiteSearch />
-          {session && <Link href="/settings" className="inline-flex min-h-11 items-center text-gray-700 hover:text-coral-700">Profile settings</Link>}
-          {session && <Link href="/logout" className="inline-flex min-h-11 items-center text-gray-700 hover:text-coral-700">Logout</Link>}
           {session ? (
-            <Link href="/dashboard" className="inline-flex min-h-11 items-center rounded-xl bg-coral-600 px-4 py-2 font-medium text-white transition-colors hover:bg-coral-700">
-              <span className="max-w-32 truncate" title={`Signed in as ${session.user.name}`}>Dashboard · {session.user.name}</span>
-            </Link>
+            <AccountMenu name={session.user.name} />
           ) : (
             <Link href="/login" className="inline-flex min-h-11 items-center rounded-xl bg-gray-900 px-4 py-2 font-medium text-white transition-colors hover:bg-gray-800">
               Login
             </Link>
           )}
         </nav>
-        <div className="flex min-w-0 items-center gap-2 xl:hidden">
+        <div className="flex min-w-0 items-center gap-2 lg:hidden">
           {session && <Link href="/dashboard" className="max-w-28 truncate text-sm font-medium text-gray-700" aria-label={`Signed in as ${session.user.name}. Open dashboard.`}>{session.user.name}</Link>}
           <MobileNav authenticated={Boolean(session)} />
         </div>

@@ -73,7 +73,7 @@ export default function MediaGallery({ videoUrl, images }: { videoUrl?: string |
             <button
               key={idx}
               onClick={() => setActiveIndex(idx)}
-              className={`relative flex-shrink-0 w-32 h-20 rounded-lg overflow-hidden border-2 transition-all ${
+              className={`relative flex-shrink-0 w-32 h-20 rounded-lg overflow-hidden border-2 transition-[border-color,box-shadow,opacity] ${
                 activeIndex === idx
                   ? "border-coral-500 opacity-100 ring-2 ring-coral-500 ring-offset-1"
                   : "border-transparent opacity-60 hover:opacity-100"

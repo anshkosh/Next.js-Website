@@ -101,10 +101,10 @@ export default function FounderTopbar({ user }: { user: { name?: string | null; 
             </div>
             
             <Link href="/dashboard" onClick={() => setIsMenuOpen(false)} className="flex items-center gap-2 px-2 py-2 text-gray-700 font-medium hover:bg-gray-50 rounded-md">
-              <LayoutDashboard size={20} className="text-gray-400" /> Dashboard
+              <LayoutDashboard size={20} className="text-gray-500" /> Dashboard
             </Link>
             <Link href="/" onClick={() => setIsMenuOpen(false)} className="flex items-center gap-2 px-2 py-2 text-gray-700 font-medium hover:bg-gray-50 rounded-md">
-              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-400"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-500"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
               Public Feed
             </Link>
             

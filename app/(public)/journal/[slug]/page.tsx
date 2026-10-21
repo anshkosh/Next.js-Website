@@ -144,7 +144,7 @@ export default async function JournalArticlePage({ params }: Props) {
                 {post.category && (
                   <Link
                     href={`/journal?category=${post.category.slug}`}
-                    className="bg-coral-500 text-white text-xs font-bold px-3 py-1 rounded-full hover:bg-coral-600 transition-colors"
+                    className="bg-coral-600 text-white text-xs font-bold px-3 py-1 rounded-full hover:bg-coral-700 transition-colors"
                   >
                     {post.category.name}
                   </Link>
@@ -196,7 +196,7 @@ export default async function JournalArticlePage({ params }: Props) {
           {/* Tags */}
           {post.tags.length > 0 && (
             <div className="flex flex-wrap items-center gap-2 mb-12 pb-8 border-b border-gray-200">
-              <Tag size={16} className="text-gray-400" />
+              <Tag size={16} className="text-gray-500" />
               {post.tags.map(tag => (
                 <span key={tag} className="bg-gray-100 text-gray-600 text-sm px-3 py-1 rounded-full hover:bg-gray-200 transition-colors">
                   #{tag}
@@ -207,7 +207,7 @@ export default async function JournalArticlePage({ params }: Props) {
 
           {/* Author card */}
           <div className="bg-gray-50 rounded-xl p-6 mb-16 flex items-center gap-4">
-            <div className="w-12 h-12 rounded-full bg-coral-500 flex items-center justify-center text-white font-bold text-xl font-heading">
+            <div className="w-12 h-12 rounded-full bg-coral-600 flex items-center justify-center text-white font-bold text-xl font-heading">
               {post.authorName.charAt(0)}
             </div>
             <div>

@@ -1,6 +1,6 @@
 import { db } from "@/lib/db";
 import { publicStartupWhere } from "@/lib/startup-visibility";
-import { rankSignals, signalSnapshotQuery, type SignalSnapshot, type SignalActivity } from "@/lib/startup-signals";
+import { activitySignals, rankSignals, signalSnapshotQuery, type SignalSnapshot, type SignalActivity } from "@/lib/startup-signals";
 
 export const LEADERBOARD_PAGE_SIZE = 20;
 
@@ -66,4 +66,18 @@ export async function getLeaderboard(requestedPage = 1, cookieId?: string, featu
     });
     return { entries, totalCount, page, totalPages };
   }, { isolationLevel: "RepeatableRead" });
+}
+
+// Activity points for cards and profiles, so every surface shows the same signal
+// total as the leaderboard. Startups outside the ranking get no entry.
+export async function getActivitySignals(ids: string[]) {
+  const wanted = new Set(ids);
+  if (!process.env.DATABASE_URL || wanted.size === 0) return new Map<string, number>();
+  const rows = await db.$queryRaw<SignalSnapshot[]>(signalSnapshotQuery());
+  return new Map(rows.filter(row => wanted.has(row.id)).map(row => [row.id, activitySignals(row)]));
+}
+
+export async function withActivitySignals<T extends { id: string }>(startups: T[]) {
+  const signals = await getActivitySignals(startups.map(startup => startup.id));
+  return startups.map(startup => ({ ...startup, activitySignals: signals.get(startup.id) }));
 }

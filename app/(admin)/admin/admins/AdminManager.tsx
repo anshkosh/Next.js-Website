@@ -46,7 +46,7 @@ export default function AdminManager({ admins, currentUserId }: { admins: { id: 
         <h2 className="text-lg font-medium text-gray-700">Manage Access</h2>
         <button 
           onClick={() => setIsAddOpen(true)}
-          className="flex items-center gap-2 px-4 py-2 bg-coral-500 text-white rounded-md font-medium hover:bg-coral-600 transition-colors"
+          className="flex items-center gap-2 px-4 py-2 bg-coral-600 text-white rounded-md font-medium hover:bg-coral-700 transition-colors"
         >
           <UserPlus size={16} /> Add Admin/Reviewer
         </button>
@@ -93,7 +93,7 @@ export default function AdminManager({ admins, currentUserId }: { admins: { id: 
                       <ShieldOff size={16} />
                     </button>
                   ) : (
-                    <span className="text-xs text-gray-400 italic">You</span>
+                    <span className="text-xs text-gray-500 italic">You</span>
                   )}
                 </TableCell>
               </TableRow>
@@ -125,7 +125,7 @@ export default function AdminManager({ admins, currentUserId }: { admins: { id: 
               
               <div className="flex justify-end gap-3 mt-6">
                 <button type="button" onClick={() => setIsAddOpen(false)} className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-md font-medium">Cancel</button>
-                <button type="submit" disabled={isSubmitting} className="px-4 py-2 bg-coral-500 text-white rounded-md font-medium hover:bg-coral-600 disabled:opacity-50">
+                <button type="submit" disabled={isSubmitting} className="px-4 py-2 bg-coral-600 text-white rounded-md font-medium hover:bg-coral-700 disabled:opacity-50">
                   {isSubmitting ? "Adding..." : "Add Access"}
                 </button>
               </div>

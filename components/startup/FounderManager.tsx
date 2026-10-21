@@ -189,7 +189,7 @@ export default function FounderManager({ startupId, onBusyChange }: { startupId:
         </div>
       ) : (
         founders.length < 3 && (
-          <button type="button" onClick={startAdd} className="w-full py-4 border-2 border-dashed border-gray-200 hover:border-coral-400 rounded-xl flex items-center justify-center gap-2 text-gray-500 hover:text-coral-500 hover:bg-coral-50/50 transition-all">
+          <button type="button" onClick={startAdd} className="w-full py-4 border-2 border-dashed border-gray-200 hover:border-coral-400 rounded-xl flex items-center justify-center gap-2 text-gray-500 hover:text-coral-500 hover:bg-coral-50/50 transition-colors">
             <Plus className="w-5 h-5" />
             <span className="font-medium">Add another founder</span>
           </button>

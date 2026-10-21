@@ -2,77 +2,86 @@ import Link from "next/link";
 import Image from "next/image";
 import NewsletterSignup from "@/components/marketing/NewsletterSignup";
 
+const columns = [
+  {
+    title: "Explore",
+    links: [
+      { label: "Discover", href: "/discover" },
+      { label: "Leaderboard", href: "/leaderboard" },
+      { label: "Categories", href: "/categories" },
+      { label: "Journal", href: "/journal" },
+    ],
+  },
+  {
+    title: "For founders",
+    links: [
+      { label: "List your startup", href: "/startup/new" },
+      { label: "Free Launch Support", href: "/launch-support" },
+      { label: "FAQ", href: "/faq" },
+    ],
+    note: "Listing is free. An account is required, and profiles are reviewed before publication.",
+  },
+  {
+    title: "Company",
+    links: [
+      { label: "About Anshkosh", href: "/about" },
+      { label: "Contact us", href: "/contact" },
+      { label: "Trust & Safety", href: "/trust-safety" },
+    ],
+  },
+  {
+    title: "Legal",
+    links: [
+      { label: "Privacy Notice", href: "/privacy" },
+      { label: "Terms of Service", href: "/terms" },
+      { label: "Beta Tester Consent", href: "/beta-consent" },
+    ],
+  },
+];
+
+// Tall enough to tap on phones, tighter on desktop where a pointer is precise.
+const linkClass = "inline-flex min-h-10 items-center text-gray-700 transition-colors hover:text-coral-700 lg:min-h-8";
+
 export default function Footer() {
   return (
-    <footer className="w-full border-t border-gray-200 bg-gray-50 py-12 mt-auto dark:border-gray-700 dark:bg-gray-950">
-      <div className="container mx-auto px-4 max-w-7xl">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 pb-8 border-b border-gray-200">
-          {/* Column 1: Logo & Tagline */}
-          <div className="space-y-3">
-            <Link href="/" className="flex items-center gap-2">
-              <Image src="/logo.svg" alt="Anshkosh Logo" width={32} height={32} className="w-8 h-8" />
-              <span className="text-2xl font-bold font-heading tracking-tight">
-                <span className="text-gray-900">Anshkosh</span>
+    <footer className="mt-auto w-full border-t border-gray-200 bg-gray-50">
+      <div className="container mx-auto max-w-7xl px-4 py-12">
+        <div className="grid gap-10 lg:grid-cols-[minmax(0,2fr)_repeat(4,minmax(0,1fr))] lg:gap-8">
+          <div className="space-y-4">
+            <Link href="/" aria-label="Anshkosh home" className="inline-flex items-center gap-2">
+              <Image src="/logo.svg" alt="" width={32} height={32} className="h-8 w-8" />
+              <span className="font-heading text-2xl font-bold tracking-tight">
+                <span className="text-gray-900">ANSH</span>
+                <span className="text-coral-500">KOSH</span>
               </span>
             </Link>
-            <p className="text-sm text-gray-500">
+            <p className="max-w-xs text-sm leading-relaxed text-gray-600">
               Discover Indian startups before launch.
             </p>
-          </div>
-
-          {/* Column 2: Platform */}
-          <div className="space-y-3">
-            <h4 className="font-bold text-gray-900 text-sm font-heading uppercase tracking-wider">Platform</h4>
-            <ul className="space-y-2 text-sm text-gray-700">
-              <li><Link href="/discover" className="hover:text-gray-900 transition-colors">Discover</Link></li>
-              <li><Link href="/leaderboard" className="hover:text-gray-900 transition-colors">Leaderboard</Link></li>
-              <li><Link href="/categories" className="hover:text-gray-900 transition-colors">Categories</Link></li>
-              <li><Link href="/journal" className="hover:text-gray-900 transition-colors">Journal</Link></li>
-              <li><Link href="/startup/new" className="hover:text-gray-900 transition-colors">List your startup</Link></li>
-              <li><Link href="/launch-support" className="hover:text-gray-900 transition-colors">Free Launch Support</Link></li>
-            </ul>
-            <p className="text-xs leading-relaxed text-gray-500">Listing is free. An account is required, and profiles are reviewed before publication.</p>
-          </div>
-
-          {/* Column 3: Legal */}
-          <div className="space-y-3">
-            <h4 className="font-bold text-gray-900 text-sm font-heading uppercase tracking-wider">Legal</h4>
-            <ul className="space-y-2 text-sm text-gray-700">
-              <li><Link href="/about" className="hover:text-gray-900 transition-colors">About Anshkosh</Link></li>
-              <li><Link href="/faq" className="hover:text-gray-900 transition-colors">FAQ</Link></li>
-              <li><Link href="/privacy" className="hover:text-gray-900 transition-colors">Privacy Notice</Link></li>
-              <li><Link href="/beta-consent" className="hover:text-gray-900 transition-colors">Beta Tester Consent</Link></li>
-              <li><Link href="/terms" className="hover:text-gray-900 transition-colors">Terms of Service</Link></li>
-              <li><Link href="/trust-safety" className="hover:text-gray-900 transition-colors">Trust & Safety</Link></li>
-            </ul>
-          </div>
-
-          {/* Column 4: Contact */}
-          <div className="space-y-3">
-            <h4 className="font-bold text-gray-900 text-sm font-heading uppercase tracking-wider">Contact</h4>
-            <ul className="space-y-2 text-sm text-gray-700">
-              <li>
-                <Link href="/contact" className="hover:text-gray-900 transition-colors">
-                  Contact Us
-                </Link>
-              </li>
-              <li>
-                <a href="mailto:hello@anshkosh.com" className="hover:text-gray-900 transition-colors">
-                  hello@anshkosh.com
-                </a>
-              </li>
-              <li className="text-gray-500">India</li>
-            </ul>
             <NewsletterSignup />
+          </div>
+
+          <div className="grid grid-cols-2 gap-8 sm:grid-cols-4 lg:contents">
+            {columns.map(column => (
+              <nav key={column.title} aria-labelledby={`footer-${column.title.toLowerCase().replace(/\s+/g, "-")}`} className="min-w-0">
+                <h2 id={`footer-${column.title.toLowerCase().replace(/\s+/g, "-")}`} className="font-sans text-xs font-semibold uppercase tracking-[0.14em] text-gray-900">
+                  {column.title}
+                </h2>
+                <ul className="mt-3 text-sm">
+                  {column.links.map(link => (
+                    <li key={link.href}><Link href={link.href} className={linkClass}>{link.label}</Link></li>
+                  ))}
+                </ul>
+                {column.note && <p className="mt-3 text-xs leading-relaxed text-gray-600">{column.note}</p>}
+              </nav>
+            ))}
           </div>
         </div>
 
-        {/* Bottom Bar */}
-        <div className="pt-6 space-y-3 text-center text-xs text-gray-600">
-          <p>
-            This platform is an early-access pilot. Payments and preorders are not open during the pilot.
-          </p>
-          <p>© 2026 Anshkosh. All rights reserved.</p>
+        {/* Right padding keeps this text clear of the floating Contact and back-to-top buttons. */}
+        <div className="mt-10 flex flex-col gap-3 border-t border-gray-200 pt-6 text-xs text-gray-600 sm:flex-row sm:items-center sm:justify-between md:pr-40">
+          <p>© 2026 Anshkosh. All rights reserved. · <a href="mailto:hello@anshkosh.com" className="underline-offset-2 hover:text-coral-700 hover:underline">hello@anshkosh.com</a> · India</p>
+          <p>This platform is an early-access pilot. Payments and preorders are not open during the pilot.</p>
         </div>
       </div>
     </footer>

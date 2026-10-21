@@ -79,7 +79,7 @@ export default function SearchBar({ categories = [] }: SearchBarProps) {
   };
 
   return (
-    <div className="relative w-full max-w-3xl mx-auto flex items-center bg-white border border-gray-200 rounded-full shadow-sm overflow-hidden focus-within:ring-2 focus-within:ring-coral-500 focus-within:border-transparent transition-all">
+    <div className="relative w-full max-w-3xl mx-auto flex items-center bg-white border border-gray-200 rounded-full shadow-sm overflow-hidden focus-within:ring-2 focus-within:ring-coral-500 focus-within:border-transparent transition-[border-color,box-shadow]">
       {categories.length > 0 && (
         <div className="relative w-2/5 flex-shrink-0 border-r border-gray-200 bg-gray-50/50 sm:w-auto sm:max-w-[45%]">
           <label htmlFor="startup-category" className="sr-only">Filter by category</label>
@@ -104,7 +104,7 @@ export default function SearchBar({ categories = [] }: SearchBarProps) {
       
       <div className="relative min-w-0 flex-1 flex items-center">
         <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
           </svg>
         </div>
@@ -124,7 +124,7 @@ export default function SearchBar({ categories = [] }: SearchBarProps) {
             type="button"
             aria-label="Clear search"
             onClick={handleClearText}
-            className="absolute inset-y-0 right-0 pr-4 flex items-center text-gray-400 hover:text-gray-600"
+            className="absolute inset-y-0 right-0 pr-4 flex items-center text-gray-500 hover:text-gray-600"
           >
             <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
               <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />

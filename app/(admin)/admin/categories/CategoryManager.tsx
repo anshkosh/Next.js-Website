@@ -74,7 +74,7 @@ function IconPickerModal({ isOpen, onClose, onSelect }: { isOpen: boolean, onClo
         </div>
         
         <div className="relative mb-4">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" size={18} />
           <input 
             type="text" 
             placeholder="Search icons..." 
@@ -179,7 +179,7 @@ export default function CategoryManager({ initialCategories }: { initialCategori
         <h2 className="text-lg font-medium text-gray-700">Manage Categories</h2>
         <button 
           onClick={() => { setIsAddOpen(true); setAddIconName("CircleDashed"); }}
-          className="flex items-center gap-2 px-4 py-2 bg-coral-500 text-white rounded-md font-medium hover:bg-coral-600 transition-colors"
+          className="flex items-center gap-2 px-4 py-2 bg-coral-600 text-white rounded-md font-medium hover:bg-coral-700 transition-colors"
         >
           <Plus size={16} /> Add Category
         </button>
@@ -280,7 +280,7 @@ export default function CategoryManager({ initialCategories }: { initialCategori
                     {addIconName ? <DynamicIcon name={addIconName} size={20} className="text-gray-600" /> : <div className="w-5 h-5 bg-gray-100 rounded-full" />}
                     <span className="text-gray-700">{addIconName || "Select an icon"}</span>
                   </span>
-                  <Edit2 size={14} className="text-gray-400" />
+                  <Edit2 size={14} className="text-gray-500" />
                 </button>
               </div>
               <div>
@@ -290,7 +290,7 @@ export default function CategoryManager({ initialCategories }: { initialCategori
               
               <div className="flex justify-end gap-3 mt-6">
                 <button type="button" onClick={() => setIsAddOpen(false)} className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-md font-medium">Cancel</button>
-                <button type="submit" disabled={isSubmitting} className="px-4 py-2 bg-coral-500 text-white rounded-md font-medium hover:bg-coral-600 disabled:opacity-50">
+                <button type="submit" disabled={isSubmitting} className="px-4 py-2 bg-coral-600 text-white rounded-md font-medium hover:bg-coral-700 disabled:opacity-50">
                   {isSubmitting ? "Creating..." : "Create Category"}
                 </button>
               </div>
@@ -321,7 +321,7 @@ export default function CategoryManager({ initialCategories }: { initialCategori
                     <DynamicIcon name={editCategory.iconName || "Rocket"} size={20} className="text-gray-600" />
                     <span className="text-gray-700">{editCategory.iconName}</span>
                   </span>
-                  <Edit2 size={14} className="text-gray-400" />
+                  <Edit2 size={14} className="text-gray-500" />
                 </button>
               </div>
               <div>

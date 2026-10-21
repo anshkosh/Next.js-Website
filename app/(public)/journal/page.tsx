@@ -158,7 +158,7 @@ export default async function JournalPage(props: {
                       fill
                       priority
                       sizes="(min-width: 768px) 50vw, 100vw"
-                      className="object-cover group-hover:scale-105 transition-transform duration-500"
+                      className="object-cover group-hover:scale-105 transition-transform duration-(--duration-slow)"
                     />
                   ) : (
                     <div className="absolute inset-0 flex items-center justify-center">
@@ -179,7 +179,7 @@ export default async function JournalPage(props: {
                   {featuredPost.excerpt && (
                     <p className="text-gray-500 leading-relaxed line-clamp-3">{featuredPost.excerpt}</p>
                   )}
-                  <div className="flex items-center gap-4 text-sm text-gray-400">
+                  <div className="flex items-center gap-4 text-sm text-gray-500">
                     <span className="font-medium text-gray-600">{featuredPost.authorName}</span>
                     {featuredPost.publishedAt && (
                       <span>{featuredPost.publishedAt.toLocaleDateString("en-IN", { day: "numeric", month: "long", year: "numeric" })}</span>

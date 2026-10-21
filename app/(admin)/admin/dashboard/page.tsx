@@ -157,7 +157,7 @@ export default async function AdminDashboardPage() {
               {topStartups.length > 0 ? topStartups.map((startup, idx) => (
                 <div key={startup.id} className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <span className="text-gray-400 font-medium w-4">{idx + 1}.</span>
+                    <span className="text-gray-500 font-medium w-4">{idx + 1}.</span>
                     <span className="font-medium truncate max-w-48">{startup.name}</span>
                     {startup.status !== "LIVE" && (
                       <span className="text-[10px] px-1.5 py-0.5 bg-gray-100 rounded text-gray-500">{startup.status}</span>
@@ -187,7 +187,7 @@ export default async function AdminDashboardPage() {
                   </div>
                   <div className="w-full bg-gray-100 rounded-full h-2">
                     <div 
-                      className="bg-coral-400 h-2 rounded-full transition-all duration-500" 
+                      className="bg-coral-400 h-2 rounded-full transition-[width] duration-500" 
                       style={{ width: `${(cat._count.startups / maxCategoryCount) * 100}%` }}
                     />
                   </div>

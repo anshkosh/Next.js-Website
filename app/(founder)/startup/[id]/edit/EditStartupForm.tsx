@@ -17,6 +17,7 @@ import DraftRecoveryNotice from "@/components/startup/DraftRecoveryNotice";
 import type { Startup } from "@prisma/client";
 import { startupFieldErrors, startupFieldLabel } from "@/lib/startup-wizard";
 import { startupMetadataFields } from "@/lib/startup-metadata";
+import { preferredScrollBehavior } from "@/lib/scroll-behavior";
 
 const availableIcons = [
   "Zap", "Shield", "Rocket", "Globe", "Users", "Smartphone", "CheckCircle", "Star", "Heart", 
@@ -44,7 +45,7 @@ export default function EditStartupForm({ initialData, userId }: { initialData: 
   const scrollToFirstError = useCallback(() => {
     const errorText = document.querySelector(".text-red-500");
     if (errorText) {
-      errorText.scrollIntoView({ behavior: "smooth", block: "center" });
+      errorText.scrollIntoView({ behavior: preferredScrollBehavior(), block: "center" });
       const parentInput = errorText.parentElement?.querySelector("input, textarea, select");
       if (parentInput) {
         (parentInput as HTMLElement).focus?.({ preventScroll: true });
@@ -55,13 +56,13 @@ export default function EditStartupForm({ initialData, userId }: { initialData: 
     for (const key of Object.keys(errors)) {
       const el = document.querySelector(`[name="${key}"]`);
       if (el) {
-        el.scrollIntoView({ behavior: "smooth", block: "center" });
+        el.scrollIntoView({ behavior: preferredScrollBehavior(), block: "center" });
         (el as HTMLElement).focus?.({ preventScroll: true });
         return;
       }
     }
 
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    window.scrollTo({ top: 0, behavior: preferredScrollBehavior() });
   }, [errors]);
 
   useEffect(() => {
@@ -153,7 +154,7 @@ export default function EditStartupForm({ initialData, userId }: { initialData: 
       setTimeout(() => {
         const el = document.querySelector(`[name="${firstKey}"]`);
         if (el) {
-          el.scrollIntoView({ behavior: "smooth", block: "center" });
+          el.scrollIntoView({ behavior: preferredScrollBehavior(), block: "center" });
           (el as HTMLElement).focus?.();
         }
       }, 50);
@@ -370,7 +371,7 @@ export default function EditStartupForm({ initialData, userId }: { initialData: 
             maxLength={10}
             className={`w-full border rounded-md p-2 ${errors.startupPhone ? "border-red-500 bg-red-50/20" : ""}`}
           />
-          <p className="text-xs text-gray-400 mt-1">10-digit mobile number</p>
+          <p className="text-xs text-gray-500 mt-1">10-digit mobile number</p>
           {errors.startupPhone && (
             <p className="text-red-500 text-xs mt-1">{errors.startupPhone[0]}</p>
           )}
@@ -425,7 +426,7 @@ export default function EditStartupForm({ initialData, userId }: { initialData: 
             <span className={`text-xs ${
               formData.problemStatement.length > 0 && formData.problemStatement.length < 100
                 ? "text-red-500 font-medium"
-                : "text-gray-400"
+                : "text-gray-500"
             }`}>
               {formData.problemStatement.length}/800
               {formData.problemStatement.length > 0 && formData.problemStatement.length < 100 && " (min 100)"}
@@ -456,7 +457,7 @@ export default function EditStartupForm({ initialData, userId }: { initialData: 
             <span className={`text-xs ${
               formData.solutionStatement.length > 0 && formData.solutionStatement.length < 100
                 ? "text-red-500 font-medium"
-                : "text-gray-400"
+                : "text-gray-500"
             }`}>
               {formData.solutionStatement.length}/1000
               {formData.solutionStatement.length > 0 && formData.solutionStatement.length < 100 && " (min 100)"}
@@ -484,7 +485,7 @@ export default function EditStartupForm({ initialData, userId }: { initialData: 
             <label className="block text-sm font-medium text-gray-700">
               Target Audience & Ideal Customer <span className="text-red-500">*</span>
             </label>
-            <span className="text-xs text-gray-400">{formData.targetAudience.length}/500</span>
+            <span className="text-xs text-gray-500">{formData.targetAudience.length}/500</span>
           </div>
           <textarea
             name="targetAudience"
@@ -528,9 +529,9 @@ export default function EditStartupForm({ initialData, userId }: { initialData: 
           <div className="flex items-center justify-between mb-1">
             <label className="block text-sm font-medium text-gray-700">
               Existing Proof Points & Traction
-              <span className="ml-1.5 text-xs font-normal text-gray-400">(Optional)</span>
+              <span className="ml-1.5 text-xs font-normal text-gray-500">(Optional)</span>
             </label>
-            <span className="text-xs text-gray-400">{formData.tractionEvidence.length}/600</span>
+            <span className="text-xs text-gray-500">{formData.tractionEvidence.length}/600</span>
           </div>
           <textarea
             name="tractionEvidence"
@@ -568,7 +569,7 @@ export default function EditStartupForm({ initialData, userId }: { initialData: 
               if (embedUrl) {
                 return <iframe src={embedUrl} className="w-full h-full" frameBorder="0" allowFullScreen></iframe>;
               }
-              return <div className="flex items-center justify-center h-full text-gray-400">Invalid or unsupported video URL</div>;
+              return <div className="flex items-center justify-center h-full text-gray-500">Invalid or unsupported video URL</div>;
             })()}
           </div>
         )}
@@ -721,7 +722,7 @@ export default function EditStartupForm({ initialData, userId }: { initialData: 
         <button
           type="submit"
           disabled={isSaving || isMediaBusy}
-          className="px-6 py-2 bg-coral-500 text-white rounded-md hover:bg-coral-600 disabled:opacity-50 font-medium"
+          className="px-6 py-2 bg-coral-600 text-white rounded-md hover:bg-coral-700 disabled:opacity-50 font-medium"
         >
           {isSaving ? "Saving..." : "Save Changes"}
         </button>

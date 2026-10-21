@@ -32,7 +32,7 @@ export default function JournalAdminActions({ postId, status }: JournalAdminActi
   };
 
   if (isPending) {
-    return <Loader2 size={16} className="animate-spin text-gray-400" />;
+    return <Loader2 size={16} className="animate-spin text-gray-500" />;
   }
 
   return (

@@ -1,8 +1,19 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { usePathname } from "next/navigation";
-import { requestPreviewMotion } from "@/lib/preview-motion";
+import { CURTAIN_SEEN_KEY } from "@/lib/curtain";
+
+// Shown once per browser session; app/layout.tsx hides it before paint on later visits.
+function curtainSeen() {
+  try { return window.sessionStorage.getItem(CURTAIN_SEEN_KEY) === "1"; } catch { return false; }
+}
+
+function rememberCurtain() {
+  try { window.sessionStorage.setItem(CURTAIN_SEEN_KEY, "1"); } catch { /* Storage may be unavailable. */ }
+}
+
+const subscribeToNothing = () => () => {};
 
 export function PreEntryCurtain({ authenticated = false }: { authenticated?: boolean }) {
   const pathname = usePathname();
@@ -13,9 +24,10 @@ function HomeCurtain() {
   const [entered, setEntered] = useState(false);
   const [opening, setOpening] = useState(false);
   const enterButtonRef = useRef<HTMLButtonElement>(null);
+  const seen = useSyncExternalStore(subscribeToNothing, curtainSeen, () => false);
 
   useEffect(() => {
-    if (entered) return;
+    if (entered || curtainSeen()) return;
 
     const content = document.getElementById("site-content");
     const previousOverflow = document.body.style.overflow;
@@ -31,6 +43,8 @@ function HomeCurtain() {
 
   useEffect(() => {
     if (entered) {
+      // Remember only once the reveal is over, so the opening is not cut short.
+      rememberCurtain();
       const main = document.getElementById("main-content");
       if (main) {
         if (!main.hasAttribute("tabindex")) main.setAttribute("tabindex", "-1");
@@ -46,7 +60,7 @@ function HomeCurtain() {
     const onMotionChange = (event: MediaQueryListEvent) => {
       if (event.matches) setEntered(true);
     };
-    const fallback = window.setTimeout(() => setEntered(true), 3400);
+    const fallback = window.setTimeout(() => setEntered(true), 1200);
     media?.addEventListener("change", onMotionChange);
     return () => {
       window.clearTimeout(fallback);
@@ -60,11 +74,10 @@ function HomeCurtain() {
       setEntered(true);
       return;
     }
-    requestPreviewMotion();
     setOpening(true);
   };
 
-  if (entered) return null;
+  if (entered || seen) return null;
 
   return (
     <div

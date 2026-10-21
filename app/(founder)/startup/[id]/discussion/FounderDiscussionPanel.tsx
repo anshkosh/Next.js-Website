@@ -73,7 +73,7 @@ function CommentReplyRow({ comment }: { comment: ApprovedComment }) {
             {comment.authorName.charAt(0).toUpperCase()}
           </div>
           <span className="font-semibold text-gray-900 text-sm">{comment.authorName}</span>
-          <span className="text-gray-400 text-xs">· {formatDate(comment.createdAt)}</span>
+          <span className="text-gray-500 text-xs">· {formatDate(comment.createdAt)}</span>
         </div>
         <p className="text-gray-700 text-sm leading-relaxed whitespace-pre-wrap pl-10">
           {comment.body}
@@ -93,7 +93,7 @@ function CommentReplyRow({ comment }: { comment: ApprovedComment }) {
           onChange={(e) => setReplyText(e.target.value)}
           placeholder="Write a reply as the founder…"
           maxLength={2000}
-          className="w-full px-4 py-3 text-sm rounded-xl border border-gray-200 bg-gray-50 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-coral-400 focus:border-transparent resize-none transition-all"
+          className="w-full px-4 py-3 text-sm rounded-xl border border-gray-200 bg-gray-50 text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-coral-400 focus:border-transparent resize-none transition-[border-color,box-shadow]"
         />
         <div className="text-right text-xs text-gray-600 tabular-nums">{replyText.length}/2000</div>
 
@@ -117,7 +117,7 @@ function CommentReplyRow({ comment }: { comment: ApprovedComment }) {
           <button
             onClick={handleSave}
             disabled={isSaving || isDeleting || !replyText.trim() || !isDirty}
-            className="inline-flex items-center gap-2 px-4 py-2 bg-coral-500 hover:bg-coral-600 disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-semibold rounded-xl transition-colors"
+            className="inline-flex items-center gap-2 px-4 py-2 bg-coral-600 hover:bg-coral-700 disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-semibold rounded-xl transition-colors"
           >
             <Save className="w-4 h-4" />
             {isSaving ? "Saving…" : savedReply ? "Update Reply" : "Post Reply"}
@@ -142,10 +142,10 @@ function CommentReplyRow({ comment }: { comment: ApprovedComment }) {
 export default function FounderDiscussionPanel({ comments }: { comments: ApprovedComment[] }) {
   if (comments.length === 0) {
     return (
-      <div className="text-center py-16 text-gray-400">
+      <div className="text-center py-16 text-gray-500">
         <MessageSquare className="w-12 h-12 mx-auto mb-4 opacity-30" />
         <p className="font-medium text-gray-500 text-lg">No comments yet</p>
-        <p className="text-sm mt-2 text-gray-400">
+        <p className="text-sm mt-2 text-gray-500">
           Approved visitor comments will appear here once your admin reviews them.
         </p>
       </div>

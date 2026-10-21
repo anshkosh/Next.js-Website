@@ -174,12 +174,12 @@ export default async function DashboardPage() {
               <Rocket size={26} className="text-blue-500" />
             </div>
             <div>
-              <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-0.5">
+              <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-0.5">
                 Total Startups
               </p>
               <p className="text-3xl font-bold text-gray-900 leading-none">
                 {totalStartups}
-                <span className="text-base font-normal text-gray-400 ml-1">
+                <span className="text-base font-normal text-gray-500 ml-1">
                   / {maxStartups}
                 </span>
               </p>
@@ -192,7 +192,7 @@ export default async function DashboardPage() {
               <Star size={26} className="text-coral-500" />
             </div>
             <div>
-              <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-0.5">
+              <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-0.5">
                 Total Net Votes
               </p>
               <p className="text-3xl font-bold text-gray-900 leading-none">
@@ -207,7 +207,7 @@ export default async function DashboardPage() {
               <Activity size={26} className="text-green-500" />
             </div>
             <div>
-              <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-0.5">
+              <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-0.5">
                 Live Startups
               </p>
               <p className="text-3xl font-bold text-gray-900 leading-none">
@@ -223,13 +223,13 @@ export default async function DashboardPage() {
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
           <div>
             <h2 className="text-xl font-bold text-gray-900">Your Startups</h2>
-            <p className="text-sm text-gray-400 mt-0.5">
+            <p className="text-sm text-gray-500 mt-0.5">
               {totalStartups} of {maxStartups} startup slot
               {maxStartups !== 1 ? "s" : ""} used
             </p>
           </div>
 
-          {!isAtLimit && <Link href="/startup/new" className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-coral-500 px-5 py-2.5 text-sm font-semibold text-white hover:bg-coral-600"><Plus size={16} /> Submit a New Startup</Link>}
+          {!isAtLimit && <Link href="/startup/new" className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-coral-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-coral-700"><Plus size={16} /> Submit a New Startup</Link>}
 
         </div>
 
@@ -245,13 +245,13 @@ export default async function DashboardPage() {
             <h2 className="text-2xl font-bold text-gray-900 mb-2">
               No startups yet
             </h2>
-            <p className="text-gray-400 mb-8 max-w-md text-sm">
+            <p className="text-gray-500 mb-8 max-w-md text-sm">
               You haven’t submitted any startups. Add your first startup to get
               discovered by people interested in what you’re building.
             </p>
             <Link
               href="/startup/new"
-              className="px-6 py-3 bg-coral-500 text-white rounded-xl font-semibold hover:bg-coral-600 transition-colors shadow-sm"
+              className="px-6 py-3 bg-coral-600 text-white rounded-xl font-semibold hover:bg-coral-700 transition-colors shadow-sm"
             >
               Submit your first startup
             </Link>
@@ -267,7 +267,7 @@ export default async function DashboardPage() {
               return (
                 <div
                   key={startup.id}
-                  className={`bg-white rounded-2xl border border-gray-100 border-t-4 ${cfg.borderCls} shadow-sm hover:shadow-lg transition-all duration-200 flex flex-col overflow-hidden relative group`}
+                  className={`bg-white rounded-2xl border border-gray-100 border-t-4 ${cfg.borderCls} shadow-sm hover:shadow-lg transition-shadow duration-(--duration-quick) flex flex-col overflow-hidden relative group`}
                 >
                   {/* Delete button */}
                   <div className="flex justify-end px-3 pt-2">
@@ -310,7 +310,7 @@ export default async function DashboardPage() {
                         {startup.revision && <span className="rounded-full bg-amber-50 px-2 py-1 text-xs font-medium text-amber-800">{startup.revision.status === "REJECTED" ? "Changes need attention" : "Changes awaiting review"}</span>}
                         {startup.betaTesterProgram?.enabled && <span className="rounded-full bg-violet-50 px-2 py-1 text-xs font-medium text-violet-700">Beta signups open</span>}
                       </div>
-                      <p className="text-sm text-gray-400 truncate mb-3">
+                      <p className="text-sm text-gray-500 truncate mb-3">
                         {startup.tagline}
                       </p>
 
@@ -367,7 +367,7 @@ export default async function DashboardPage() {
                           >
                             <Zap size={13} /> Updates
                             {startup.updateCount > 0 && (
-                              <span className="absolute -top-1.5 -right-1.5 bg-coral-500 text-white text-[9px] font-bold w-4 h-4 rounded-full flex items-center justify-center">
+                              <span className="absolute -top-1.5 -right-1.5 bg-coral-600 text-white text-[9px] font-bold w-4 h-4 rounded-full flex items-center justify-center">
                                 {startup.updateCount}
                               </span>
                             )}
@@ -401,7 +401,7 @@ export default async function DashboardPage() {
                     {/* DRAFT */}
                     {startup.status === "DRAFT" && (
                       <div className="space-y-2">
-                        <p className="text-xs font-medium text-gray-400 mb-1">
+                        <p className="text-xs font-medium text-gray-500 mb-1">
                           Continue editing your draft
                         </p>
                         <div className="grid grid-cols-2 gap-2">

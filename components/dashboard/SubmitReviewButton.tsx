@@ -43,7 +43,7 @@ export default function SubmitReviewButton({
       type="button"
       onClick={handleSubmit}
       disabled={isSubmitting}
-      className="w-full flex justify-center items-center gap-1 py-2.5 bg-coral-500 text-white rounded-lg text-sm font-semibold hover:bg-coral-600 transition-colors disabled:opacity-50"
+      className="w-full flex justify-center items-center gap-1 py-2.5 bg-coral-600 text-white rounded-lg text-sm font-semibold hover:bg-coral-700 transition-colors disabled:opacity-50"
     >
       {isSubmitting ? "Submitting..." : "Submit"}
     </button>

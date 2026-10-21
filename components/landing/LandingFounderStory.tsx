@@ -13,7 +13,7 @@ export default function LandingFounderStory() {
       <div className="mx-auto grid max-w-6xl gap-10 px-4 sm:px-6 lg:grid-cols-[1fr_1.15fr] lg:gap-x-20 lg:gap-y-7">
         <div>
           <p className="mb-4 text-xs font-semibold uppercase tracking-[0.16em] text-coral-700">For founders, wherever you’re starting</p>
-          <h2 id="founder-story-title" className="max-w-md font-heading text-4xl font-bold leading-tight tracking-tight text-gray-900 sm:text-5xl">Every startup starts<br />with a <span className="text-coral-500">problem.</span></h2>
+          <h2 id="founder-story-title" className="max-w-md font-heading text-4xl font-bold leading-tight tracking-tight text-gray-900 sm:text-5xl">Every startup starts with a <span className="text-coral-500">problem.</span></h2>
           <p className="mt-5 max-w-md text-base leading-relaxed text-gray-600">Help people understand why it matters. Anshkosh gives your startup a public home for the idea, the team, and the progress behind it.</p>
         </div>
         <div>

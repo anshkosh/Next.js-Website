@@ -22,6 +22,8 @@ it("keeps ranks, named vote controls and profile links accessible in populated r
   expect(host.textContent).toContain("1 founder update");
   expect(host.querySelector('[role="status"]')?.textContent).toContain("19 signals");
   expect(host.querySelector("details")?.textContent).toContain("Founder–community discussions: 1 · 3 points");
+  expect(host.querySelector("details")?.textContent).toContain("Total signals: 19");
+  expect(host.textContent).toContain("12 votes + 7 activity");
 });
 
 it.each(["rejected", "network"])("rolls back an optimistic vote and announces a %s failure", async kind => {
@@ -67,6 +69,7 @@ it("preserves activity points when voting and accepts refreshed server totals", 
     expect(host.querySelector('[role="status"]')?.textContent).toContain("19 signals");
     await act(async () => host.querySelector("button")!.click());
     expect(host.querySelector('[role="status"]')?.textContent).toContain("20 signals");
+    expect(host.textContent).toContain("13 votes + 7 activity");
     await act(async () => root.render(<UpvoteButton {...props} initialCount={16} initialUpvoted activitySignals={9} />));
     expect(host.querySelector('[role="status"]')?.textContent).toContain("25 signals");
   } finally { await act(async () => root.unmount()); }

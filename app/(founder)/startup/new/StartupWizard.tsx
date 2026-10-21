@@ -21,6 +21,7 @@ const availableIcons = [
   "Activity", "TrendingUp", "Award", "Key", "Lock", "Cloud", "Server", "Database", "Cpu", "Code", "Monitor"
 ];
 import { createStartupSchema } from "@/lib/validators/startup.schema";
+import { preferredScrollBehavior } from "@/lib/scroll-behavior";
 import {
   createStartup,
   updateStartup,
@@ -130,7 +131,7 @@ export default function StartupWizard({ userId, initialId, initialStep, initialD
         setTimeout(() => {
           const el = document.querySelector(`[name="${firstKey}"]`);
           if (el) {
-            el.scrollIntoView({ behavior: "smooth", block: "center" });
+            el.scrollIntoView({ behavior: preferredScrollBehavior(), block: "center" });
             (el as HTMLElement).focus?.();
           }
         }, 50);
@@ -159,7 +160,7 @@ export default function StartupWizard({ userId, initialId, initialStep, initialD
         setTimeout(() => {
           const el = document.querySelector(`[name="${firstKey}"]`);
           if (el) {
-            el.scrollIntoView({ behavior: "smooth", block: "center" });
+            el.scrollIntoView({ behavior: preferredScrollBehavior(), block: "center" });
             (el as HTMLElement).focus?.();
           }
         }, 50);
@@ -209,7 +210,7 @@ export default function StartupWizard({ userId, initialId, initialStep, initialD
           setTimeout(() => {
             const el = document.querySelector(`[name="${firstErrorKey}"]`);
             if (el) {
-              el.scrollIntoView({ behavior: "smooth", block: "center" });
+              el.scrollIntoView({ behavior: preferredScrollBehavior(), block: "center" });
               (el as HTMLElement).focus?.();
             }
           }, 50);
@@ -308,8 +309,8 @@ export default function StartupWizard({ userId, initialId, initialStep, initialD
             <div
               className={`w-8 h-8 shrink-0 rounded-full flex items-center justify-center text-sm font-bold border-2 transition-colors duration-300 ${
                 step >= i
-                  ? "bg-coral-500 border-coral-500 text-white"
-                  : "bg-white border-gray-300 text-gray-400"
+                  ? "bg-coral-600 border-coral-600 text-white"
+                  : "bg-white border-gray-300 text-gray-500"
               }`}
             >
               {i}
@@ -329,7 +330,7 @@ export default function StartupWizard({ userId, initialId, initialStep, initialD
       {step >= 2 && step <= 5 && (() => {
         const remaining = STEP_META.slice(step - 1).reduce((sum, s) => sum + s.minutes, 0);
         return (
-          <p className="text-right text-xs text-gray-400 mb-6">
+          <p className="text-right text-xs text-gray-500 mb-6">
             ⏱ ~{remaining} min left — you&apos;re doing great!
           </p>
         );
@@ -341,7 +342,7 @@ export default function StartupWizard({ userId, initialId, initialStep, initialD
           <div className="space-y-6">
             <div className="flex items-center justify-between mb-1">
               <h2 className="text-xl font-bold font-heading">Step 1: Basic Info</h2>
-              <span className="text-xs font-semibold text-gray-400 bg-gray-50 border border-gray-100 px-3 py-1 rounded-full shrink-0 ml-3">{STEP_META[0].pill}</span>
+              <span className="text-xs font-semibold text-gray-500 bg-gray-50 border border-gray-100 px-3 py-1 rounded-full shrink-0 ml-3">{STEP_META[0].pill}</span>
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -403,7 +404,7 @@ export default function StartupWizard({ userId, initialId, initialStep, initialD
           <div className="space-y-6">
             <div className="flex items-center justify-between mb-1">
               <h2 className="text-xl font-bold font-heading">Step 2: Details</h2>
-              <span className="text-xs font-semibold text-gray-400 bg-gray-50 border border-gray-100 px-3 py-1 rounded-full shrink-0 ml-3">{STEP_META[1].pill}</span>
+              <span className="text-xs font-semibold text-gray-500 bg-gray-50 border border-gray-100 px-3 py-1 rounded-full shrink-0 ml-3">{STEP_META[1].pill}</span>
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -490,7 +491,7 @@ export default function StartupWizard({ userId, initialId, initialStep, initialD
                   maxLength={10}
                   className={`w-full border rounded-md p-2 ${errors.startupPhone ? "border-red-500 bg-red-50/20" : ""}`}
                 />
-                <p className="text-xs text-gray-400 mt-1">10-digit mobile number</p>
+                <p className="text-xs text-gray-500 mt-1">10-digit mobile number</p>
                 {errors.startupPhone && (
                   <p className="text-red-500 text-xs mt-1">{errors.startupPhone[0]}</p>
                 )}
@@ -538,7 +539,7 @@ export default function StartupWizard({ userId, initialId, initialStep, initialD
           <div className="space-y-6">
             <div className="flex items-center justify-between mb-1">
               <h2 className="text-xl font-bold font-heading">Step 3: Core Proposition</h2>
-              <span className="text-xs font-semibold text-gray-400 bg-gray-50 border border-gray-100 px-3 py-1 rounded-full shrink-0 ml-3">{STEP_META[2].pill}</span>
+              <span className="text-xs font-semibold text-gray-500 bg-gray-50 border border-gray-100 px-3 py-1 rounded-full shrink-0 ml-3">{STEP_META[2].pill}</span>
             </div>
 
             {/* Problem Statement */}
@@ -550,7 +551,7 @@ export default function StartupWizard({ userId, initialId, initialStep, initialD
                 <span className={`text-xs ${
                   formData.problemStatement.length > 0 && formData.problemStatement.length < 100
                     ? "text-red-500 font-medium"
-                    : "text-gray-400"
+                    : "text-gray-500"
                 }`}>
                   {formData.problemStatement.length}/800
                   {formData.problemStatement.length > 0 && formData.problemStatement.length < 100 && " (min 100)"}
@@ -581,7 +582,7 @@ export default function StartupWizard({ userId, initialId, initialStep, initialD
                 <span className={`text-xs ${
                   formData.solutionStatement.length > 0 && formData.solutionStatement.length < 100
                     ? "text-red-500 font-medium"
-                    : "text-gray-400"
+                    : "text-gray-500"
                 }`}>
                   {formData.solutionStatement.length}/1000
                   {formData.solutionStatement.length > 0 && formData.solutionStatement.length < 100 && " (min 100)"}
@@ -609,7 +610,7 @@ export default function StartupWizard({ userId, initialId, initialStep, initialD
                 <label className="block text-sm font-medium text-gray-700">
                   Target Audience & Ideal Customer <span className="text-red-500">*</span>
                 </label>
-                <span className="text-xs text-gray-400">{formData.targetAudience.length}/500</span>
+                <span className="text-xs text-gray-500">{formData.targetAudience.length}/500</span>
               </div>
               <textarea
                 name="targetAudience"
@@ -653,9 +654,9 @@ export default function StartupWizard({ userId, initialId, initialStep, initialD
               <div className="flex items-center justify-between mb-1">
                 <label className="block text-sm font-medium text-gray-700">
                   Existing Proof Points & Traction
-                  <span className="ml-1.5 text-xs font-normal text-gray-400">(Optional)</span>
+                  <span className="ml-1.5 text-xs font-normal text-gray-500">(Optional)</span>
                 </label>
-                <span className="text-xs text-gray-400">{formData.tractionEvidence.length}/600</span>
+                <span className="text-xs text-gray-500">{formData.tractionEvidence.length}/600</span>
               </div>
               <textarea
                 name="tractionEvidence"
@@ -674,7 +675,7 @@ export default function StartupWizard({ userId, initialId, initialStep, initialD
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <h2 className="text-xl font-bold font-heading">Step 4: Founders &amp; Team</h2>
-              <span className="text-xs font-semibold text-gray-400 bg-gray-50 border border-gray-100 px-3 py-1 rounded-full shrink-0 ml-3">{STEP_META[3].pill}</span>
+              <span className="text-xs font-semibold text-gray-500 bg-gray-50 border border-gray-100 px-3 py-1 rounded-full shrink-0 ml-3">{STEP_META[3].pill}</span>
             </div>
             <FounderManager startupId={startupId!} onBusyChange={busy => setUploadBusy("founders", busy)} />
           </div>
@@ -684,7 +685,7 @@ export default function StartupWizard({ userId, initialId, initialStep, initialD
           <div className="space-y-8">
             <div className="flex items-center justify-between mb-1">
               <h2 className="text-xl font-bold font-heading">Step 5: Media &amp; Features</h2>
-              <span className="text-xs font-semibold text-gray-400 bg-gray-50 border border-gray-100 px-3 py-1 rounded-full shrink-0 ml-3">{STEP_META[4].pill}</span>
+              <span className="text-xs font-semibold text-gray-500 bg-gray-50 border border-gray-100 px-3 py-1 rounded-full shrink-0 ml-3">{STEP_META[4].pill}</span>
             </div>
 
             {/* Video Link */}
@@ -711,7 +712,7 @@ export default function StartupWizard({ userId, initialId, initialStep, initialD
                     if (embedUrl) {
                       return <iframe src={embedUrl} className="w-full h-full" frameBorder="0" allowFullScreen></iframe>;
                     }
-                    return <div className="flex items-center justify-center h-full text-gray-400">Invalid or unsupported video URL</div>;
+                    return <div className="flex items-center justify-center h-full text-gray-500">Invalid or unsupported video URL</div>;
                   })()}
                 </div>
               )}
@@ -862,7 +863,7 @@ export default function StartupWizard({ userId, initialId, initialStep, initialD
               <button
                 onClick={handleNext}
                 disabled={isSaving || isMediaBusy}
-                className="px-6 py-2.5 bg-coral-500 text-white rounded-xl text-sm font-semibold hover:bg-coral-600 disabled:opacity-50 transition-colors shadow-sm"
+                className="px-6 py-2.5 bg-coral-600 text-white rounded-xl text-sm font-semibold hover:bg-coral-700 disabled:opacity-50 transition-colors shadow-sm"
               >
                 {isSaving ? "Saving…" : "Next"}
               </button>
@@ -870,7 +871,7 @@ export default function StartupWizard({ userId, initialId, initialStep, initialD
               <button
                 onClick={handleSubmitReview}
                 disabled={isSaving || isMediaBusy}
-                className="px-6 py-2.5 bg-coral-500 text-white rounded-xl text-sm font-semibold hover:bg-coral-600 disabled:opacity-50 transition-colors shadow-sm"
+                className="px-6 py-2.5 bg-coral-600 text-white rounded-xl text-sm font-semibold hover:bg-coral-700 disabled:opacity-50 transition-colors shadow-sm"
               >
                 {isSaving ? "Submitting…" : "Submit for Review"}
               </button>

@@ -24,7 +24,7 @@ export default function CategoryPills({ categories }: { categories: Category[] }
           scroll={false}
           className={`flex-shrink-0 px-4 py-2 rounded-full text-sm font-medium transition-colors snap-start ${
             activeCategory === "all" 
-              ? "bg-coral-500 text-white shadow-md" 
+              ? "bg-coral-600 text-white shadow-md" 
               : "bg-gray-100 text-gray-700 hover:bg-gray-200"
           }`}
         >
@@ -37,7 +37,7 @@ export default function CategoryPills({ categories }: { categories: Category[] }
             scroll={false}
             className={`flex-shrink-0 px-4 py-2 rounded-full text-sm font-medium transition-colors snap-start flex items-center gap-1.5 ${
               activeCategory === cat.slug 
-                ? "bg-coral-500 text-white shadow-md" 
+                ? "bg-coral-600 text-white shadow-md" 
                 : "bg-gray-100 text-gray-700 hover:bg-gray-200"
             }`}
           >

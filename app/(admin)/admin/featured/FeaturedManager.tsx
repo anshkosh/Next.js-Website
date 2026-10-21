@@ -200,7 +200,7 @@ export default function FeaturedManager({
                     {index + 1}
                   </span>
 
-                  <div className="w-8 h-8 relative rounded-md border border-gray-200 bg-gray-50 overflow-hidden shrink-0 flex items-center justify-center font-bold text-gray-400 text-xs">
+                  <div className="w-8 h-8 relative rounded-md border border-gray-200 bg-gray-50 overflow-hidden shrink-0 flex items-center justify-center font-bold text-gray-500 text-xs">
                     {item.startup.logoUrl ? (
                       <Image
                         src={item.startup.logoUrl}
@@ -284,7 +284,7 @@ export default function FeaturedManager({
           <button
             onClick={handleAdd}
             disabled={!selectedStartupId || featuredList.length >= 6 || isPending}
-            className="px-5 py-2 bg-coral-500 hover:bg-coral-600 text-white rounded-xl font-bold text-sm transition-colors flex items-center justify-center gap-1.5 shadow-2xs disabled:opacity-50"
+            className="px-5 py-2 bg-coral-600 hover:bg-coral-700 text-white rounded-xl font-bold text-sm transition-colors flex items-center justify-center gap-1.5 shadow-2xs disabled:opacity-50"
           >
             <Plus className="w-4 h-4" />
             <span>Add</span>

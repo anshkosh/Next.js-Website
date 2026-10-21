@@ -50,7 +50,7 @@ function CommentCard({ comment, replyHref }: { comment: PublicComment; replyHref
   return (
     <div className="group">
       {/* Main comment */}
-      <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 hover:border-gray-200 hover:shadow-md transition-all duration-200">
+      <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 hover:border-gray-200 hover:shadow-md transition-[border-color,box-shadow] duration-(--duration-quick)">
         {/* Author row */}
         <div className="flex items-start gap-3 mb-3">
           <div className="w-9 h-9 rounded-full bg-gradient-to-br from-gray-100 to-gray-200 text-gray-600 flex items-center justify-center text-sm font-bold flex-shrink-0 select-none">
@@ -61,7 +61,7 @@ function CommentCard({ comment, replyHref }: { comment: PublicComment; replyHref
               <span className="font-semibold text-gray-900 text-sm truncate">
                 {comment.authorName}
               </span>
-              <span className="text-gray-400 text-xs">{formatDate(comment.createdAt)}</span>
+              <span className="text-gray-500 text-xs">{formatDate(comment.createdAt)}</span>
             </div>
           </div>
         </div>
@@ -83,7 +83,7 @@ function CommentCard({ comment, replyHref }: { comment: PublicComment; replyHref
             <div className="pl-3">
               {/* Founder badge row */}
               <div className="flex items-center gap-2 mb-3 flex-wrap">
-                <div className="w-8 h-8 rounded-full bg-coral-500 text-white flex items-center justify-center text-xs font-bold flex-shrink-0">
+                <div className="w-8 h-8 rounded-full bg-coral-600 text-white flex items-center justify-center text-xs font-bold flex-shrink-0">
                   👋
                 </div>
                 <span className="font-semibold text-coral-800 text-sm">
@@ -93,7 +93,7 @@ function CommentCard({ comment, replyHref }: { comment: PublicComment; replyHref
                   Founder
                 </span>
                 {comment.repliedAt && (
-                  <span className="text-coral-400 text-xs ml-auto">
+                  <span className="text-coral-700 text-xs ml-auto">
                     {formatDate(comment.repliedAt)}
                   </span>
                 )}
@@ -201,13 +201,13 @@ function CommentForm({ startupId, viewer, availability, setAvailability, onSubmi
               onChange={handleChange}
               required
               maxLength={80}
-              className="w-full px-4 py-2.5 rounded-xl border border-gray-200 bg-gray-50 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-coral-400 focus:border-transparent transition-all"
+              className="w-full px-4 py-2.5 rounded-xl border border-gray-200 bg-gray-50 text-sm text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-coral-400 focus:border-transparent transition-[border-color,box-shadow]"
             />
           </div>
           <div>
             <label htmlFor="comment-email" className="block text-sm font-medium text-gray-700 mb-1.5">
               Email <span className="text-red-400">*</span>
-              <span className="text-gray-400 font-normal ml-1">(private, never shown)</span>
+              <span className="text-gray-500 font-normal ml-1">(private, never shown)</span>
             </label>
             <input
               id="comment-email"
@@ -218,7 +218,7 @@ function CommentForm({ startupId, viewer, availability, setAvailability, onSubmi
               onChange={handleChange}
               required
               maxLength={254}
-              className="w-full px-4 py-2.5 rounded-xl border border-gray-200 bg-gray-50 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-coral-400 focus:border-transparent transition-all"
+              className="w-full px-4 py-2.5 rounded-xl border border-gray-200 bg-gray-50 text-sm text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-coral-400 focus:border-transparent transition-[border-color,box-shadow]"
             />
           </div>
         </div>
@@ -237,9 +237,9 @@ function CommentForm({ startupId, viewer, availability, setAvailability, onSubmi
             onChange={handleChange}
             required
             maxLength={2000}
-            className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-coral-400 focus:border-transparent resize-none transition-all"
+            className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50 text-sm text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-coral-400 focus:border-transparent resize-none transition-[border-color,box-shadow]"
           />
-          <div className="text-right text-xs text-gray-400 mt-1">
+          <div className="text-right text-xs text-gray-500 mt-1">
             {form.body.length}/2000
           </div>
         </div>
@@ -270,7 +270,7 @@ function CommentForm({ startupId, viewer, availability, setAvailability, onSubmi
           <button
             type="submit"
             disabled={isPending || !form.token || !availability.allowed}
-            className="inline-flex items-center gap-2 px-6 py-2.5 bg-coral-500 hover:bg-coral-600 disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-semibold rounded-xl transition-colors shadow-sm"
+            className="inline-flex items-center gap-2 px-6 py-2.5 bg-coral-600 hover:bg-coral-700 disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-semibold rounded-xl transition-colors shadow-sm"
           >
             {isPending ? (
               <>
@@ -284,7 +284,7 @@ function CommentForm({ startupId, viewer, availability, setAvailability, onSubmi
               </>
             )}
           </button>
-          <p className="text-xs text-gray-400 flex items-center gap-1.5">
+          <p className="text-xs text-gray-500 flex items-center gap-1.5">
             <Clock className="w-3.5 h-3.5" />
             Comments are reviewed before appearing publicly
           </p>
@@ -374,7 +374,7 @@ export default function DiscussionSection({
         </section>}
         {/* Comments feed */}
         {comments.length === 0 && !submitted && pendingComments.length === 0 ? (
-          <div className="text-center py-10 text-gray-400">
+          <div className="text-center py-10 text-gray-500">
             <MessageSquare className="w-10 h-10 mx-auto mb-3 opacity-30" />
             <p className="font-medium text-gray-500">No comments yet</p>
             <p className="text-sm mt-1">Be the first to start the discussion!</p>

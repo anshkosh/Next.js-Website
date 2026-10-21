@@ -117,7 +117,7 @@ export default function SettingsEditor({ initialSettings }: { initialSettings: R
           <button
             onClick={() => handleSave("maintenance_mode", settings.maintenance_mode === "true" ? "false" : "true")}
             disabled={isSaving["maintenance_mode"]}
-            className="px-4 py-2 bg-coral-500 text-white rounded-md font-medium hover:bg-coral-600 disabled:opacity-50"
+            className="px-4 py-2 bg-coral-600 text-white rounded-md font-medium hover:bg-coral-700 disabled:opacity-50"
           >
             {isSaving["maintenance_mode"] ? "Saving..." : "Toggle & Save"}
           </button>
@@ -154,7 +154,7 @@ export default function SettingsEditor({ initialSettings }: { initialSettings: R
           <button
             onClick={() => handleSave("max_startups_per_user", settings.max_startups_per_user)}
             disabled={isSaving["max_startups_per_user"]}
-            className="px-4 py-2 bg-coral-500 text-white rounded-md font-medium hover:bg-coral-600 disabled:opacity-50"
+            className="px-4 py-2 bg-coral-600 text-white rounded-md font-medium hover:bg-coral-700 disabled:opacity-50"
           >
             {isSaving["max_startups_per_user"] ? "Saving..." : "Save"}
           </button>
@@ -190,7 +190,7 @@ export default function SettingsEditor({ initialSettings }: { initialSettings: R
           <button
             onClick={() => handleSave("upvote_milestones", settings.upvote_milestones)}
             disabled={isSaving["upvote_milestones"]}
-            className="px-4 py-2 bg-coral-500 text-white rounded-md font-medium hover:bg-coral-600 disabled:opacity-50"
+            className="px-4 py-2 bg-coral-600 text-white rounded-md font-medium hover:bg-coral-700 disabled:opacity-50"
           >
             {isSaving["upvote_milestones"] ? "Saving..." : "Save JSON"}
           </button>
@@ -222,7 +222,7 @@ export default function SettingsEditor({ initialSettings }: { initialSettings: R
           <button
             onClick={() => handleSave("contact_notification_emails", settings.contact_notification_emails || "")}
             disabled={isSaving["contact_notification_emails"]}
-            className="px-4 py-2 bg-coral-500 text-white rounded-md font-medium hover:bg-coral-600 disabled:opacity-50 whitespace-nowrap"
+            className="px-4 py-2 bg-coral-600 text-white rounded-md font-medium hover:bg-coral-700 disabled:opacity-50 whitespace-nowrap"
           >
             {isSaving["contact_notification_emails"] ? "Saving..." : "Save"}
           </button>
@@ -230,7 +230,7 @@ export default function SettingsEditor({ initialSettings }: { initialSettings: R
 
         {/* Tag input area */}
         <div
-          className="min-h-[48px] w-full flex flex-wrap gap-2 items-center border border-gray-300 rounded-md px-3 py-2 bg-gray-50 cursor-text focus-within:ring-2 focus-within:ring-coral-400 focus-within:border-coral-400 transition-all"
+          className="min-h-[48px] w-full flex flex-wrap gap-2 items-center border border-gray-300 rounded-md px-3 py-2 bg-gray-50 cursor-text focus-within:ring-2 focus-within:ring-coral-400 focus-within:border-coral-400 transition-[border-color,box-shadow]"
           onClick={() => emailInputRef.current?.focus()}
         >
           {/* Existing email pills */}
@@ -260,7 +260,7 @@ export default function SettingsEditor({ initialSettings }: { initialSettings: R
             onKeyDown={handleEmailKeyDown}
             onBlur={() => { if (emailInput.trim()) addEmail(emailInput); }}
             placeholder={contactEmails.length === 0 ? "Type email and press Enter or comma..." : "Add another..."}
-            className="flex-1 min-w-[200px] bg-transparent text-sm text-gray-900 placeholder-gray-400 outline-none border-none p-0"
+            className="flex-1 min-w-[200px] bg-transparent text-sm text-gray-900 placeholder-gray-500 outline-none border-none p-0"
           />
 
           {/* Inline add button */}
@@ -276,7 +276,7 @@ export default function SettingsEditor({ initialSettings }: { initialSettings: R
         </div>
 
         {/* Hint */}
-        <p className="mt-1.5 text-xs text-gray-400">
+        <p className="mt-1.5 text-xs text-gray-500">
           Press <kbd className="bg-gray-100 border border-gray-200 rounded px-1 py-0.5 text-[10px] font-mono">Enter</kbd> or{" "}
           <kbd className="bg-gray-100 border border-gray-200 rounded px-1 py-0.5 text-[10px] font-mono">,</kbd> to add.
           Backspace removes the last tag.

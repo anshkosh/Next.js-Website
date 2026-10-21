@@ -76,12 +76,12 @@ function CommentModerationRow({ comment }: { comment: AdminComment }) {
         <div className="space-y-0.5">
           <div className="flex items-center gap-2 flex-wrap">
             <span className="font-semibold text-gray-900">{comment.authorName}</span>
-            <span className="text-gray-400 text-sm">·</span>
+            <span className="text-gray-500 text-sm">·</span>
             <span className="text-sm text-gray-500">{comment.authorEmail}</span>
-            <span className="text-gray-400 text-sm">·</span>
-            <span className="text-xs text-gray-400">{formatDate(comment.createdAt)}</span>
+            <span className="text-gray-500 text-sm">·</span>
+            <span className="text-xs text-gray-500">{formatDate(comment.createdAt)}</span>
           </div>
-          <div className="flex items-center gap-1.5 text-xs text-gray-400">
+          <div className="flex items-center gap-1.5 text-xs text-gray-500">
             <span>on</span>
             <Link
               href={`/startups/${comment.startup.slug}`}

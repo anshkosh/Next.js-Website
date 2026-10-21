@@ -46,7 +46,7 @@ export default function IconSelect({
           </div>
           <span className="truncate text-gray-700 font-medium">{currentValue}</span>
         </div>
-        <ChevronDown className="w-4 h-4 text-gray-400 shrink-0 ml-1" />
+        <ChevronDown className="w-4 h-4 text-gray-500 shrink-0 ml-1" />
       </button>
 
       {isOpen && (

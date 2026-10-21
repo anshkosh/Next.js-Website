@@ -119,7 +119,7 @@ export default function RegisterPage() {
               </label>
               <div className="mt-1 relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <User className="h-5 w-5 text-gray-400" />
+                  <User className="h-5 w-5 text-gray-500" />
                 </div>
                 <input
                   id="register-name"
@@ -129,7 +129,7 @@ export default function RegisterPage() {
                   required
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  className="appearance-none block w-full pl-10 px-3 py-2.5 border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-coral-500 focus:border-coral-500 sm:text-sm transition-colors"
+                  className="appearance-none block w-full pl-10 px-3 py-2.5 border border-gray-300 rounded-lg shadow-sm placeholder-gray-500 focus:outline-none focus:ring-coral-500 focus:border-coral-500 sm:text-sm transition-colors"
                   placeholder="John Doe"
                 />
               </div>
@@ -141,7 +141,7 @@ export default function RegisterPage() {
               </label>
               <div className="mt-1 relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Mail className="h-5 w-5 text-gray-400" />
+                  <Mail className="h-5 w-5 text-gray-500" />
                 </div>
                 <input
                   id="register-email"
@@ -151,7 +151,7 @@ export default function RegisterPage() {
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="appearance-none block w-full pl-10 px-3 py-2.5 border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-coral-500 focus:border-coral-500 sm:text-sm transition-colors"
+                  className="appearance-none block w-full pl-10 px-3 py-2.5 border border-gray-300 rounded-lg shadow-sm placeholder-gray-500 focus:outline-none focus:ring-coral-500 focus:border-coral-500 sm:text-sm transition-colors"
                   placeholder="you@example.com"
                 />
               </div>
@@ -171,7 +171,7 @@ export default function RegisterPage() {
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="appearance-none block w-full px-3 py-2.5 border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-coral-500 focus:border-coral-500 sm:text-sm transition-colors"
+                  className="appearance-none block w-full px-3 py-2.5 border border-gray-300 rounded-lg shadow-sm placeholder-gray-500 focus:outline-none focus:ring-coral-500 focus:border-coral-500 sm:text-sm transition-colors"
                 />
               </div>
               <p id="password-requirements" className="mt-2 text-xs text-gray-500">

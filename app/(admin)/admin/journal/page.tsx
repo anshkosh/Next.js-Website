@@ -76,7 +76,7 @@ export default async function AdminJournalPage(props: {
           <Link href="/admin/journal/categories" className="px-3 py-2 text-sm border border-gray-200 rounded-md hover:bg-gray-50 text-gray-700">
             Categories
           </Link>
-          <Link href="/admin/journal/new" className="flex items-center gap-1.5 px-4 py-2 bg-coral-500 text-white rounded-md text-sm font-medium hover:bg-coral-600 transition-colors">
+          <Link href="/admin/journal/new" className="flex items-center gap-1.5 px-4 py-2 bg-coral-600 text-white rounded-md text-sm font-medium hover:bg-coral-700 transition-colors">
             <Plus size={16} /> New Post
           </Link>
         </div>
@@ -98,7 +98,7 @@ export default async function AdminJournalPage(props: {
               key={s}
               href={buildQuery({ status: s, page: "1" })}
               className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${status === s
-                ? "bg-coral-500 text-white"
+                ? "bg-coral-600 text-white"
                 : "bg-white border border-gray-200 text-gray-600 hover:bg-gray-50"
               }`}
             >
@@ -129,7 +129,7 @@ export default async function AdminJournalPage(props: {
           <TableBody>
             {posts.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={8} className="text-center py-12 text-gray-400">
+                <TableCell colSpan={8} className="text-center py-12 text-gray-500">
                   No posts found.{" "}
                   <Link href="/admin/journal/new" className="text-coral-500 hover:underline">Create the first one →</Link>
                 </TableCell>
@@ -158,7 +158,7 @@ export default async function AdminJournalPage(props: {
                     <div className="flex justify-end items-center gap-1.5">
                       {post.status === "PUBLISHED" && (
                         <a href={`/journal/${post.slug}`} target="_blank" rel="noreferrer"
-                          className="p-1.5 text-gray-400 hover:text-gray-700 bg-gray-100 rounded-md" title="View public post">
+                          className="p-1.5 text-gray-500 hover:text-gray-700 bg-gray-100 rounded-md" title="View public post">
                           <ExternalLink size={15} />
                         </a>
                       )}
@@ -183,7 +183,7 @@ export default async function AdminJournalPage(props: {
             <Link
               key={i}
               href={buildQuery({ page: String(i + 1) })}
-              className={`px-3 py-1 rounded-md text-sm font-medium ${page === i + 1 ? "bg-coral-500 text-white" : "bg-white border text-gray-700 hover:bg-gray-50"}`}
+              className={`px-3 py-1 rounded-md text-sm font-medium ${page === i + 1 ? "bg-coral-600 text-white" : "bg-white border text-gray-700 hover:bg-gray-50"}`}
             >
               {i + 1}
             </Link>
