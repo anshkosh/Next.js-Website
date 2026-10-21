@@ -1,6 +1,5 @@
 import Link from "next/link";
 import Image from "next/image";
-import NewsletterSignup from "@/components/marketing/NewsletterSignup";
 
 const columns = [
   {
@@ -19,7 +18,6 @@ const columns = [
       { label: "Free Launch Support", href: "/launch-support" },
       { label: "FAQ", href: "/faq" },
     ],
-    note: "Listing is free. An account is required, and profiles are reviewed before publication.",
   },
   {
     title: "Company",
@@ -46,7 +44,7 @@ export default function Footer() {
   return (
     <footer className="mt-auto w-full border-t border-gray-200 bg-gray-50">
       <div className="container mx-auto max-w-7xl px-4 py-12">
-        <div className="grid gap-10 lg:grid-cols-[minmax(0,2fr)_repeat(4,minmax(0,1fr))] lg:gap-8">
+        <div className="grid gap-10 lg:grid-cols-[minmax(0,1.4fr)_repeat(4,minmax(0,1fr))] lg:gap-8">
           <div className="space-y-4">
             <Link href="/" aria-label="Anshkosh home" className="inline-flex items-center gap-2">
               <Image src="/logo.svg" alt="" width={32} height={32} className="h-8 w-8" />
@@ -58,7 +56,6 @@ export default function Footer() {
             <p className="max-w-xs text-sm leading-relaxed text-gray-600">
               Discover Indian startups before launch.
             </p>
-            <NewsletterSignup />
           </div>
 
           <div className="grid grid-cols-2 gap-8 sm:grid-cols-4 lg:contents">
@@ -72,7 +69,6 @@ export default function Footer() {
                     <li key={link.href}><Link href={link.href} className={linkClass}>{link.label}</Link></li>
                   ))}
                 </ul>
-                {column.note && <p className="mt-3 text-xs leading-relaxed text-gray-600">{column.note}</p>}
               </nav>
             ))}
           </div>
