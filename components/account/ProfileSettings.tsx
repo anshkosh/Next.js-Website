@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import Link from "next/link";
 import { useHydrated } from "@/components/useHydrated";
 import { authClient } from "@/lib/auth-client";
 import { saveProfileSettings } from "@/app/actions/profile.actions";
@@ -58,7 +57,6 @@ export default function ProfileSettings({ user }: { user: Profile }) {
     <div role="status" className="text-sm text-green-800">{savedAt && <><span>Profile saved.</span> <span className="tabular-nums">Saved at {savedAt}.</span></>}</div>
     <div className="flex flex-wrap items-center gap-5">
       <button disabled={!hydrated || busy || uploadBusy} className="min-h-11 rounded-xl bg-coral-600 px-5 font-semibold text-white hover:bg-coral-700 disabled:opacity-60">{busy ? "Saving…" : "Save profile"}</button>
-      <Link href="/dashboard#founder-mode-control" className="inline-flex min-h-11 items-center text-sm font-semibold text-gray-700 underline underline-offset-4">Manage founder mode on dashboard</Link>
     </div>
   </form>;
 }

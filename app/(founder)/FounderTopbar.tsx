@@ -2,120 +2,98 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { useState } from "react";
-import { useRouter } from "next/navigation";
-import { LogOut, LayoutDashboard, Settings, Menu, X } from "lucide-react";
-import { authClient } from "@/lib/auth-client";
+import { useEffect, useState } from "react";
+import { usePathname } from "next/navigation";
+import { LogOut, Menu, X } from "lucide-react";
 import AccountAvatar from "@/components/account/AccountAvatar";
+import AccountMenu from "@/components/layout/AccountMenu";
 
 export default function FounderTopbar({ user }: { user: { name?: string | null; image?: string | null; email?: string | null; founderMode: boolean } }) {
-  const router = useRouter();
+  const pathname = usePathname();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [menuShown, setMenuShown] = useState(false);
+  const name = user.name || "Your account";
 
-  const handleLogout = async () => {
-    await authClient.signOut();
-    router.push("/login");
-  };
+  const links = [
+    { label: "Dashboard", href: "/dashboard", current: pathname === "/dashboard" },
+    ...(user.founderMode ? [{ label: "Founder Journal", href: "/dashboard/journal", current: pathname?.startsWith("/dashboard/journal") ?? false }] : []),
+    { label: "Discover", href: "/discover", current: false },
+    { label: "Free tools", href: "/launch-support", current: false },
+  ];
+
+  // Mount the phone menu closed, then open it on the next frame so it can grow in.
+  useEffect(() => {
+    if (!isMenuOpen) return;
+    const frame = requestAnimationFrame(() => setMenuShown(true));
+    return () => { cancelAnimationFrame(frame); setMenuShown(false); };
+  }, [isMenuOpen]);
 
   return (
-    <header className="sticky top-0 z-50 w-full bg-white border-b border-gray-100 shadow-sm">
-      <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-        <Link href="/" className="flex items-center gap-2">
-          <Image src="/logo.svg" alt="Anshkosh Logo" width={32} height={32} className="w-8 h-8" priority />
-          <span className="text-xl font-bold font-heading tracking-tight">
+    <header className="sticky top-0 z-50 w-full border-b border-gray-100 bg-white shadow-sm">
+      <div className="container mx-auto flex h-16 items-center justify-between px-4">
+        <Link href="/" aria-label="Anshkosh home" className="flex items-center gap-2">
+          <Image src="/logo.svg" alt="" width={32} height={32} className="h-8 w-8" priority />
+          <span className="font-heading text-xl font-bold tracking-tight">
             <span className="text-gray-900">ANSH</span>
             <span className="text-coral-500">KOSH</span>
           </span>
         </Link>
 
-        {/* Desktop Navigation */}
-        <div className="hidden lg:flex items-center gap-6">
-          <Link href="/dashboard" className="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors">
-            Dashboard
-          </Link>
-          <Link href="/" className="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors">
-            Feed
-          </Link>
-          {user.founderMode && <Link href="/dashboard/journal" className="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors">Founder Journal</Link>}
-          <Link href="/launch-support" className="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors">Free tools</Link>
-          
-          <div className="relative" onKeyDown={event => { if (event.key === "Escape") { setIsDropdownOpen(false); (event.currentTarget.querySelector("button") as HTMLButtonElement | null)?.focus(); } }}>
-            <button 
-              aria-label={`Account options for ${user.name || "your account"}`}
-              aria-expanded={isDropdownOpen}
-              aria-controls="account-options"
-              onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-              className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-gray-200 hover:bg-gray-50 transition-colors"
+        <nav aria-label="Founder navigation" className="hidden items-center gap-6 lg:flex">
+          {links.map(link => (
+            <Link
+              key={link.href}
+              href={link.href}
+              aria-current={link.current ? "page" : undefined}
+              className={`inline-flex min-h-11 items-center border-b-2 text-sm font-medium transition-colors ${link.current ? "border-coral-600 text-coral-700" : "border-transparent text-gray-600 hover:border-gray-300 hover:text-gray-900"}`}
             >
-              <AccountAvatar name={user.name || user.email} image={user.image} />
-              <span className="text-sm font-medium truncate max-w-[100px]">{user.name || "User"}</span>
-            </button>
+              {link.label}
+            </Link>
+          ))}
+          <AccountMenu name={name} email={user.email} image={user.image} />
+        </nav>
 
-            {isDropdownOpen && (
-              <>
-                <div className="fixed inset-0 z-10" onClick={() => setIsDropdownOpen(false)} />
-                <div id="account-options" className="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-lg border border-gray-100 py-1 z-20">
-                  <div className="px-4 py-2 border-b border-gray-100 mb-1">
-                    <p className="text-sm font-medium text-gray-900 truncate">{user.name}</p>
-                    <p className="text-xs text-gray-500 truncate">{user.email}</p>
-                  </div>
-                  <Link href="/dashboard" onClick={() => setIsDropdownOpen(false)} className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
-                    <LayoutDashboard size={16} /> Dashboard
-                  </Link>
-                  <Link href="/settings" onClick={() => setIsDropdownOpen(false)} className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
-                    <Settings size={16} /> Profile settings
-                  </Link>
-                  <hr className="my-1 border-gray-100" />
-                  <button onClick={handleLogout} className="w-full flex items-center gap-2 px-4 py-2 text-sm text-red-600 hover:bg-red-50 text-left">
-                    <LogOut size={16} /> Logout
-                  </button>
-                </div>
-              </>
-            )}
-          </div>
-        </div>
-
-        {/* Mobile Toggle */}
-        <button 
-          className="lg:hidden min-h-11 min-w-11 p-2 text-gray-600 hover:bg-gray-100 rounded-md"
+        <button
+          type="button"
+          className="min-h-11 min-w-11 rounded-md p-2 text-gray-600 hover:bg-gray-100 lg:hidden"
           aria-label={isMenuOpen ? "Close navigation" : "Open navigation"}
           aria-expanded={isMenuOpen}
           aria-controls="founder-mobile-navigation"
-          onClick={() => setIsMenuOpen(!isMenuOpen)}
+          onClick={() => setIsMenuOpen(open => !open)}
         >
-          {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
+          <span className="t-icon-swap" data-state={isMenuOpen ? "b" : "a"} aria-hidden="true">
+            <Menu size={24} className="t-icon" data-icon="a" />
+            <X size={24} className="t-icon" data-icon="b" />
+          </span>
         </button>
       </div>
 
-      {/* Mobile Menu */}
       {isMenuOpen && (
-        <div id="founder-mobile-navigation" className="lg:hidden border-t border-gray-100 bg-white absolute w-full shadow-lg">
-          <div className="px-4 py-4 space-y-4">
-            <div className="flex items-center gap-3 pb-4 border-b border-gray-100">
+        <nav id="founder-mobile-navigation" aria-label="Founder navigation" className={`t-dropdown${menuShown ? " is-open" : ""} absolute w-full border-t border-gray-100 bg-white shadow-lg lg:hidden`}>
+          <div className="space-y-1 px-4 py-4">
+            <div className="mb-3 flex items-center gap-3 border-b border-gray-100 pb-4">
               <AccountAvatar name={user.name || user.email} image={user.image} />
-              <div>
-                <p className="font-medium text-gray-900">{user.name || "User"}</p>
-                <p className="text-sm text-gray-500">{user.email}</p>
+              <div className="min-w-0">
+                <p className="truncate font-medium text-gray-900">{name}</p>
+                {user.email && <p className="truncate text-sm text-gray-600">{user.email}</p>}
               </div>
             </div>
-            
-            <Link href="/dashboard" onClick={() => setIsMenuOpen(false)} className="flex items-center gap-2 px-2 py-2 text-gray-700 font-medium hover:bg-gray-50 rounded-md">
-              <LayoutDashboard size={20} className="text-gray-500" /> Dashboard
+            {[...links, { label: "Profile settings", href: "/settings", current: pathname === "/settings" }].map(link => (
+              <Link
+                key={link.href}
+                href={link.href}
+                aria-current={link.current ? "page" : undefined}
+                onClick={() => setIsMenuOpen(false)}
+                className={`flex min-h-11 items-center rounded-xl px-3 font-medium ${link.current ? "bg-coral-50 text-coral-700" : "text-gray-700 hover:bg-gray-100"}`}
+              >
+                {link.label}
+              </Link>
+            ))}
+            <Link href="/logout" prefetch={false} onClick={() => setIsMenuOpen(false)} className="flex min-h-11 items-center gap-2 rounded-xl px-3 font-medium text-red-700 hover:bg-red-50">
+              <LogOut size={18} aria-hidden="true" /> Logout
             </Link>
-            <Link href="/" onClick={() => setIsMenuOpen(false)} className="flex items-center gap-2 px-2 py-2 text-gray-700 font-medium hover:bg-gray-50 rounded-md">
-              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-500"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
-              Public Feed
-            </Link>
-            
-            {user.founderMode && <Link href="/dashboard/journal" onClick={() => setIsMenuOpen(false)} className="flex min-h-11 items-center px-2 text-gray-700 font-medium">Founder Journal</Link>}
-            <Link href="/launch-support" onClick={() => setIsMenuOpen(false)} className="flex min-h-11 items-center px-2 text-gray-700 font-medium">Free tools</Link>
-            <Link href="/settings" onClick={() => setIsMenuOpen(false)} className="flex min-h-11 items-center gap-2 px-2 text-gray-700 font-medium"><Settings size={20} /> Profile settings</Link>
-            <button onClick={handleLogout} className="w-full flex items-center gap-2 px-2 py-2 text-red-600 font-medium hover:bg-red-50 rounded-md text-left">
-              <LogOut size={20} /> Logout
-            </button>
           </div>
-        </div>
+        </nav>
       )}
     </header>
   );
