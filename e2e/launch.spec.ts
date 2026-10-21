@@ -159,6 +159,7 @@ test("signup, real verification token, login, photo editing, private deck and st
   await page.getByRole("button", { name: "Next", exact: true }).click();
   await page.getByRole("button", { name: "Edit media and features", exact: true }).click();
   await page.getByRole("button", { name: "Add Feature", exact: true }).click();
+  await expect(page.getByLabel("Feature 1 title", { exact: true })).toBeVisible();
   await page.getByRole("button", { name: "Next", exact: true }).click();
   await expect(page.getByLabel("Feature 1 title", { exact: true })).toHaveAttribute("aria-invalid", "true");
   await page.getByLabel("Feature 1 title", { exact: true }).fill("A saved feature");
