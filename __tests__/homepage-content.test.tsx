@@ -31,7 +31,7 @@ describe("homepage public content", () => {
     const html = renderToStaticMarkup(await FeaturedStartups());
     expect(queries.featured).toHaveBeenCalledWith(expect.objectContaining({
       where: expect.objectContaining({
-        startup: { status: "LIVE" },
+        startup: { status: "LIVE", founder: { founderMode: true } },
         OR: [{ featuredUntil: null }, { featuredUntil: { gt: expect.any(Date) } }],
       }),
       orderBy: { sortOrder: "asc" },

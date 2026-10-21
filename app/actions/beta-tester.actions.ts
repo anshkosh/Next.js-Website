@@ -1,5 +1,7 @@
 "use server";
 
+import { publicStartupWhere } from "@/lib/startup-visibility";
+
 import { db } from "@/lib/db";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
@@ -38,7 +40,7 @@ export async function submitBetaTesterRequest(input: unknown): Promise<{ success
     }
 
     const program = await db.betaTesterProgram.findFirst({
-      where: { startupId, enabled: true, startup: { status: "LIVE" } },
+      where: { startupId, enabled: true, startup: publicStartupWhere },
       select: { id: true, startup: { select: { slug: true } } },
     });
     if (!program) return { error: "Beta tester signups are closed for this startup." };

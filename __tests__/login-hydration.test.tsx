@@ -1,0 +1,25 @@
+import { act } from "react";
+import { renderToString } from "react-dom/server";
+import { hydrateRoot, type Root } from "react-dom/client";
+import { afterEach, expect, it, vi } from "vitest";
+const m = vi.hoisted(() => ({ signIn: vi.fn(), push: vi.fn() }));
+vi.mock("@/lib/auth-client", () => ({ authClient: { signIn: { email: m.signIn, social: vi.fn() } } }));
+vi.mock("next/navigation", () => ({ useRouter: () => ({ push: m.push }) }));
+vi.mock("@/components/auth/AuthHomeIcon", () => ({ default: () => null }));
+import Login from "@/app/(auth)/login/page";
+let root: Root | undefined;
+afterEach(async () => { if (root) await act(async () => root?.unmount()); root = undefined; document.body.innerHTML = ""; vi.clearAllMocks(); });
+it("keeps native typing through hydration and reads it into the sign-in request", async () => {
+  m.signIn.mockResolvedValue({ data: {} });
+  const container = document.createElement("div"); document.body.append(container);
+  container.innerHTML = renderToString(<Login />);
+  const email = container.querySelector<HTMLInputElement>('input[name="email"]')!;
+  const password = container.querySelector<HTMLInputElement>('input[name="password"]')!;
+  email.value = "early@example.test"; password.value = "EarlySynthetic123!";
+  await act(async () => { root = hydrateRoot(container, <Login />); });
+  await act(async () => root?.render(<Login />));
+  expect(email.value).toBe("early@example.test"); expect(password.value).toBe("EarlySynthetic123!");
+  await act(async () => container.querySelector("form")!.dispatchEvent(new Event("submit", { bubbles: true, cancelable: true })));
+  expect(m.signIn).toHaveBeenCalledWith({ email: "early@example.test", password: "EarlySynthetic123!" });
+  expect(m.push).toHaveBeenCalledWith("/dashboard");
+});

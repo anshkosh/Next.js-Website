@@ -1,4 +1,5 @@
 import { db } from "@/lib/db";
+import { publicStartupWhere } from "@/lib/startup-visibility";
 import { rankSignals, signalSnapshotQuery, type SignalSnapshot, type SignalActivity } from "@/lib/startup-signals";
 
 export const LEADERBOARD_PAGE_SIZE = 20;
@@ -47,7 +48,7 @@ export async function getLeaderboard(requestedPage = 1, cookieId?: string, featu
       : eligible.slice((page - 1) * LEADERBOARD_PAGE_SIZE, page * LEADERBOARD_PAGE_SIZE);
 
     const startups = await tx.startup.findMany({
-      where: { status: "LIVE", id: { in: selected.map(row => row.id) } },
+      where: { ...publicStartupWhere, id: { in: selected.map(row => row.id) } },
       select: {
         id: true, slug: true, name: true, tagline: true, logoUrl: true,
         upvoteCount: true, downvoteCount: true, signalCount: true, updateCount: true,

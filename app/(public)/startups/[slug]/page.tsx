@@ -1,3 +1,4 @@
+import { publicStartupWhere } from "@/lib/startup-visibility";
 import { db } from "@/lib/db";
 import { notFound, permanentRedirect } from "next/navigation";
 import Image from "next/image";
@@ -80,7 +81,7 @@ export async function generateStaticParams() {
   if (!process.env.DATABASE_URL) return [];
 
   const startups = await db.startup.findMany({
-    where: { status: "LIVE" },
+    where: publicStartupWhere,
     select: { slug: true },
   });
 
@@ -96,16 +97,16 @@ export async function generateMetadata(props: {
   if (!process.env.DATABASE_URL) notFound();
 
   const startup = await db.startup.findUnique({
-    where: { slug: params.slug, status: "LIVE" },
+    where: { slug: params.slug, ...publicStartupWhere },
     include: { category: true },
   });
 
   if (!startup) {
     const redirect = await db.slugRedirect.findUnique({
       where: { oldSlug: params.slug },
-      include: { startup: true },
+      include: { startup: { select: { slug: true, status: true, founder: { select: { founderMode: true } } } } },
     });
-    if (redirect?.startup?.status === "LIVE") {
+    if (redirect?.startup?.status === "LIVE" && redirect.startup.founder.founderMode) {
       permanentRedirect(`/startups/${redirect.startup.slug}`);
     }
     notFound();
@@ -149,7 +150,7 @@ export default async function StartupDetailPage(props: {
   const cookieId = cookieStore.get("anshkosh_vid")?.value;
 
   const startup = await db.startup.findUnique({
-    where: { slug: params.slug },
+    where: { slug: params.slug, ...publicStartupWhere },
     include: {
       category: true,
       upvotes: cookieId
@@ -175,9 +176,9 @@ export default async function StartupDetailPage(props: {
   if (!startup) {
     const redirect = await db.slugRedirect.findUnique({
       where: { oldSlug: params.slug },
-      include: { startup: true },
+      include: { startup: { select: { slug: true, status: true, founder: { select: { founderMode: true } } } } },
     });
-    if (redirect?.startup?.status === "LIVE") {
+    if (redirect?.startup?.status === "LIVE" && redirect.startup.founder.founderMode) {
       permanentRedirect(`/startups/${redirect.startup.slug}`);
     }
     notFound();

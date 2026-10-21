@@ -33,7 +33,7 @@ describe("journal image visibility", () => {
   it("allows anonymous access only through a public entry on the matching live startup", async () => {
     m.shared.mockResolvedValue({ id: "public-entry" });
     const response = await get(); expect(response.status).toBe(200);
-    expect(m.shared).toHaveBeenCalledWith({ where: { authorId: "owner", visibility: "PUBLIC", approvedAt: { not: null }, publishedAt: { lte: expect.any(Date) }, mediaKeys: { has: path.join("/") }, startup: { status: "LIVE", founderId: "owner" } }, select: { id: true } });
+    expect(m.shared).toHaveBeenCalledWith({ where: { authorId: "owner", visibility: "PUBLIC", approvedAt: { not: null }, publishedAt: { lte: expect.any(Date) }, mediaKeys: { has: path.join("/") }, startup: { status: "LIVE", founder: { founderMode: true }, founderId: "owner" } }, select: { id: true } });
     expect(response.headers.get("cache-control")).toBe("private, no-store");
   });
   it("rechecks access on every request so returning an entry to private revokes the image URL", async () => {

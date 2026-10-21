@@ -6,8 +6,9 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { LogOut, LayoutDashboard, Settings, Menu, X } from "lucide-react";
 import { authClient } from "@/lib/auth-client";
+import AccountAvatar from "@/components/account/AccountAvatar";
 
-export default function FounderTopbar({ user }: { user: { name?: string | null; email?: string | null; founderMode: boolean } }) {
+export default function FounderTopbar({ user }: { user: { name?: string | null; image?: string | null; email?: string | null; founderMode: boolean } }) {
   const router = useRouter();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -47,9 +48,7 @@ export default function FounderTopbar({ user }: { user: { name?: string | null; 
               onClick={() => setIsDropdownOpen(!isDropdownOpen)}
               className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-gray-200 hover:bg-gray-50 transition-colors"
             >
-              <div className="w-6 h-6 rounded-full bg-coral-100 text-coral-600 flex items-center justify-center text-xs font-bold uppercase">
-                {user.name?.charAt(0) || user.email?.charAt(0) || "U"}
-              </div>
+              <AccountAvatar name={user.name || user.email} image={user.image} />
               <span className="text-sm font-medium truncate max-w-[100px]">{user.name || "User"}</span>
             </button>
 
@@ -94,9 +93,7 @@ export default function FounderTopbar({ user }: { user: { name?: string | null; 
         <div id="founder-mobile-navigation" className="lg:hidden border-t border-gray-100 bg-white absolute w-full shadow-lg">
           <div className="px-4 py-4 space-y-4">
             <div className="flex items-center gap-3 pb-4 border-b border-gray-100">
-              <div className="w-10 h-10 rounded-full bg-coral-100 text-coral-600 flex items-center justify-center font-bold uppercase">
-                {user.name?.charAt(0) || user.email?.charAt(0) || "U"}
-              </div>
+              <AccountAvatar name={user.name || user.email} image={user.image} />
               <div>
                 <p className="font-medium text-gray-900">{user.name || "User"}</p>
                 <p className="text-sm text-gray-500">{user.email}</p>

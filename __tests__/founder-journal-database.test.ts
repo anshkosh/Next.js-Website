@@ -33,6 +33,7 @@ beforeAll(async () => {
 });
 afterAll(async () => {
   if (!enabled) return;
+  await db.founderJournalEntry.deleteMany({ where: { authorId: { in: [author, other, reviewer].filter(Boolean) } } });
   await db.startup.deleteMany({ where: { id: { in: [startup, otherStartup].filter(Boolean) } } });
   await db.user.deleteMany({ where: { id: { in: [author, other, reviewer].filter(Boolean) } } });
   if (category) await db.category.delete({ where: { id: category } });
@@ -62,6 +63,12 @@ it.skipIf(!enabled)("preserves privacy across real database creation, publicatio
   expect((await publicFounderEntry(entry.id))?.title).toBe(draft.title);
   expect(publicRows).toHaveLength(1); expect(publicRows[0].milestoneDone).toBe(true);
   expect(publicRows[0]).not.toHaveProperty("authorId");
+  await db.user.update({ where: { id: author }, data: { founderMode: false } });
+  expect(await publicFounderEntries(startup, author)).toEqual([]);
+  expect(await publicFounderEntry(entry.id)).toBeNull();
+  await db.user.update({ where: { id: author }, data: { founderMode: true } });
+  expect(await publicFounderEntries(startup, author)).toEqual(publicRows);
+  expect((await publicFounderEntry(entry.id))?.title).toBe(draft.title);
   await db.startup.update({ where: { id: startup }, data: { status: "SUSPENDED" } });
   expect(await publicFounderEntry(entry.id)).toBeNull();
   expect(await publicFounderEntries(startup, author)).toEqual([]);

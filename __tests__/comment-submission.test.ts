@@ -67,5 +67,5 @@ it("never uses an unverified email address or an unsigned ID to read pending com
   expect(await fetchOwnPendingComments(startupId)).toEqual([]); expect(mock.findMany).not.toHaveBeenCalled();
   mock.getCookie.mockReturnValue({ value: addCommentReceipt(undefined, id, process.env.BETTER_AUTH_SECRET) });
   await fetchOwnPendingComments(startupId);
-  expect(mock.findMany).toHaveBeenCalledWith(expect.objectContaining({ where: { id: { in: [id] }, startupId, status: "PENDING", startup: { status: "LIVE" } }, select: { id: true, authorName: true, body: true, createdAt: true } }));
+  expect(mock.findMany).toHaveBeenCalledWith(expect.objectContaining({ where: { id: { in: [id] }, startupId, status: "PENDING", startup: { status: "LIVE", founder: { founderMode: true } } }, select: { id: true, authorName: true, body: true, createdAt: true } }));
 });

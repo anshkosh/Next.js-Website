@@ -1,3 +1,4 @@
+import { publicStartupWhere } from "@/lib/startup-visibility";
 import { publicStartupCard, publicStartupCardSelect } from "@/lib/public-startup-card";
 import { db } from "@/lib/db";
 import { notFound } from "next/navigation";
@@ -44,7 +45,7 @@ export default async function CategoryPage(props: { params: Promise<{ slug: stri
   const startups = await db.startup.findMany({
     where: {
       categoryId: category.id,
-      status: "LIVE",
+      ...publicStartupWhere,
     },
     select: publicStartupCardSelect(cookieId),
     orderBy: [

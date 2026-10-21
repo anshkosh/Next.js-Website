@@ -17,6 +17,11 @@ model User {
   updatedAt     DateTime  @updatedAt
   role          String    @default("user")
   founderMode   Boolean   @default(true)
+  bio           String    @default("")
+  location      String    @default("")
+  websiteUrl    String    @default("")
+  notifyStartupReviews Boolean @default(true)
+  notifyVoteMilestones Boolean @default(true)
   banned        Boolean   @default(false)
   banReason     String?
   banExpires    DateTime?

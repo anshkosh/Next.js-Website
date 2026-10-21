@@ -27,7 +27,7 @@ describe("public founder entry pages", () => {
   });
   it("filters publication and live status in the query and strips ownership identifiers from its result", async () => {
     const entry = await publicFounderEntry("entry-one");
-    expect(m.entry).toHaveBeenCalledWith(expect.objectContaining({ where: { id: "entry-one", visibility: "PUBLIC", approvedAt: { not: null }, publishedAt: { lte: expect.any(Date) }, startup: { status: "LIVE" } } }));
+    expect(m.entry).toHaveBeenCalledWith(expect.objectContaining({ where: { id: "entry-one", visibility: "PUBLIC", approvedAt: { not: null }, publishedAt: { lte: expect.any(Date) }, startup: { status: "LIVE", founder: { founderMode: true } } } }));
     expect(entry).not.toHaveProperty("authorId"); expect(entry?.startup).not.toHaveProperty("founderId");
     expect(dynamic).toBe("force-dynamic");
   });
@@ -77,7 +77,7 @@ describe("public founder entry pages", () => {
     let urls = (await sitemap()).map(entry => entry.url);
     expect(urls).toContain(`https://www.anshkosh.com${founderEntryPath(row)}`);
     expect(urls.some(url => /old-owner-entry|detached/.test(url))).toBe(false);
-    expect(m.entries).toHaveBeenCalledWith(expect.objectContaining({ where: { visibility: "PUBLIC", approvedAt: { not: null }, publishedAt: { lte: expect.any(Date) }, startup: { status: "LIVE" } } }));
+    expect(m.entries).toHaveBeenCalledWith(expect.objectContaining({ where: { visibility: "PUBLIC", approvedAt: { not: null }, publishedAt: { lte: expect.any(Date) }, startup: { status: "LIVE", founder: { founderMode: true } } } }));
     urls = (await sitemap()).map(entry => entry.url);
     expect(urls.some(url => url.includes('/founder-journal/'))).toBe(false); expect(sitemapDynamic).toBe("force-dynamic");
   });

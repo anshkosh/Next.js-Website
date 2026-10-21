@@ -65,7 +65,7 @@ export function signalSnapshotQuery(now = new Date()) {
         AND c."createdAt" <= (${now}::timestamptz AT TIME ZONE 'UTC') AND NULLIF(BTRIM(c.body), '') IS NOT NULL
         AND LOWER(BTRIM(c."authorEmail")) <> LOWER(BTRIM(founder.email))
     ) comments ON true
-    WHERE s.status = 'LIVE'
+    WHERE s.status = 'LIVE' AND founder."founderMode" = true
   `;
 }
 

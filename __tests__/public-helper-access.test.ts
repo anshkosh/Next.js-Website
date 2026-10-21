@@ -19,13 +19,13 @@ it.each(["DRAFT", "PENDING_REVIEW", "REJECTED", "SUSPENDED"])("does not expose %
   expect(await getFounders("known-id")).toEqual({ data: [] });
   expect(await getUpdates("known-id")).toEqual({ data: [] });
   await fetchApprovedComments("known-id");
-  expect(mock.comments).toHaveBeenCalledWith(expect.objectContaining({ where: { startupId: "known-id", status: "APPROVED", startup: { status: "LIVE" } } }));
+  expect(mock.comments).toHaveBeenCalledWith(expect.objectContaining({ where: { startupId: "known-id", status: "APPROVED", startup: { status: "LIVE", founder: { founderMode: true } } } }));
 });
 it("keeps draft management available to its verified owner without broadening public access", async () => {
   mock.session.mockResolvedValue({ user: { id: "owner", emailVerified: true } });
   mock.founders.mockResolvedValue([]); mock.updates.mockResolvedValue([]);
   await getFounders("draft"); await getUpdates("draft");
-  for (const find of [mock.founders, mock.updates]) expect(find).toHaveBeenCalledWith(expect.objectContaining({ where: { startupId: "draft", startup: { OR: [{ status: "LIVE" }, { founderId: "owner" }] } }, select: expect.any(Object) }));
+  for (const find of [mock.founders, mock.updates]) expect(find).toHaveBeenCalledWith(expect.objectContaining({ where: { startupId: "draft", startup: { OR: [{ status: "LIVE", founder: { founderMode: true } }, { founderId: "owner" }] } }, select: expect.any(Object) }));
 });
 it("rejects serialized filter operators instead of accepting a string-shaped type assertion", async () => {
   const input = { not: "anything" } as unknown as string;

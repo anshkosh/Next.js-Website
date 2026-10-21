@@ -67,7 +67,7 @@ describe("canonical URL policy", () => {
     const { default: sitemap } = await import("../app/sitemap");
     const entries = await sitemap();
     expect(entries).toHaveLength(25);
-    expect(queries.startup).toHaveBeenCalledWith(expect.objectContaining({ where: { status: "LIVE" } }));
+    expect(queries.startup).toHaveBeenCalledWith(expect.objectContaining({ where: { status: "LIVE", founder: { founderMode: true } } }));
     expect(queries.journalPost).toHaveBeenCalledWith(expect.objectContaining({ where: { status: "PUBLISHED" } }));
     expect(entries.find(entry => entry.url.endsWith("/journal/published-story"))?.lastModified).toEqual(updatedAt);
   });

@@ -62,7 +62,7 @@ describe("beta tester signup and founder review", () => {
   it("stores normalized contact data and a timestamped consent version without returning the email", async () => {
     const result = await submitBetaTesterRequest(validApplication);
     expect(result).toEqual({ success: true });
-    expect(mocks.programFindFirst).toHaveBeenCalledWith(expect.objectContaining({ where: { startupId: "startup-1", enabled: true, startup: { status: "LIVE" } } }));
+    expect(mocks.programFindFirst).toHaveBeenCalledWith(expect.objectContaining({ where: { startupId: "startup-1", enabled: true, startup: { status: "LIVE", founder: { founderMode: true } } } }));
     expect(mocks.requestCreate).toHaveBeenCalledWith({ data: {
       programId: "program-1", name: "Riya", email: "riya@example.com", message: "I would like to test checkout.",
       consentedAt: new Date("2026-10-18T10:00:00.000Z"), consentVersion: BETA_TESTER_CONSENT_VERSION,

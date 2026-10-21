@@ -1,12 +1,13 @@
 import { db } from "./db";
 import { voteTransition } from "./voting";
+import { publicStartupWhere } from "./startup-visibility";
 
 // Serialize changes to both vote tables and the counters using the startup row.
 export async function recordVote(startupId: string, requested: -1 | 1, identity: { fingerprintHash: string; cookieId: string }) {
   return db.$transaction(async tx => {
     await tx.$queryRaw`SELECT id FROM "Startup" WHERE id = ${startupId} FOR UPDATE`;
     const startup = await tx.startup.findUnique({
-      where: { id: startupId },
+      where: { id: startupId, ...publicStartupWhere },
       select: { id: true, status: true, name: true, slug: true, category: { select: { slug: true } }, founder: { select: { email: true } } },
     });
     if (!startup || startup.status !== "LIVE") return { success: false as const, error: "Only published startups can receive votes." };

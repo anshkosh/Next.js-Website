@@ -1,6 +1,19 @@
 # Website changelog
 
-## Unreleased — account settings and submission recovery
+## Unreleased — founder visibility and account controls
+
+- Hide all owned startup listings, direct pages, old-slug redirects, previews,
+  search/sitemap/category entries and rankings when founder mode is off.
+- Apply the same rule to linked founder stories, public decks and public
+  comment/vote/beta signup actions. Keep owner/reviewer management access.
+- Explain visibility in settings. Restore previous approved visibility when
+  founder mode is enabled again, without changing saved data or review status.
+- Move the founder-mode switch to the dashboard with automatic saving.
+- Expand profile settings with an owned profile photo, bio, location, website,
+  real email-delivery preferences, verified email changes, password changes and
+  other-device sign-out. Keep verification/recovery and newsletter consent separate.
+
+## 21 October 2026 — account settings and submission recovery (PR #46)
 
 - Enable profile settings for every signed-in account, with name editing, email
   status and a saved founder mode preference. Founder mode defaults on; members
