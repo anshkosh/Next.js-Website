@@ -87,6 +87,10 @@ the serial journey. This applies only with `E2E_TEST_MODE=1` outside production;
 the heap limit, fixture guards and production configuration are unchanged.
 The direct logout regression awaits the successful sign-out response before
 checking navigation, using the same 30-second navigation budget as login.
+CI assertions use the same 30-second budget as browser actions so a still-pending
+save is allowed to finish before its saved-content and persistence assertions.
+The per-journey time limits remain bounded. Failure traces are retained on the
+first failure because this serial fixture suite intentionally has no retries.
 The serial fixture journey fails on its first attempt and preserves evidence;
 replaying it against existing vote/rate-limit state can mask the original failure.
 Photo-upload scenarios assert a successful upload response and a valid sanitized

@@ -15,6 +15,10 @@
   finished. Isolated E2E config now retains compiled routes for the job duration;
   the logout test requires a successful sign-out response and the existing login
   navigation budget. Production and fixture-isolation guards remain unchanged.
+- A further first-journey screenshot showed the draft save still pending when
+  the default five-second assertion expired. CI assertions now use the existing
+  30-second action budget; failure traces are retained on first failure, matching
+  the serial suite's no-retry policy. Saved-content and DB assertions remain.
 
 ## 22 October 2026 — Claude site review release preparation
 
