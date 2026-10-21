@@ -10,21 +10,21 @@ import PasswordField from "@/components/auth/PasswordField";
 
 export default function LoginPage() {
   const router = useRouter();
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
   const [error, setError] = useState("");
 
   const handleEmailLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+    // Read native fields at submit time so hydration cannot reset early typing.
+    const fields = new FormData(e.currentTarget as HTMLFormElement);
     setLoading(true);
     setError("");
 
     try {
       const { error } = await authClient.signIn.email({
-        email,
-        password,
+        email: String(fields.get("email") || ""),
+        password: String(fields.get("password") || ""),
       });
 
       if (error) {
@@ -119,8 +119,6 @@ export default function LoginPage() {
                   type="email"
                   autoComplete="email"
                   required
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
                   className="appearance-none block w-full pl-10 px-3 py-2.5 border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-coral-500 focus:border-coral-500 sm:text-sm transition-colors"
                   placeholder="you@startup.com"
                 />
@@ -141,8 +139,6 @@ export default function LoginPage() {
                   label="Password"
                   autoComplete="current-password"
                   required
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
                   className="appearance-none block w-full px-3 py-2.5 border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-coral-500 focus:border-coral-500 sm:text-sm transition-colors"
                 />
               </div>

@@ -1,3 +1,5 @@
+import DashboardModeControl from "@/components/account/DashboardModeControl";
+import { publicStartupWhere } from "@/lib/startup-visibility";
 import { db } from "@/lib/db";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
@@ -67,7 +69,7 @@ export default async function DashboardPage() {
   }
 
   const profile = await db.user.findUnique({ where: { id: session.user.id }, select: { name: true, founderMode: true } });
-  if (!profile?.founderMode) return <div className="mx-auto w-full max-w-4xl px-4 py-12 sm:py-16"><h1 className="font-heading text-3xl font-bold text-gray-900">Welcome, {profile?.name || session.user.name}</h1><p className="mt-3 max-w-xl text-base leading-relaxed text-gray-600">Discover what people are building, ask useful questions and follow their progress. You don’t need a startup to take part.</p><div className="mt-8 flex flex-wrap gap-4"><Link href="/discover" className="inline-flex min-h-12 items-center rounded-xl bg-coral-600 px-5 font-semibold text-white hover:bg-coral-700">Explore startups</Link><Link href="/journal" className="inline-flex min-h-12 items-center rounded-xl border border-gray-300 bg-white px-5 font-semibold text-gray-800 hover:bg-gray-50">Read founder stories</Link></div><section className="mt-12 border-t border-gray-200 pt-6"><h2 className="text-lg font-semibold text-gray-900">Make yourself at home</h2><p className="mt-2 text-sm leading-relaxed text-gray-600">Your member or backer account can share feedback and apply to beta programs where available. Building a startup? Enable founder mode in your settings.</p><Link href="/settings" className="mt-3 inline-flex min-h-11 items-center font-semibold text-coral-700 underline underline-offset-4">Profile settings</Link></section></div>;
+  if (!profile?.founderMode) return <div className="mx-auto w-full max-w-4xl px-4 py-12 sm:py-16"><DashboardModeControl enabled={false} /><h1 className="font-heading text-3xl font-bold text-gray-900">Welcome, {profile?.name || session.user.name}</h1><p className="mt-3 max-w-xl text-base leading-relaxed text-gray-600">Discover what people are building, ask useful questions and follow their progress. You don’t need a startup to take part.</p><div className="mt-8 flex flex-wrap gap-4"><Link href="/discover" className="inline-flex min-h-12 items-center rounded-xl bg-coral-600 px-5 font-semibold text-white hover:bg-coral-700">Explore startups</Link><Link href="/journal" className="inline-flex min-h-12 items-center rounded-xl border border-gray-300 bg-white px-5 font-semibold text-gray-800 hover:bg-gray-50">Read founder stories</Link></div><section className="mt-12 border-t border-gray-200 pt-6"><h2 className="text-lg font-semibold text-gray-900">Make yourself at home</h2><p className="mt-2 text-sm leading-relaxed text-gray-600">Your member or backer account can share feedback and apply to beta programs where available. Any saved startups and linked journal stories stay hidden publicly while founder mode is off. Building a startup? Turn founder mode on above.</p><Link href="/settings" className="mt-3 inline-flex min-h-11 items-center font-semibold text-coral-700 underline underline-offset-4">Profile settings</Link></section></div>;
 
   const startups = await db.startup.findMany({
     where: { founderId: session.user.id },
@@ -124,7 +126,7 @@ export default async function DashboardPage() {
     liveStartupIds.length ? db.startupUpdate.findFirst({ where: { startupId: { in: liveStartupIds }, createdAt: { gte: activitySince } }, select: { id: true } }) : null,
     liveStartupIds.length ? db.comment.findFirst({ where: { startupId: { in: liveStartupIds }, repliedAt: { gte: activitySince } }, select: { id: true } }) : null,
     db.startup.findFirst({
-      where: { status: "LIVE", founderId: { not: session.user.id }, ...(session.user.email ? { comments: { none: { authorEmail: { equals: session.user.email, mode: "insensitive" }, status: { in: ["PENDING", "APPROVED"] } } } } : {}) },
+      where: { ...publicStartupWhere, founderId: { not: session.user.id }, ...(session.user.email ? { comments: { none: { authorEmail: { equals: session.user.email, mode: "insensitive" }, status: { in: ["PENDING", "APPROVED"] } } } } : {}) },
       select: { slug: true, name: true }, orderBy: [{ publishedAt: "desc" }, { id: "desc" }],
     }),
   ]);
@@ -161,6 +163,8 @@ export default async function DashboardPage() {
             Your startup, your progress, your next move.
           </p>
         </div>
+
+        <DashboardModeControl enabled={true} />
 
         {/* Stats Row */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-5 mb-12">

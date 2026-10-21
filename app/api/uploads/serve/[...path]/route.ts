@@ -1,3 +1,4 @@
+import { publicStartupWhere } from "@/lib/startup-visibility";
 import { NextRequest, NextResponse } from "next/server";
 import { r2 } from "@/lib/storage/r2";
 import { GetObjectCommand } from "@aws-sdk/client-s3";
@@ -26,7 +27,7 @@ export async function GET(
       const session = await auth.api.getSession({ headers: req.headers });
       if (session?.user.id !== ownerId) {
         const shared = await db.founderJournalEntry.findFirst({
-          where: { authorId: ownerId, visibility: "PUBLIC", approvedAt: { not: null }, publishedAt: { lte: new Date() }, mediaKeys: { has: key }, startup: { status: "LIVE", founderId: ownerId } }, select: { id: true },
+          where: { authorId: ownerId, visibility: "PUBLIC", approvedAt: { not: null }, publishedAt: { lte: new Date() }, mediaKeys: { has: key }, startup: { ...publicStartupWhere, founderId: ownerId } }, select: { id: true },
         });
         const reviewer = session?.user.emailVerified && !session.user.banned && ["admin", "reviewer"].includes(session.user.role ?? "");
         const submitted = !shared && reviewer ? await db.founderJournalRevision.findFirst({
@@ -42,7 +43,7 @@ export async function GET(
     if (isPitchDeck) {
       const url = `/api/uploads/serve/${key}`;
       if (!pitchDeckUrlSchema.safeParse(url).success) return new NextResponse("Not Found", { status: 404 });
-      const profiles = await db.startup.findMany({ where: { status: "LIVE", metadata: { path: ["pitchDeckUrl"], equals: url } }, select: { metadata: true } });
+      const profiles = await db.startup.findMany({ where: { ...publicStartupWhere, metadata: { path: ["pitchDeckUrl"], equals: url } }, select: { metadata: true } });
       const isPublic = profiles.some(profile => publicPitchDeck(profile.metadata) === url);
       if (!isPublic) {
         const session = await auth.api.getSession({ headers: req.headers });

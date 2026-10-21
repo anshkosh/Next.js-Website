@@ -25,14 +25,14 @@ export default async function NewStartupPage({
           Ready to share your startup?
         </h1>
         <p className="mt-3 text-gray-600">
-          Enable founder mode in your profile settings to open your startup
+          Enable founder mode on your dashboard to open your startup
           workspace.
         </p>
         <Link
-          href="/settings"
+          href="/dashboard#founder-mode-control"
           className="mt-5 inline-flex min-h-11 items-center font-semibold text-coral-700 underline"
         >
-          Open profile settings
+          Open dashboard
         </Link>
       </div>
     );

@@ -38,7 +38,7 @@ export function getSubject(template: TemplateName, data: Record<string, unknown>
   switch (template) {
     case "newsletter_confirmation": return "Confirm your Anshkosh newsletter signup";
     case "welcome": return "Welcome to anshkosh! 🚀";
-    case "startup_approved": return `${data.startupName} is now live on anshkosh!`;
+    case "startup_approved": return `${data.startupName} has been approved on Anshkosh`;
     case "startup_rejected": return `Update needed: ${data.startupName}`;
     case "upvote_milestone": return `🎉 ${data.startupName} hit ${data.milestone} upvotes!`;
     case "new_submission": return `New startup for review: ${data.startupName}`;

@@ -1,3 +1,4 @@
+import { publicStartupWhere } from "@/lib/startup-visibility";
 import { cookies } from "next/headers";
 import Link from "next/link";
 import { ArrowRight, Sparkles } from "lucide-react";
@@ -12,7 +13,7 @@ export default async function FeaturedStartups({ cookieId }: { cookieId?: string
   const now = new Date();
   const rows = await db.featuredStartup.findMany({
     where: {
-      startup: { status: "LIVE" },
+      startup: publicStartupWhere,
       OR: [{ featuredUntil: null }, { featuredUntil: { gt: now } }],
     },
     orderBy: { sortOrder: "asc" },

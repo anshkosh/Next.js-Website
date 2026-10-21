@@ -1,3 +1,4 @@
+import { publicStartupWhere } from "@/lib/startup-visibility";
 import { startupSearchWhere } from "@/lib/startup-search";
 import { publicStartupCard, publicStartupCardSelect } from "@/lib/public-startup-card";
 import { db } from "@/lib/db";
@@ -62,7 +63,7 @@ export default async function DiscoverPage(props: {
   const cookieId = cookieStore.get("anshkosh_vid")?.value;
 
   const where: Prisma.StartupWhereInput = {
-    status: "LIVE",
+    ...publicStartupWhere,
   };
 
   if (categorySlug && categorySlug !== "all") {

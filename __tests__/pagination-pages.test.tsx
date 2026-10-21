@@ -48,7 +48,7 @@ it("fills Discover rows and paginates every matching startup exactly once", asyn
     seen.push(...ids);
     expect(mock.startups.mock.lastCall?.[0]).toMatchObject({
       skip: (page - 1) * 24, take: 24,
-      where: { status: "LIVE", category: { slug: "technology" } },
+      where: { status: "LIVE", founder: { founderMode: true }, category: { slug: "technology" } },
     });
     const pagination = renderToStaticMarkup(content.props.children[1]);
     expect(pagination).toContain(`Page ${page} of 3`);

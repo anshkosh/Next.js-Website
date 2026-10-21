@@ -1,3 +1,4 @@
+import { publicStartupWhere } from "@/lib/startup-visibility";
 import { db } from "@/lib/db";
 import { MetadataRoute } from "next";
 import { SITE_URL } from "@/lib/seo";
@@ -28,7 +29,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   if (!process.env.DATABASE_URL) return staticRoutes;
 
   const startups = await db.startup.findMany({
-    where: { status: "LIVE" },
+    where: publicStartupWhere,
     select: { slug: true, updatedAt: true },
   });
 
@@ -41,7 +42,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     select: { slug: true, updatedAt: true },
   });
   const founderEntries = await db.founderJournalEntry.findMany({
-    where: { visibility: "PUBLIC", approvedAt: { not: null }, publishedAt: { lte: new Date() }, startup: { status: "LIVE" } },
+    where: { visibility: "PUBLIC", approvedAt: { not: null }, publishedAt: { lte: new Date() }, startup: publicStartupWhere },
     select: { id: true, title: true, updatedAt: true, authorId: true, startup: { select: { founderId: true } } },
   });
 

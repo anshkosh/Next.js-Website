@@ -1,15 +1,18 @@
+import { publicStartupWhere } from "@/lib/startup-visibility";
 import { ImageResponse } from 'next/og';
 import { db } from '@/lib/db';
 import { NextRequest } from 'next/server';
 import { ogLogo } from '@/lib/og-logo';
 
+export const dynamic = "force-dynamic";
+
 export async function GET(req: NextRequest, props: { params: Promise<{ slug: string }> }) {
   const params = await props.params;
   const startup = await db.startup.findUnique({
-    where: { slug: params.slug, status: 'LIVE' },
+    where: { slug: params.slug, ...publicStartupWhere },
     select: { name: true, tagline: true, logoUrl: true, category: { select: { name: true, iconName: true } } },
   });
-  if (!startup) return new Response('Not Found', { status: 404 });
+  if (!startup) return new Response('Not Found', { status: 404, headers: { "Cache-Control": "private, no-store" } });
   const logo = await ogLogo(startup.logoUrl);
 
   return new ImageResponse(
@@ -71,6 +74,6 @@ export async function GET(req: NextRequest, props: { params: Promise<{ slug: str
         </div>
       </div>
     ),
-    { width: 1200, height: 630 }
+    { width: 1200, height: 630, headers: { "Cache-Control": "private, no-store" } }
   );
 }

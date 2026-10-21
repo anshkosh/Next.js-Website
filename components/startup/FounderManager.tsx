@@ -4,7 +4,8 @@ import EditableImageUpload from "./EditableImageUpload";
 import { useUploadActivity } from "./useUploadActivity";
 import { useState, useEffect } from "react";
 import { Loader2, Plus, Trash2 } from "lucide-react";
-import { getFounders, createFounder, updateFounder, deleteFounder } from "@/app/actions/founder.actions";
+import { createFounder, updateFounder, deleteFounder } from "@/app/actions/founder.actions";
+import { fetchStartupFounders } from "@/lib/startup-team-client";
 import { authClient } from "@/lib/auth-client";
 import { useDraftRecovery } from "./useDraftRecovery";
 import DraftRecoveryNotice from "./DraftRecoveryNotice";
@@ -42,12 +43,13 @@ export default function FounderManager({ startupId, onBusyChange }: { startupId:
   useEffect(() => {
     if (!startupId) return;
     let alive = true;
-    getFounders(startupId).then(res => {
+    const controller = new AbortController();
+    fetchStartupFounders(startupId, controller.signal).then(res => {
       if (!alive) return;
       if (res.data) setFounders(res.data);
       setIsLoading(false);
     }).catch(() => { if (alive) setIsLoading(false); });
-    return () => { alive = false; };
+    return () => { alive = false; controller.abort(); };
   }, [startupId]);
 
   const startAdd = () => {

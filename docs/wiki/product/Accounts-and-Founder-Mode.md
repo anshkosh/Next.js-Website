@@ -1,25 +1,49 @@
 # Accounts, founder mode and draft recovery
 
 All members, backers, founders, reviewers and administrators can open `/settings`
-to update their display name and founder mode. Email identity is displayed with its
-verification status; password recovery uses the existing email reset flow.
+to update their display name, profile photo, bio (500 characters), location,
+website, startup-review emails and vote-milestone emails. Photos use the existing
+image editor, rewrite, upload quotas and an owned-upload check on save. Profile
+details do not replace a startup's published founding-team fields.
+The email worker checks optional notification preferences at delivery time;
+verification, recovery and essential messages remain independent. Newsletter
+consent retains its existing double-opt-in/unsubscribe flow.
+
+Email changes require confirmation in the current verified mailbox, then a link
+sent to the new address; the sign-in identity changes only after both steps.
+Settings offers verification resend for unverified identities, current-password
+change (revoking other sessions), password recovery and signing out other devices.
+Google-only accounts use recovery to create an email sign-in password.
 Profile settings are linked from public, mobile, founder and admin navigation.
 
 Founder mode starts **on** for new accounts, including Google registration. The
 registration form lets members and backers switch it off before creating their
 account. Existing accounts retain founder mode through an additive `User` column
-with a `true` default. Anyone can change their own mode later in Profile settings.
+with a `true` default. Anyone can change their own mode later using the dashboard
+switch, which saves immediately. Profile settings links to this dashboard control.
 
 With founder mode off, the dashboard offers discovery, stories and feedback rather
 than startup management. Starting a submission asks the member to enable founder
-mode. Existing startups, journal entries, votes, beta requests and account roles
-are preserved. Founder mode is a workspace preference; it grants no moderation or
-account administration rights. Backer accounts do not enable investments/payments.
+mode. Turning founder mode off also hides every owned startup publicly:
+homepage, Discover/featured lists, categories/counts, search, leaderboard, startup
+URLs and old-slug redirects, social previews and sitemap entries. Linked public
+founder stories and public pitch-deck access follow the same visibility rule;
+public comment, vote and beta signup actions reject hidden startups.
 
-Profile settings accept a strict allowlist (`name`, boolean `founderMode`) for the
-signed-in, non-banned account. Better Auth updates the current user. Its existing
-admin/reviewer roles are independent of the workspace preference. No account ID,
-verification status or permission role is accepted by the profile form.
+Existing startups, journal entries, votes, beta requests, featured selections and
+account roles are preserved. Turning founder mode back on restores the previous
+visibility of approved LIVE startups; drafts, suspended startups and unapproved
+stories stay hidden. Owner/reviewer management access remains available through
+its existing permission checks. Founder mode grants no moderation or account
+administration rights. Backer accounts do not enable investments/payments.
+
+Profile settings accept a strict allowlist (`name`, `image`, `bio`, `location`,
+`websiteUrl`, `notifyStartupReviews`, `notifyVoteMilestones`) for the signed-in,
+non-banned account. The dashboard action accepts only boolean `founderMode`.
+Better Auth updates the current user. Existing admin/reviewer roles are independent
+of this preference. No account ID, verification status or permission role is
+accepted by either form. New profile fields and preference defaults use an additive
+migration; existing account identities, moderation states and saved content remain.
 
 ## Startup submissions
 

@@ -5,7 +5,7 @@ import { admin } from "better-auth/plugins";
 import { memoryAdapter } from "better-auth/adapters/memory";
 import { accountAdminOptions } from "@/lib/auth-roles";
 import { accountProfileFields } from "@/lib/account-profile";
-import { profileSettingsSchema } from "@/lib/validators/profile.schema";
+import { profileSettingsSchema, founderModeSchema } from "@/lib/validators/profile.schema";
 
 const origin = "https://profile.example.test";
 describe("self-service profiles through real auth endpoints", () => {
@@ -63,7 +63,7 @@ describe("self-service profiles through real auth endpoints", () => {
         new Request(`${origin}/api/auth/update-user`, {
           method: "POST",
           headers: { origin, cookie, "content-type": "application/json" },
-          body: JSON.stringify({ name: "Updated member", founderMode: false }),
+          body: JSON.stringify({ name: "Updated member", founderMode: false, bio: "Building useful things", location: "Hyderabad", websiteUrl: "https://example.test", notifyStartupReviews: false, notifyVoteMilestones: false }),
         }),
       );
       expect(saved.status).toBe(200);
@@ -80,6 +80,8 @@ describe("self-service profiles through real auth endpoints", () => {
       expect((await session.json()).user).toMatchObject({
         name: "Updated member",
         founderMode: false,
+        bio: "Building useful things", location: "Hyderabad", websiteUrl: "https://example.test",
+        notifyStartupReviews: false, notifyVoteMilestones: false,
         role,
       });
       const malformed = await instance.handler(
@@ -104,6 +106,11 @@ describe("self-service profiles through real auth endpoints", () => {
     expect(anonymous.status).toBe(401);
   }, 30000);
   it("rejects account ids, privileges, unexpected fields and non-boolean mode input", () => {
+    const valid = { name: "Member", image: "", bio: "", location: "", websiteUrl: "", notifyStartupReviews: true, notifyVoteMilestones: false };
+    expect(profileSettingsSchema.safeParse(valid).success).toBe(true);
+    expect(founderModeSchema.safeParse({ founderMode: false }).success).toBe(true);
+    expect(founderModeSchema.safeParse({ founderMode: false, id: "another-account" }).success).toBe(false);
+    expect(founderModeSchema.safeParse({ founderMode: "false" }).success).toBe(false);
     for (const patch of [
       { role: "admin" },
       { id: "someone-else" },
@@ -111,11 +118,13 @@ describe("self-service profiles through real auth endpoints", () => {
       { emailVerified: true },
       { founderMode: "false" },
       { name: " " },
+      { websiteUrl: "javascript:alert(1)" },
+      { bio: "x".repeat(501) },
+      { notifyStartupReviews: "false" },
     ]) {
       expect(
         profileSettingsSchema.safeParse({
-          name: "Member",
-          founderMode: false,
+          ...valid,
           ...patch,
         }).success,
       ).toBe(false);

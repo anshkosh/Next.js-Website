@@ -15,11 +15,11 @@ export default async function FounderLayout({ children }: { children: React.Reac
     redirect("/login");
   }
 
-  const profile = await db.user.findUnique({ where: { id: session.user.id }, select: { name: true, founderMode: true } });
+  const profile = await db.user.findUnique({ where: { id: session.user.id }, select: { name: true, image: true, founderMode: true } });
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
-      <FounderTopbar user={{ name: profile?.name ?? session.user.name, email: session.user.email, founderMode: profile?.founderMode ?? false }} />
+      <FounderTopbar user={{ name: profile?.name ?? session.user.name, image: profile?.image, email: session.user.email, founderMode: profile?.founderMode ?? false }} />
       <main className="flex-1 flex flex-col">
         {children}
       </main>

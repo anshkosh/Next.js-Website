@@ -32,7 +32,7 @@ describe("OG destination boundary", () => {
   it("requires a LIVE parent and returns 404 without rendering a private startup", async () => {
     mock.find.mockResolvedValue(null);
     expect((await GET(new NextRequest("https://www.anshkosh.com/api/og/draft"), { params: Promise.resolve({ slug: "draft" }) })).status).toBe(404);
-    expect(mock.find).toHaveBeenCalledWith(expect.objectContaining({ where: { slug: "draft", status: "LIVE" } }));
+    expect(mock.find).toHaveBeenCalledWith(expect.objectContaining({ where: { slug: "draft", status: "LIVE", founder: { founderMode: true } } }));
     expect(mock.image).not.toHaveBeenCalled(); expect(mock.send).not.toHaveBeenCalled();
   });
 });

@@ -1,5 +1,7 @@
 "use server";
 
+import { publicStartupWhere } from "@/lib/startup-visibility";
+
 import { db } from "@/lib/db";
 import { auth } from "@/lib/auth";
 import { cookies, headers } from "next/headers";
@@ -37,7 +39,7 @@ export async function fetchOwnPendingComments(startupId: string): Promise<Pendin
   const ids = readCommentReceipts((await cookies()).get(COMMENT_RECEIPT_COOKIE)?.value, process.env.BETTER_AUTH_SECRET);
   if (!ids.length) return [];
   const rows = await db.comment.findMany({
-    where: { id: { in: ids }, startupId, status: "PENDING", startup: { status: "LIVE" } },
+    where: { id: { in: ids }, startupId, status: "PENDING", startup: publicStartupWhere },
     orderBy: { createdAt: "desc" }, take: 20,
     select: { id: true, authorName: true, body: true, createdAt: true },
   });
@@ -84,9 +86,9 @@ export async function submitComment(formData: {
       };
     }
 
-    // Ensure startup is LIVE
+    // Only publicly visible startups accept comments.
     const startup = await db.startup.findUnique({
-      where: { id: startupId, status: "LIVE" },
+      where: { id: startupId, ...publicStartupWhere },
       select: { id: true, slug: true },
     });
     if (!startup) {
@@ -140,7 +142,7 @@ export async function fetchApprovedComments(
   if (typeof startupId !== "string" || !startupId || startupId.length > 128 || (cursor !== undefined && (typeof cursor !== "string" || !cursor || cursor.length > 128))) return { comments: [], nextCursor: null };
   try {
     const rows = await db.comment.findMany({
-      where: { startupId, status: "APPROVED", startup: { status: "LIVE" } },
+      where: { startupId, status: "APPROVED", startup: publicStartupWhere },
       orderBy: { createdAt: "desc" },
       take: COMMENTS_PAGE_SIZE + 1,
       ...(cursor ? { cursor: { id: cursor }, skip: 1 } : {}),

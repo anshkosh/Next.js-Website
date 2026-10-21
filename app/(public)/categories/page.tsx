@@ -1,9 +1,11 @@
+import { publicStartupWhere } from "@/lib/startup-visibility";
 import { db } from "@/lib/db";
 import CategoryCard from "@/components/category/CategoryCard";
 import Link from "next/link";
 import { seoMetadata } from "@/lib/seo";
 
-export const revalidate = 21600; // 6 hours
+// Counts must reflect founder visibility changes on the next public request.
+export const dynamic = "force-dynamic";
 
 export const metadata = seoMetadata({
   title: "Startup Categories — Anshkosh",
@@ -26,7 +28,7 @@ export default async function CategoriesPage() {
     orderBy: { sortOrder: "asc" },
     include: {
       _count: {
-        select: { startups: { where: { status: "LIVE" } } },
+        select: { startups: { where: publicStartupWhere } },
       },
     },
   });

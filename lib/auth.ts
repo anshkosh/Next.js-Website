@@ -14,6 +14,18 @@ export const auth = betterAuth({
   }),
   user: {
     additionalFields: accountProfileFields,
+    changeEmail: {
+      enabled: true,
+      sendChangeEmailConfirmation: async ({ user, newEmail, url }) => {
+        const { sendEmail } = await import("./email/adapter");
+        await sendEmail({
+          to: user.email,
+          subject: "Confirm your Anshkosh email change",
+          html: `<p>You asked to change your Anshkosh email to ${escapeEmailHtml(newEmail)}.</p><p><a href="${escapeEmailHtml(url)}">Confirm this request</a>. We will then send a verification link to the new address.</p><p>If you did not request this change, ignore this email.</p>`,
+          text: `You asked to change your Anshkosh email to ${newEmail}. Confirm the request: ${url}\nWe will then send a verification link to the new address. If you did not request this, ignore this email.`,
+        });
+      },
+    },
   },
   emailAndPassword: {
     enabled: true,

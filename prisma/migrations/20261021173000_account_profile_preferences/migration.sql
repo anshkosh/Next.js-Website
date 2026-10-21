@@ -1,0 +1,6 @@
+ALTER TABLE "User"
+  ADD COLUMN "bio" TEXT NOT NULL DEFAULT '',
+  ADD COLUMN "location" TEXT NOT NULL DEFAULT '',
+  ADD COLUMN "websiteUrl" TEXT NOT NULL DEFAULT '',
+  ADD COLUMN "notifyStartupReviews" BOOLEAN NOT NULL DEFAULT true,
+  ADD COLUMN "notifyVoteMilestones" BOOLEAN NOT NULL DEFAULT true;

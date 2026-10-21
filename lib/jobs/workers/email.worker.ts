@@ -4,6 +4,7 @@ import { sendEmail } from "@/lib/email/adapter";
 import { renderEmailTemplate, getSubject, TemplateName } from "@/lib/email/templates";
 import { logger } from "@/lib/logger";
 import { toPlainText } from "@react-email/components";
+import { emailPreferenceAllows } from "@/lib/email/preferences";
 
 export const emailWorker = new Worker(
   "email",
@@ -16,6 +17,10 @@ export const emailWorker = new Worker(
         subject?: string;
       };
 
+      if (!await emailPreferenceAllows(template, to)) {
+        logger.info("Email skipped by account preference", { jobId: job.id, template });
+        return;
+      }
       const html = await renderEmailTemplate(template, data);
       const subject = customSubject || getSubject(template, data);
 

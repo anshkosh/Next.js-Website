@@ -11,7 +11,7 @@ export async function verifySignalsPostgres(db: PrismaClient) {
     await db.$transaction(async tx => {
       await tx.$executeRawUnsafe("SET LOCAL TIME ZONE 'America/Denver'");
       const tables = [
-        '"User" (id text, email text, name text)',
+        '"User" (id text, email text, name text, "founderMode" boolean DEFAULT true)',
         '"Startup" (id text, name text, "founderId" text, status text)',
         '"Upvote" ("startupId" text)',
         '"Downvote" ("startupId" text)',
@@ -21,7 +21,7 @@ export async function verifySignalsPostgres(db: PrismaClient) {
         '"Comment" ("startupId" text, "authorEmail" text, body text, status text, reply text, "repliedAt" timestamp, "createdAt" timestamp, "authorName" text DEFAULT \'Fixture commenter\')',
       ];
       for (const table of tables) await tx.$executeRawUnsafe(`CREATE TEMP TABLE ${table} ON COMMIT DROP`);
-      await tx.$executeRawUnsafe(`INSERT INTO "User" VALUES ('owner', 'owner@example.invalid', 'Owner')`);
+      await tx.$executeRawUnsafe(`INSERT INTO "User" (id, email, name) VALUES ('owner', 'owner@example.invalid', 'Owner')`);
       await tx.$executeRawUnsafe(`INSERT INTO "Startup" VALUES ('one','One','owner','LIVE'),('two','Two','owner','LIVE'),('draft','Draft','owner','DRAFT')`);
       await tx.$executeRawUnsafe(`INSERT INTO "Upvote" VALUES ('one'),('one'),('two')`);
       await tx.$executeRawUnsafe(`INSERT INTO "Downvote" VALUES ('one')`);
@@ -57,6 +57,11 @@ export async function verifySignalsPostgres(db: PrismaClient) {
       assert.deepEqual(first.map(row => [row.id, row.founderDays, row.backers, row.discussions, row.leaderboardScore, row.rank]), [
         ['one', 3, 4, 2, 21, 1], ['two', 1, 1, 1, 8, 2],
       ]);
+      // A mode change hides all owned startups without rewriting their activity.
+      await tx.$executeRawUnsafe(`UPDATE "User" SET "founderMode"=false WHERE id='owner'`);
+      assert.deepEqual(await snapshot(), []);
+      await tx.$executeRawUnsafe(`UPDATE "User" SET "founderMode"=true WHERE id='owner'`);
+      assert.deepEqual(rankSignals(await snapshot()), first);
       await tx.$executeRawUnsafe(`UPDATE "Comment" SET status='REJECTED' WHERE "startupId"='one' AND LOWER(BTRIM("authorEmail"))='a@example.invalid'`);
       const [afterReject] = rankSignals(await snapshot());
       assert.equal(afterReject.leaderboardScore, 16);

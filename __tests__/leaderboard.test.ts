@@ -28,7 +28,7 @@ it("uses dense global ranks before pagination, sharing ties across page boundari
   const result = await getLeaderboard(2);
   expect(result.entries.map(entry => entry.rank)).toEqual([3, 4, 4]);
   expect(result).toMatchObject({ totalCount: 23, totalPages: 2, page: 2 });
-  expect(mock.rows.mock.calls[0][0].where).toEqual({ status: "LIVE", id: { in: ["tied-17", "zero-a", "zero-b"] } });
+  expect(mock.rows.mock.calls[0][0].where).toEqual({ status: "LIVE", founder: { founderMode: true }, id: { in: ["tied-17", "zero-a", "zero-b"] } });
   expect(mock.transaction).toHaveBeenCalledWith(expect.any(Function), { isolationLevel: "RepeatableRead" });
 });
 it("continues with the next place after a tied rank", async () => {

@@ -3,6 +3,7 @@ import { PrismaClient } from "@prisma/client";
 import sharp from "sharp";
 import { randomUUID } from "node:crypto";
 import { PDFDocument } from "pdf-lib";
+import { founderEntryPath } from "../lib/founder-journal-seo";
 
 // The upload route rewrites PDFs and rejects ones pdf-lib cannot parse, so the fixture must be a real document.
 async function validPdf() {
@@ -158,6 +159,7 @@ test("signup, real verification token, login, photo editing, private deck and st
   await page.getByRole("button", { name: "Next", exact: true }).click();
   await page.getByRole("button", { name: "Edit media and features", exact: true }).click();
   await page.getByRole("button", { name: "Add Feature", exact: true }).click();
+  await expect(page.getByLabel("Feature 1 title", { exact: true })).toBeVisible();
   await page.getByRole("button", { name: "Next", exact: true }).click();
   await expect(page.getByLabel("Feature 1 title", { exact: true })).toHaveAttribute("aria-invalid", "true");
   await page.getByLabel("Feature 1 title", { exact: true }).fill("A saved feature");
@@ -482,23 +484,20 @@ test("member registration and profile settings work across modes without losing 
   await expect(page.getByRole("link", { name: "Explore startups", exact: true })).toBeVisible();
   await expect(page.getByRole("link", { name: "Submit a New Startup" })).toHaveCount(0);
   await enter(page, "/settings");
-  await expect(page.getByRole("switch", { name: /Founder mode/ })).not.toBeChecked();
   await page.getByLabel("Full name", { exact: true }).fill("Updated Community Member");
-  await page.getByRole("switch", { name: /Founder mode/ }).click();
   await page.getByRole("button", { name: "Save profile", exact: true }).click();
   await expect(page.getByRole("status").filter({ hasText: "Profile saved." })).toBeVisible();
   await page.reload();
   await expect(page.getByLabel("Full name", { exact: true })).toHaveValue("Updated Community Member");
-  await expect(page.getByRole("switch", { name: /Founder mode/ })).toBeChecked();
   await enter(page, "/dashboard");
+  await page.getByRole("switch", { name: /Founder mode/ }).click();
   await expect(page.getByRole("link", { name: "Submit a New Startup", exact: true })).toBeVisible();
   const member = await db.user.findUniqueOrThrow({ where: { email: memberEmail } });
   const modeStartup = await db.startup.create({ data: { name: `Mode test ${randomUUID()}`, slug: `mode-${randomUUID()}`, tagline: "A preserved account preference fixture", description: "This fixture verifies that founder mode never deletes saved work.", websiteUrl: "https://example.test", founderName: member.name, founderId: member.id, categoryId, status: "DRAFT" } });
   const before = await db.startup.findUniqueOrThrow({ where: { id: modeStartup.id } });
-  await enter(page, "/settings");
-  await page.getByRole("switch", { name: /Founder mode/ }).uncheck();
-  await page.getByRole("button", { name: "Save profile", exact: true }).click();
-  await expect(page.getByText("Profile saved.", { exact: true })).toBeVisible();
+  await enter(page, "/dashboard");
+  await page.getByRole("switch", { name: /Founder mode/ }).click();
+  await expect(page.getByRole("link", { name: "Explore startups", exact: true })).toBeVisible();
   await page.setViewportSize({ width: 1366, height: 900 });
   await page.screenshot({ path: ".impeccable/review/desktop.png", fullPage: true });
   await page.setViewportSize({ width: 390, height: 844 });
@@ -509,10 +508,182 @@ test("member registration and profile settings work across modes without losing 
   await expect(page.getByRole("link", { name: "Explore startups", exact: true })).toBeVisible();
   const after = await db.startup.findUniqueOrThrow({ where: { id: modeStartup.id } });
   expect(after).toEqual(before);
-  await enter(page, "/settings");
-  await page.getByRole("switch", { name: /Founder mode/ }).check();
-  await page.getByRole("button", { name: "Save profile", exact: true }).click();
-  await expect(page.getByText("Profile saved.", { exact: true })).toBeVisible();
+  await enter(page, "/dashboard");
+  await page.getByRole("switch", { name: /Founder mode/ }).click();
+  await expect.poll(async () => (await db.user.findUniqueOrThrow({ where: { id: member.id } })).founderMode).toBe(true);
   await enter(page, "/dashboard");
   await expect(page.getByRole("heading", { name: modeStartup.name, exact: true })).toBeVisible();
+});
+
+test("founder mode hides every owned startup publicly and restores approved visibility without losing data", async ({ page, browser }) => {
+  test.setTimeout(300000);
+  const visibilityEmail = `visibility-${randomUUID()}@example.test`;
+  const signup = await page.request.post("/api/auth/sign-up/email", {
+    headers: { origin: "http://127.0.0.1:3100" },
+    data: { name: "Visibility Founder", email: visibilityEmail, password },
+  });
+  expect(signup.ok()).toBe(true);
+  const owner = await db.user.update({ where: { email: visibilityEmail }, data: { emailVerified: true } });
+  const fixtures = await Promise.all(["LIVE", "LIVE", "DRAFT", "SUSPENDED"].map((status, index) => db.startup.create({ data: {
+    name: `Visibility fixture ${index} ${randomUUID()}`, slug: `visibility-${randomUUID()}`,
+    tagline: "Visibility changes preserve all saved startup data", description: "An isolated fixture for founder mode public visibility.",
+    websiteUrl: "https://example.test", founderName: owner.name, founderId: owner.id, categoryId,
+    status: status as "LIVE" | "DRAFT" | "SUSPENDED",
+  } })));
+  const [live] = fixtures;
+  const teamName = `Visibility team ${randomUUID()}`;
+  await db.startupFounder.create({ data: { startupId: live.id, name: teamName } });
+  const reviewer = await db.user.findUniqueOrThrow({ where: { email: adminEmail } });
+  const control = await db.startup.create({ data: { name: "Visible control startup", slug: `control-${randomUUID()}`, tagline: "A different owner remains visible", description: "An isolated public visibility control.", websiteUrl: "https://example.test", founderName: reviewer.name, founderId: reviewer.id, categoryId, status: "LIVE" } });
+  // A historical address can be reused by a current startup. Hiding the
+  // current startup must not resurrect this redirect to a different owner.
+  await db.slugRedirect.create({ data: { oldSlug: live.slug, startupId: control.id } });
+  await db.featuredStartup.create({ data: { startupId: live.id, sortOrder: -100 } });
+  const entry = await db.founderJournalEntry.create({ data: {
+    authorId: owner.id, startupId: live.id, title: `Visibility story ${randomUUID()}`, body: "A preserved approved story.",
+    visibility: "PUBLIC", approvedAt: new Date(), publishedAt: new Date(),
+  } });
+  const oldSlug = `old-${live.slug}`;
+  await db.slugRedirect.create({ data: { oldSlug, startupId: live.id } });
+  const visitor = await isolatedContext(browser);
+  try {
+    const direct = (slug: string) => `/startups/${slug}`;
+    const storyPath = founderEntryPath(entry);
+    const publicPages = ["/", "/discover", "/leaderboard", "/category/foodtech", `/search?q=${encodeURIComponent(live.name)}`];
+    // Warm and assert visible pages before changing mode, so cached public reads
+    // and redirects are exercised as well as new requests.
+    for (const fixture of fixtures.slice(0, 2)) {
+      expect((await visitor.request.get(direct(fixture.slug))).status()).toBe(200);
+    }
+    expect((await visitor.request.get(storyPath)).status()).toBe(200);
+    const publicTeam = await visitor.request.get(`/api/startups/${live.id}/founders`);
+    expect(publicTeam.headers()["cache-control"]).toContain("no-store");
+    expect((await publicTeam.json()).data).toEqual([expect.objectContaining({ name: teamName })]);
+    expect((await visitor.request.get(direct(oldSlug))).url()).toContain(direct(live.slug));
+    expect(await (await visitor.request.get("/discover")).text()).toContain(`href="${direct(live.slug)}"`);
+    expect(await (await visitor.request.get("/sitemap.xml")).text()).toContain(storyPath);
+    for (const route of publicPages) await visitor.request.get(route);
+    await login(page, visibilityEmail);
+    await enter(page, "/dashboard");
+    await page.getByRole("switch", { name: /Founder mode/ }).click();
+    await expect.poll(async () => (await db.user.findUniqueOrThrow({ where: { id: owner.id } })).founderMode).toBe(false);
+    await expect(page.getByRole("link", { name: "Explore startups", exact: true })).toBeVisible();
+
+    for (const fixture of fixtures) {
+      expect((await visitor.request.get(direct(fixture.slug))).status()).toBe(404);
+      expect((await visitor.request.get(`/api/og/${fixture.slug}`)).status()).toBe(404);
+    }
+    expect((await visitor.request.get(direct(oldSlug))).status()).toBe(404);
+    expect((await visitor.request.get(storyPath)).status()).toBe(404);
+    expect((await (await visitor.request.get(`/api/startups/${live.id}/founders`)).json()).data).toEqual([]);
+    expect((await (await page.request.get(`/api/startups/${live.id}/founders`)).json()).data).toEqual([expect.objectContaining({ name: teamName })]);
+    expect((await visitor.request.get(direct(control.slug))).status()).toBe(200);
+    // The storage action must reject a mutation from a previously open page too.
+    const { recordVote } = await import("../lib/vote-store");
+    expect(await recordVote(live.id, 1, { cookieId: randomUUID(), fingerprintHash: randomUUID() })).toMatchObject({ success: false });
+    expect(await db.upvote.count({ where: { startupId: live.id } })).toBe(0);
+    for (const route of [...publicPages, "/sitemap.xml"]) {
+      const html = await (await visitor.request.get(route)).text();
+      for (const fixture of fixtures) expect(html).not.toContain(`href="${direct(fixture.slug)}"`);
+      if (route === "/sitemap.xml") {
+        expect(html).not.toContain(live.slug);
+        expect(html).not.toContain(storyPath);
+      }
+    }
+    // Public URLs stay hidden even when their owner is the visitor.
+    expect((await page.request.get(direct(live.slug))).status()).toBe(404);
+    const after = await Promise.all(fixtures.map(fixture => db.startup.findUniqueOrThrow({ where: { id: fixture.id } })));
+    expect(after).toEqual(fixtures);
+    expect(await db.founderJournalEntry.findUniqueOrThrow({ where: { id: entry.id } })).toEqual(entry);
+
+    await page.getByRole("switch", { name: /Founder mode/ }).click();
+    await expect.poll(async () => (await db.user.findUniqueOrThrow({ where: { id: owner.id } })).founderMode).toBe(true);
+    for (const fixture of fixtures.slice(0, 2)) expect((await visitor.request.get(direct(fixture.slug))).status()).toBe(200);
+    for (const fixture of fixtures.slice(2)) expect((await visitor.request.get(direct(fixture.slug))).status()).toBe(404);
+    expect((await visitor.request.get(storyPath)).status()).toBe(200);
+    expect((await visitor.request.get(direct(oldSlug))).url()).toContain(direct(live.slug));
+    expect(await (await visitor.request.get("/discover")).text()).toContain(`href="${direct(live.slug)}"`);
+    expect(await (await visitor.request.get("/sitemap.xml")).text()).toContain(storyPath);
+  } finally {
+    await visitor.close();
+    await db.founderJournalEntry.deleteMany({ where: { authorId: owner.id } });
+    await db.slugRedirect.deleteMany({ where: { startupId: { in: [live.id, control.id] } } });
+    await db.featuredStartup.deleteMany({ where: { startupId: live.id } });
+    await db.startup.deleteMany({ where: { founderId: owner.id } });
+    await db.startup.delete({ where: { id: control.id } });
+    await db.user.delete({ where: { id: owner.id } });
+  }
+});
+
+test("expanded profile, optional emails and verified sign-in changes persist", async ({ page, browser }) => {
+  test.setTimeout(300000);
+  const originalEmail = `profile-${randomUUID()}@example.test`;
+  const changedEmail = `changed-${randomUUID()}@example.test`;
+  const changedPassword = "NewProfilePassword123!";
+  const signup = await page.request.post("/api/auth/sign-up/email", { headers: { origin: "http://127.0.0.1:3100" }, data: { name: "Profile Member", email: originalEmail, password } });
+  expect(signup.ok()).toBe(true);
+  const member = await db.user.update({ where: { email: originalEmail }, data: { emailVerified: true } });
+  await login(page, originalEmail);
+  await enter(page, "/settings");
+  await expect(page.getByRole("switch", { name: /Founder mode/ })).toHaveCount(0);
+  await uploadPhoto(page, "Upload profile photo");
+  await page.getByLabel("Bio", { exact: true }).fill("A member interested in useful early-stage products.");
+  await page.getByLabel("Location", { exact: true }).fill("Hyderabad");
+  await page.getByLabel("Website", { exact: true }).fill("https://example.test/member");
+  await page.getByRole("checkbox", { name: /Startup review updates/ }).uncheck();
+  await page.getByRole("checkbox", { name: /Vote milestones/ }).uncheck();
+  await page.getByRole("button", { name: "Save profile", exact: true }).click();
+  // Cold compilation plus the owned-photo check can exceed the five-second
+  // assertion default on CI. Still require the real confirmed save.
+  await expect(page.getByText("Profile saved.", { exact: true })).toBeVisible({ timeout: 30000 });
+  await expect(page.getByText(/Saved at/)).toBeVisible();
+  await page.reload();
+  const saved = await db.user.findUniqueOrThrow({ where: { id: member.id } });
+  expect(saved).toMatchObject({ bio: "A member interested in useful early-stage products.", location: "Hyderabad", websiteUrl: "https://example.test/member", notifyStartupReviews: false, notifyVoteMilestones: false });
+  expect(saved.image).toMatch(/^\/api\/uploads\/serve\/founders\//);
+  await expect(page.getByLabel("Bio", { exact: true })).toHaveValue(saved.bio);
+  await expect(page.getByRole("checkbox", { name: /Vote milestones/ })).not.toBeChecked();
+  const { emailQueue } = await import("../lib/jobs/queues");
+  const job = await emailQueue.add("preference-fixture", { template: "upvote_milestone", to: originalEmail, data: { startupName: "Preference fixture", milestone: 10, slug: "fixture" } });
+  await expect.poll(() => job.getState()).toBe("completed");
+  const captured = await (await fetch("http://127.0.0.1:3181/messages")).json();
+  expect(captured.some((message: { to: { email: string }[]; subject: string }) => message.to.some(recipient => recipient.email === originalEmail) && message.subject.includes("Preference fixture"))).toBe(false);
+
+  await page.getByLabel("New email address", { exact: true }).fill(changedEmail);
+  await page.getByRole("button", { name: "Change email", exact: true }).click();
+  await expect(page.getByRole("status").filter({ hasText: "Check your current email" })).toBeVisible();
+  expect((await db.user.findUniqueOrThrow({ where: { id: member.id } })).email).toBe(originalEmail);
+  await enter(page, await emailLink(originalEmail, /verify-email/));
+  expect((await db.user.findUniqueOrThrow({ where: { id: member.id } })).email).toBe(originalEmail);
+  await enter(page, await emailLink(changedEmail, /verify-email/));
+  await expect.poll(async () => (await db.user.findUniqueOrThrow({ where: { id: member.id } })).email).toBe(changedEmail);
+  await expect(page.getByText(changedEmail, { exact: false }).first()).toBeVisible();
+
+  const otherDevice = await isolatedContext(browser);
+  try {
+    const otherPage = await otherDevice.newPage();
+    await login(otherPage, changedEmail);
+    await page.getByLabel("Current password", { exact: true }).fill(password);
+    await page.getByLabel("New password", { exact: true }).fill(changedPassword);
+    await page.getByLabel("Confirm new password", { exact: true }).fill(changedPassword);
+    await page.getByRole("button", { name: "Update password", exact: true }).click();
+    await expect(page.getByRole("status").filter({ hasText: "Password updated." })).toBeVisible();
+    await otherPage.goto("/dashboard");
+    await expect(otherPage).toHaveURL(/\/login$/);
+    await login(otherPage, changedEmail, changedPassword);
+    await page.getByRole("button", { name: "Sign out other sessions", exact: true }).click();
+    await expect(page.getByRole("status").filter({ hasText: "Other sessions signed out." })).toBeVisible();
+    await otherPage.goto("/dashboard");
+    await expect(otherPage).toHaveURL(/\/login$/);
+    await page.reload();
+    await expect(page.getByLabel("Bio", { exact: true })).toHaveValue(saved.bio);
+    await expect(page.getByRole("button", { name: "Save profile", exact: true })).toBeEnabled();
+    for (const width of [1366, 768, 390]) {
+      await page.setViewportSize({ width, height: 900 });
+      await page.evaluate(() => window.scrollTo({ top: 0, left: 0, behavior: "instant" }));
+      await expect.poll(() => page.evaluate(() => scrollY)).toBe(0);
+      expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+      await page.screenshot({ path: `.impeccable/review/settings-${width}.png`, fullPage: true });
+    }
+  } finally { await otherDevice.close(); }
 });

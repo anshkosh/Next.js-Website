@@ -36,7 +36,6 @@ import {
 
 export const StartupApprovedEmail = ({
   startupName = "Your Startup",
-  slug = "your-startup",
 }: {
   startupName?: string;
   slug?: string;
@@ -46,7 +45,7 @@ export const StartupApprovedEmail = ({
   return (
     <Html>
       <Head />
-      <Preview>Your startup is live on anshkosh! 🎉</Preview>
+      <Preview>Your startup has been approved on Anshkosh.</Preview>
       <Body style={main}>
         <Container style={container}>
           <Section style={header}>
@@ -68,18 +67,18 @@ export const StartupApprovedEmail = ({
             <Heading style={heading}>Great news! 🎉</Heading>
             <Text style={text}>
               Your startup, <strong>{startupName}</strong>, has been approved
-              and is now live on anshkosh!
+              on Anshkosh.
             </Text>
             <Text style={text}>
-              Now is the perfect time to share it with your network and start
-              gathering upvotes.
+              Your approved listing is public while founder mode is on. You can
+              manage its visibility from your dashboard without losing saved work.
             </Text>
             <Section style={btnContainer}>
               <Button
                 style={buttonSuccess}
-                href={`${baseUrl}/startups/${slug}`}
+                href={`${baseUrl}/dashboard`}
               >
-                View Your Listing
+                Open Your Dashboard
               </Button>
             </Section>
             <Text style={text}>

@@ -30,7 +30,7 @@ it.each([{ id: "other", role: "user", emailVerified: true }, { id: owner, emailV
 it("only exposes explicitly public/legacy decks from live profiles", async () => {
   mock.profiles.mockResolvedValue([{ metadata: { pitchDeckUrl: url, pitchDeckVisibility: "public" } }]);
   expect((await get()).status).toBe(200);
-  expect(mock.profiles).toHaveBeenCalledWith(expect.objectContaining({ where: expect.objectContaining({ status: "LIVE" }) }));
+  expect(mock.profiles).toHaveBeenCalledWith(expect.objectContaining({ where: expect.objectContaining({ status: "LIVE", founder: { founderMode: true } }) }));
   expect(publicPitchDeck({ pitchDeckUrl: url })).toBe(url);
   expect(publicPitchDeck({ pitchDeckUrl: url, pitchDeckVisibility: "private" })).toBeNull();
 });
