@@ -10,6 +10,11 @@
 - Follow-up branch `codex/site-review-vitest-security` upgrades the Vitest family
   to the compatible 4.1.12 security patch. No audit exceptions, deployment checks,
   application code, migrations or manual server configuration are changed.
+- Browser runs exposed late development-server request timeouts and a logout
+  assertion that began its five-second navigation deadline before sign-out
+  finished. Isolated E2E config now retains compiled routes for the job duration;
+  the logout test requires a successful sign-out response and the existing login
+  navigation budget. Production and fixture-isolation guards remain unchanged.
 
 ## 22 October 2026 — Claude site review release preparation
 

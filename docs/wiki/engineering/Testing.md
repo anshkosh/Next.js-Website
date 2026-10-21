@@ -81,6 +81,12 @@ browser session during compilation. V8's heap limit remains enforced; actual
 memory exhaustion still fails CI. Production configuration is unchanged.
 The Next development test process has a bounded 5-GiB heap; the expanded Quill
 journey exceeded the previous 4-GiB limit. Other test services retain their defaults.
+The isolated development server keeps up to 100 compiled route entries for the
+20-minute browser-job budget, avoiding repeated eviction/recompilation during
+the serial journey. This applies only with `E2E_TEST_MODE=1` outside production;
+the heap limit, fixture guards and production configuration are unchanged.
+The direct logout regression awaits the successful sign-out response before
+checking navigation, using the same 30-second navigation budget as login.
 The serial fixture journey fails on its first attempt and preserves evidence;
 replaying it against existing vote/rate-limit state can mask the original failure.
 Photo-upload scenarios assert a successful upload response and a valid sanitized

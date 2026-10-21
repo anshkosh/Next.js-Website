@@ -458,8 +458,11 @@ test("founder lesson submission, update feedback and direct sign-out work togeth
     await page.getByRole("button", { name: "Publish Update", exact: true }).click();
     await expect(page.getByRole("status")).toContainText("Update published successfully");
     await expect.poll(async () => db.startupUpdate.count({ where: { startupId, title: updateTitle } })).toBe(1);
+    const signedOut = page.waitForResponse(response => response.request().method() === "POST"
+      && new URL(response.url()).pathname === "/api/auth/sign-out");
     await enter(page, "/logout");
-    await expect(page).toHaveURL(/\/login$/);
+    expect((await signedOut).ok()).toBe(true);
+    await expect(page).toHaveURL(/\/login$/, { timeout: 30000 });
     await page.goto("/dashboard");
     await expect(page).toHaveURL(/\/login$/);
   } finally {

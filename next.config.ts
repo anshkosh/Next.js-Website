@@ -7,6 +7,9 @@ const nextConfig: NextConfig = {
   compress: true,
   poweredByHeader: false,
   ...(process.env.E2E_TEST_MODE === "1" && process.env.NODE_ENV !== "production" ? {
+    // The serial browser journey revisits routes over several minutes. Keep
+    // their compiled entries instead of repeatedly rebuilding evicted pages.
+    onDemandEntries: { maxInactiveAge: 20 * 60 * 1000, pagesBufferLength: 100 },
     experimental: {
       // Keep the isolated browser session alive through on-demand compilation.
       // V8's heap limit still fails the job on a real out-of-memory condition.
