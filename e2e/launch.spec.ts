@@ -625,7 +625,7 @@ test("expanded profile, optional emails and verified sign-in changes persist", a
   const member = await db.user.update({ where: { email: originalEmail }, data: { emailVerified: true } });
   await login(page, originalEmail);
   await enter(page, "/settings");
-  await expect(page.getByRole("switch", { name: /Founder mode/ })).toHaveCount(0);
+  await expect(page.getByRole("switch", { name: /Founder mode/ })).toBeChecked();
   await uploadPhoto(page, "Upload profile photo");
   await page.getByLabel("Bio", { exact: true }).fill("A member interested in useful early-stage products.");
   await page.getByLabel("Location", { exact: true }).fill("Hyderabad");

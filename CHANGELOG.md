@@ -1,5 +1,18 @@
 # Website changelog
 
+## 22 October 2026 — site review polish
+
+- Show combined vote and activity signals on public startup cards, profiles and
+  the founder dashboard using the existing scoring rules.
+- Refresh Discover cards with problem statements, latest updates, sorting and
+  counts; show featured startups in the carousel without repeating them in the grid.
+- Improve contrast, responsive account navigation and reduced-motion behavior;
+  show the shortened homepage curtain once per browser session.
+- Simplify dashboard cards and startup deletion, add founder mode with Undo to
+  settings, and redirect signed-in login/register visits to the dashboard.
+- Remove the footer newsletter form and listing note. The existing journal
+  newsletter-anchor follow-up remains recorded in Content-and-SEO.md.
+
 ## Unreleased — founder visibility and account controls
 
 - Hide all owned startup listings, direct pages, old-slug redirects, previews,
