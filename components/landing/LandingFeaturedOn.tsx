@@ -2,7 +2,7 @@ import { ArrowUpRight } from "lucide-react";
 import { FEATURED_LISTINGS } from "@/lib/featured-listings";
 import FeaturedMarquee from "./FeaturedMarquee";
 
-// The track holds the list twice so the CSS animation can loop seamlessly. The
+// The track holds the list twice so the drifting strip can loop seamlessly. The
 // second copy is hidden from assistive technology and the tab order.
 const TRACK = [...FEATURED_LISTINGS, ...FEATURED_LISTINGS];
 

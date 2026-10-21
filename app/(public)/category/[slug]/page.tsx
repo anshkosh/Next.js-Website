@@ -1,5 +1,6 @@
 import { publicStartupWhere } from "@/lib/startup-visibility";
 import { publicStartupCard, publicStartupCardSelect } from "@/lib/public-startup-card";
+import { withActivitySignals } from "@/lib/leaderboard";
 import { db } from "@/lib/db";
 import { notFound } from "next/navigation";
 import StartupCard from "@/components/startup/StartupCard";
@@ -54,7 +55,7 @@ export default async function CategoryPage(props: { params: Promise<{ slug: stri
     ],
   });
 
-  const formattedStartups = startups.map(publicStartupCard);
+  const formattedStartups = await withActivitySignals(startups.map(publicStartupCard));
 
   return (
     <div className="container mx-auto px-4 py-12 max-w-5xl">

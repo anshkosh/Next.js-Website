@@ -3,7 +3,6 @@ import { createRoot, type Root } from "react-dom/client";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import FeaturedStartupsCarousel from "../components/landing/FeaturedStartupsCarousel";
 
-vi.mock("framer-motion", () => ({ useReducedMotion: () => false }));
 vi.mock("@/components/startup/StartupCard", () => ({
   default: ({ startup }: { startup: { name: string } }) => <div data-testid="startup-card">{startup.name}</div>,
 }));

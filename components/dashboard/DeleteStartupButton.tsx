@@ -3,8 +3,10 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { deleteStartup } from "@/app/actions/startup.actions";
-import { Trash2, AlertCircle, Loader2 } from "lucide-react";
+import { Trash2, Loader2 } from "lucide-react";
+import { Dialog, DialogClose, DialogContent, DialogDescription, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 
+// The shared dialog traps focus, closes on Escape and returns focus to this button.
 export default function DeleteStartupButton({
   startupId,
   startupName,
@@ -12,85 +14,61 @@ export default function DeleteStartupButton({
   startupId: string;
   startupName: string;
 }) {
-  const [showConfirm, setShowConfirm] = useState(false);
+  const [open, setOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [error, setError] = useState("");
   const router = useRouter();
 
   const handleDelete = async () => {
     setIsDeleting(true);
+    setError("");
     try {
       const res = await deleteStartup(startupId);
       if (res.error) {
-        alert(res.error);
+        setError(res.error);
       } else {
-        setShowConfirm(false);
+        setOpen(false);
         router.refresh();
       }
     } catch (err) {
       console.error("Delete startup error:", err);
-      alert("Failed to delete startup. Please try again.");
+      setError("We could not delete this startup. Please try again.");
     } finally {
       setIsDeleting(false);
     }
   };
 
   return (
-    <>
-      <button
-        type="button"
-        onClick={() => setShowConfirm(true)}
-        className="inline-flex min-h-11 items-center justify-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-red-700 transition-colors hover:bg-red-50"
-        title="Delete startup"
+    <Dialog open={open} onOpenChange={next => { if (!isDeleting) { setOpen(next); setError(""); } }}>
+      <DialogTrigger
         aria-label={`Delete ${startupName}`}
+        className="inline-flex min-h-11 items-center justify-center gap-2 rounded-lg px-3 text-sm font-medium text-gray-600 transition-colors hover:bg-red-50 hover:text-red-700"
       >
         <Trash2 size={16} aria-hidden="true" /> Delete startup
-      </button>
-
-      {showConfirm && (
-        <div className="fixed inset-0 bg-black/60 flex items-center justify-center p-4 z-[100] overflow-y-auto" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget && !isDeleting) setShowConfirm(false); }}>
-          <div role="dialog" aria-modal="true" aria-labelledby="delete-startup-title" className="bg-white rounded-2xl max-w-md w-full overflow-hidden shadow-xl animate-in fade-in zoom-in-95 duration-200 relative">
-            <div className="p-6">
-              <div className="w-12 h-12 rounded-full bg-red-100 flex items-center justify-center text-red-600 mb-4 mx-auto">
-                <AlertCircle size={24} />
-              </div>
-              
-              <h3 id="delete-startup-title" className="text-xl font-bold text-center text-gray-900 mb-2">
-                Delete Startup
-              </h3>
-              
-              <p className="text-center text-gray-500 mb-6">
-                Are you sure you want to delete <span className="font-semibold text-gray-900">{startupName}</span>? This action is permanent and cannot be undone.
-              </p>
-
-              <div className="flex gap-3">
-                <button
-                  type="button"
-                  onClick={() => setShowConfirm(false)}
-                  disabled={isDeleting}
-                  className="flex-1 px-4 py-2.5 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 font-medium transition-colors disabled:opacity-50"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="button"
-                  onClick={handleDelete}
-                  disabled={isDeleting}
-                  className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-red-600 text-white rounded-lg hover:bg-red-700 font-medium transition-colors disabled:opacity-50"
-                >
-                  {isDeleting ? (
-                    <>
-                      <Loader2 size={18} className="animate-spin" />
-                      Deleting...
-                    </>
-                  ) : (
-                    "Delete"
-                  )}
-                </button>
-              </div>
-            </div>
-          </div>
+      </DialogTrigger>
+      <DialogContent showCloseButton={false} className="gap-0 p-6 sm:max-w-md">
+        <DialogTitle className="font-heading text-xl font-bold text-gray-900">Delete {startupName}?</DialogTitle>
+        <DialogDescription className="mt-2 text-sm leading-relaxed text-gray-600">
+          This permanently removes the startup profile with its team, votes, updates, discussion and beta tester program. Your journal entries are kept but no longer linked to it. This cannot be undone.
+        </DialogDescription>
+        {error && <p role="alert" className="mt-4 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-800">{error}</p>}
+        <div className="mt-6 flex gap-3">
+          <DialogClose
+            disabled={isDeleting}
+            className="inline-flex min-h-11 flex-1 items-center justify-center rounded-xl border border-gray-300 bg-white px-4 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 disabled:opacity-50"
+          >
+            Keep startup
+          </DialogClose>
+          <button
+            type="button"
+            onClick={handleDelete}
+            disabled={isDeleting}
+            className="inline-flex min-h-11 flex-1 items-center justify-center gap-2 rounded-xl bg-red-700 px-4 text-sm font-semibold text-white transition-colors hover:bg-red-800 disabled:opacity-50"
+          >
+            {isDeleting ? <><Loader2 size={18} aria-hidden="true" className="animate-spin" /> Deleting…</> : "Delete permanently"}
+          </button>
         </div>
-      )}
-    </>
+      </DialogContent>
+    </Dialog>
   );
 }

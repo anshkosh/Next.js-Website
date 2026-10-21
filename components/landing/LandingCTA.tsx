@@ -14,8 +14,7 @@ export default function LandingCTA() {
         <div className="max-w-xl">
           <p className="mb-4 text-xs font-semibold uppercase tracking-[0.16em] text-coral-700">There’s a place for your next step</p>
           <h2 id="next-step-title" className="font-heading text-4xl font-bold leading-tight tracking-tight text-gray-900 sm:text-5xl">
-            Bring your next step<br />
-            <span className="text-coral-500">to Anshkosh.</span>
+            Bring your next step <span className="block text-coral-500">to Anshkosh.</span>
           </h2>
           <p className="mt-5 max-w-lg text-base leading-relaxed text-gray-600 sm:text-lg">
             Find a startup that interests you. Share the one you’re building.

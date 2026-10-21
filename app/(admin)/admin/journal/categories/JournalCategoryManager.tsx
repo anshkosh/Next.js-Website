@@ -89,7 +89,7 @@ export default function JournalCategoryManager({ initialCategories }: Props) {
       {!showAddForm ? (
         <button
           onClick={() => setShowAddForm(true)}
-          className="flex items-center gap-1.5 px-4 py-2 bg-coral-500 text-white rounded-md text-sm font-medium hover:bg-coral-600 transition-colors"
+          className="flex items-center gap-1.5 px-4 py-2 bg-coral-600 text-white rounded-md text-sm font-medium hover:bg-coral-700 transition-colors"
         >
           <Plus size={16} /> Add Category
         </button>
@@ -113,7 +113,7 @@ export default function JournalCategoryManager({ initialCategories }: Props) {
             <button
               onClick={handleCreate}
               disabled={isPending}
-              className="flex items-center gap-1 px-3 py-1.5 bg-coral-500 text-white rounded-md text-sm font-medium hover:bg-coral-600 disabled:opacity-50"
+              className="flex items-center gap-1 px-3 py-1.5 bg-coral-600 text-white rounded-md text-sm font-medium hover:bg-coral-700 disabled:opacity-50"
             >
               {isPending ? <Loader2 size={14} className="animate-spin" /> : <Check size={14} />} Create
             </button>
@@ -130,7 +130,7 @@ export default function JournalCategoryManager({ initialCategories }: Props) {
       {/* Category list */}
       <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
         {categories.length === 0 ? (
-          <div className="text-center py-12 text-gray-400 text-sm">
+          <div className="text-center py-12 text-gray-500 text-sm">
             No categories yet. Create your first one above.
           </div>
         ) : (
@@ -182,7 +182,7 @@ export default function JournalCategoryManager({ initialCategories }: Props) {
                           setEditName(cat.name);
                           setEditDesc(cat.description);
                         }}
-                        className="p-1.5 text-gray-400 hover:text-gray-700 bg-gray-100 rounded-md"
+                        className="p-1.5 text-gray-500 hover:text-gray-700 bg-gray-100 rounded-md"
                         title="Edit"
                       >
                         <Pencil size={14} />

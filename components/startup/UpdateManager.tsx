@@ -214,7 +214,7 @@ export default function UpdateManager({ startupId }: { startupId: string }) {
           <p className="text-gray-500 text-sm">Share progress, milestones, and news with your audience.</p>
         </div>
         {updates.length > 0 && (
-          <span className="text-sm font-medium text-gray-400">{updates.length} update{updates.length !== 1 ? "s" : ""}</span>
+          <span className="text-sm font-medium text-gray-500">{updates.length} update{updates.length !== 1 ? "s" : ""}</span>
         )}
       </div>
 
@@ -237,19 +237,19 @@ export default function UpdateManager({ startupId }: { startupId: string }) {
                       <Image unoptimized width={80} height={56} src={update.imageUrl} alt="" className="w-20 h-14 object-cover rounded-lg border border-gray-200" />
                     </div>
                   )}
-                  <p className="text-xs text-gray-400 mt-2 ml-8">{timeAgo(update.createdAt)}</p>
+                  <p className="text-xs text-gray-500 mt-2 ml-8">{timeAgo(update.createdAt)}</p>
                 </div>
                 <div className="flex items-center gap-1 shrink-0">
                   <button
                     onClick={() => startEdit(update)}
-                    className="p-1.5 text-gray-400 hover:text-gray-700 hover:bg-white rounded-md transition-colors"
+                    className="p-1.5 text-gray-500 hover:text-gray-700 hover:bg-white rounded-md transition-colors"
                     title="Edit update"
                   >
                     <Edit2 className="w-4 h-4" />
                   </button>
                   <button
                     onClick={() => handleDelete(update.id)}
-                    className="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-md transition-colors"
+                    className="p-1.5 text-gray-500 hover:text-red-500 hover:bg-red-50 rounded-md transition-colors"
                     title="Delete update"
                   >
                     <Trash2 className="w-4 h-4" />
@@ -291,7 +291,7 @@ export default function UpdateManager({ startupId }: { startupId: string }) {
               placeholder="e.g. We just hit 1000 users!"
               maxLength={200}
             />
-            <p className="text-xs text-gray-400 mt-1 text-right">{formData.title.length}/200</p>
+            <p className="text-xs text-gray-500 mt-1 text-right">{formData.title.length}/200</p>
           </div>
 
           <div>
@@ -304,7 +304,7 @@ export default function UpdateManager({ startupId }: { startupId: string }) {
               maxLength={5000}
               rows={5}
             />
-            <p className="text-xs text-gray-400 mt-1 text-right">{formData.body.length}/5000</p>
+            <p className="text-xs text-gray-500 mt-1 text-right">{formData.body.length}/5000</p>
           </div>
 
           {/* Image Upload */}
@@ -320,7 +320,7 @@ export default function UpdateManager({ startupId }: { startupId: string }) {
                     className="w-20 h-14 object-cover rounded-lg border shadow-sm"
                   />
                 ) : (
-                  <div className="w-20 h-14 flex items-center justify-center rounded-lg border bg-gray-100 text-gray-400">
+                  <div className="w-20 h-14 flex items-center justify-center rounded-lg border bg-gray-100 text-gray-500">
                     <ImageIcon className="w-6 h-6" />
                   </div>
                 )}
@@ -336,7 +336,7 @@ export default function UpdateManager({ startupId }: { startupId: string }) {
                     setImagePreview("");
                     setImageError(false);
                   }}
-                  className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                  className="p-2 text-gray-500 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
                 >
                   <X className="w-5 h-5" />
                 </button>
@@ -354,9 +354,9 @@ export default function UpdateManager({ startupId }: { startupId: string }) {
                   onChange={(e) => e.target.files?.[0] && uploadImage(e.target.files[0])}
                   className="hidden"
                 />
-                <UploadCloud className="w-6 h-6 text-gray-400 mb-2" />
+                <UploadCloud className="w-6 h-6 text-gray-500 mb-2" />
                 <p className="text-sm font-medium text-gray-700">Click to upload an image</p>
-                <p className="text-xs text-gray-400 mt-1">PNG, JPG, WebP, GIF — max 5MB</p>
+                <p className="text-xs text-gray-500 mt-1">PNG, JPG, WebP, GIF — max 5MB</p>
               </label>
             )}
           </div>
@@ -372,7 +372,7 @@ export default function UpdateManager({ startupId }: { startupId: string }) {
             <button
               onClick={handleSave}
               disabled={isSaving || isUploading}
-              className="px-4 py-2 text-sm font-medium bg-coral-500 text-white rounded-lg hover:bg-coral-600 disabled:opacity-50 transition-colors"
+              className="px-4 py-2 text-sm font-medium bg-coral-600 text-white rounded-lg hover:bg-coral-700 disabled:opacity-50 transition-colors"
             >
               {isSaving
                 ? "Saving..."
@@ -385,7 +385,7 @@ export default function UpdateManager({ startupId }: { startupId: string }) {
       ) : (
         <button
           onClick={startAdd}
-          className="w-full py-4 border-2 border-dashed border-gray-200 hover:border-coral-400 rounded-xl flex items-center justify-center gap-2 text-gray-500 hover:text-coral-500 hover:bg-coral-50/50 transition-all"
+          className="w-full py-4 border-2 border-dashed border-gray-200 hover:border-coral-400 rounded-xl flex items-center justify-center gap-2 text-gray-500 hover:text-coral-500 hover:bg-coral-50/50 transition-colors"
         >
           <Plus className="w-5 h-5" />
           <span className="font-medium">Post a New Update</span>

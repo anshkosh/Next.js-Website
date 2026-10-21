@@ -81,7 +81,7 @@ export default function UpdatesSection({ updates }: { updates: Update[] }) {
                     <span className="inline-flex items-center px-2 py-0.5 rounded-full bg-coral-100 text-coral-700 text-xs font-bold">
                       Update #{updateNumber}
                     </span>
-                    <span className="text-xs text-gray-400">{formatDate(update.createdAt)}</span>
+                    <span className="text-xs text-gray-500">{formatDate(update.createdAt)}</span>
                   </div>
 
                   {/* Title */}

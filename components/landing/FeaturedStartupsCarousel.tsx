@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, type ComponentProps } from "react";
-import { useReducedMotion } from "framer-motion";
+import { usePrefersReducedMotion } from "@/components/usePrefersReducedMotion";
 import { ArrowLeft, ArrowRight, Pause, Play } from "lucide-react";
 import StartupCard from "@/components/startup/StartupCard";
 
@@ -9,10 +9,12 @@ type Startup = ComponentProps<typeof StartupCard>["startup"];
 
 export default function FeaturedStartupsCarousel({ startups }: { startups: Startup[] }) {
   const [activeIndex, setActiveIndex] = useState(0);
+  // Only animate a change of startup, never the first card on page load.
+  const [moved, setMoved] = useState(false);
   const [userPaused, setUserPaused] = useState(false);
   const [hovered, setHovered] = useState(false);
   const [focused, setFocused] = useState(false);
-  const prefersReducedMotion = useReducedMotion() === true;
+  const prefersReducedMotion = usePrefersReducedMotion();
   const hasMultipleStartups = startups.length > 1;
   const rotationPaused = userPaused || hovered || focused || prefersReducedMotion;
   const activeStartup = startups[activeIndex];
@@ -21,6 +23,7 @@ export default function FeaturedStartupsCarousel({ startups }: { startups: Start
     if (!hasMultipleStartups || rotationPaused) return;
 
     const timer = window.setInterval(() => {
+      setMoved(true);
       setActiveIndex((current) => (current + 1) % startups.length);
     }, 30_000);
 
@@ -30,6 +33,7 @@ export default function FeaturedStartupsCarousel({ startups }: { startups: Start
   if (!activeStartup) return null;
 
   const move = (direction: number) => {
+    setMoved(true);
     setActiveIndex((current) => (current + direction + startups.length) % startups.length);
   };
 
@@ -46,7 +50,7 @@ export default function FeaturedStartupsCarousel({ startups }: { startups: Start
         if (!event.currentTarget.contains(event.relatedTarget as Node | null)) setFocused(false);
       }}
     >
-      <div key={activeStartup.id} aria-live="off" aria-atomic="true">
+      <div key={activeStartup.id} aria-live="off" aria-atomic="true" className={moved ? "t-soft-enter" : undefined}>
         <StartupCard startup={activeStartup} />
       </div>
 
@@ -59,7 +63,7 @@ export default function FeaturedStartupsCarousel({ startups }: { startups: Start
 
           <div className="flex items-center gap-2">
             <span className="mr-1 hidden text-xs text-gray-500 sm:inline">
-              {prefersReducedMotion ? "Auto-advance off · reduced motion" : rotationPaused ? "Auto-advance paused" : "Changes every 30 seconds"}
+              {prefersReducedMotion ? "Auto-advance off" : rotationPaused ? "Auto-advance paused" : "Changes every 30 seconds"}
             </span>
             {!prefersReducedMotion && (
               <button

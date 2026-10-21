@@ -8,8 +8,16 @@ import NavigationLinks from "./NavigationLinks";
 
 export default function MobileNav({ authenticated }: { authenticated: boolean }) {
   const [open, setOpen] = useState(false);
+  const [shown, setShown] = useState(false);
   const container = useRef<HTMLDivElement>(null);
   const toggle = useRef<HTMLButtonElement>(null);
+
+  // Mount closed, then open on the next frame so the panel can grow from the header.
+  useEffect(() => {
+    if (!open) return;
+    const frame = requestAnimationFrame(() => setShown(true));
+    return () => { cancelAnimationFrame(frame); setShown(false); };
+  }, [open]);
 
   useEffect(() => {
     if (!open) return;
@@ -21,7 +29,7 @@ export default function MobileNav({ authenticated }: { authenticated: boolean })
   }, [open]);
 
   return (
-    <div ref={container} className="xl:hidden" onKeyDown={event => {
+    <div ref={container} className="lg:hidden" onKeyDown={event => {
       if (event.key === "Escape" && open) {
         event.preventDefault();
         setOpen(false);
@@ -37,10 +45,13 @@ export default function MobileNav({ authenticated }: { authenticated: boolean })
         onClick={() => setOpen((value) => !value)}
         className="flex h-11 w-11 items-center justify-center rounded-xl text-gray-700 hover:bg-gray-100"
       >
-        {open ? <X size={24} aria-hidden="true" /> : <Menu size={24} aria-hidden="true" />}
+        <span className="t-icon-swap" data-state={open ? "b" : "a"} aria-hidden="true">
+          <Menu size={24} className="t-icon" data-icon="a" />
+          <X size={24} className="t-icon" data-icon="b" />
+        </span>
       </button>
       {open && (
-        <nav id="mobile-navigation" aria-label="Mobile navigation" className="absolute inset-x-0 top-full max-h-[calc(100dvh-4rem)] overflow-y-auto border-b border-gray-200 bg-[#FAF8F5] px-4 py-4 shadow-soft">
+        <nav id="mobile-navigation" aria-label="Mobile navigation" className={`t-dropdown${shown ? " is-open" : ""} absolute inset-x-0 top-full max-h-[calc(100dvh-4rem)] overflow-y-auto border-b border-gray-200 bg-[#FAF8F5] px-4 py-4 shadow-soft`}>
           <div className="flex flex-col gap-1">
             <NavigationLinks mobile onNavigate={() => setOpen(false)} />
             <Link href={authenticated ? "/dashboard" : "/login"} onClick={() => setOpen(false)} className="mt-2 rounded-xl bg-gray-900 px-3 py-3 text-center font-medium text-white hover:bg-gray-800">

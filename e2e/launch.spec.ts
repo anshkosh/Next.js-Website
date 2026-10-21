@@ -408,7 +408,10 @@ test("signed-in comments prefill identity and remain privately visible while pen
   await login(page, adminEmail, password, true);
   await page.goto("/");
   await expect(page.getByRole("dialog", { name: "Anshkosh is under construction." })).toHaveCount(0);
-  await expect(page.getByRole("navigation", { name: "Primary navigation" }).getByRole("link", { name: /Dashboard.*Test Reviewer/ })).toBeVisible();
+  await page.getByRole("navigation", { name: "Primary navigation" }).getByRole("button", { name: "Account menu for Test Reviewer", exact: true }).click();
+  await expect(page.getByRole("menuitem", { name: "Dashboard", exact: true })).toHaveAttribute("href", "/dashboard");
+  await page.getByRole("menuitem", { name: "Dashboard", exact: true }).click();
+  await expect(page).toHaveURL(/\/dashboard/);
   const body = `Private pending receipt ${randomUUID()}`;
   try {
     await enter(page, `/startups/${slug}`);
@@ -482,7 +485,7 @@ test("member registration and profile settings work across modes without losing 
   await enter(page, await emailLink(memberEmail, /verify-email/));
   await login(page, memberEmail);
   await expect(page.getByRole("link", { name: "Explore startups", exact: true })).toBeVisible();
-  await expect(page.getByRole("link", { name: "Submit a New Startup" })).toHaveCount(0);
+  await expect(page.getByRole("link", { name: "Submit a new startup" })).toHaveCount(0);
   await enter(page, "/settings");
   await page.getByLabel("Full name", { exact: true }).fill("Updated Community Member");
   await page.getByRole("button", { name: "Save profile", exact: true }).click();
@@ -491,7 +494,7 @@ test("member registration and profile settings work across modes without losing 
   await expect(page.getByLabel("Full name", { exact: true })).toHaveValue("Updated Community Member");
   await enter(page, "/dashboard");
   await page.getByRole("switch", { name: /Founder mode/ }).click();
-  await expect(page.getByRole("link", { name: "Submit a New Startup", exact: true })).toBeVisible();
+  await expect(page.getByRole("link", { name: "Submit a new startup", exact: true })).toBeVisible();
   const member = await db.user.findUniqueOrThrow({ where: { email: memberEmail } });
   const modeStartup = await db.startup.create({ data: { name: `Mode test ${randomUUID()}`, slug: `mode-${randomUUID()}`, tagline: "A preserved account preference fixture", description: "This fixture verifies that founder mode never deletes saved work.", websiteUrl: "https://example.test", founderName: member.name, founderId: member.id, categoryId, status: "DRAFT" } });
   const before = await db.startup.findUniqueOrThrow({ where: { id: modeStartup.id } });
@@ -625,7 +628,7 @@ test("expanded profile, optional emails and verified sign-in changes persist", a
   const member = await db.user.update({ where: { email: originalEmail }, data: { emailVerified: true } });
   await login(page, originalEmail);
   await enter(page, "/settings");
-  await expect(page.getByRole("switch", { name: /Founder mode/ })).toHaveCount(0);
+  await expect(page.getByRole("switch", { name: /Founder mode/ })).toBeChecked();
   await uploadPhoto(page, "Upload profile photo");
   await page.getByLabel("Bio", { exact: true }).fill("A member interested in useful early-stage products.");
   await page.getByLabel("Location", { exact: true }).fill("Hyderabad");

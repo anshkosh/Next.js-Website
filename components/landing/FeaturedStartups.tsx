@@ -5,6 +5,7 @@ import { ArrowRight, Sparkles } from "lucide-react";
 import FeaturedStartupsCarousel from "@/components/landing/FeaturedStartupsCarousel";
 import { db } from "@/lib/db";
 import { publicStartupCard, publicStartupCardSelect } from "@/lib/public-startup-card";
+import { withActivitySignals } from "@/lib/leaderboard";
 
 export default async function FeaturedStartups({ cookieId }: { cookieId?: string } = {}) {
   if (!process.env.DATABASE_URL) return null;
@@ -19,7 +20,7 @@ export default async function FeaturedStartups({ cookieId }: { cookieId?: string
     orderBy: { sortOrder: "asc" },
     select: { startup: { select: publicStartupCardSelect(visitorCookieId) } },
   });
-  const startups = rows.map(({ startup }) => publicStartupCard(startup));
+  const startups = await withActivitySignals(rows.map(({ startup }) => publicStartupCard(startup)));
 
   if (startups.length === 0) return null;
 

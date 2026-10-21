@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { preferredScrollBehavior } from "@/lib/scroll-behavior";
 
 type Tab = {
   id: string;
@@ -15,7 +16,29 @@ type Props = {
 export default function StartupTabNav({ tabs }: Props) {
   const [activeTab, setActiveTab] = useState(tabs[0]?.id ?? "");
   const isClickScrolling = useRef(false);
-  const navRef = useRef<HTMLDivElement>(null);
+  const navRef = useRef<HTMLElement>(null);
+  const listRef = useRef<HTMLDivElement>(null);
+  const barRef = useRef<HTMLSpanElement>(null);
+  const barPlaced = useRef(false);
+
+  // Transitions.dev tabs sliding: the underline glides to the active tab. It is
+  // placed without a transition on first paint and on resize so it never slides in.
+  useEffect(() => {
+    const bar = barRef.current;
+    const place = (animate: boolean) => {
+      const tab = listRef.current?.querySelector<HTMLElement>(`[data-tab="${activeTab}"]`);
+      if (!bar || !tab) return;
+      if (!animate) bar.style.transition = "none";
+      bar.style.transform = `translateX(${tab.offsetLeft}px)`;
+      bar.style.width = `${tab.offsetWidth}px`;
+      if (!animate) { void bar.offsetWidth; bar.style.removeProperty("transition"); }
+    };
+    place(barPlaced.current);
+    barPlaced.current = true;
+    const onResize = () => place(false);
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
+  }, [activeTab]);
 
   // Scroll-spy via IntersectionObserver
   useEffect(() => {
@@ -59,49 +82,48 @@ export default function StartupTabNav({ tabs }: Props) {
     return () => observers.forEach((o) => o.disconnect());
   }, [tabs]);
 
-  const handleTabClick = (id: string) => {
+  const handleTabClick = (event: React.MouseEvent<HTMLAnchorElement>, id: string) => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    event.preventDefault();
     setActiveTab(id);
     isClickScrolling.current = true;
+    // Each section's scroll-margin-top clears the sticky header and this nav.
+    el.scrollIntoView({ behavior: preferredScrollBehavior(), block: "start" });
+    window.history.replaceState(null, "", `#${id}`);
 
-    const el = document.getElementById(id);
-    if (el) {
-      // Offset: sticky header (64px) + sticky tab nav (49px) + small gap (8px)
-      const offset = 64 + 49 + 8;
-      const top = el.getBoundingClientRect().top + window.scrollY - offset;
-      window.scrollTo({ top, behavior: "smooth" });
-    }
-
-    // Re-enable scroll-spy after the scroll animation (~900ms)
-    setTimeout(() => {
-      isClickScrolling.current = false;
-    }, 900);
+    // Re-enable scroll-spy once the scroll settles; the timer covers browsers without scrollend.
+    const release = () => { isClickScrolling.current = false; };
+    window.addEventListener("scrollend", release, { once: true });
+    setTimeout(release, 900);
   };
 
   return (
-    <div
+    <nav
       ref={navRef}
+      aria-label="Startup page sections"
       className="sticky top-16 z-40 w-full bg-white border-b border-gray-200 shadow-sm"
     >
       <div className="container mx-auto px-4 max-w-5xl">
         <div
-          role="tablist"
-          aria-label="Startup page sections"
-          className="flex items-end gap-0 overflow-x-auto scrollbar-hide"
+          ref={listRef}
+          className="relative flex items-end gap-0 overflow-x-auto scrollbar-hide"
         >
+          <span ref={barRef} aria-hidden="true" className="t-tabs-bar bg-coral-500" />
           {tabs.map((tab) => {
             const isActive = activeTab === tab.id;
             return (
-              <button
+              <a
                 key={tab.id}
-                role="tab"
-                aria-selected={isActive}
-                aria-controls={tab.id}
-                onClick={() => handleTabClick(tab.id)}
+                href={`#${tab.id}`}
+                data-tab={tab.id}
+                aria-current={isActive ? "location" : undefined}
+                onClick={(event) => handleTabClick(event, tab.id)}
                 className={[
                   "relative flex items-center gap-2 px-4 py-3.5 text-sm font-medium whitespace-nowrap",
-                  "transition-all duration-200 border-b-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-coral-400 focus-visible:ring-offset-1",
+                  "transition-colors duration-(--tabs-dur) border-b-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-coral-400 focus-visible:ring-offset-1",
                   isActive
-                    ? "border-coral-500 text-coral-600"
+                    ? "border-transparent text-coral-600"
                     : "border-transparent text-gray-500 hover:text-gray-800 hover:border-gray-300",
                 ].join(" ")}
               >
@@ -111,20 +133,20 @@ export default function StartupTabNav({ tabs }: Props) {
                     className={[
                       "inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full text-xs font-bold",
                       isActive
-                        ? "bg-coral-100 text-coral-600"
+                        ? "bg-coral-100 text-coral-700"
                         : tab.count === 0
-                        ? "bg-gray-100 text-gray-400"
-                        : "bg-coral-50 text-coral-500",
+                        ? "bg-gray-100 text-gray-600"
+                        : "bg-coral-50 text-coral-700",
                     ].join(" ")}
                   >
                     {tab.count}
                   </span>
                 )}
-              </button>
+              </a>
             );
           })}
         </div>
       </div>
-    </div>
+    </nav>
   );
 }

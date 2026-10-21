@@ -27,7 +27,7 @@ export default function JournalCard({ post }: JournalCardProps) {
   return (
     <Link
       href={`/journal/${post.slug}`}
-      className="group flex flex-col bg-white border border-gray-200 rounded-xl overflow-hidden hover:shadow-md hover:-translate-y-0.5 transition-all duration-300"
+      className="group flex flex-col bg-white border border-gray-200 rounded-xl overflow-hidden hover:shadow-md hover:-translate-y-0.5 transition-[translate,box-shadow] duration-(--duration-quick)"
     >
       {/* Cover Image */}
       <div className="relative aspect-video bg-gradient-to-br from-coral-50 to-gray-100 overflow-hidden">
@@ -36,7 +36,7 @@ export default function JournalCard({ post }: JournalCardProps) {
             src={post.coverImageUrl}
             alt={post.title}
             fill
-            className="object-cover group-hover:scale-105 transition-transform duration-500"
+            className="object-cover group-hover:scale-105 transition-transform duration-(--duration-slow)"
             sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
           />
         ) : (
@@ -80,7 +80,7 @@ export default function JournalCard({ post }: JournalCardProps) {
         {post.tags.length > 0 && (
           <div className="flex flex-wrap gap-1.5">
             {post.tags.slice(0, 3).map(tag => (
-              <span key={tag} className="text-xs bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full">
+              <span key={tag} className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full">
                 #{tag}
               </span>
             ))}
@@ -88,7 +88,7 @@ export default function JournalCard({ post }: JournalCardProps) {
         )}
 
         {/* Meta */}
-        <div className="flex items-center justify-between text-xs text-gray-400 pt-1 border-t border-gray-100 mt-auto">
+        <div className="flex items-center justify-between text-xs text-gray-500 pt-1 border-t border-gray-100 mt-auto">
           <span className="font-medium text-gray-500">{post.authorName}</span>
           <div className="flex items-center gap-3">
             {post.updatedAt ? <span>Updated {formatDate(post.updatedAt)}</span> : post.publishedAt && <span>{formatDate(post.publishedAt)}</span>}

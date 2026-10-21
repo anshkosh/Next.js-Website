@@ -19,12 +19,12 @@ export default function CategoryPills({ categories }: { categories: Category[] }
   return (
     <div className="relative w-full overflow-hidden">
       <div className="flex items-center gap-3 overflow-x-auto pb-4 pt-2 px-1 snap-x scrollbar-hide">
-        <Link 
+        <Link
           href="/discover"
           scroll={false}
           className={`flex-shrink-0 px-4 py-2 rounded-full text-sm font-medium transition-colors snap-start ${
-            activeCategory === "all" 
-              ? "bg-coral-500 text-white shadow-md" 
+            activeCategory === "all"
+              ? "bg-coral-600 text-white shadow-md"
               : "bg-gray-100 text-gray-700 hover:bg-gray-200"
           }`}
         >
@@ -36,8 +36,8 @@ export default function CategoryPills({ categories }: { categories: Category[] }
             href={`/discover?category=${cat.slug}`}
             scroll={false}
             className={`flex-shrink-0 px-4 py-2 rounded-full text-sm font-medium transition-colors snap-start flex items-center gap-1.5 ${
-              activeCategory === cat.slug 
-                ? "bg-coral-500 text-white shadow-md" 
+              activeCategory === cat.slug
+                ? "bg-coral-600 text-white shadow-md"
                 : "bg-gray-100 text-gray-700 hover:bg-gray-200"
             }`}
           >

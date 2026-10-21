@@ -45,6 +45,17 @@ of this preference. No account ID, verification status or permission role is
 accepted by either form. New profile fields and preference defaults use an additive
 migration; existing account identities, moderation states and saved content remain.
 
+## Account navigation and mode controls
+
+The public header and founder top bar share an account menu with Dashboard,
+Profile settings and Logout. Signed-in visitors to `/login` and `/register`
+are redirected to their dashboard. Mobile navigation exposes the same destinations.
+
+Founder mode is available on both the dashboard and profile settings. Changes
+save immediately; a short-lived Undo offer restores the previous mode. Public
+visibility and review-state rules above remain the same. Startup deletion uses
+the shared confirmation dialog and stays at the bottom of each dashboard card.
+
 ## Startup submissions
 
 The new-submission page checks the account allowance before starting a new form.

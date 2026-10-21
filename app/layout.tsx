@@ -6,6 +6,7 @@ import { UnderConstructionBanner } from "@/components/site/UnderConstructionBann
 import { PreEntryCurtain } from "@/components/site/PreEntryCurtain";
 import { DEFAULT_SOCIAL_IMAGE, SITE_URL, absoluteUrl, PILOT_DESCRIPTION } from "@/lib/seo";
 import { viewerSession } from "@/lib/viewer-session";
+import { CURTAIN_SEEN_KEY } from "@/lib/curtain";
 
 const BASE_URL = SITE_URL;
 
@@ -56,6 +57,10 @@ export default async function RootLayout({
       style={{ colorScheme: "light" }}
       suppressHydrationWarning
     >
+      <head>
+        {/* Hide the preview curtain before first paint once this session has entered. */}
+        <script dangerouslySetInnerHTML={{ __html: `try{if(sessionStorage.getItem(${JSON.stringify(CURTAIN_SEEN_KEY)})==="1")document.documentElement.dataset.curtainSeen=""}catch(e){}` }} />
+      </head>
       <body className="min-h-full flex flex-col">
         <PreEntryCurtain authenticated={authenticated} />
         <div id="site-content" className="flex min-h-full flex-1 flex-col">

@@ -156,7 +156,7 @@ export default function FounderJournal({ entries, startups }: { entries: Entry[]
           </div>}
           <div className="flex flex-wrap gap-3">
             <button type="button" onClick={() => setPreview(value => !value)} className={secondary}>{preview ? "Hide preview" : "Preview entry"}</button>
-            <button type="submit" disabled={uploading || (draft.visibility === "PUBLIC" && !canPublish)} className="min-h-11 rounded-xl bg-coral-500 px-5 py-3 text-sm font-semibold text-white hover:bg-coral-600 disabled:cursor-not-allowed disabled:opacity-50">{uploading ? "Uploading image…" : pending ? "Saving…" : draft.visibility === "PUBLIC" ? "Submit for review" : "Save private entry"}</button>
+            <button type="submit" disabled={uploading || (draft.visibility === "PUBLIC" && !canPublish)} className="min-h-11 rounded-xl bg-coral-600 px-5 py-3 text-sm font-semibold text-white hover:bg-coral-700 disabled:cursor-not-allowed disabled:opacity-50">{uploading ? "Uploading image…" : pending ? "Saving…" : draft.visibility === "PUBLIC" ? "Submit for review" : "Save private entry"}</button>
           </div>
         </fieldset>
       </form>

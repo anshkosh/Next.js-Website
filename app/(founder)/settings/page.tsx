@@ -4,6 +4,7 @@ import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import ProfileSettings from "@/components/account/ProfileSettings";
 import AccountSecuritySettings from "@/components/account/AccountSecuritySettings";
+import DashboardModeControl from "@/components/account/DashboardModeControl";
 import { seoMetadata } from "@/lib/seo";
 
 export const metadata = {
@@ -20,7 +21,7 @@ export default async function SettingsPage() {
   if (!session?.user) redirect("/login");
   const user = await db.user.findUnique({
     where: { id: session.user.id },
-    select: { name: true, email: true, emailVerified: true, image: true, bio: true, location: true, websiteUrl: true, notifyStartupReviews: true, notifyVoteMilestones: true },
+    select: { name: true, email: true, emailVerified: true, image: true, bio: true, location: true, websiteUrl: true, notifyStartupReviews: true, notifyVoteMilestones: true, founderMode: true },
   });
   if (!user) redirect("/login");
   const hasPassword = await db.account.count({ where: { userId: session.user.id, providerId: "credential" } });
@@ -33,6 +34,8 @@ export default async function SettingsPage() {
         Your account, the way you use Anshkosh.
       </p>
       <ProfileSettings user={user} />
+      <h2 className="mt-10 mb-4 text-xl font-semibold text-gray-900">Founder mode</h2>
+      <DashboardModeControl enabled={user.founderMode} />
       <AccountSecuritySettings email={user.email} emailVerified={user.emailVerified} hasPassword={hasPassword > 0} />
     </div>
   );

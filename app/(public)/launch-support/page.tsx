@@ -51,8 +51,7 @@ export default function LaunchSupportPage() {
             Launch Support · Free during early access
           </p>
           <h1 className="max-w-3xl font-heading text-4xl font-bold leading-[1.1] tracking-tight text-balance sm:text-5xl md:text-6xl">
-            Your next step,<br />
-            with Anshkosh.
+            Your next step, with Anshkosh.
           </h1>
           <p className="mt-6 max-w-2xl text-lg leading-relaxed text-gray-600">
             Test your idea. Decide what to build. Make your launch materials.

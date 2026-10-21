@@ -1,4 +1,6 @@
 import DashboardModeControl from "@/components/account/DashboardModeControl";
+
+export const metadata = { title: "Dashboard — Anshkosh", robots: { index: false, follow: false } };
 import { publicStartupWhere } from "@/lib/startup-visibility";
 import { db } from "@/lib/db";
 import { auth } from "@/lib/auth";
@@ -11,10 +13,8 @@ import SubmitReviewButton from "@/components/dashboard/SubmitReviewButton";
 import DeleteStartupButton from "@/components/dashboard/DeleteStartupButton";
 import FounderWorkspace from "@/components/dashboard/FounderWorkspace";
 import DashboardOverview, { type DashboardNotice } from "@/components/dashboard/DashboardOverview";
+import { getActivitySignals } from "@/lib/leaderboard";
 import {
-  Rocket,
-  Star,
-  Activity,
   Plus,
   Edit2,
   ExternalLink,
@@ -30,32 +30,22 @@ const statusConfig = {
   LIVE: {
     label: "Live",
     badgeCls: "bg-green-100 text-green-700",
-    borderCls: "border-t-green-500",
-    glowCls: "shadow-green-100",
   },
   DRAFT: {
     label: "Draft",
     badgeCls: "bg-gray-100 text-gray-600",
-    borderCls: "border-t-gray-400",
-    glowCls: "",
   },
   PENDING_REVIEW: {
-    label: "Under Review",
+    label: "Under review",
     badgeCls: "bg-yellow-100 text-yellow-700",
-    borderCls: "border-t-yellow-400",
-    glowCls: "",
   },
   REJECTED: {
     label: "Rejected",
     badgeCls: "bg-red-100 text-red-700",
-    borderCls: "border-t-red-500",
-    glowCls: "",
   },
   SUSPENDED: {
     label: "Suspended",
     badgeCls: "bg-orange-100 text-orange-800",
-    borderCls: "border-t-orange-400",
-    glowCls: "",
   },
 } as const;
 
@@ -94,8 +84,14 @@ export default async function DashboardPage() {
   const maxStartups = Math.max(1, parseInt(maxStartupsSetting, 10) || 1);
   const isAtLimit = totalStartups >= maxStartups;
 
-  const totalSignals = startups.reduce((sum, s) => sum + s.signalCount, 0);
   const liveStartups = startups.filter((s) => s.status === "LIVE").length;
+  // Same signal total as the public cards and leaderboard: net votes plus capped activity.
+  const activityById = await getActivitySignals(startups.map(startup => startup.id));
+  const totalVotes = startups.reduce((sum, s) => sum + s.signalCount, 0);
+  const totalActivity = [...activityById.values()].reduce((sum, points) => sum + points, 0);
+  const totalSignals = totalVotes + totalActivity;
+  // The profile, not the session, so a rename in settings shows straight away.
+  const firstName = (profile.name || session.user.name || "").split(" ")[0] || "Founder";
 
   const journalReviews = await db.founderJournalRevision.findMany({
     where: { entry: { authorId: session.user.id, visibility: "PUBLIC" }, status: { in: ["PENDING_REVIEW", "CHANGES_REQUESTED", "SCHEDULED"] } },
@@ -141,339 +137,191 @@ export default async function DashboardPage() {
     : liveStartup ? { title: "Keep building in public", detail: "Add a journal reflection, share a recent update, or celebrate a new milestone when you have something meaningful to share.", href: "/dashboard/journal", label: "Open your journal" }
     : { title: "Explore another founder’s journey", detail: "Browse startups and share a useful question or piece of feedback with a founder.", href: "/discover", label: "Explore startups" };
 
+  const actionClass = "inline-flex min-h-11 items-center justify-center gap-1.5 rounded-xl border border-gray-200 bg-white px-3 text-sm font-medium text-gray-700 transition-colors hover:border-coral-300 hover:text-coral-700";
+  const countClass = "rounded-full bg-gray-100 px-1.5 text-xs font-semibold tabular-nums text-gray-700";
+  const needsReviewNote = startups.some(startup => startup.status !== "LIVE" || startup.revision);
+
   return (
-    <div
-      className="min-h-screen"
-      style={{
-        background:
-          "linear-gradient(135deg, #fafafa 0%, #f0f4ff 40%, #fff5f2 100%)",
-      }}
-    >
-      <div className="container mx-auto px-4 pt-7 pb-28 md:pt-10 max-w-6xl">
-        {/* Welcome Header */}
-        <div className="mb-6">
-          <h1 className="text-3xl md:text-4xl font-bold font-heading text-gray-900 tracking-tight">
-            Welcome back,{" "}
-            <span className="text-coral-500">
-              {session.user.name?.split(" ")[0] || "Founder"}
-            </span>
-            ! 👋
-          </h1>
-          <p className="text-gray-500 mt-2 text-base">
-            Your startup, your progress, your next move.
+    <div className="container mx-auto max-w-6xl px-4 pt-7 pb-28 md:pt-10">
+      <div className="mb-6">
+        <h1 className="font-heading text-3xl font-bold tracking-tight text-gray-900 md:text-4xl">
+          Welcome back, <span className="text-coral-700">{firstName}</span>
+        </h1>
+        <p className="mt-2 text-base text-gray-600">Your startup, your progress, your next move.</p>
+      </div>
+
+      <dl className="mb-8 grid grid-cols-3 divide-x divide-gray-100 rounded-2xl border border-gray-200 bg-white">
+        <div className="px-4 py-4 sm:px-6">
+          <dt className="text-xs font-semibold uppercase tracking-wider text-gray-600">Startups</dt>
+          <dd className="mt-1 font-heading text-2xl font-bold tabular-nums text-gray-900 sm:text-3xl">
+            {totalStartups}<span className="ml-1 font-sans text-sm font-normal text-gray-600">/ {maxStartups}</span>
+          </dd>
+        </div>
+        <div className="px-4 py-4 sm:px-6">
+          <dt className="text-xs font-semibold uppercase tracking-wider text-gray-600">Signals</dt>
+          <dd className="mt-1 font-heading text-2xl font-bold tabular-nums text-gray-900 sm:text-3xl">{totalSignals}</dd>
+          <dd className="mt-0.5 text-xs text-gray-600 tabular-nums">{totalVotes} votes + {totalActivity} activity</dd>
+        </div>
+        <div className="px-4 py-4 sm:px-6">
+          <dt className="text-xs font-semibold uppercase tracking-wider text-gray-600">Live</dt>
+          <dd className="mt-1 font-heading text-2xl font-bold tabular-nums text-gray-900 sm:text-3xl">{liveStartups}</dd>
+        </div>
+      </dl>
+
+      <DashboardOverview notices={notices} nextStep={nextStep} />
+
+      <div className="mb-6 flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
+        <div>
+          <h2 className="font-heading text-xl font-bold text-gray-900">Your startups</h2>
+          <p className="mt-0.5 text-sm text-gray-600">
+            {totalStartups} of {maxStartups} startup slot{maxStartups !== 1 ? "s" : ""} used
           </p>
         </div>
+        {!isAtLimit && <Link href="/startup/new" className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-coral-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-coral-700"><Plus size={16} aria-hidden="true" /> Submit a new startup</Link>}
+      </div>
 
-        <DashboardModeControl enabled={true} />
+      {needsReviewNote && <p className="mb-6 text-sm text-gray-600">Submissions are reviewed manually. We’ll email you when a decision is ready; contact us if you need a status update.</p>}
 
-        {/* Stats Row */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-5 mb-12">
-          {/* Total Startups */}
-          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-shadow p-6 flex items-center gap-5">
-            <div className="w-14 h-14 rounded-2xl bg-blue-50 flex items-center justify-center shrink-0">
-              <Rocket size={26} className="text-blue-500" />
-            </div>
-            <div>
-              <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-0.5">
-                Total Startups
-              </p>
-              <p className="text-3xl font-bold text-gray-900 leading-none">
-                {totalStartups}
-                <span className="text-base font-normal text-gray-400 ml-1">
-                  / {maxStartups}
-                </span>
-              </p>
-            </div>
-          </div>
-
-          {/* Total Signals */}
-          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-shadow p-6 flex items-center gap-5">
-            <div className="w-14 h-14 rounded-2xl bg-coral-50 flex items-center justify-center shrink-0">
-              <Star size={26} className="text-coral-500" />
-            </div>
-            <div>
-              <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-0.5">
-                Total Net Votes
-              </p>
-              <p className="text-3xl font-bold text-gray-900 leading-none">
-                {totalSignals}
-              </p>
-            </div>
-          </div>
-
-          {/* Live Startups */}
-          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-shadow p-6 flex items-center gap-5">
-            <div className="w-14 h-14 rounded-2xl bg-green-50 flex items-center justify-center shrink-0">
-              <Activity size={26} className="text-green-500" />
-            </div>
-            <div>
-              <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-0.5">
-                Live Startups
-              </p>
-              <p className="text-3xl font-bold text-gray-900 leading-none">
-                {liveStartups}
-              </p>
-            </div>
-          </div>
+      {startups.length === 0 ? (
+        <div className="flex flex-col items-center rounded-3xl border border-gray-200 bg-white px-4 py-20 text-center">
+          <h2 className="mb-2 font-heading text-2xl font-bold text-gray-900">No startups yet</h2>
+          <p className="mb-8 max-w-md text-sm text-gray-600">
+            You haven’t submitted any startups. Add your first startup to get discovered by people interested in what you’re building.
+          </p>
+          <Link href="/startup/new" className="inline-flex min-h-11 items-center rounded-xl bg-coral-600 px-6 font-semibold text-white transition-colors hover:bg-coral-700">
+            Submit your first startup
+          </Link>
+          <div className="mt-5 w-full max-w-md"><FounderWorkspace /></div>
         </div>
+      ) : (
+        <div className={`grid grid-cols-1 gap-5 ${startups.length > 1 ? "md:grid-cols-2" : ""}`}>
+          {startups.map((startup) => {
+            const cfg = statusConfig[startup.status as keyof typeof statusConfig] ?? statusConfig.DRAFT;
+            const activity = activityById.get(startup.id);
 
-        <DashboardOverview notices={notices} nextStep={nextStep} />
-
-        {/* Section Header */}
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
-          <div>
-            <h2 className="text-xl font-bold text-gray-900">Your Startups</h2>
-            <p className="text-sm text-gray-400 mt-0.5">
-              {totalStartups} of {maxStartups} startup slot
-              {maxStartups !== 1 ? "s" : ""} used
-            </p>
-          </div>
-
-          {!isAtLimit && <Link href="/startup/new" className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-coral-500 px-5 py-2.5 text-sm font-semibold text-white hover:bg-coral-600"><Plus size={16} /> Submit a New Startup</Link>}
-
-        </div>
-
-        {isAtLimit && <p className="mb-6 text-sm text-gray-600">Your {maxStartups}-startup allowance is in use. Continue an existing draft below or manage a submitted startup.</p>}
-        <p className="mb-6 text-sm text-gray-600">Submissions are reviewed manually. We’ll email you when a decision is ready; contact us if you need a status update.</p>
-
-        {/* Startup Cards */}
-        {startups.length === 0 ? (
-          <div className="bg-white py-24 px-4 text-center rounded-3xl border border-gray-100 shadow-sm flex flex-col items-center">
-            <div className="w-24 h-24 bg-coral-50 rounded-full flex items-center justify-center mb-6">
-              <Rocket className="text-coral-400 w-10 h-10" />
-            </div>
-            <h2 className="text-2xl font-bold text-gray-900 mb-2">
-              No startups yet
-            </h2>
-            <p className="text-gray-400 mb-8 max-w-md text-sm">
-              You haven’t submitted any startups. Add your first startup to get
-              discovered by people interested in what you’re building.
-            </p>
-            <Link
-              href="/startup/new"
-              className="px-6 py-3 bg-coral-500 text-white rounded-xl font-semibold hover:bg-coral-600 transition-colors shadow-sm"
-            >
-              Submit your first startup
-            </Link>
-            <div className="mt-5 w-full max-w-md"><FounderWorkspace /></div>
-          </div>
-        ) : (
-          <div className={`grid grid-cols-1 gap-5 ${startups.length > 1 ? "md:grid-cols-2" : ""}`}>
-            {startups.map((startup) => {
-              const cfg =
-                statusConfig[startup.status as keyof typeof statusConfig] ??
-                statusConfig.DRAFT;
-
-              return (
-                <div
-                  key={startup.id}
-                  className={`bg-white rounded-2xl border border-gray-100 border-t-4 ${cfg.borderCls} shadow-sm hover:shadow-lg transition-all duration-200 flex flex-col overflow-hidden relative group`}
-                >
-                  {/* Delete button */}
-                  <div className="flex justify-end px-3 pt-2">
-                    <DeleteStartupButton
-                      startupId={startup.id}
-                      startupName={startup.name}
-                    />
+            return (
+              <article key={startup.id} aria-labelledby={`startup-${startup.id}`} className="flex flex-col rounded-2xl border border-gray-200 bg-white">
+                <div className="flex items-start gap-4 p-5">
+                  <div className="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-gray-100 bg-gray-50">
+                    {startup.logoUrl ? (
+                      <Image src={startup.logoUrl} alt="" width={64} height={64} className="h-full w-full object-cover" />
+                    ) : (
+                      <span aria-hidden="true" className="text-2xl font-bold text-gray-500">{startup.name.charAt(0)}</span>
+                    )}
                   </div>
-
-                  {/* Card Body */}
-                  <div className="p-5 flex items-start gap-4">
-                    {/* Logo */}
-                    <div className="w-16 h-16 shrink-0 rounded-xl bg-gray-50 border border-gray-100 flex items-center justify-center overflow-hidden">
-                      {startup.logoUrl ? (
-                        <Image
-                          src={startup.logoUrl}
-                          alt={startup.name}
-                          width={64}
-                          height={64}
-                          className="object-cover w-full h-full"
-                        />
-                      ) : (
-                        <span className="text-2xl font-bold text-gray-300">
-                          {startup.name.charAt(0)}
-                        </span>
-                      )}
+                  <div className="min-w-0 flex-1">
+                    <div className="mb-1 flex flex-wrap items-center gap-2">
+                      <h3 id={`startup-${startup.id}`} className="truncate text-base font-bold text-gray-900">{startup.name}</h3>
+                      <span className={`rounded-full px-2 py-0.5 text-xs font-semibold ${cfg.badgeCls}`}>{cfg.label}</span>
+                      {startup.revision && <span className="rounded-full bg-amber-50 px-2 py-0.5 text-xs font-medium text-amber-800">{startup.revision.status === "REJECTED" ? "Changes need attention" : "Changes awaiting review"}</span>}
+                      {startup.betaTesterProgram?.enabled && <span className="rounded-full bg-violet-50 px-2 py-0.5 text-xs font-medium text-violet-700">Beta signups open</span>}
                     </div>
-
-                    {/* Info */}
-                    <div className="flex-1 min-w-0 pr-6">
-                      <div className="flex items-center gap-2 flex-wrap mb-1">
-                        <h3 className="text-base font-bold text-gray-900 truncate">
-                          {startup.name}
-                        </h3>
-                        <span
-                          className={`px-2 py-0.5 text-[10px] uppercase font-bold tracking-wider rounded-full ${cfg.badgeCls}`}
-                        >
-                          {cfg.label}
-                        </span>
-                        {startup.revision && <span className="rounded-full bg-amber-50 px-2 py-1 text-xs font-medium text-amber-800">{startup.revision.status === "REJECTED" ? "Changes need attention" : "Changes awaiting review"}</span>}
-                        {startup.betaTesterProgram?.enabled && <span className="rounded-full bg-violet-50 px-2 py-1 text-xs font-medium text-violet-700">Beta signups open</span>}
-                      </div>
-                      <p className="text-sm text-gray-400 truncate mb-3">
-                        {startup.tagline}
-                      </p>
-
-                      {/* Meta pills */}
-                      <div className="flex items-center gap-2 flex-wrap">
-                        <span className="inline-flex items-center gap-1 text-xs font-semibold text-gray-600 bg-gray-50 border border-gray-100 px-2.5 py-1 rounded-full">
-                          <Star size={11} className="text-coral-400" />
-                          {startup.signalCount} net votes
-                        </span>
-                        <span className="inline-flex items-center gap-1 text-xs font-medium text-gray-500 bg-gray-50 border border-gray-100 px-2.5 py-1 rounded-full">
-                          {startup.category.name}
-                        </span>
-                        {startup._count.comments > 0 && (
-                          <span className="inline-flex items-center gap-1 text-xs font-semibold text-blue-600 bg-blue-50 border border-blue-100 px-2.5 py-1 rounded-full">
-                            <MessageSquare size={11} />
-                            {startup._count.comments}
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Divider */}
-                  <div className="h-px bg-gray-100 mx-5" />
-
-                  {/* Card Footer — Status-aware actions */}
-                  <div className="p-4">
-                    <div className="mb-3"><FounderWorkspace showJournal={startup.status !== "LIVE"} /><p className="mt-2 text-center text-xs leading-relaxed text-gray-500">Free tools to validate your idea, plan your runway, and prepare your launch.</p></div>
-                    {/* LIVE */}
-                    {startup.status === "LIVE" && (
-                      <div className="space-y-2.5">
-                        <p className="text-xs font-semibold text-green-600 flex items-center gap-1.5 mb-2">
-                          <span className="w-1.5 h-1.5 rounded-full bg-green-500 inline-block animate-pulse" />
-                          Your startup is live!
-                        </p>
-                        <div className="grid grid-cols-2 gap-2">
-                          <Link
-                            href={`/startups/${startup.slug}`}
-                            target="_blank"
-                            className="flex items-center justify-center gap-1.5 py-2.5 bg-white border border-gray-200 text-gray-700 rounded-xl text-xs font-semibold hover:bg-gray-50 transition-colors"
-                          >
-                            <ExternalLink size={13} /> View Page
-                          </Link>
-                          <Link
-                            href={`/startup/${startup.id}/edit`}
-                            className="flex items-center justify-center gap-1.5 py-2.5 bg-white border border-gray-200 text-gray-700 rounded-xl text-xs font-semibold hover:bg-gray-50 transition-colors"
-                          >
-                            <Edit2 size={13} /> Edit
-                          </Link>
-                          <div className="col-span-2 grid grid-cols-2 gap-2 sm:grid-cols-4">
-                          <Link
-                            href={`/startup/${startup.id}/updates`}
-                            className="flex items-center justify-center gap-1.5 py-2.5 bg-coral-50 border border-coral-200 text-coral-700 rounded-xl text-xs font-semibold hover:bg-coral-100 transition-colors relative"
-                          >
-                            <Zap size={13} /> Updates
-                            {startup.updateCount > 0 && (
-                              <span className="absolute -top-1.5 -right-1.5 bg-coral-500 text-white text-[9px] font-bold w-4 h-4 rounded-full flex items-center justify-center">
-                                {startup.updateCount}
-                              </span>
-                            )}
-                          </Link>
-                          <Link href="/dashboard/journal" className="flex min-h-11 items-center justify-center gap-1.5 rounded-xl border border-violet-200 bg-violet-50 py-2.5 text-xs font-semibold text-violet-700 transition-colors hover:bg-violet-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-500">
-                            <BookOpen aria-hidden="true" size={13} /> Journal
-                          </Link>
-                          <Link
-                            href={`/startup/${startup.id}/discussion`}
-                            className="flex items-center justify-center gap-1.5 py-2.5 bg-blue-50 border border-blue-200 text-blue-700 rounded-xl text-xs font-semibold hover:bg-blue-100 transition-colors relative"
-                          >
-                            <MessageSquare size={13} /> Discussion
-                            {startup._count.comments > 0 && (
-                              <span className="absolute -top-1.5 -right-1.5 bg-blue-500 text-white text-[9px] font-bold w-4 h-4 rounded-full flex items-center justify-center">
-                                {startup._count.comments}
-                              </span>
-                            )}
-                          </Link>
-                          <Link
-                            href={`/startup/${startup.id}/beta-testers`}
-                            className="flex min-h-11 items-center justify-center gap-1.5 rounded-xl border border-violet-200 bg-violet-50 py-2.5 text-xs font-semibold text-violet-700 transition-colors hover:bg-violet-100"
-                          >
-                            <UsersRound size={13} /> Beta testers
-                          </Link>
-                          </div>
-                        </div>
-                        <p className="text-xs leading-relaxed text-gray-500">Updates for announcements. Journal for reflections and stories. Discussion for conversations.</p>
-                      </div>
-                    )}
-
-                    {/* DRAFT */}
-                    {startup.status === "DRAFT" && (
-                      <div className="space-y-2">
-                        <p className="text-xs font-medium text-gray-400 mb-1">
-                          Continue editing your draft
-                        </p>
-                        <div className="grid grid-cols-2 gap-2">
-                          <Link
-                            href={`/startup/${startup.id}/edit`}
-                            className="flex items-center justify-center gap-1.5 py-2.5 bg-white border border-gray-200 text-gray-700 rounded-xl text-xs font-semibold hover:bg-gray-50 transition-colors"
-                          >
-                            <Edit2 size={13} /> Edit
-                          </Link>
-                          <SubmitReviewButton startupId={startup.id} />
-                        </div>
-                      </div>
-                    )}
-
-                    {/* PENDING_REVIEW */}
-                    {startup.status === "PENDING_REVIEW" && (
-                      <div className="space-y-2">
-                        <div className="bg-yellow-50 text-yellow-800 px-3 py-2.5 rounded-xl text-xs font-medium flex gap-2 items-start">
-                          <AlertCircle
-                            size={13}
-                            className="shrink-0 mt-0.5 text-yellow-500"
-                          />
-                          Under review — we’ll email you when it’s approved.
-                        </div>
-                        {startup._count.comments > 0 && (
-                          <Link
-                            href={`/startup/${startup.id}/discussion`}
-                            className="flex items-center justify-center gap-1.5 w-full py-2.5 bg-blue-50 border border-blue-200 text-blue-700 rounded-xl text-xs font-semibold hover:bg-blue-100 transition-colors"
-                          >
-                            <MessageSquare size={13} /> Discussion (
-                            {startup._count.comments})
-                          </Link>
-                        )}
-                      </div>
-                    )}
-
-                    {/* REJECTED */}
-                    {startup.status === "REJECTED" && (
-                      <div className="space-y-2">
-                        <div className="bg-red-50 text-red-700 px-3 py-2 rounded-xl text-xs font-medium border border-red-100">
-                          <p className="font-bold mb-0.5">Changes needed</p>
-                          <p className="line-clamp-2 text-red-600 font-normal">
-                            {startup.adminNotes}
-                          </p>
-                        </div>
-                        <Link
-                          href={`/startup/${startup.id}/edit`}
-                          className="flex items-center justify-center gap-1.5 w-full py-2.5 bg-gray-900 text-white rounded-xl text-xs font-semibold hover:bg-gray-800 transition-colors"
-                        >
-                          <RefreshCw size={13} /> Edit & Resubmit
-                        </Link>
-                      </div>
-                    )}
-
-                    {/* SUSPENDED */}
-                    {startup.status === "SUSPENDED" && (
-                      <div className="bg-orange-50 text-orange-800 px-3 py-2.5 rounded-xl text-xs font-medium flex gap-2 items-start border border-orange-100">
-                        <AlertCircle
-                          size={13}
-                          className="shrink-0 mt-0.5 text-orange-500"
-                        />
-                        Account suspended. Please contact support.
-                      </div>
-                    )}
+                    <p className="mb-3 truncate text-sm text-gray-600">{startup.tagline}</p>
+                    <p className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-gray-600 tabular-nums">
+                      <span className="font-semibold text-gray-800">
+                        {activity === undefined ? `${startup.signalCount} net votes` : `${startup.signalCount + activity} signals · ${startup.signalCount} votes + ${activity} activity`}
+                      </span>
+                      <span>{startup.category.name}</span>
+                    </p>
                   </div>
                 </div>
-              );
-            })}
-          </div>
-        )}
-        <p className="mt-8 border-t border-gray-200 pt-5 text-sm text-gray-600">Need a hand? <Link href="/contact" className="inline-flex min-h-11 items-center font-semibold text-coral-700 underline underline-offset-4">Contact us</Link></p>
+
+                <div className="border-t border-gray-100 p-4">
+                  {startup.status === "LIVE" && (
+                    <div className="space-y-3">
+                      <p className="flex items-center gap-1.5 text-sm font-semibold text-green-700">
+                        <span aria-hidden="true" className="inline-block h-1.5 w-1.5 rounded-full bg-green-600" />
+                        Your startup is live
+                      </p>
+                      <div className="grid grid-cols-2 gap-2">
+                        <Link href={`/startups/${startup.slug}`} target="_blank" rel="noopener" className={actionClass}>
+                          <ExternalLink size={14} aria-hidden="true" /> View page<span className="sr-only"> (opens in a new tab)</span>
+                        </Link>
+                        <Link href={`/startup/${startup.id}/edit`} className={actionClass}>
+                          <Edit2 size={14} aria-hidden="true" /> Edit
+                        </Link>
+                      </div>
+                      <nav aria-label={`Manage ${startup.name}`} className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+                        <Link href={`/startup/${startup.id}/updates`} className={actionClass}>
+                          <Zap size={14} aria-hidden="true" /> Updates
+                          {startup.updateCount > 0 && <span className={countClass}>{startup.updateCount}<span className="sr-only"> updates</span></span>}
+                        </Link>
+                        <Link href="/dashboard/journal" className={actionClass}>
+                          <BookOpen size={14} aria-hidden="true" /> Journal
+                        </Link>
+                        <Link href={`/startup/${startup.id}/discussion`} className={actionClass}>
+                          <MessageSquare size={14} aria-hidden="true" /> Discussion
+                          {startup._count.comments > 0 && <span className={countClass}>{startup._count.comments}<span className="sr-only"> comments</span></span>}
+                        </Link>
+                        <Link href={`/startup/${startup.id}/beta-testers`} className={actionClass}>
+                          <UsersRound size={14} aria-hidden="true" /> Beta testers
+                        </Link>
+                      </nav>
+                      <p className="text-xs leading-relaxed text-gray-600">Updates for announcements. Journal for reflections and stories. Discussion for conversations.</p>
+                    </div>
+                  )}
+
+                  {startup.status === "DRAFT" && (
+                    <div className="space-y-2">
+                      <p className="text-sm text-gray-600">Continue editing your draft.</p>
+                      <div className="grid grid-cols-2 gap-2">
+                        <Link href={`/startup/${startup.id}/edit`} className={actionClass}>
+                          <Edit2 size={14} aria-hidden="true" /> Edit
+                        </Link>
+                        <SubmitReviewButton startupId={startup.id} />
+                      </div>
+                    </div>
+                  )}
+
+                  {startup.status === "PENDING_REVIEW" && (
+                    <div className="space-y-2">
+                      <p className="flex items-start gap-2 rounded-xl bg-yellow-50 px-3 py-2.5 text-sm text-yellow-900">
+                        <AlertCircle size={14} aria-hidden="true" className="mt-0.5 shrink-0" />
+                        Under review. We’ll email you when it’s approved.
+                      </p>
+                      {startup._count.comments > 0 && (
+                        <Link href={`/startup/${startup.id}/discussion`} className={`${actionClass} w-full`}>
+                          <MessageSquare size={14} aria-hidden="true" /> Discussion <span className={countClass}>{startup._count.comments}<span className="sr-only"> comments</span></span>
+                        </Link>
+                      )}
+                    </div>
+                  )}
+
+                  {startup.status === "REJECTED" && (
+                    <div className="space-y-2">
+                      <div className="rounded-xl border border-red-100 bg-red-50 px-3 py-2 text-sm text-red-800">
+                        <p className="font-semibold">Changes needed</p>
+                        {startup.adminNotes && <p className="mt-0.5 line-clamp-2">{startup.adminNotes}</p>}
+                      </div>
+                      <Link href={`/startup/${startup.id}/edit`} className="inline-flex min-h-11 w-full items-center justify-center gap-1.5 rounded-xl bg-gray-900 text-sm font-semibold text-white transition-colors hover:bg-gray-800">
+                        <RefreshCw size={14} aria-hidden="true" /> Edit and resubmit
+                      </Link>
+                    </div>
+                  )}
+
+                  {startup.status === "SUSPENDED" && (
+                    <p className="flex items-start gap-2 rounded-xl border border-orange-100 bg-orange-50 px-3 py-2.5 text-sm text-orange-900">
+                      <AlertCircle size={14} aria-hidden="true" className="mt-0.5 shrink-0" />
+                      <span>This listing is suspended and hidden from the public. <Link href="/contact" className="font-semibold underline underline-offset-2">Contact us</Link> for help.</span>
+                    </p>
+                  )}
+                </div>
+
+                {/* Permanent actions stay last, away from everyday ones. */}
+                <div className="mt-auto flex justify-end border-t border-gray-100 px-3 py-1">
+                  <DeleteStartupButton startupId={startup.id} startupName={startup.name} />
+                </div>
+              </article>
+            );
+          })}
+        </div>
+      )}
+
+      <div className="mt-10">
+        <DashboardModeControl enabled={true} />
       </div>
+
+      <p className="mt-8 border-t border-gray-200 pt-5 text-sm text-gray-600">Need a hand? <Link href="/contact" className="inline-flex min-h-11 items-center font-semibold text-coral-700 underline underline-offset-4">Contact us</Link></p>
     </div>
   );
 }

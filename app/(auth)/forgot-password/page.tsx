@@ -47,7 +47,7 @@ export default function ForgotPasswordPage() {
             <div>
               <label htmlFor="forgot-email" className="block text-sm font-medium text-gray-700">Email address</label>
               <div className="relative mt-1">
-                <Mail className="pointer-events-none absolute left-3 top-3 h-5 w-5 text-gray-400" aria-hidden="true" />
+                <Mail className="pointer-events-none absolute left-3 top-3 h-5 w-5 text-gray-500" aria-hidden="true" />
                 <input id="forgot-email" name="email" type="email" autoComplete="email" required value={email} onChange={(event) => setEmail(event.target.value)} className="block w-full rounded-lg border border-gray-300 px-3 py-2.5 pl-10 text-sm focus:border-coral-500 focus:outline-none focus:ring-coral-500" />
               </div>
             </div>

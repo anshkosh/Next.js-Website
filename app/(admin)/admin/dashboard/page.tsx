@@ -11,7 +11,7 @@ export default async function AdminDashboardPage() {
   });
 
   const totalStartups = statusCounts.reduce((acc, curr) => acc + curr._count, 0);
-  
+
   const statusMap = statusCounts.reduce((acc, curr) => {
     acc[curr.status] = curr._count;
     return acc;
@@ -22,7 +22,7 @@ export default async function AdminDashboardPage() {
   // 4. Total Upvotes Today
   const today = new Date();
   today.setHours(0, 0, 0, 0);
-  
+
   const upvotesToday = await db.upvote.count({
     where: {
       createdAt: {
@@ -34,7 +34,7 @@ export default async function AdminDashboardPage() {
   // 5. New Founders This Week
   const sevenDaysAgo = new Date();
   sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
-  
+
   const newFoundersCount = await db.user.count({
     where: {
       createdAt: {
@@ -69,7 +69,7 @@ export default async function AdminDashboardPage() {
       <h1 className="text-2xl font-bold font-heading mb-6">Dashboard Overview</h1>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        
+
         {/* Total Startups */}
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
@@ -157,7 +157,7 @@ export default async function AdminDashboardPage() {
               {topStartups.length > 0 ? topStartups.map((startup, idx) => (
                 <div key={startup.id} className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <span className="text-gray-400 font-medium w-4">{idx + 1}.</span>
+                    <span className="text-gray-500 font-medium w-4">{idx + 1}.</span>
                     <span className="font-medium truncate max-w-48">{startup.name}</span>
                     {startup.status !== "LIVE" && (
                       <span className="text-[10px] px-1.5 py-0.5 bg-gray-100 rounded text-gray-500">{startup.status}</span>
@@ -186,8 +186,8 @@ export default async function AdminDashboardPage() {
                     <span className="text-gray-500 font-medium">{cat._count.startups}</span>
                   </div>
                   <div className="w-full bg-gray-100 rounded-full h-2">
-                    <div 
-                      className="bg-coral-400 h-2 rounded-full transition-all duration-500" 
+                    <div
+                      className="bg-coral-400 h-2 rounded-full transition-[width] duration-500"
                       style={{ width: `${(cat._count.startups / maxCategoryCount) * 100}%` }}
                     />
                   </div>

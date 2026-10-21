@@ -34,7 +34,7 @@ export default function AdminSidebar({ role, pendingReviewCount, pendingCommentC
   ];
 
   return (
-    <div className={`bg-gray-900 text-white transition-all duration-300 flex flex-col ${collapsed ? "w-16" : "w-64"} hidden md:flex`}>
+    <div className={`bg-gray-900 text-white transition-[width] duration-300 flex flex-col ${collapsed ? "w-16" : "w-64"} hidden md:flex`}>
       <div className="h-16 flex items-center justify-between px-4 border-b border-gray-800">
         {!collapsed && <span className="font-bold text-lg">Admin Panel</span>}
         <button onClick={() => setCollapsed(!collapsed)} className="p-1 hover:bg-gray-800 rounded">
@@ -51,7 +51,7 @@ export default function AdminSidebar({ role, pendingReviewCount, pendingCommentC
                 <Link
                   href={item.href}
                   className={`flex items-center gap-3 px-3 py-2 rounded-md transition-colors ${
-                    isActive ? "bg-coral-500 text-white" : "text-gray-300 hover:bg-gray-800 hover:text-white"
+                    isActive ? "bg-coral-600 text-white" : "text-gray-300 hover:bg-gray-800 hover:text-white"
                   }`}
                   title={collapsed ? item.name : undefined}
                 >

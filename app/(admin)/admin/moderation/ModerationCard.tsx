@@ -57,7 +57,7 @@ export default function ModerationCard({ startup }: { startup: ModerationStartup
               />
             </div>
           ) : (
-            <div className="w-16 h-16 shrink-0 rounded-lg bg-gray-100 flex items-center justify-center text-xl font-bold text-gray-400 border border-gray-200">
+            <div className="w-16 h-16 shrink-0 rounded-lg bg-gray-100 flex items-center justify-center text-xl font-bold text-gray-500 border border-gray-200">
               {startup.name.substring(0, 2).toUpperCase()}
             </div>
           )}
@@ -187,7 +187,7 @@ export default function ModerationCard({ startup }: { startup: ModerationStartup
                 {startup.logoUrl ? (
                   <Image unoptimized width={48} height={48} src={startup.logoUrl} alt={startup.name} className="w-12 h-12 rounded-lg border border-gray-200 object-cover bg-white" />
                 ) : (
-                  <div className="w-12 h-12 rounded-lg bg-gray-100 flex items-center justify-center font-bold text-gray-400 border border-gray-200">
+                  <div className="w-12 h-12 rounded-lg bg-gray-100 flex items-center justify-center font-bold text-gray-500 border border-gray-200">
                     {startup.name.substring(0,2).toUpperCase()}
                   </div>
                 )}
@@ -196,7 +196,7 @@ export default function ModerationCard({ startup }: { startup: ModerationStartup
                   <p className="text-sm text-gray-500">{startup.tagline}</p>
                 </div>
               </div>
-              <button onClick={() => setShowDetailsDialog(false)} className="p-2 text-gray-400 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors">
+              <button onClick={() => setShowDetailsDialog(false)} className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors">
                 <X size={24} />
               </button>
             </div>
@@ -227,7 +227,7 @@ export default function ModerationCard({ startup }: { startup: ModerationStartup
                             ? `https://www.youtube.com/embed/${yt[2]}` 
                             : vim ? `https://player.vimeo.com/video/${vim[1]}` : null;
                           if (embedUrl) return <iframe src={embedUrl} className="w-full h-full" frameBorder="0" allowFullScreen></iframe>;
-                          return <div className="flex items-center justify-center h-full text-gray-400">Preview not available. <a href={startup.videoUrl} target="_blank" className="ml-1 text-blue-500 hover:underline">Open link</a></div>;
+                          return <div className="flex items-center justify-center h-full text-gray-500">Preview not available. <a href={startup.videoUrl} target="_blank" className="ml-1 text-blue-500 hover:underline">Open link</a></div>;
                         })()}
                       </div>
                     </section>

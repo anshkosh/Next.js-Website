@@ -13,7 +13,7 @@ import { istDateTimeInput, parseJournalSchedule } from "@/lib/journal-scheduling
 
 const QuillEditor = dynamic(() => import("./QuillEditor"), { ssr: false, loading: () => (
   <div className="border border-gray-200 rounded-lg flex items-center justify-center min-h-[400px] bg-gray-50">
-    <Loader2 className="animate-spin text-gray-400" size={32} />
+    <Loader2 className="animate-spin text-gray-500" size={32} />
   </div>
 )});
 
@@ -247,7 +247,7 @@ export default function JournalForm({ categories, post }: JournalFormProps) {
             </button>
           ) : (
             <button onClick={handlePublish} disabled={isPending || coverUploading || inlineUploading}
-              className="flex items-center gap-1 px-4 py-2 text-sm bg-coral-500 text-white rounded-md hover:bg-coral-600 transition-colors font-medium">
+              className="flex items-center gap-1 px-4 py-2 text-sm bg-coral-600 text-white rounded-md hover:bg-coral-700 transition-colors font-medium">
               <Eye size={16} /> Publish
             </button>
           )}
@@ -278,7 +278,7 @@ export default function JournalForm({ categories, post }: JournalFormProps) {
             <div>
               <label className="block text-sm font-semibold text-gray-700 mb-1.5">Slug</label>
               <div className="flex items-center gap-2">
-                <span className="text-sm text-gray-400 shrink-0">/journal/</span>
+                <span className="text-sm text-gray-500 shrink-0">/journal/</span>
                 <input
                   value={slug}
                   onChange={e => { setSlug(e.target.value); setSlugManual(true); }}
@@ -305,7 +305,7 @@ export default function JournalForm({ categories, post }: JournalFormProps) {
 
           {/* Excerpt */}
           <div className="bg-white border border-gray-200 rounded-lg p-5">
-            <label className="block text-sm font-semibold text-gray-700 mb-1.5">Excerpt <span className="text-gray-400 font-normal">(optional)</span></label>
+            <label className="block text-sm font-semibold text-gray-700 mb-1.5">Excerpt <span className="text-gray-500 font-normal">(optional)</span></label>
             <p className="text-xs text-gray-500 mb-2">Short summary for cards and meta descriptions. Auto-generated from content if left empty.</p>
             <textarea
               value={excerpt}
@@ -348,7 +348,7 @@ export default function JournalForm({ categories, post }: JournalFormProps) {
                 </button>
               </div>
             ) : (
-              <label className="flex flex-col items-center justify-center gap-2 border-2 border-dashed border-gray-200 rounded-lg p-6 cursor-pointer hover:bg-gray-50 transition-colors text-gray-400">
+              <label className="flex flex-col items-center justify-center gap-2 border-2 border-dashed border-gray-200 rounded-lg p-6 cursor-pointer hover:bg-gray-50 transition-colors text-gray-500">
                 {coverUploading ? <Loader2 size={24} className="animate-spin" /> : <Upload size={24} />}
                 <span className="text-sm">{coverUploading ? "Uploading…" : "Click to upload cover image"}</span>
                 <span className="text-xs">PNG, JPEG, WEBP · Max 5MB</span>
@@ -393,7 +393,7 @@ export default function JournalForm({ categories, post }: JournalFormProps) {
               {tags.map(tag => (
                 <span key={tag} className="flex items-center gap-1 bg-gray-100 text-gray-700 text-xs px-2 py-1 rounded-full">
                   {tag}
-                  <button onClick={() => setTags(prev => prev.filter(t => t !== tag))} className="text-gray-400 hover:text-gray-600">
+                  <button onClick={() => setTags(prev => prev.filter(t => t !== tag))} className="text-gray-500 hover:text-gray-600">
                     <X size={12} />
                   </button>
                 </span>
@@ -430,7 +430,7 @@ export default function JournalForm({ categories, post }: JournalFormProps) {
               </div>
               <div>
                 <p className="text-sm font-semibold text-gray-700">Featured Post</p>
-                <p className="text-xs text-gray-400">Highlight on the journal listing page</p>
+                <p className="text-xs text-gray-500">Highlight on the journal listing page</p>
               </div>
             </label>
           </div>
@@ -480,7 +480,7 @@ export default function JournalForm({ categories, post }: JournalFormProps) {
                     }}
                     placeholder="Type and press Enter to add keywords…"
                     className="w-full px-3 py-2 border border-gray-200 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-coral-500/40" />
-                  <p className="text-xs text-gray-400 mt-1">Press Enter or comma to add. Backspace to remove last.</p>
+                  <p className="text-xs text-gray-500 mt-1">Press Enter or comma to add. Backspace to remove last.</p>
                 </div>
                 <div>
                   <label className="block text-xs font-semibold text-gray-600 mb-1">Canonical URL</label>

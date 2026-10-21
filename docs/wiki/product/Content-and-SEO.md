@@ -23,7 +23,9 @@ Use `seoMetadata()` from `lib/seo.ts` on every new public page so it gets a titl
 Journal detail pages avoid showing an excerpt twice when it already opens the
 body, preserve numeric superscript citations, and expose full-size illustration
 links for small screens. Share uses the browser's share sheet or a copy fallback.
-The footer newsletter form has the stable `#newsletter-signup` anchor. Reviewed
+The newsletter form was removed from the footer on 22 October 2026, so the
+`#newsletter-signup` anchor no longer exists on public pages. Journal content that
+links to it (the corrected Bluelearn CTA) needs a new destination. Reviewed
 Bluelearn/category data corrections and their apply guards are documented in the
 [site-swarm review](../operations/Site-Swarm-Bugfixes-2026-10-20.md).
 

@@ -1,7 +1,4 @@
 .artwork {
-  --hand-x: 8%;
-  --hand-y: -10%;
-  --hand-rotation: 4deg;
   position: relative;
   height: 220px;
   overflow: hidden;
@@ -35,67 +32,6 @@
   height: 100%;
 }
 
-.openHand {
-  position: absolute;
-  z-index: 2;
-  left: 52.7%;
-  top: 34.1%;
-  width: 47.4%;
-  transform-origin: 78% 58%;
-  transform: translate3d(var(--hand-x), var(--hand-y), 0) rotate(var(--hand-rotation));
-  will-change: transform;
-}
-
-/* Cropped assets share the original 1672 x 941 coordinate system. */
-.handImage {
-  position: relative;
-  z-index: 2;
-  display: block;
-  width: 100%;
-  height: auto;
-  max-width: none;
-}
-
-/* Repeat the fabric, but not its alpha edge: one stretched mask avoids saw teeth. */
-.sleeveTail {
-  position: absolute;
-  left: calc(100% - 1px);
-  top: 0;
-  width: 70%;
-  height: 100%;
-  background: #17171b url("/images/hero-scroll-sleeve-tail.webp") repeat-x left top / auto 100%;
-  -webkit-mask: url("/images/hero-scroll-sleeve-tail.webp") left top / 100% 100% no-repeat;
-  mask: url("/images/hero-scroll-sleeve-tail.webp") left top / 100% 100% no-repeat;
-}
-
-.layerImage {
-  display: block;
-  width: 100%;
-  height: auto;
-  max-width: none;
-}
-
-.fruit {
-  position: absolute;
-  z-index: 3;
-  left: 45.75%;
-  top: 66.65%;
-  width: 7.8%;
-}
-
-.shadow {
-  position: absolute;
-  z-index: 1;
-  left: 45.9%;
-  top: 81.3%;
-  width: 7.5%;
-  height: 1.6%;
-  border-radius: 50%;
-  background: #30251d;
-  filter: blur(5px);
-  opacity: 0.28;
-}
-
 .fade {
   position: absolute;
   inset: 0 0 auto;
@@ -115,8 +51,4 @@
 
 @media (min-width: 1024px) {
   .frame { width: 920px; min-width: 0; transform: translateX(-50%) scaleY(0.9); }
-}
-
-@media print {
-  .openHand { transform: translate3d(8%, -10%, 0) rotate(4deg); }
 }

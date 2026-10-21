@@ -139,7 +139,7 @@ export default function BetaTesterManager({
               <div className="min-w-0 flex-1">
                 <div className="flex flex-wrap items-center gap-2"><h3 className="font-semibold text-gray-900">{request.name || "Tester"}</h3><span className={`rounded-full px-2 py-0.5 text-xs font-semibold ${request.status === "APPROVED" ? "bg-emerald-50 text-emerald-700" : "bg-amber-50 text-amber-800"}`}>{request.status === "APPROVED" ? "Approved" : "Pending review"}</span></div>
                 {request.message && <p className="mt-2 whitespace-pre-wrap text-sm leading-relaxed text-gray-600">{request.message}</p>}
-                <p className="mt-2 text-xs text-gray-400">Received {new Date(request.createdAt).toLocaleDateString("en-IN", { dateStyle: "medium", timeZone: "Asia/Kolkata" })}</p>
+                <p className="mt-2 text-xs text-gray-500">Received {new Date(request.createdAt).toLocaleDateString("en-IN", { dateStyle: "medium", timeZone: "Asia/Kolkata" })}</p>
                 {request.status === "APPROVED" && request.email && <a href={`mailto:${request.email}`} className="mt-3 inline-flex min-h-11 items-center gap-2 rounded-lg bg-coral-50 px-3 text-sm font-semibold text-coral-800 underline underline-offset-2"><Mail className="h-4 w-4" />{request.email}</a>}
               </div>
               <div className="flex shrink-0 gap-2">

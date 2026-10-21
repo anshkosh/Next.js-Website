@@ -4,6 +4,7 @@ import { useId, useOptimistic, useTransition, useState } from "react";
 import { ChevronUp, ChevronDown } from "lucide-react";
 import { toggleVote } from "@/app/actions/upvote.actions";
 import { signalCount, voteTransition, type VoteDirection } from "@/lib/voting";
+import PopNumber from "@/components/motion/PopNumber";
 
 function compactCount(value: number) {
   return Math.abs(value) >= 1000
@@ -50,21 +51,21 @@ export default function UpvoteButton({ startupId, startupName, initialCount, ini
       <div className="flex w-full items-center rounded-xl border border-gray-200 bg-white">
         <button type="button" onClick={event => vote(event, 1)} disabled={isPending} aria-pressed={optimistic.vote === 1} aria-busy={isPending} aria-describedby={error ? errorId : undefined}
           aria-label={`${optimistic.vote === 1 ? "Remove upvote" : "Upvote"}${name}, ${optimistic.upvoteCount} upvotes`}
-          className={`flex h-11 w-11 shrink-0 flex-col items-center justify-center rounded-l-xl transition-colors disabled:cursor-wait focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-coral-600 ${optimistic.vote === 1 ? "bg-coral-50 text-coral-700" : "text-gray-600 hover:bg-gray-50"}`}>
+          className={`flex h-11 w-11 shrink-0 flex-col items-center justify-center rounded-l-[11px] transition-colors disabled:cursor-wait focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-coral-600 ${optimistic.vote === 1 ? "bg-coral-50 text-coral-700" : "text-gray-600 hover:bg-gray-50"}`}>
           <ChevronUp aria-hidden="true" className="h-4 w-4" />
           <span aria-hidden="true" className="text-[10px] font-medium tabular-nums">{compactCount(optimistic.upvoteCount)}</span>
         </button>
         <span role="status" aria-live="polite" aria-atomic="true" className="min-w-0 flex-1 text-center text-sm font-semibold tabular-nums text-gray-900" title={`${optimistic.upvoteCount} upvotes − ${optimistic.downvoteCount} downvotes${activitySignals === undefined ? "" : ` + ${activitySignals} activity points`}`}>
-          <span className="sr-only">{startupName ? `${startupName}: ` : ""}</span>{compactCount(signalCount(optimistic) + (activitySignals ?? 0))}<span className="sr-only"> {activitySignals === undefined ? "net votes" : "signals"}, {optimistic.upvoteCount} upvotes minus {optimistic.downvoteCount} downvotes{activitySignals === undefined ? "" : ` plus ${activitySignals} activity points`}</span>
+          <span className="sr-only">{startupName ? `${startupName}: ` : ""}</span><PopNumber value={compactCount(signalCount(optimistic) + (activitySignals ?? 0))} /><span className="sr-only"> {activitySignals === undefined ? "net votes" : "signals"}, {optimistic.upvoteCount} upvotes minus {optimistic.downvoteCount} downvotes{activitySignals === undefined ? "" : ` plus ${activitySignals} activity points`}</span>
         </span>
         <button type="button" onClick={event => vote(event, -1)} disabled={isPending} aria-pressed={optimistic.vote === -1} aria-busy={isPending} aria-describedby={error ? errorId : undefined}
           aria-label={`${optimistic.vote === -1 ? "Remove downvote" : "Downvote"}${name}, ${optimistic.downvoteCount} downvotes`}
-          className={`flex h-11 w-11 shrink-0 flex-col items-center justify-center rounded-r-xl transition-colors disabled:cursor-wait focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-coral-600 ${optimistic.vote === -1 ? "bg-gray-100 text-gray-900" : "text-gray-600 hover:bg-gray-50"}`}>
+          className={`flex h-11 w-11 shrink-0 flex-col items-center justify-center rounded-r-[11px] transition-colors disabled:cursor-wait focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-coral-600 ${optimistic.vote === -1 ? "bg-gray-100 text-gray-900" : "text-gray-600 hover:bg-gray-50"}`}>
           <ChevronDown aria-hidden="true" className="h-4 w-4" />
           <span aria-hidden="true" className="text-[10px] font-medium tabular-nums">{compactCount(optimistic.downvoteCount)}</span>
         </button>
       </div>
-      <span className="text-[11px] text-gray-600">{activitySignals === undefined ? "Net votes" : "Signals"}</span>
+      <span aria-hidden="true" className="text-center text-[11px] leading-tight text-gray-600">{activitySignals === undefined ? "Net votes" : `${compactCount(signalCount(optimistic))} votes + ${compactCount(activitySignals)} activity`}</span>
       {error && <p id={errorId} role="alert" className="text-center text-xs leading-relaxed text-red-600">{error}</p>}
     </div>
   );

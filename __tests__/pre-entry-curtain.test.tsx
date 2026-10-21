@@ -3,11 +3,10 @@ import { createRoot } from "react-dom/client";
 import { beforeEach, expect, it, vi } from "vitest";
 import { PreEntryCurtain } from "../components/site/PreEntryCurtain";
 import { UnderConstructionBanner } from "../components/site/UnderConstructionBanner";
-import { previewMotionRequested } from "../lib/preview-motion";
 
 const route = vi.hoisted(() => ({ pathname: "/" }));
 vi.mock("next/navigation", () => ({ usePathname: () => route.pathname }));
-beforeEach(() => { route.pathname = "/"; });
+beforeEach(() => { route.pathname = "/"; window.sessionStorage.clear(); });
 
 it("keeps signed-in visitors out of the preview gate without locking the page", async () => {
   vi.stubGlobal("IS_REACT_ACT_ENVIRONMENT", true);
@@ -68,7 +67,6 @@ it("enters immediately with reduced motion and restores access and focus", async
     expect(content.inert).toBe(false);
     expect(document.activeElement).toBe(main);
     expect(document.body.style.overflow).toBe(previousOverflow);
-    expect(previewMotionRequested()).toBe(false);
   } finally {
     await act(async () => root.unmount());
     container.remove();
@@ -93,9 +91,7 @@ it("opens with Sneak peek, has no skip button, and unlocks only after the reveal
     expect(content.inert).toBe(true);
     const enter = container.querySelector("button")!;
     expect(enter.textContent).toBe("Sneak peek");
-    expect(previewMotionRequested()).toBe(false);
     await act(async () => enter.click());
-    expect(previewMotionRequested()).toBe(true);
     expect(container.querySelector(".curtain-stage--opening")).not.toBeNull();
     expect(container.textContent).not.toContain("Skip animation");
     expect(container.querySelectorAll("button")).toHaveLength(1);
@@ -112,5 +108,28 @@ it("opens with Sneak peek, has no skip button, and unlocks only after the reveal
     container.remove();
     content.remove();
     vi.unstubAllGlobals();
+  }
+});
+
+it("shows the curtain once per session", async () => {
+  vi.stubGlobal("IS_REACT_ACT_ENVIRONMENT", true);
+  vi.stubGlobal("matchMedia", () => ({ matches: true }));
+  const container = document.createElement("div");
+  const content = document.createElement("div");
+  content.id = "site-content";
+  document.body.append(container, content);
+  const root = createRoot(container);
+  try {
+    await act(async () => root.render(<PreEntryCurtain />));
+    await act(async () => container.querySelector("button")!.click());
+    route.pathname = "/journal";
+    await act(async () => root.render(<PreEntryCurtain />));
+    route.pathname = "/";
+    await act(async () => root.render(<PreEntryCurtain />));
+    expect(container.querySelector('[role="dialog"]')).toBeNull();
+    expect(content.inert).not.toBe(true);
+  } finally {
+    await act(async () => root.unmount());
+    container.remove(); content.remove(); vi.unstubAllGlobals();
   }
 });

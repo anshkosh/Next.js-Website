@@ -7,7 +7,6 @@ import {
   Mail,
   MapPin,
   Send,
-  CheckCircle2,
   AlertCircle,
   Loader2,
 } from "lucide-react";
@@ -44,9 +43,7 @@ function LeftPanel() {
         </div>
 
         <h2 className="text-3xl md:text-4xl font-heading font-bold text-white leading-tight mb-4">
-          We read every
-          <br />
-          message.
+          We read every message.
         </h2>
         <p className="text-white/90 text-base leading-relaxed max-w-sm">
           Whether you have a question, a partnership idea, or just want to say
@@ -169,7 +166,9 @@ function SuccessState({
       className="flex flex-col items-center justify-center text-center py-16 px-6 gap-5"
     >
       <div className="w-20 h-20 rounded-full bg-green-50 border-2 border-green-200 flex items-center justify-center">
-        <CheckCircle2 className="w-10 h-10 text-green-500" />
+        <span className="t-success-check text-green-600" data-state="in" aria-hidden="true">
+          <svg viewBox="0 0 24 24" width="40" height="40" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5" /></svg>
+        </span>
       </div>
       <div>
         <h3 className="text-2xl font-heading font-bold text-gray-900 mb-2">

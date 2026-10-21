@@ -20,6 +20,7 @@ import { journalPage } from "@/lib/founder-journal";
 import FounderJournalSection from "@/components/startup/FounderJournalSection";
 import BetaTesterSignup from "@/components/startup/BetaTesterSignup";
 import { viewerSession } from "@/lib/viewer-session";
+import { getActivitySignals } from "@/lib/leaderboard";
 import { fetchOwnPendingComments, getCommentAvailability } from "@/app/actions/comment.actions";
 
 // Visitor-specific cookies must be read at request time, including for new slugs.
@@ -196,7 +197,7 @@ export default async function StartupDetailPage(props: {
   const publicEntries = await publicFounderEntries(startup.id, startup.founderId, publicJournalPage);
 
   // Fetch initial approved comments for the discussion section (server-side for SEO)
-  const [initialComments, totalApprovedCount, session, initialPendingComments, initialAvailability] = await Promise.all([
+  const [initialComments, totalApprovedCount, session, initialPendingComments, initialAvailability, activitySignals] = await Promise.all([
     db.comment.findMany({
       where: { startupId: startup.id, status: "APPROVED" },
       orderBy: { createdAt: "desc" },
@@ -217,6 +218,7 @@ export default async function StartupDetailPage(props: {
     viewerSession(),
     fetchOwnPendingComments(startup.id),
     getCommentAvailability(),
+    getActivitySignals([startup.id]),
   ]);
 
   // Determine if there is a next cursor for the comments
@@ -247,7 +249,7 @@ export default async function StartupDetailPage(props: {
   return (
     <main className="min-h-screen bg-gray-50 pb-20">
       {/* Premium Hero Header */}
-      <div className="w-full bg-coral-500 text-white pt-16 pb-12">
+      <div className="w-full bg-coral-600 text-white pt-16 pb-12">
         <div className="container mx-auto px-4 max-w-5xl flex flex-col lg:flex-row justify-between gap-8 items-start lg:items-center">
           
           {/* Left Side: Logo, Name, Meta */}
@@ -263,7 +265,7 @@ export default async function StartupDetailPage(props: {
                   className="object-cover"
                 />
               ) : (
-                <div className="w-full h-full flex items-center justify-center text-4xl text-gray-400 font-bold">
+                <div className="w-full h-full flex items-center justify-center text-4xl text-gray-500 font-bold">
                   {startup.name.charAt(0)}
                 </div>
               )}
@@ -273,34 +275,34 @@ export default async function StartupDetailPage(props: {
               <h1 className="text-3xl md:text-4xl font-extrabold font-heading">
                 {startup.name}
               </h1>
-              <p className="text-coral-50 text-lg max-w-2xl">
+              <p className="text-white text-lg max-w-2xl">
                 {startup.tagline}
               </p>
               
               {/* Metadata Badges */}
               <div className="flex flex-wrap items-center gap-3 mt-2">
-                <Link href={`/category/${startup.category.slug}`} className="inline-flex items-center px-3 py-1 bg-coral-600/50 hover:bg-coral-600 rounded-full text-sm font-medium transition-colors border border-coral-400/50">
+                <Link href={`/category/${startup.category.slug}`} className="inline-flex items-center px-3 py-1 bg-coral-700/50 hover:bg-coral-700 rounded-full text-sm font-medium transition-colors border border-coral-400/50">
                   {startup.category.name}
                 </Link>
                 {city && (
-                  <span className="inline-flex items-center px-3 py-1 bg-coral-600/50 rounded-full text-sm font-medium border border-coral-400/50">
+                  <span className="inline-flex items-center px-3 py-1 bg-coral-700/50 rounded-full text-sm font-medium border border-coral-400/50">
                     📍 {city}
                   </span>
                 )}
                 {foundedYear && (
-                  <span className="inline-flex items-center px-3 py-1 bg-coral-600/50 rounded-full text-sm font-medium border border-coral-400/50">
+                  <span className="inline-flex items-center px-3 py-1 bg-coral-700/50 rounded-full text-sm font-medium border border-coral-400/50">
                     📅 {foundedYear}
                   </span>
                 )}
                 {/* Socials */}
                 <div className="flex items-center gap-2 ml-2">
                   {twitterUrl && (
-                    <a href={twitterUrl} target="_blank" rel="noopener noreferrer" className="p-1.5 bg-coral-600/50 hover:bg-coral-600 rounded-full transition-colors border border-coral-400/50">
+                    <a href={twitterUrl} target="_blank" rel="noopener noreferrer" className="p-1.5 bg-coral-700/50 hover:bg-coral-700 rounded-full transition-colors border border-coral-400/50">
                       <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M23.953 4.57a10 10 0 01-2.825.775 4.958 4.958 0 002.163-2.723c-.951.555-2.005.959-3.127 1.184a4.92 4.92 0 00-8.384 4.482C7.69 8.095 4.067 6.13 1.64 3.162a4.822 4.822 0 00-.666 2.475c0 1.71.87 3.213 2.188 4.096a4.904 4.904 0 01-2.228-.616v.06a4.923 4.923 0 003.946 4.827 4.996 4.996 0 01-2.212.085 4.936 4.936 0 004.604 3.417 9.867 9.867 0 01-6.102 2.105c-.39 0-.779-.023-1.17-.067a13.995 13.995 0 007.557 2.209c9.053 0 13.998-7.496 13.998-13.985 0-.21 0-.42-.015-.63A9.935 9.935 0 0024 4.59z"/></svg>
                     </a>
                   )}
                   {linkedinUrl && (
-                    <a href={linkedinUrl} target="_blank" rel="noopener noreferrer" className="p-1.5 bg-coral-600/50 hover:bg-coral-600 rounded-full transition-colors border border-coral-400/50">
+                    <a href={linkedinUrl} target="_blank" rel="noopener noreferrer" className="p-1.5 bg-coral-700/50 hover:bg-coral-700 rounded-full transition-colors border border-coral-400/50">
                       <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
                     </a>
                   )}
@@ -319,13 +321,15 @@ export default async function StartupDetailPage(props: {
             >
               Visit Website
             </a>
-            <div className="w-full sm:w-auto bg-white rounded-xl shadow-sm overflow-hidden flex items-center justify-center p-0.5">
+            <div className="w-full sm:w-auto bg-white rounded-[14px] shadow-sm overflow-hidden flex items-center justify-center p-0.5">
               <UpvoteButton
                 startupId={startup.id}
                 initialCount={startup.upvoteCount}
                 initialUpvoted={hasUpvoted}
                 initialDownvoted={hasDownvoted}
                 initialDownvotes={startup.downvoteCount}
+                startupName={startup.name}
+                activitySignals={activitySignals.get(startup.id)}
               />
             </div>
           </div>
@@ -357,7 +361,7 @@ export default async function StartupDetailPage(props: {
 
           <KeyFeaturesSection features={features} />
 
-          <FoundersSection founders={startup.founders} />
+          <FoundersSection founders={startup.founders} editHref={session?.user.id === startup.founderId ? `/startup/${startup.id}/edit` : undefined} />
         </div>
 
         {/* ── Core Proposition Section ── */}

@@ -116,7 +116,7 @@ export default async function AdminStartupsPage(props: {
                         <Image src={startup.logoUrl} alt={startup.name} width={32} height={32} className="object-cover" />
                       </div>
                     ) : (
-                      <div className="w-8 h-8 rounded-md bg-gray-100 flex items-center justify-center text-xs font-bold text-gray-400">
+                      <div className="w-8 h-8 rounded-md bg-gray-100 flex items-center justify-center text-xs font-bold text-gray-500">
                         {startup.name.substring(0, 2).toUpperCase()}
                       </div>
                     )}
@@ -173,7 +173,7 @@ export default async function AdminStartupsPage(props: {
             <Link 
               key={number}
               href={pageHref("/admin/startups", number, { q, status, categoryId, sort })}
-              className={`px-3 py-1 rounded-md text-sm font-medium ${page === number ? "bg-coral-500 text-white" : "bg-white border text-gray-700 hover:bg-gray-50"}`}
+              className={`px-3 py-1 rounded-md text-sm font-medium ${page === number ? "bg-coral-600 text-white" : "bg-white border text-gray-700 hover:bg-gray-50"}`}
             >
               {number}
             </Link>

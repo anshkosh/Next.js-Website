@@ -2,8 +2,8 @@
 import { afterEach, beforeEach, expect, it, vi } from "vitest";
 import { renderToStaticMarkup } from "react-dom/server";
 import type { ReactElement } from "react";
-const mock = vi.hoisted(() => ({ startups: vi.fn(), count: vi.fn(), categories: vi.fn(), program: vi.fn(), requests: vi.fn() }));
-vi.mock("@/lib/db", () => ({ db: { startup: { findMany: mock.startups, count: mock.count, findFirst: async () => ({ id: "startup", name: "Startup", slug: "startup", status: "LIVE" }) }, category: { findMany: mock.categories }, betaTesterProgram: { findUnique: mock.program }, betaTesterRequest: { count: mock.requests } } }));
+const mock = vi.hoisted(() => ({ featured: vi.fn(), startups: vi.fn(), count: vi.fn(), categories: vi.fn(), program: vi.fn(), requests: vi.fn() }));
+vi.mock("@/lib/db", () => ({ db: { $queryRaw: async () => [], featuredStartup: { findMany: mock.featured }, startup: { findMany: mock.startups, count: mock.count, findFirst: async () => ({ id: "startup", name: "Startup", slug: "startup", status: "LIVE" }) }, category: { findMany: mock.categories }, betaTesterProgram: { findUnique: mock.program }, betaTesterRequest: { count: mock.requests } } }));
 vi.mock("@/lib/auth", () => ({ auth: { api: { getSession: async () => ({ user: { id: "owner", role: "admin", emailVerified: true } }) } } }));
 vi.mock("next/headers", () => ({ headers: async () => new Headers(), cookies: async () => ({ get: () => undefined }) }));
 vi.mock("@/components/landing/FeaturedStartups", () => ({ default: () => null }));
@@ -13,7 +13,7 @@ vi.mock("@/components/dashboard/BetaTesterManager", () => ({ default: () => null
 import DiscoverPage from "@/app/(public)/discover/page";
 import AdminStartupsPage from "@/app/(admin)/admin/startups/page";
 import BetaTestersPage from "@/app/(founder)/startup/[id]/beta-testers/page";
-beforeEach(() => { vi.clearAllMocks(); vi.stubEnv("DATABASE_URL", "test-only"); mock.startups.mockResolvedValue([]); mock.count.mockResolvedValue(0); mock.categories.mockResolvedValue([]); mock.program.mockResolvedValue(null); });
+beforeEach(() => { vi.clearAllMocks(); vi.stubEnv("DATABASE_URL", "test-only"); mock.startups.mockResolvedValue([]); mock.featured.mockResolvedValue([]); mock.count.mockResolvedValue(0); mock.categories.mockResolvedValue([]); mock.program.mockResolvedValue(null); });
 afterEach(() => vi.unstubAllEnvs());
 it.each(["abc", "0", "-1", "10001", "9007199254740993"])("never sends malformed page %s to Prisma", async page => {
   await DiscoverPage({ searchParams: Promise.resolve({ page }) });
@@ -37,7 +37,7 @@ it("fills Discover rows and paginates every matching startup exactly once", asyn
       page: String(page), q: "startup", category: "technology",
     }) });
     const content = tree.props.children[2];
-    const cards: ReactElement<{ startup: { id: string } }>[] = content.props.children[0].props.children;
+    const cards: ReactElement<{ startup: { id: string } }>[] = content.props.children[1].props.children;
     const ids = cards.map(card => card.props.startup.id);
     expect(ids).toHaveLength(page < 3 ? 24 : 1);
     if (page < 3) {
@@ -50,7 +50,7 @@ it("fills Discover rows and paginates every matching startup exactly once", asyn
       skip: (page - 1) * 24, take: 24,
       where: { status: "LIVE", founder: { founderMode: true }, category: { slug: "technology" } },
     });
-    const pagination = renderToStaticMarkup(content.props.children[1]);
+    const pagination = renderToStaticMarkup(content.props.children[2]);
     expect(pagination).toContain(`Page ${page} of 3`);
     expect(pagination).toContain(page < 3 ? ">Next<" : ">Previous<");
     expect(pagination).toContain("q=startup");
@@ -71,4 +71,13 @@ it("bounds beta request reads, counts the full backlog and hides pending email a
   const manager = tree.props.children[0];
   expect(manager.props.pendingTotal).toBe(23);
   expect(manager.props.requests[0].email).toBeNull(); expect(manager.props.requests[1].email).toBe("visible@example.test");
+});
+
+it("sorts Discover by the chosen option and keeps featured startups out of the unfiltered grid", async () => {
+  mock.featured.mockResolvedValue([{ startupId: "featured-one" }]);
+  await DiscoverPage({ searchParams: Promise.resolve({ sort: "newest" }) });
+  expect(mock.startups.mock.calls[0][0]).toMatchObject({ orderBy: [{ createdAt: "desc" }], where: { id: { notIn: ["featured-one"] } } });
+  await DiscoverPage({ searchParams: Promise.resolve({ q: "startup", sort: "unknown" }) });
+  expect(mock.startups.mock.calls[1][0].orderBy).toEqual([{ signalCount: "desc" }, { createdAt: "desc" }]);
+  expect(mock.startups.mock.calls[1][0].where.id).toBeUndefined();
 });

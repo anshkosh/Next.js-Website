@@ -1,5 +1,16 @@
 # Progress
 
+## 22 October 2026 — Claude site review release preparation
+
+- Owner authorized reviewing, pushing and merging `claude/site-review-fixes`.
+  The branch retains Claude's three original commits and their authorship.
+- Reviewed the UI/navigation changes against the current main baseline `c128585`.
+  Updated account documentation and the settings browser assertion to cover the
+  newly available founder-mode control without changing its visibility rules.
+- Release requires passing PR unit/dependency/browser gates, then the normal
+  main deployment and public release/health verification. No manual server
+  configuration or database migration is required by this branch.
+
 ## 21 October 2026 — founder mode public visibility correction
 
 - Owner reported that switching founder mode off left linked startups public,

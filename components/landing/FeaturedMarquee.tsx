@@ -19,11 +19,10 @@ export default function FeaturedMarquee({ children }: { children: ReactNode }) {
     let offset = 0, last = performance.now(), frame = 0;
     let hover = false, focus = false, dragging = false, captured = false;
     let startX = 0, startOffset = 0, moved = 0;
+    // Measure on resize, not every frame; idle while off-screen or in a hidden tab.
+    let half = el.scrollWidth / 2, onScreen = true;
 
-    const wrap = (value: number) => {
-      const half = el.scrollWidth / 2;
-      return half > 0 ? (((value % half) - half) % half) : 0;
-    };
+    const wrap = (value: number) => half > 0 ? (((value % half) - half) % half) : 0;
     const apply = () => { el.style.transform = `translate3d(${offset}px,0,0)`; };
     const tick = (now: number) => {
       const seconds = Math.min((now - last) / 1000, 0.1);
@@ -31,6 +30,15 @@ export default function FeaturedMarquee({ children }: { children: ReactNode }) {
       if (!hover && !focus && !dragging) { offset = wrap(offset - SPEED * seconds); apply(); }
       frame = requestAnimationFrame(tick);
     };
+    const start = () => {
+      if (frame || !onScreen || document.hidden) return;
+      last = performance.now();
+      frame = requestAnimationFrame(tick);
+    };
+    const stop = () => { cancelAnimationFrame(frame); frame = 0; };
+    const sync = () => (onScreen && !document.hidden ? start() : stop());
+    const resize = new ResizeObserver(() => { half = el.scrollWidth / 2; });
+    const visible = new IntersectionObserver(([entry]) => { onScreen = entry.isIntersecting; sync(); });
 
     const down = (event: PointerEvent) => {
       if (event.pointerType === "mouse" && event.button !== 0) return;
@@ -71,9 +79,15 @@ export default function FeaturedMarquee({ children }: { children: ReactNode }) {
     view.addEventListener("pointerleave", leave);
     view.addEventListener("focusin", focusIn);
     view.addEventListener("focusout", focusOut);
-    frame = requestAnimationFrame(tick);
+    document.addEventListener("visibilitychange", sync);
+    resize.observe(el);
+    visible.observe(view);
+    start();
     return () => {
-      cancelAnimationFrame(frame);
+      stop();
+      resize.disconnect();
+      visible.disconnect();
+      document.removeEventListener("visibilitychange", sync);
       view.removeEventListener("pointerdown", down);
       view.removeEventListener("pointermove", move);
       view.removeEventListener("pointerup", up);

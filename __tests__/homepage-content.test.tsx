@@ -9,7 +9,7 @@ vi.mock("@/lib/db", () => ({ db: {
   featuredStartup: { findMany: queries.featured },
 } }));
 vi.mock("next/headers", () => ({ cookies: queries.cookies }));
-vi.mock("@/lib/leaderboard", () => ({ getLeaderboard: queries.leaderboard }));
+vi.mock("@/lib/leaderboard", () => ({ getLeaderboard: queries.leaderboard, withActivitySignals: async <T,>(startups: T[]) => startups }));
 vi.mock("@/app/actions/upvote.actions", () => ({ toggleVote: vi.fn() }));
 
 const featuredRow = (overrides: Record<string, unknown> = {}) => ({ startup: {
