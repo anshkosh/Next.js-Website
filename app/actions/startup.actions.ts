@@ -108,7 +108,8 @@ export async function createStartup(formData: FormData) {
         status: "DRAFT",
     });
 
-    revalidatePath("/dashboard");
+    // The founder layout is dynamic. Draft saves need no cache invalidation;
+    // an action-triggered route refresh can race the wizard's next step URL.
     return { data: startup };
   } catch (error) {
     if (error instanceof StartupQuotaError) return { error: error.message };
@@ -241,7 +242,7 @@ export async function updateStartup(formData: FormData) {
     });
     const notificationDelivered = event ? await deliverNotification(event.id) : true;
 
-    revalidatePath("/dashboard");
+    if (isSubmitting) revalidatePath("/dashboard");
     return { data: updatedStartup, notificationPending: !notificationDelivered };
   } catch (error) {
     logger.error("Update startup error:", error);

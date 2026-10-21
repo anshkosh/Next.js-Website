@@ -12,8 +12,8 @@
 - Expand profile settings with an owned profile photo, bio, location, website,
   real email-delivery preferences, verified email changes, password changes and
   other-device sign-out. Keep verification/recovery and newsletter consent separate.
-- Cancel background team reads when leaving a wizard step so delayed responses
-  cannot reload the editor and drop newly entered features.
+- Avoid route refreshes after draft-only saves and cancel background team reads
+  when leaving a wizard step, preserving newly entered fields and features.
 
 ## 21 October 2026 — account settings and submission recovery (PR #46)
 

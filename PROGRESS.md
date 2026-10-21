@@ -29,10 +29,11 @@
 - Login preserves pre-hydration typing in native fields and reads FormData on
   submit; the POST fallback remains. Approval emails now describe approval and
   dashboard visibility rather than claiming an off-mode listing is public.
-- Full browser validation exposed a delayed team-read Server Action arriving
-  after a wizard step change and reloading the editor. Team reads now use an
-  abortable, uncached GET with the existing public/owner/reviewer predicate;
-  editing no longer shares the action navigation queue with background reads.
+- Full browser validation exposed draft-save revalidation racing the wizard's
+  next step URL and reloading the editor. Draft-only saves no longer invalidate
+  the already-dynamic dashboard; submitted/published writes retain invalidation.
+  Team reads use an abortable, uncached GET with the existing visibility checks,
+  avoiding the action navigation queue for background reads.
 
 ## 21 October 2026 — account settings and reported submission issues
 
