@@ -1,5 +1,16 @@
 # Progress
 
+## 22 October 2026 — site review deployment dependency follow-up
+
+- PR #48 passed all gates (616 unit tests and 14 browser journeys) and was
+  owner-authorized merged as `771a075`. One profile-photo save timeout passed
+  unchanged on a fresh isolated browser run.
+- Main's subsequent audit newly reported two `@vitest/mocker` advisories and
+  stopped deployment. The public release remains `c128585` until checks pass.
+- Follow-up branch `codex/site-review-vitest-security` upgrades the Vitest family
+  to the compatible 4.1.12 security patch. No audit exceptions, deployment checks,
+  application code, migrations or manual server configuration are changed.
+
 ## 22 October 2026 — Claude site review release preparation
 
 - Owner authorized reviewing, pushing and merging `claude/site-review-fixes`.

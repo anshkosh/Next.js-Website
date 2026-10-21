@@ -1,5 +1,11 @@
 # Website changelog
 
+## 22 October 2026 — test-tooling security patch
+
+- Upgrade Vitest and its matching coverage package to 4.1.12 to remove two
+  mocker advisories newly reported by the release audit. Keep the dependency
+  policy and existing reviewed exceptions unchanged.
+
 ## 22 October 2026 — site review polish
 
 - Show combined vote and activity signals on public startup cards, profiles and
