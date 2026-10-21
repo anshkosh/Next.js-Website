@@ -102,6 +102,9 @@ export async function generateMetadata(props: {
   });
 
   if (!startup) {
+    // A reused slug may also have a historical redirect. A hidden current
+    // listing must return 404 instead of redirecting to another startup.
+    if (await db.startup.findUnique({ where: { slug: params.slug }, select: { id: true } })) notFound();
     const redirect = await db.slugRedirect.findUnique({
       where: { oldSlug: params.slug },
       include: { startup: { select: { slug: true, status: true, founder: { select: { founderMode: true } } } } },
@@ -174,6 +177,7 @@ export default async function StartupDetailPage(props: {
   });
 
   if (!startup) {
+    if (await db.startup.findUnique({ where: { slug: params.slug }, select: { id: true } })) notFound();
     const redirect = await db.slugRedirect.findUnique({
       where: { oldSlug: params.slug },
       include: { startup: { select: { slug: true, status: true, founder: { select: { founderMode: true } } } } },

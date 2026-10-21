@@ -530,6 +530,11 @@ test("founder mode hides every owned startup publicly and restores approved visi
     status: status as "LIVE" | "DRAFT" | "SUSPENDED",
   } })));
   const [live] = fixtures;
+  const reviewer = await db.user.findUniqueOrThrow({ where: { email: adminEmail } });
+  const control = await db.startup.create({ data: { name: "Visible control startup", slug: `control-${randomUUID()}`, tagline: "A different owner remains visible", description: "An isolated public visibility control.", websiteUrl: "https://example.test", founderName: reviewer.name, founderId: reviewer.id, categoryId, status: "LIVE" } });
+  // A historical address can be reused by a current startup. Hiding the
+  // current startup must not resurrect this redirect to a different owner.
+  await db.slugRedirect.create({ data: { oldSlug: live.slug, startupId: control.id } });
   await db.featuredStartup.create({ data: { startupId: live.id, sortOrder: -100 } });
   const entry = await db.founderJournalEntry.create({ data: {
     authorId: owner.id, startupId: live.id, title: `Visibility story ${randomUUID()}`, body: "A preserved approved story.",
@@ -564,6 +569,7 @@ test("founder mode hides every owned startup publicly and restores approved visi
     }
     expect((await visitor.request.get(direct(oldSlug))).status()).toBe(404);
     expect((await visitor.request.get(storyPath)).status()).toBe(404);
+    expect((await visitor.request.get(direct(control.slug))).status()).toBe(200);
     // The storage action must reject a mutation from a previously open page too.
     const { recordVote } = await import("../lib/vote-store");
     expect(await recordVote(live.id, 1, { cookieId: randomUUID(), fingerprintHash: randomUUID() })).toMatchObject({ success: false });
@@ -593,9 +599,10 @@ test("founder mode hides every owned startup publicly and restores approved visi
   } finally {
     await visitor.close();
     await db.founderJournalEntry.deleteMany({ where: { authorId: owner.id } });
-    await db.slugRedirect.deleteMany({ where: { startupId: live.id } });
+    await db.slugRedirect.deleteMany({ where: { startupId: { in: [live.id, control.id] } } });
     await db.featuredStartup.deleteMany({ where: { startupId: live.id } });
     await db.startup.deleteMany({ where: { founderId: owner.id } });
+    await db.startup.delete({ where: { id: control.id } });
     await db.user.delete({ where: { id: owner.id } });
   }
 });
@@ -618,7 +625,9 @@ test("expanded profile, optional emails and verified sign-in changes persist", a
   await page.getByRole("checkbox", { name: /Startup review updates/ }).uncheck();
   await page.getByRole("checkbox", { name: /Vote milestones/ }).uncheck();
   await page.getByRole("button", { name: "Save profile", exact: true }).click();
-  await expect(page.getByText("Profile saved.", { exact: true })).toBeVisible();
+  // Cold compilation plus the owned-photo check can exceed the five-second
+  // assertion default on CI. Still require the real confirmed save.
+  await expect(page.getByText("Profile saved.", { exact: true })).toBeVisible({ timeout: 30000 });
   await expect(page.getByText(/Saved at/)).toBeVisible();
   await page.reload();
   const saved = await db.user.findUniqueOrThrow({ where: { id: member.id } });
