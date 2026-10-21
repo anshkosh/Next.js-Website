@@ -113,7 +113,7 @@ export default function FounderManager({ startupId, onBusyChange }: { startupId:
 
   return (
     <div className="space-y-6">
-      <h2 className="text-xl font-bold">Step 3: Founders</h2>
+      <h2 className="text-xl font-bold">Founders</h2>
       <p className="text-gray-500 text-sm">Add up to 3 founders to your startup profile.</p>
       <DraftRecoveryNotice draft={draft} />
 

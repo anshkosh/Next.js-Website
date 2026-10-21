@@ -29,7 +29,7 @@ export const faqData = [
   },
   {
     question: "What counts as evidence in a validation test?",
-    answer: "Evidence from a founder’s test may include genuine feedback, survey responses, waitlist actions, pilot requests, service enquiries, preorder intent, or other defined actions. This evidence is separate from the site’s net voting score and is not automatically a customer, order, payment, revenue result, or promise.",
+    answer: "Evidence from a founder’s test may include genuine feedback, survey responses, pilot requests, service enquiries, preorder intent, or other defined actions. This evidence is separate from the site’s net voting score and is not automatically a customer, order, payment, revenue result, or promise.",
   },
   {
     question: "Can I place a preorder now?",

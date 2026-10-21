@@ -1,6 +1,6 @@
 "use client";
 export default function DraftRecoveryNotice({ draft }: { draft: {
-  recovery: object | null; savedAt: number | null; storageError: boolean;
+  recovery: object | null; savedAt: number | null; storageError: boolean; dirty: boolean;
   restoreDraft: () => void; discardDraft: () => void;
 } }) {
   if (draft.recovery) return <aside className="rounded-xl border border-coral-200 bg-coral-50 p-4 text-sm space-y-3">
@@ -12,5 +12,6 @@ export default function DraftRecoveryNotice({ draft }: { draft: {
     </div>
   </aside>;
   if (draft.storageError) return <p role="status" className="text-sm text-amber-800">Device recovery is unavailable. Save your draft before leaving this page.</p>;
+  if (!draft.dirty) return <p role="status" className="text-xs text-gray-600">No unsaved changes.</p>;
   return <p role="status" className="text-xs text-gray-500">{draft.savedAt ? "Recovery copy saved on this device. Changes are not submitted until you save." : "Unfinished changes are saved on this device for 7 days. Avoid using a shared computer."}</p>;
 }

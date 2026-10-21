@@ -78,7 +78,7 @@ export function useDraftRecovery<T extends object>(key: string | null, value: T,
     if (key) { try { window.localStorage.removeItem(key); } catch { /* Warning is already shown if unavailable. */ } }
     setRecovery(null); setSavedAt(null);
   }
-  function markSaved() { setBaseline(latest.current.serialized); clear(); }
+  function markSaved(savedValue?: T) { setBaseline(savedValue ? JSON.stringify(savedValue) : latest.current.serialized); clear(); }
   return {
     recovery, dirty, savedAt, storageError, markSaved,
     restoreDraft: () => { if (recovery) latest.current.restore(recovery); setRecovery(null); },

@@ -11,6 +11,8 @@ import ChecklistPage from "../app/(public)/launch-support/checklist/page";
 import KitPage from "../app/(public)/launch-support/kit/page";
 import { FOUNDER_TOOLS } from "../lib/founder-toolkit";
 
+vi.mock("@/lib/auth-client", () => ({ authClient: { useSession: () => ({ data: null, isPending: false }) } }));
+
 let root: Root | undefined;
 let container: HTMLDivElement;
 beforeEach(() => { vi.stubGlobal("IS_REACT_ACT_ENVIRONMENT", true); localStorage.clear(); container = document.createElement("div"); document.body.append(container); });
@@ -48,7 +50,7 @@ describe("free launch tools", () => {
     await mount(<LaunchChecklist />);
     await act(async () => (container.querySelector('input[type="checkbox"]') as HTMLInputElement).click());
     expect(container.textContent).toContain("1 of 11 tasks complete");
-    expect(readChecklist(localStorage.getItem("anshkosh-launch-checklist-v1") ?? "")).toEqual(["problem"]);
+    expect(readChecklist(localStorage.getItem("anshkosh-launch-checklist-v1:guest") ?? "")).toEqual(["problem"]);
     await act(async () => root?.unmount()); root = undefined;
     await mount(<LaunchChecklist />);
     expect((container.querySelector('input[type="checkbox"]') as HTMLInputElement).checked).toBe(true);

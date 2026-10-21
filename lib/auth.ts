@@ -5,12 +5,16 @@ import { db } from "./db";
 import { getTrustedAuthOrigins } from "./auth-origins";
 import { escapeEmailHtml } from "./email/escape";
 import { accountAdminOptions } from "./auth-roles";
+import { accountProfileFields } from "./account-profile";
 
 export const auth = betterAuth({
   trustedOrigins: getTrustedAuthOrigins,
   database: prismaAdapter(db, {
     provider: "postgresql",
   }),
+  user: {
+    additionalFields: accountProfileFields,
+  },
   emailAndPassword: {
     enabled: true,
     requireEmailVerification: true,

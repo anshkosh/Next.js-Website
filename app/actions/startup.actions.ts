@@ -2,6 +2,7 @@
 import { ownsPitchDeck } from "@/lib/validators/pitch-deck.schema";
 import { mergeStartupMetadata } from "@/lib/startup-metadata";
 import { savePublishedRevision } from "@/lib/startup-revisions";
+import { startupFieldErrors } from "@/lib/startup-wizard";
 import { logger } from "@/lib/logger";
 
 import { db } from "@/lib/db";
@@ -84,7 +85,7 @@ export async function createStartup(formData: FormData) {
         .join("\n");
       return {
         error: `Please fix the following errors:\n${errorMsg}`,
-        details: validatedData.error.flatten().fieldErrors,
+        details: startupFieldErrors(validatedData.error.issues),
       };
     }
 
@@ -177,7 +178,7 @@ export async function updateStartup(formData: FormData) {
         .join("\n");
       return {
         error: `Please fix the following errors:\n${errorMsg}`,
-        details: validatedData.error.flatten().fieldErrors,
+        details: startupFieldErrors(validatedData.error.issues),
       };
     }
 

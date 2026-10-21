@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { LogOut } from "lucide-react";
 import { authClient } from "@/lib/auth-client";
 import { useRouter } from "next/navigation";
@@ -23,6 +24,7 @@ export default function AdminTopbar({ user }: { user: { name?: string | null; ro
         <span className="text-sm font-medium text-gray-700 hidden sm:inline-block">
           {user.name} ({user.role})
         </span>
+        <Link href="/settings" className="inline-flex min-h-11 items-center text-sm font-medium text-gray-700 hover:text-coral-700">Profile settings</Link>
         <button 
           onClick={handleLogout}
           className="flex items-center gap-2 text-sm text-gray-600 hover:text-gray-900 transition-colors"

@@ -1,37 +1,24 @@
 "use client";
 
-import { useCallback, useState, useSyncExternalStore } from "react";
 import Link from "next/link";
 import { LAUNCH_CHECKLIST, readChecklist } from "@/lib/launch-resources";
 import { launchLinkStyle } from "./LaunchToolLayout";
-
-const key = "anshkosh-launch-checklist-v1";
-const eventName = "anshkosh-launch-checklist-changed";
-function subscribe(callback: () => void) {
-  window.addEventListener("storage", callback);
-  window.addEventListener(eventName, callback);
-  return () => { window.removeEventListener("storage", callback); window.removeEventListener(eventName, callback); };
-}
-function snapshot() { try { return window.localStorage.getItem(key) ?? ""; } catch { return ""; } }
+import { useBrowserDraft } from "./useBrowserDraft";
 
 export default function LaunchChecklist() {
-  const raw = useSyncExternalStore(subscribe, snapshot, () => "");
-  const [error, setError] = useState("");
-  const [fallback, setFallback] = useState<string[] | null>(null);
-  const checked = fallback ?? readChecklist(raw);
-  const change = useCallback((id: string, done: boolean) => {
-    const next = (fallback ?? readChecklist(snapshot())).filter(value => value !== id);
+  const { data: checked, update, storageError: error } = useBrowserDraft("anshkosh-launch-checklist-v1", readChecklist);
+  const change = (id: string, done: boolean) => update(previous => {
+    const next = previous.filter(value => value !== id);
     if (done) next.push(id);
-    try { window.localStorage.setItem(key, JSON.stringify(next)); window.dispatchEvent(new Event(eventName)); setFallback(null); setError(""); }
-    catch { setFallback(next); setError("Your browser cannot save progress. Your checks work for this visit but will be lost on reload."); }
-  }, [fallback]);
+    return next;
+  });
   return (
     <>
       <div className="mb-8 rounded-xl border border-gray-200 bg-white p-5">
         <p role="status" className="font-semibold">{checked.length} of {LAUNCH_CHECKLIST.length} tasks complete</p>
         <progress aria-label="Launch preparation progress" value={checked.length} max={LAUNCH_CHECKLIST.length} className="mt-3 h-2 w-full accent-coral-600" />
-        <p className="mt-3 text-sm text-gray-600">Progress is saved only in this browser, not in your account or per startup. Checking a task does not submit, approve or publish anything.</p>
-        {error && <p role="alert" className="mt-3 text-sm text-red-700">{error}</p>}
+        <p className="mt-3 text-sm text-gray-600">Progress is saved only in this browser, separately for each signed-in account, and is not synced between devices or per startup. Checking a task does not submit, approve or publish anything.</p>
+        {error && <p role="alert" className="mt-3 text-sm text-red-700">{error === "Loading your account…" ? error : "Your browser cannot save progress. Your checks work for this visit but will be lost on reload."}</p>}
       </div>
       <div className="grid gap-6 md:grid-cols-2">
         {[...new Set(LAUNCH_CHECKLIST.map(item => item.group))].map(group => (
