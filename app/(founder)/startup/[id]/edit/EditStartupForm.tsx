@@ -15,6 +15,7 @@ import { STARTUP_STAGES } from "@/lib/startup-stages";
 import { useDraftRecovery } from "@/components/startup/useDraftRecovery";
 import DraftRecoveryNotice from "@/components/startup/DraftRecoveryNotice";
 import type { Startup } from "@prisma/client";
+import { startupFieldErrors, startupFieldLabel } from "@/lib/startup-wizard";
 import { startupMetadataFields } from "@/lib/startup-metadata";
 
 const availableIcons = [
@@ -105,7 +106,7 @@ export default function EditStartupForm({ initialData, userId }: { initialData: 
     tractionEvidence: initialData.tractionEvidence || "",
   });
 
-  const draft = useDraftRecovery(`anshkosh-draft:${userId}:edit:${initialData.id}`, formData, recovered => setFormData(previous => ({ ...previous, ...recovered, id: initialData.id })));
+  const draft = useDraftRecovery(`anshkosh-draft:${userId}:edit:${initialData.id}`, formData, recovered => { setErrors({}); setFormData(previous => ({ ...previous, ...recovered, id: initialData.id })); });
 
   const handleChange = (
     e: React.ChangeEvent<
@@ -167,28 +168,13 @@ export default function EditStartupForm({ initialData, userId }: { initialData: 
         pitchDeckUrl: formData.pitchDeckUrl,
         pitchDeckVisibility: formData.pitchDeckVisibility,
         city: dataToValidate.city || undefined,
+        features: formData.features,
         foundedYear: dataToValidate.foundedYear,
       },
     });
 
     if (!result.success) {
-      const fieldErrors: Record<string, string[]> = {};
-      result.error.issues.forEach((issue) => {
-        if (issue.path[0] === "metadata" && issue.path[1]) {
-          const fieldName = issue.path[1] as string;
-          if (!fieldErrors[fieldName]) {
-            fieldErrors[fieldName] = [];
-          }
-          fieldErrors[fieldName].push(issue.message);
-        } else {
-          const fieldName = issue.path[0] as string;
-          if (!fieldErrors[fieldName]) {
-            fieldErrors[fieldName] = [];
-          }
-          fieldErrors[fieldName].push(issue.message);
-        }
-      });
-
+      const fieldErrors = startupFieldErrors(result.error.issues);
       setErrors(fieldErrors);
       setIsSaving(false);
       return;
@@ -552,7 +538,7 @@ export default function EditStartupForm({ initialData, userId }: { initialData: 
             onChange={handleChange}
             rows={3}
             maxLength={600}
-            placeholder="Any early users, revenue, pilots, letters of intent, waitlist signups, press coverage, or other validation? Leave blank if none yet."
+            placeholder="Any early users, revenue, pilots, letters of intent, press coverage, or other validation? Leave blank if none yet."
             className="w-full border border-gray-300 rounded-md p-3 resize-none leading-relaxed"
           />
         </div>
@@ -616,7 +602,7 @@ export default function EditStartupForm({ initialData, userId }: { initialData: 
                     value={feature.icon}
                     onChange={(iconName) => {
                       const newFeatures = [...formData.features];
-                      newFeatures[idx].icon = iconName;
+                      newFeatures[idx] = { ...newFeatures[idx], icon: iconName };
                       setFormData((p) => ({ ...p, features: newFeatures }));
                     }}
                     availableIcons={availableIcons}
@@ -625,29 +611,42 @@ export default function EditStartupForm({ initialData, userId }: { initialData: 
                 <div className="md:col-span-3">
                   <label className="block text-xs font-medium text-gray-500 mb-1">Title</label>
                   <input
+                    name={`features.${idx}.title`}
+                    aria-label={`Feature ${idx + 1} title`}
+                    aria-invalid={Boolean(errors[`features.${idx}.title`])}
+                    aria-describedby={errors[`features.${idx}.title`] ? `feature-${idx}-title-error` : undefined}
+                    maxLength={50}
                     value={feature.title}
                     onChange={(e) => {
                       const newFeatures = [...formData.features];
-                      newFeatures[idx].title = e.target.value;
+                      newFeatures[idx] = { ...newFeatures[idx], title: e.target.value };
+                      setErrors(previous => Object.fromEntries(Object.entries(previous).filter(([key]) => key !== `features.${idx}.title`)));
                       setFormData(p => ({ ...p, features: newFeatures }));
                     }}
                     className="w-full border border-gray-200 rounded-md p-2 bg-white text-sm focus:ring-coral-500 focus:border-coral-500 outline-none"
                     placeholder="e.g. Blazing Fast"
                   />
+                  {errors[`features.${idx}.title`] && <p id={`feature-${idx}-title-error`} className="text-red-500 text-xs mt-1">{errors[`features.${idx}.title`][0]}</p>}
                 </div>
                 <div className="md:col-span-4">
                   <label className="block text-xs font-medium text-gray-500 mb-1">Description (Max 150 chars)</label>
                   <input
+                    name={`features.${idx}.description`}
+                    aria-label={`Feature ${idx + 1} description`}
+                    aria-invalid={Boolean(errors[`features.${idx}.description`])}
+                    aria-describedby={errors[`features.${idx}.description`] ? `feature-${idx}-description-error` : undefined}
                     value={feature.description}
                     onChange={(e) => {
                       const newFeatures = [...formData.features];
-                      newFeatures[idx].description = e.target.value;
+                      newFeatures[idx] = { ...newFeatures[idx], description: e.target.value };
+                      setErrors(previous => Object.fromEntries(Object.entries(previous).filter(([key]) => key !== `features.${idx}.description`)));
                       setFormData(p => ({ ...p, features: newFeatures }));
                     }}
                     maxLength={150}
                     className="w-full border border-gray-200 rounded-md p-2 bg-white text-sm focus:ring-coral-500 focus:border-coral-500 outline-none"
                     placeholder="Short description of this feature..."
                   />
+                  {errors[`features.${idx}.description`] && <p id={`feature-${idx}-description-error`} className="text-red-500 text-xs mt-1">{errors[`features.${idx}.description`][0]}</p>}
                 </div>
               </div>
             </div>
@@ -701,10 +700,10 @@ export default function EditStartupForm({ initialData, userId }: { initialData: 
             <AlertCircle className="w-5 h-5 text-red-500 shrink-0" />
             <span>
               {errors.form ? (
-                <strong className="capitalize">{errors.form.join(", ")}</strong>
+                <strong>{errors.form.join(", ")}</strong>
               ) : (
                 <>Validation failed for {Object.keys(errors).length} field(s):{" "}
-                <strong className="capitalize">{Object.keys(errors).map(k => k === 'logoUrl' ? 'logo' : k).join(", ")}</strong>. Please scroll up and fix them.</>
+                <strong>{Object.keys(errors).map(startupFieldLabel).join(", ")}</strong>. Please scroll up and fix them.</>
               )}
             </span>
           </div>

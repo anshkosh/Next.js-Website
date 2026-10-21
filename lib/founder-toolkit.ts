@@ -52,7 +52,10 @@ export function buildPitch(details: FounderDetails) {
   const problem = details.problem.trim(); const approach = details.approach.trim();
   const outcome = details.outcome.trim();
   if (!name || !audience || !approach || !outcome) return null;
-  const oneLine = `${name} helps ${audience} ${outcome.replace(/[.!?]+$/, "")} by ${approach.replace(/[.!?]+$/, "")}.`;
+  const promise = `${name} helps ${audience} ${outcome.replace(/[.!?]+$/, "")}`;
+  const standalone = /^[A-Z]/.test(approach) || /[.!?]\s+\S/.test(approach);
+  const oneLine = standalone ? `${promise}. ${approach.replace(/[.!?]+$/, "")}.`
+    : `${promise} by ${approach.replace(/[.!?]+$/, "")}.`;
   const introduction = [oneLine, problem ? `The problem we are working on: ${problem}` : "", details.stage.trim() ? `Current stage: ${details.stage.trim()}.` : ""].filter(Boolean).join("\n\n");
   const website = safeLaunchUrl(details.websiteUrl);
   const announcement = [`Meet ${name}.`, introduction, website ? `Explore it: ${website}` : "Get in touch to learn more."].join("\n\n");

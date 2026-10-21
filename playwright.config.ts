@@ -12,6 +12,7 @@ export default defineConfig({
     actionTimeout: 30000,
     baseURL: "http://127.0.0.1:3100",
     trace: "on-first-retry",
+    screenshot: "only-on-failure",
   },
   webServer: [
     { command: "node e2e/fixtures/services.mjs", url: "http://127.0.0.1:3181/ready", reuseExistingServer: false, timeout: 30000 },

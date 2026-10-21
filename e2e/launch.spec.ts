@@ -116,7 +116,8 @@ test("signup, real verification token, login, photo editing, private deck and st
   await page.getByLabel("Full Name", { exact: true }).fill("Test Founder");
   await page.locator('input[type="email"]').fill(email);
   await page.locator('input[name="password"]').fill(password);
-  await page.locator('input[type="checkbox"]').check();
+  await page.getByRole("checkbox", { name: "Enable founder mode" }).check();
+  await page.locator("#terms").check();
   await page.getByRole("button", { name: "Create Account" }).click();
   await expect(page.getByRole("heading", { name: "Check your email" })).toBeVisible();
   await enter(page, await emailLink(email, /verify-email/));
@@ -127,6 +128,7 @@ test("signup, real verification token, login, photo editing, private deck and st
   await page.locator('[name="tagline"]').fill(originalTagline);
   await page.locator('[name="categoryId"]').selectOption(categoryId);
   await page.getByRole("button", { name: "Next", exact: true }).click();
+  await expect(page.getByRole("heading", { name: "Step 2: Details", exact: true })).toBeVisible({ timeout: 15000 });
   await page.locator('textarea[name="description"]').fill("We are testing a repeatable food business through a local pilot, real customer feedback and a carefully measured operating model.");
   await page.locator('[name="websiteUrl"]').fill("https://example.test");
   await page.locator('[name="startupPhone"]').fill("8800776082");
@@ -144,12 +146,29 @@ test("signup, real verification token, login, photo editing, private deck and st
   await uploadPhoto(page, "Upload founder photo");
   await page.getByRole("button", { name: "Save Founder" }).click();
   await expect(page.getByRole("button", { name: "Save Founder" })).toBeHidden();
+  await expect(page).toHaveURL(/draft=.*step=4/);
+  await page.reload();
+  await expect(page.getByRole("heading", { name: "Step 4: Founders & Team" })).toBeVisible();
+  await expect(page.getByText("Test Founder", { exact: true }).last()).toBeVisible();
   await page.getByRole("button", { name: "Next", exact: true }).click();
   await expect(page.getByLabel("Pitch deck visibility")).toHaveValue("private");
   await uploadPhoto(page, "Upload new gallery image");
   await page.getByLabel("Upload PDF pitch deck").setInputFiles({ name: "deck.pdf", mimeType: "application/pdf", buffer: await validPdf() });
   await expect(page.getByRole("link", { name: "Download uploaded pitch deck" })).toBeVisible({ timeout: 15000 });
   await page.getByRole("button", { name: "Next", exact: true }).click();
+  await page.getByRole("button", { name: "Edit media and features", exact: true }).click();
+  await page.getByRole("button", { name: "Add Feature", exact: true }).click();
+  await page.getByRole("button", { name: "Next", exact: true }).click();
+  await expect(page.getByLabel("Feature 1 title", { exact: true })).toHaveAttribute("aria-invalid", "true");
+  await page.getByLabel("Feature 1 title", { exact: true }).fill("A saved feature");
+  await page.getByLabel("Feature 1 description", { exact: true }).fill("This feature should survive a browser refresh.");
+  await page.getByRole("button", { name: "Next", exact: true }).click();
+  await expect(page.getByText("A saved feature", { exact: true })).toBeVisible();
+  await expect(page.getByText("Draft saved at", { exact: false })).toBeVisible();
+  await page.reload();
+  await expect(page.getByRole("heading", { name: "Step 6: Review & Submit" })).toBeVisible();
+  await expect(page.getByText("A saved feature", { exact: true })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Restore unfinished changes" })).toHaveCount(0);
   await page.getByRole("button", { name: "Submit for Review" }).click();
   // Verify the persisted result before expecting navigation through a cold
   // dashboard compilation. A button click alone does not establish a save.
@@ -444,4 +463,56 @@ test("founder lesson submission, update feedback and direct sign-out work togeth
     await db.startupUpdate.deleteMany({ where: { startupId, title: updateTitle } });
     await db.startup.update({ where: { id: startupId }, data: { updateCount: await db.startupUpdate.count({ where: { startupId } }) } });
   }
+});
+
+
+test("member registration and profile settings work across modes without losing founder data", async ({ page }) => {
+  const memberEmail = `member-${randomUUID()}@example.test`;
+  await enter(page, "/register");
+  await expect(page.getByRole("checkbox", { name: "Enable founder mode" })).toBeChecked();
+  await page.getByRole("checkbox", { name: "Enable founder mode" }).uncheck();
+  await page.getByLabel("Full Name", { exact: true }).fill("Community Member");
+  await page.locator('input[type="email"]').fill(memberEmail);
+  await page.locator('input[name="password"]').fill(password);
+  await page.locator("#terms").check();
+  await page.getByRole("button", { name: "Create Account", exact: true }).click();
+  await expect(page.getByRole("heading", { name: "Check your email" })).toBeVisible();
+  await enter(page, await emailLink(memberEmail, /verify-email/));
+  await login(page, memberEmail);
+  await expect(page.getByRole("link", { name: "Explore startups", exact: true })).toBeVisible();
+  await expect(page.getByRole("link", { name: "Submit a New Startup" })).toHaveCount(0);
+  await enter(page, "/settings");
+  await expect(page.getByRole("switch", { name: /Founder mode/ })).not.toBeChecked();
+  await page.getByLabel("Full name", { exact: true }).fill("Updated Community Member");
+  await page.getByRole("switch", { name: /Founder mode/ }).click();
+  await page.getByRole("button", { name: "Save profile", exact: true }).click();
+  await expect(page.getByRole("status").filter({ hasText: "Profile saved." })).toBeVisible();
+  await page.reload();
+  await expect(page.getByLabel("Full name", { exact: true })).toHaveValue("Updated Community Member");
+  await expect(page.getByRole("switch", { name: /Founder mode/ })).toBeChecked();
+  await enter(page, "/dashboard");
+  await expect(page.getByRole("link", { name: "Submit a New Startup", exact: true })).toBeVisible();
+  const member = await db.user.findUniqueOrThrow({ where: { email: memberEmail } });
+  const modeStartup = await db.startup.create({ data: { name: `Mode test ${randomUUID()}`, slug: `mode-${randomUUID()}`, tagline: "A preserved account preference fixture", description: "This fixture verifies that founder mode never deletes saved work.", websiteUrl: "https://example.test", founderName: member.name, founderId: member.id, categoryId, status: "DRAFT" } });
+  const before = await db.startup.findUniqueOrThrow({ where: { id: modeStartup.id } });
+  await enter(page, "/settings");
+  await page.getByRole("switch", { name: /Founder mode/ }).uncheck();
+  await page.getByRole("button", { name: "Save profile", exact: true }).click();
+  await expect(page.getByText("Profile saved.", { exact: true })).toBeVisible();
+  await page.setViewportSize({ width: 1366, height: 900 });
+  await page.screenshot({ path: ".impeccable/review/desktop.png", fullPage: true });
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.screenshot({ path: ".impeccable/review/mobile.png", fullPage: true });
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+  await enter(page, "/dashboard");
+  await expect(page.getByRole("link", { name: "Explore startups", exact: true })).toBeVisible();
+  const after = await db.startup.findUniqueOrThrow({ where: { id: modeStartup.id } });
+  expect(after).toEqual(before);
+  await enter(page, "/settings");
+  await page.getByRole("switch", { name: /Founder mode/ }).check();
+  await page.getByRole("button", { name: "Save profile", exact: true }).click();
+  await expect(page.getByText("Profile saved.", { exact: true })).toBeVisible();
+  await enter(page, "/dashboard");
+  await expect(page.getByRole("heading", { name: modeStartup.name, exact: true })).toBeVisible();
 });

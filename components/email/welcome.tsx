@@ -35,7 +35,7 @@ import {
 } from "./shared";
 
 export const WelcomeEmail = ({
-  founderName = "Founder",
+  founderName = "there",
   url,
 }: {
   founderName?: string;
@@ -70,16 +70,15 @@ export const WelcomeEmail = ({
               Welcome to anshkosh, {founderName}!
             </Heading>
             <Text style={text}>
-              We&apos;re thrilled to have you join India&apos;s premier startup showcase
-              platform. anshkosh is the best place to launch, discover, and
-              upvote the most exciting startups in the country.
+              Explore Indian startups, share useful feedback and follow what
+              founders are building. You can join as a member, backer or founder.
             </Text>
             <Text style={text}>
-              Ready to show the world what you&apos;re building?
+              Verify your email to get started. You can enable founder mode in Profile settings whenever you want to share your own startup.
             </Text>
             <Section style={btnContainer}>
               <Button style={button} href={targetUrl}>
-                {url ? "Verify Email & Get Started" : "Submit Your Startup"}
+                {url ? "Verify Email & Get Started" : "Open Your Account"}
               </Button>
             </Section>
             <Text style={text}>

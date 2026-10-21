@@ -19,8 +19,11 @@ import RunwayPage from "../app/(public)/launch-support/runway/page";
 import TrackerPage from "../app/(public)/launch-support/tracker/page";
 import CardPage from "../app/(public)/launch-support/launch-card/page";
 
+const account = vi.hoisted(() => ({ id: null as string | null, pending: false }));
+vi.mock("@/lib/auth-client", () => ({ authClient: { useSession: () => ({ data: account.id ? { user: { id: account.id } } : null, isPending: account.pending }) } }));
+
 let root: Root | undefined; let container: HTMLDivElement;
-beforeEach(() => { vi.stubGlobal("IS_REACT_ACT_ENVIRONMENT", true); localStorage.clear(); container = document.createElement("div"); document.body.append(container); });
+beforeEach(() => { vi.stubGlobal("IS_REACT_ACT_ENVIRONMENT", true); localStorage.clear(); account.id = null; account.pending = false; container = document.createElement("div"); document.body.append(container); });
 afterEach(async () => { if (root) await act(async () => root?.unmount()); root = undefined; container.remove(); vi.restoreAllMocks(); vi.unstubAllGlobals(); vi.useRealTimers(); });
 async function mount(element: ReactNode) { root = createRoot(container); await act(async () => root?.render(element)); }
 async function fill(element: HTMLInputElement | HTMLTextAreaElement, value: string) {
@@ -83,6 +86,30 @@ describe("founder toolkit calculations and exports", () => {
 });
 
 describe("founder toolkit workflows", () => {
+  it("isolates signed-in tools from legacy, guest and other account data", async () => {
+    localStorage.setItem(FOUNDER_KEY, JSON.stringify({ name: "Legacy private name" }));
+    localStorage.setItem(`${FOUNDER_KEY}:guest`, JSON.stringify({ name: "Guest name" }));
+    account.id = "alice";
+    await mount(<PitchBuilder />);
+    expect((container.querySelector("textarea") as HTMLTextAreaElement).value).toBe("");
+    await fill(container.querySelector("textarea")!, "Alice draft");
+    account.id = "bob";
+    await act(async () => root?.render(<PitchBuilder />));
+    expect((container.querySelector("textarea") as HTMLTextAreaElement).value).toBe("");
+    await fill(container.querySelector("textarea")!, "Bob draft");
+    account.id = "alice";
+    await act(async () => root?.render(<PitchBuilder />));
+    expect((container.querySelector("textarea") as HTMLTextAreaElement).value).toBe("Alice draft");
+    account.id = null;
+    await act(async () => root?.render(<PitchBuilder />));
+    expect((container.querySelector("textarea") as HTMLTextAreaElement).value).toBe("Guest name");
+    expect(localStorage.getItem(FOUNDER_KEY)).toContain("Legacy private name");
+  });
+  it("keeps sentence-style approaches out of the by-clause", () => {
+    const pitch = buildPitch(readFounder(JSON.stringify({ name: "CreatorLedger", audience: "creators", outcome: "manage invoices", approach: "Each deal becomes a card. Track its progress." })));
+    expect(pitch?.oneLine).toBe("CreatorLedger helps creators manage invoices. Each deal becomes a card. Track its progress.");
+  });
+
   it("shares startup details between the pitch builder and kit and restores them on a new visit", async () => {
     await mount(<PitchBuilder />);
     const fields = container.querySelectorAll("textarea");
@@ -94,18 +121,18 @@ describe("founder toolkit workflows", () => {
     expect((container.querySelector("#kit-name") as HTMLTextAreaElement).value).toBe("DabbaLoop");
     expect((container.querySelector("#kit-tagline") as HTMLTextAreaElement).value).toContain("organise lunch");
     await fill(container.querySelector("#kit-name")!, "New Name");
-    expect(readFounder(localStorage.getItem(FOUNDER_KEY)!).name).toBe("New Name");
+    expect(readFounder(localStorage.getItem(`${FOUNDER_KEY}:guest`)!).name).toBe("New Name");
     await act(async () => root?.unmount()); root = undefined;
     await mount(<PitchBuilder />); expect(container.textContent).toContain("New Name helps office teams");
   });
   it("keeps profile-derived details private until the founder explicitly reuses them", async () => {
     const profile = { name: "Owned startup", tagline: "Our pitch", description: "Description", audience: "Teams", websiteUrl: "https://example.com", stage: "Pilot", evidence: "Test notes", team: "Founder", assets: [] };
     await mount(<LaunchKit initialData={profile} fromProfile />);
-    expect(localStorage.getItem(FOUNDER_KEY)).toBeNull();
+    expect(localStorage.getItem(`${FOUNDER_KEY}:guest`)).toBeNull();
     await fill(container.querySelector("#kit-name")!, "Edited name");
-    expect(localStorage.getItem(FOUNDER_KEY)).toBeNull();
+    expect(localStorage.getItem(`${FOUNDER_KEY}:guest`)).toBeNull();
     await act(async () => button("Use these details in free tools").click());
-    expect(readFounder(localStorage.getItem(FOUNDER_KEY)!).name).toBe("Edited name");
+    expect(readFounder(localStorage.getItem(`${FOUNDER_KEY}:guest`)!).name).toBe("Edited name");
   });
   it("keeps multiple views in sync when browser storage fails, and recovers on the next successful save", async () => {
     function View() { const draft = useBrowserDraft("toolkit-storage-test", readFounder); return <><input value={draft.data.name} onChange={event => draft.update({ name: event.target.value })} /><span>{draft.data.name}</span><p role="alert">{draft.storageError}</p></>; }
@@ -115,7 +142,7 @@ describe("founder toolkit workflows", () => {
     expect([...container.querySelectorAll("input")].map(input => input.value)).toEqual(["Working draft", "Working draft"]);
     expect(container.textContent).toContain("could not save");
     save.mockRestore(); await fill(container.querySelector("input")!, "Recovered draft");
-    expect(localStorage.getItem("toolkit-storage-test")).toContain("Recovered draft");
+    expect(localStorage.getItem("toolkit-storage-test:guest")).toContain("Recovered draft");
     expect(container.textContent).not.toContain("could not save");
   });
   it("adds and prioritises an MVP feature, then removes it", async () => {
@@ -123,20 +150,20 @@ describe("founder toolkit workflows", () => {
     await act(async () => button("Add feature").click());
     const checkboxes = container.querySelectorAll('input[type="checkbox"]');
     await act(async () => (checkboxes[0] as HTMLInputElement).click());
-    expect(readMvp(localStorage.getItem("anshkosh-mvp-v1")!).features[0].promise).toBe(true);
+    expect(readMvp(localStorage.getItem("anshkosh-mvp-v1:guest")!).features[0].promise).toBe(true);
     await act(async () => (checkboxes[2] as HTMLInputElement).click());
     expect(container.textContent).toContain("Handle manually");
     await act(async () => (container.querySelector('button[aria-label="Remove Order list"]') as HTMLButtonElement).click());
-    expect(readMvp(localStorage.getItem("anshkosh-mvp-v1")!).features).toEqual([]);
+    expect(readMvp(localStorage.getItem("anshkosh-mvp-v1:guest")!).features).toEqual([]);
   });
   it("records and removes actual interview evidence", async () => {
     await mount(<ValidationPlanner />);
     await fill(container.querySelector("input")!, "Manager 1");
     await fill(container.querySelectorAll("textarea")[7], "Spent an hour collecting orders yesterday.");
     await act(async () => button("Add evidence note").click());
-    expect(readValidation(localStorage.getItem("anshkosh-validation-v1")!).notes[0]).toMatchObject({ participant: "Manager 1", observation: "Spent an hour collecting orders yesterday.", signal: "No clear signal" });
+    expect(readValidation(localStorage.getItem("anshkosh-validation-v1:guest")!).notes[0]).toMatchObject({ participant: "Manager 1", observation: "Spent an hour collecting orders yesterday.", signal: "No clear signal" });
     await act(async () => button("Remove note").click());
-    expect(readValidation(localStorage.getItem("anshkosh-validation-v1")!).notes).toHaveLength(0);
+    expect(readValidation(localStorage.getItem("anshkosh-validation-v1:guest")!).notes).toHaveLength(0);
   });
   it("allows typing a complete listing URL, persists statuses and removes a directory", async () => {
     await mount(<SubmissionTracker />);
@@ -145,10 +172,10 @@ describe("founder toolkit workflows", () => {
     await fill(listing, "https://example.com/listing");
     const select = container.querySelector("select")!;
     await act(async () => { select.value = "Accepted"; select.dispatchEvent(new Event("change", { bubbles: true })); });
-    expect(readSubmissions(localStorage.getItem("anshkosh-submissions-v1")!)[0]).toMatchObject({ status: "Accepted", listingUrl: "https://example.com/listing" });
+    expect(readSubmissions(localStorage.getItem("anshkosh-submissions-v1:guest")!)[0]).toMatchObject({ status: "Accepted", listingUrl: "https://example.com/listing" });
     expect(container.querySelector('a[href="https://example.com/listing"]')).not.toBeNull();
     await act(async () => (container.querySelector('button[aria-label="Remove Product Hunt from tracker"]') as HTMLButtonElement).click());
-    expect(readSubmissions(localStorage.getItem("anshkosh-submissions-v1")!)).toHaveLength(4);
+    expect(readSubmissions(localStorage.getItem("anshkosh-submissions-v1:guest")!)).toHaveLength(4);
   });
   it("copies the actual export and provides selectable text if clipboard access is blocked", async () => {
     const copy = vi.fn().mockResolvedValue(undefined); vi.stubGlobal("navigator", { clipboard: { writeText: copy } });

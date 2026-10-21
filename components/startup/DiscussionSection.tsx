@@ -46,7 +46,7 @@ function getInitials(name: string): string {
 
 // ─── Sub-components ──────────────────────────────────────────────────────────
 
-function CommentCard({ comment }: { comment: PublicComment }) {
+function CommentCard({ comment, replyHref }: { comment: PublicComment; replyHref?: string }) {
   return (
     <div className="group">
       {/* Main comment */}
@@ -73,6 +73,7 @@ function CommentCard({ comment }: { comment: PublicComment }) {
       </div>
 
       {/* Founder reply — nested, one level */}
+      {replyHref && <Link href={replyHref} className="mt-2 inline-flex min-h-11 items-center text-sm font-semibold text-coral-700 underline underline-offset-4">{comment.reply ? "Edit founder reply" : "Reply as founder"}</Link>}
       {comment.reply && (
         <div className="ml-8 mt-2">
           <div className="relative bg-gradient-to-br from-coral-50 to-orange-50 border border-coral-200 rounded-2xl p-5 shadow-sm">
@@ -254,6 +255,7 @@ function CommentForm({ startupId, viewer, availability, setAvailability, onSubmi
           {availability.available && <p className="mt-1">Try again in about {Math.ceil(availability.retryAfterSeconds / 60)} minutes.</p>}
           <button type="button" disabled={isPending} onClick={checkAvailability} className="mt-2 min-h-11 font-semibold underline">Check availability again</button>
         </div>}
+        {availability.allowed && !form.token && <p role="status" className="text-sm text-gray-600">Complete the CAPTCHA above to post your comment.</p>}
 
         {/* Error */}
         {error && (
@@ -305,6 +307,7 @@ interface DiscussionSectionProps {
   initialNextCursor: string | null;
   totalApprovedCount: number;
   viewer?: CommentViewer;
+  isOwner?: boolean;
   initialAvailability: CommentAvailability;
   initialPendingComments: PendingComment[];
 }
@@ -315,6 +318,7 @@ export default function DiscussionSection({
   initialNextCursor,
   totalApprovedCount,
   viewer,
+  isOwner = false,
   initialAvailability,
   initialPendingComments,
 }: DiscussionSectionProps) {
@@ -378,7 +382,7 @@ export default function DiscussionSection({
         ) : (
           <div className="space-y-4">
             {comments.map((comment) => (
-              <CommentCard key={comment.id} comment={comment} />
+              <CommentCard key={comment.id} comment={comment} replyHref={isOwner ? `/startup/${startupId}/discussion#comment-${comment.id}` : undefined} />
             ))}
           </div>
         )}

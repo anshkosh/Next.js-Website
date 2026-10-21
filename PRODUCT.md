@@ -28,8 +28,9 @@ Do not invent superiority claims, guaranteed validation, fundraising outcomes, o
 
 - The public experience includes the homepage, discovery and category browsing, an all-time startup leaderboard, search, startup profiles, Journal, FAQ, Contact, and policy pages.
 - The leaderboard includes only published startup profiles, ranked by their all-time signals (upvotes minus downvotes). Equal net totals share a rank. A visitor has one active vote per startup and can switch or remove it. Public founder-name search matches published founding teams. It offers profile links, voting and pagination; category and time filters are outside the owner-requested scope.
+- Members and backers can register an account and turn founder mode off. Founder mode starts on by default and can be changed during registration or in Profile settings; switching it off preserves saved work and permissions.
 - Founders create an account to submit a startup profile. Profiles are reviewed before publication; founders can manage profiles and updates through the existing account workflows.
-- Launch Support tools work without an account. Drafts are stored in the browser on the current device and shared across the tools; copy and download actions produce reusable materials.
+- Launch Support tools work without an account. Drafts are stored in the browser on the current device, separated by signed-in account (with a separate anonymous namespace) and shared across that person’s tools; copy and download actions produce reusable materials.
 - The under-construction banner and preview entry curtain communicate the early-access pilot.
 - The existing implementation is Next.js App Router, React, TypeScript and Tailwind, with the repository's established authentication, database and deployment setup. This is an existing website, not a new scaffold.
 - Current owner instructions and the implemented homepage take precedence over older wiki descriptions of homepage messaging or future campaign plans.
@@ -39,7 +40,7 @@ Do not invent superiority claims, guaranteed validation, fundraising outcomes, o
 - Current owner-confirmed scope: startup profiles and progress, visitor discovery and feedback, and free founder tools.
 - The founder toolkit includes customer validation planning, MVP scope planning, runway calculation, pitch building, launch graphics, reusable launch materials, a launch checklist, directory information and submission tracking.
 - Account and review requirements must be explained accurately. Free support does not bypass profile review or guarantee editorial placement.
-- Payments and preorders are not open during the pilot. Investments are not offered. Feedback, waitlists and expressions of interest do not create a financial obligation or verify a startup's claims.
+- Payments and preorders are not open during the pilot. Investments are not offered. Feedback and expressions of interest do not create a financial obligation or verify a startup's claims.
 - Validation is not investment and does not establish product-market fit. Do not imply securities, ownership, returns or guaranteed traction.
 - Directory acceptance, backlinks, indexing, rankings, traffic and funding are not guaranteed. Automated directory submission and backlink packages are not current offers.
 - Preserve existing routes, authentication, moderation and data behavior during visual refinements unless the owner explicitly changes the scope.

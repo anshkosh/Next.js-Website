@@ -391,6 +391,7 @@ export default async function StartupDetailPage(props: {
           <DiscussionSection
             startupId={startup.id}
             startupSlug={startup.slug}
+            isOwner={session?.user.id === startup.founderId}
             initialComments={initialComments.map((c) => ({
               ...c,
               repliedAt: c.repliedAt?.toISOString() ?? null,

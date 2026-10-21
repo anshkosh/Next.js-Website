@@ -43,6 +43,7 @@ function CommentReplyRow({ comment }: { comment: ApprovedComment }) {
       if (result.error) {
         setFeedback({ type: "error", msg: result.error });
       } else {
+        setReplyText(replyText.trim());
         setSavedReply(replyText.trim());
         setFeedback({ type: "success", msg: "Reply saved and now live." });
       }
@@ -64,7 +65,7 @@ function CommentReplyRow({ comment }: { comment: ApprovedComment }) {
   };
 
   return (
-    <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 space-y-4">
+    <div id={`comment-${comment.id}`} className="scroll-mt-24 bg-white rounded-2xl border border-gray-100 shadow-sm p-5 space-y-4">
       {/* Comment from visitor */}
       <div className="space-y-2">
         <div className="flex items-center gap-2 flex-wrap">
@@ -87,13 +88,14 @@ function CommentReplyRow({ comment }: { comment: ApprovedComment }) {
         </div>
         <textarea
           rows={3}
+          disabled={isSaving || isDeleting}
           value={replyText}
           onChange={(e) => setReplyText(e.target.value)}
           placeholder="Write a reply as the founder…"
           maxLength={2000}
           className="w-full px-4 py-3 text-sm rounded-xl border border-gray-200 bg-gray-50 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-coral-400 focus:border-transparent resize-none transition-all"
         />
-        <div className="text-right text-xs text-gray-400">{replyText.length}/2000</div>
+        <div className="text-right text-xs text-gray-600 tabular-nums">{replyText.length}/2000</div>
 
         {/* Feedback */}
         {feedback && (

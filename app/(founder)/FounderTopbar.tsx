@@ -7,7 +7,7 @@ import { useRouter } from "next/navigation";
 import { LogOut, LayoutDashboard, Settings, Menu, X } from "lucide-react";
 import { authClient } from "@/lib/auth-client";
 
-export default function FounderTopbar({ user }: { user: { name?: string | null; email?: string | null } }) {
+export default function FounderTopbar({ user }: { user: { name?: string | null; email?: string | null; founderMode: boolean } }) {
   const router = useRouter();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -36,11 +36,14 @@ export default function FounderTopbar({ user }: { user: { name?: string | null; 
           <Link href="/" className="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors">
             Feed
           </Link>
-          <Link href="/dashboard/journal" className="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors">Founder Journal</Link>
+          {user.founderMode && <Link href="/dashboard/journal" className="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors">Founder Journal</Link>}
           <Link href="/launch-support" className="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors">Free tools</Link>
           
-          <div className="relative">
+          <div className="relative" onKeyDown={event => { if (event.key === "Escape") { setIsDropdownOpen(false); (event.currentTarget.querySelector("button") as HTMLButtonElement | null)?.focus(); } }}>
             <button 
+              aria-label={`Account options for ${user.name || "your account"}`}
+              aria-expanded={isDropdownOpen}
+              aria-controls="account-options"
               onClick={() => setIsDropdownOpen(!isDropdownOpen)}
               className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-gray-200 hover:bg-gray-50 transition-colors"
             >
@@ -53,16 +56,16 @@ export default function FounderTopbar({ user }: { user: { name?: string | null; 
             {isDropdownOpen && (
               <>
                 <div className="fixed inset-0 z-10" onClick={() => setIsDropdownOpen(false)} />
-                <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-100 py-1 z-20">
+                <div id="account-options" className="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-lg border border-gray-100 py-1 z-20">
                   <div className="px-4 py-2 border-b border-gray-100 mb-1">
                     <p className="text-sm font-medium text-gray-900 truncate">{user.name}</p>
                     <p className="text-xs text-gray-500 truncate">{user.email}</p>
                   </div>
-                  <Link href="/dashboard" className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
+                  <Link href="/dashboard" onClick={() => setIsDropdownOpen(false)} className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
                     <LayoutDashboard size={16} /> Dashboard
                   </Link>
-                  <Link href="/settings" className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 opacity-50 cursor-not-allowed pointer-events-none">
-                    <Settings size={16} /> Settings (Soon)
+                  <Link href="/settings" onClick={() => setIsDropdownOpen(false)} className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
+                    <Settings size={16} /> Profile settings
                   </Link>
                   <hr className="my-1 border-gray-100" />
                   <button onClick={handleLogout} className="w-full flex items-center gap-2 px-4 py-2 text-sm text-red-600 hover:bg-red-50 text-left">
@@ -108,8 +111,9 @@ export default function FounderTopbar({ user }: { user: { name?: string | null; 
               Public Feed
             </Link>
             
-            <Link href="/dashboard/journal" onClick={() => setIsMenuOpen(false)} className="flex min-h-11 items-center px-2 text-gray-700 font-medium">Founder Journal</Link>
+            {user.founderMode && <Link href="/dashboard/journal" onClick={() => setIsMenuOpen(false)} className="flex min-h-11 items-center px-2 text-gray-700 font-medium">Founder Journal</Link>}
             <Link href="/launch-support" onClick={() => setIsMenuOpen(false)} className="flex min-h-11 items-center px-2 text-gray-700 font-medium">Free tools</Link>
+            <Link href="/settings" onClick={() => setIsMenuOpen(false)} className="flex min-h-11 items-center gap-2 px-2 text-gray-700 font-medium"><Settings size={20} /> Profile settings</Link>
             <button onClick={handleLogout} className="w-full flex items-center gap-2 px-2 py-2 text-red-600 font-medium hover:bg-red-50 rounded-md text-left">
               <LogOut size={20} /> Logout
             </button>

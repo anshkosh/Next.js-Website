@@ -21,7 +21,7 @@ export default function MobileNav({ authenticated }: { authenticated: boolean })
   }, [open]);
 
   return (
-    <div ref={container} className="lg:hidden" onKeyDown={event => {
+    <div ref={container} className="xl:hidden" onKeyDown={event => {
       if (event.key === "Escape" && open) {
         event.preventDefault();
         setOpen(false);
@@ -46,6 +46,7 @@ export default function MobileNav({ authenticated }: { authenticated: boolean })
             <Link href={authenticated ? "/dashboard" : "/login"} onClick={() => setOpen(false)} className="mt-2 rounded-xl bg-gray-900 px-3 py-3 text-center font-medium text-white hover:bg-gray-800">
               {authenticated ? "Dashboard" : "Login"}
             </Link>
+            {authenticated && <><Link href="/settings" onClick={() => setOpen(false)} className="flex min-h-11 items-center px-3 font-medium text-gray-700">Profile settings</Link><Link href="/logout" onClick={() => setOpen(false)} className="flex min-h-11 items-center px-3 font-medium text-red-700">Logout</Link></>}
             <div className="mt-3 flex items-center justify-between border-t border-gray-200 pt-3 dark:border-gray-700">
               <FullSiteSearch align="left" />
             </div>

@@ -66,6 +66,9 @@ export default async function DashboardPage() {
     redirect("/login");
   }
 
+  const profile = await db.user.findUnique({ where: { id: session.user.id }, select: { name: true, founderMode: true } });
+  if (!profile?.founderMode) return <div className="mx-auto w-full max-w-4xl px-4 py-12 sm:py-16"><h1 className="font-heading text-3xl font-bold text-gray-900">Welcome, {profile?.name || session.user.name}</h1><p className="mt-3 max-w-xl text-base leading-relaxed text-gray-600">Discover what people are building, ask useful questions and follow their progress. You don’t need a startup to take part.</p><div className="mt-8 flex flex-wrap gap-4"><Link href="/discover" className="inline-flex min-h-12 items-center rounded-xl bg-coral-600 px-5 font-semibold text-white hover:bg-coral-700">Explore startups</Link><Link href="/journal" className="inline-flex min-h-12 items-center rounded-xl border border-gray-300 bg-white px-5 font-semibold text-gray-800 hover:bg-gray-50">Read founder stories</Link></div><section className="mt-12 border-t border-gray-200 pt-6"><h2 className="text-lg font-semibold text-gray-900">Make yourself at home</h2><p className="mt-2 text-sm leading-relaxed text-gray-600">Your member or backer account can share feedback and apply to beta programs where available. Building a startup? Enable founder mode in your settings.</p><Link href="/settings" className="mt-3 inline-flex min-h-11 items-center font-semibold text-coral-700 underline underline-offset-4">Profile settings</Link></section></div>;
+
   const startups = await db.startup.findMany({
     where: { founderId: session.user.id },
     include: {
@@ -226,6 +229,9 @@ export default async function DashboardPage() {
 
         </div>
 
+        {isAtLimit && <p className="mb-6 text-sm text-gray-600">Your {maxStartups}-startup allowance is in use. Continue an existing draft below or manage a submitted startup.</p>}
+        <p className="mb-6 text-sm text-gray-600">Submissions are reviewed manually. We’ll email you when a decision is ready; contact us if you need a status update.</p>
+
         {/* Startup Cards */}
         {startups.length === 0 ? (
           <div className="bg-white py-24 px-4 text-center rounded-3xl border border-gray-100 shadow-sm flex flex-col items-center">
@@ -237,7 +243,7 @@ export default async function DashboardPage() {
             </h2>
             <p className="text-gray-400 mb-8 max-w-md text-sm">
               You haven’t submitted any startups. Add your first startup to get
-              discovered by thousands of makers and investors.
+              discovered by people interested in what you’re building.
             </p>
             <Link
               href="/startup/new"

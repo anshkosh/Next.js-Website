@@ -20,6 +20,7 @@ This wiki lives in the repository so it is reviewed with the code it describes. 
 
 **Product**
 - [Overview](product/Overview.md): what Anshkosh is, pilot rules, users and roles
+- [Accounts and founder mode](product/Accounts-and-Founder-Mode.md): registration, settings, workspace preferences and draft recovery
 - [Startup lifecycle](product/Startup-Lifecycle.md): application, moderation, live listing, updates
 - [Content, SEO and growth](product/Content-and-SEO.md): canonical host, sitemap, journal, listings, copy rules
 

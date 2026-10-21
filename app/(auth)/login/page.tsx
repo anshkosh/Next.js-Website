@@ -64,7 +64,7 @@ export default function LoginPage() {
           Welcome back
         </h1>
         <p className="mt-2 text-center text-sm text-gray-600">
-          Sign in to manage your startup profile
+          Sign in to explore startups and join your community
         </p>
       </div>
 

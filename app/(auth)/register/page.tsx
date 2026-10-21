@@ -1,5 +1,7 @@
 "use client";
 
+import { useHydrated } from "@/components/useHydrated";
+
 import { useState } from "react";
 import { authClient } from "@/lib/auth-client";
 import Link from "next/link";
@@ -8,7 +10,9 @@ import AuthHomeIcon from "@/components/auth/AuthHomeIcon";
 import PasswordField from "@/components/auth/PasswordField";
 
 export default function RegisterPage() {
+  const hydrated = useHydrated();
   const [name, setName] = useState("");
+  const [founderMode, setFounderMode] = useState(true);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -42,6 +46,7 @@ export default function RegisterPage() {
         name,
         email,
         password,
+        founderMode,
       });
 
       if (error) {
@@ -94,13 +99,14 @@ export default function RegisterPage() {
           Create your account
         </h1>
         <p className="mt-2 text-center text-sm text-gray-600">
-          Join Anshkosh to showcase your startup
+          Discover startups, share feedback, or build your own
         </p>
       </div>
 
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
         <div className="bg-white py-8 px-4 shadow-xl shadow-gray-200/50 sm:rounded-2xl sm:px-10 border border-gray-100">
           <form method="post" className="space-y-5" onSubmit={handleRegister}>
+            <fieldset disabled={!hydrated || loading} className="space-y-5">
             {error && (
               <div className="bg-red-50 border border-red-100 text-red-600 text-sm p-3 rounded-lg text-center">
                 {error}
@@ -146,7 +152,7 @@ export default function RegisterPage() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   className="appearance-none block w-full pl-10 px-3 py-2.5 border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-coral-500 focus:border-coral-500 sm:text-sm transition-colors"
-                  placeholder="you@startup.com"
+                  placeholder="you@example.com"
                 />
               </div>
             </div>
@@ -194,6 +200,10 @@ export default function RegisterPage() {
               )}
             </div>
 
+            <div className="rounded-xl bg-gray-50 p-4">
+              <label className="flex cursor-pointer items-start gap-3"><input name="founderMode" type="checkbox" checked={founderMode} onChange={e => setFounderMode(e.target.checked)} aria-describedby="register-mode-help" className="mt-1 h-5 w-5 accent-coral-600" /><span className="text-sm font-semibold text-gray-900">Enable founder mode</span></label>
+              <p id="register-mode-help" className="mt-2 text-sm leading-relaxed text-gray-600">Submitting a startup? Turn this on. Members and backers can turn it off. You can change it in Profile settings anytime.</p>
+            </div>
             <div className="flex items-start">
               <div className="flex items-center h-5">
                 <input
@@ -233,6 +243,7 @@ export default function RegisterPage() {
               {loading && <Loader2 size={16} className="animate-spin" />}
               Create Account
             </button>
+            </fieldset>
           </form>
 
           <div className="mt-8 text-center text-sm">
