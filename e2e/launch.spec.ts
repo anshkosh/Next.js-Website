@@ -195,6 +195,7 @@ test("private data export and confirmed deletion isolate owners, roll back failu
     await page.getByLabel("Deletion confirmation code", { exact: true }).fill(deletionCode);
     await page.getByLabel("Type DELETE to confirm", { exact: true }).fill("DELETE");
     await page.getByRole("button", { name: "Delete my account permanently", exact: true }).click();
+    await expect(page).toHaveURL(/\/account-deleted$/);
     await expect(page.getByRole("heading", { name: "Your account has been deleted", exact: true })).toBeVisible({ timeout: 30000 });
     expect(await db.user.count({ where: { id: owner.id } })).toBe(0);
     expect(await db.account.count({ where: { userId: owner.id } })).toBe(0);

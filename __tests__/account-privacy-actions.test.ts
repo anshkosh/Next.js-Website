@@ -1,7 +1,8 @@
 // @vitest-environment node
 import { beforeEach, expect, it, vi } from "vitest";
-const m = vi.hoisted(() => ({ session: vi.fn(), limit: vi.fn(), issue: vi.fn(), discard: vi.fn(), erase: vi.fn(), email: vi.fn(), revalidate: vi.fn() }));
+const m = vi.hoisted(() => ({ session: vi.fn(), limit: vi.fn(), issue: vi.fn(), discard: vi.fn(), erase: vi.fn(), email: vi.fn(), revalidate: vi.fn(), redirect: vi.fn() }));
 vi.mock("next/headers", () => ({ headers: async () => new Headers() }));
+vi.mock("next/navigation", () => ({ redirect: m.redirect, RedirectType: { replace: "replace" } }));
 vi.mock("@/lib/auth", () => ({ auth: { api: { getSession: m.session } } }));
 vi.mock("@/lib/utils/rate-limit", () => ({ checkRateLimit: m.limit }));
 vi.mock("@/lib/account-privacy", async original => ({ ...await original<object>(), issuePrivacyCode: m.issue, discardUnsentPrivacyCode: m.discard, eraseAccount: m.erase }));
@@ -12,6 +13,7 @@ const code = "b".repeat(32);
 beforeEach(() => {
   vi.resetAllMocks(); m.session.mockResolvedValue({ user: { id: "owner", emailVerified: true, banned: false }, session: { id: "active" } });
   m.limit.mockResolvedValue(true); m.issue.mockResolvedValue({ code, email: "owner@example.test", proof: { id: "proof", value: "hash-only" } }); m.discard.mockResolvedValue({});
+  m.redirect.mockImplementation(() => { throw new Error("confirmed deletion redirect"); });
 });
 it("emails a purpose-specific code but never returns it to the browser", async () => {
   const result = await requestAccountPrivacyCode({ purpose: "delete" });
@@ -37,12 +39,14 @@ it("requires exact confirmation and disallows client-selected targets before era
   expect(m.erase).not.toHaveBeenCalled(); expect(m.session).not.toHaveBeenCalled();
 });
 it("passes only the signed-in identity and refreshes visibility after confirmed deletion", async () => {
-  expect(await deleteMyAccount({ code, confirmation: "DELETE" })).toEqual({ success: true });
+  await expect(deleteMyAccount({ code, confirmation: "DELETE" })).rejects.toThrow("confirmed deletion redirect");
   expect(m.erase).toHaveBeenCalledWith({ userId: "owner", sessionId: "active" }, code);
   expect(m.revalidate).toHaveBeenCalledWith("/", "layout");
+  expect(m.redirect).toHaveBeenCalledWith("/account-deleted", "replace");
 });
 it("does not report deletion or refresh caches when the transaction fails", async () => {
   m.erase.mockRejectedValue(new Error("database failure"));
   expect(await deleteMyAccount({ code, confirmation: "DELETE" })).toHaveProperty("error");
   expect(m.revalidate).not.toHaveBeenCalled();
+  expect(m.redirect).not.toHaveBeenCalled();
 });

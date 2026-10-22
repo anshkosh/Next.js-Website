@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { authClient } from "@/lib/auth-client";
 import { useHydrated } from "@/components/useHydrated";
 import { deleteMyAccount, requestAccountPrivacyCode } from "@/app/actions/account-privacy.actions";
 
@@ -19,7 +18,6 @@ export default function AccountDataSettings({ emailVerified, canDelete }: { emai
   const [downloadError, setDownloadError] = useState("");
   const [deletionStatus, setDeletionStatus] = useState("");
   const [deletionError, setDeletionError] = useState("");
-  const [deleted, setDeleted] = useState(false);
   const disabled = !hydrated || !!busy || !emailVerified;
 
   async function requestCode(purpose: "export" | "delete") {
@@ -60,18 +58,10 @@ export default function AccountDataSettings({ emailVerified, canDelete }: { emai
     setBusy("delete");
     try {
       const result = await deleteMyAccount({ code: deletionCode, confirmation });
-      if (result.error) { setDeletionError(result.error); return; }
-      setDeleted(true); setDeletionCode(""); setConfirmation("");
-      try { await authClient.signOut(); } catch { /* All database sessions are already revoked. */ }
+      if (result?.error) setDeletionError(result.error);
     } catch { setDeletionError("We could not confirm deletion. Check your connection and account before retrying."); }
     finally { setBusy(""); }
   }
-
-  if (deleted) return <section role="status" className="rounded-2xl border border-gray-200 bg-white p-5 sm:p-7">
-    <h2 className="font-heading text-2xl font-bold text-gray-900">Your account has been deleted</h2>
-    <p className="mt-3 text-sm leading-relaxed text-gray-600">Your account and owned content are removed, and all sessions are revoked. Upload removal is queued and retried if needed. Backups are not erased immediately; contact us about retained backup copies. Clear this site’s browser storage to remove device-only drafts.</p>
-    <Link href="/" className="mt-4 inline-flex min-h-11 items-center font-semibold text-coral-700 underline underline-offset-4">Return to Anshkosh</Link>
-  </section>;
 
   return <section id="account-data" aria-labelledby="account-data-heading" className="scroll-mt-6 space-y-6 rounded-2xl border border-gray-200 bg-white p-5 sm:p-7">
     <h2 id="account-data-heading" className="font-heading text-2xl font-bold text-gray-900">Your data and account</h2>

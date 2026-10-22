@@ -42,6 +42,12 @@
 - The saved-file assertions passed. Direct privacy-helper imports now use the
   same relative server-module paths as the existing vote-store browser checks,
   avoiding Playwright's unresolved Next-only alias during rollback verification.
+- Rollback passed; the next run exposed the protected settings refresh replacing
+  the post-deletion confirmation with login. Confirmed deletion now redirects
+  to a public, no-index receipt before clearing stale browser auth cookies.
+  Root visibility invalidation and database session revocation remain intact;
+  failed transactions cannot redirect or report success. The browser must verify
+  both the receipt URL and confirmation before checking dependent data and files.
 
 ## 22 October 2026 — local account download and deletion preparation
 

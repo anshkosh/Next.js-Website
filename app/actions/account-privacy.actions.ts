@@ -1,5 +1,6 @@
 "use server";
 import { headers } from "next/headers";
+import { redirect, RedirectType } from "next/navigation";
 import { z } from "zod";
 import { AccountPrivacyError, deleteAccountSchema, discardUnsentPrivacyCode, eraseAccount, issuePrivacyCode, privacyPurposeSchema } from "@/lib/account-privacy";
 import { limitPrivacyAction, privacyActor } from "@/lib/account-privacy-auth";
@@ -40,8 +41,10 @@ export async function deleteMyAccount(input: unknown) {
     await limitPrivacyAction(actor.userId, "delete", 10);
     await eraseAccount(actor, parsed.data.code);
     revalidateSavedPath("/", "layout");
-    return { success: true };
   } catch (error) {
     return { error: error instanceof AccountPrivacyError ? error.message : "Your account could not be deleted. Nothing is confirmed deleted; please try again." };
   }
+  // The protected settings layout can no longer render after session revocation.
+  // Redirect outside the catch so a successful deletion is never reported failed.
+  redirect("/account-deleted", RedirectType.replace);
 }
