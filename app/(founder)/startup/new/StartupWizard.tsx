@@ -128,13 +128,13 @@ export default function StartupWizard({ userId, initialId, initialStep, initialD
       if (Object.keys(manualErrors).length > 0) {
         setErrors(manualErrors);
         const firstKey = Object.keys(manualErrors)[0];
-        setTimeout(() => {
+        {
           const el = document.querySelector(`[name="${firstKey}"]`);
           if (el) {
             el.scrollIntoView({ behavior: preferredScrollBehavior(), block: "center" });
             (el as HTMLElement).focus?.();
           }
-        }, 50);
+        }
         return false;
       }
     }
@@ -157,13 +157,13 @@ export default function StartupWizard({ userId, initialId, initialStep, initialD
       if (Object.keys(manualErrors).length > 0) {
         setErrors(manualErrors);
         const firstKey = Object.keys(manualErrors)[0];
-        setTimeout(() => {
+        {
           const el = document.querySelector(`[name="${firstKey}"]`);
           if (el) {
             el.scrollIntoView({ behavior: preferredScrollBehavior(), block: "center" });
             (el as HTMLElement).focus?.();
           }
-        }, 50);
+        }
         return false;
       }
       return true;
@@ -207,13 +207,13 @@ export default function StartupWizard({ userId, initialId, initialStep, initialD
         setErrors(stepErrors);
         const firstErrorKey = Object.keys(stepErrors)[0];
         if (firstErrorKey) {
-          setTimeout(() => {
+          {
             const el = document.querySelector(`[name="${firstErrorKey}"]`);
             if (el) {
               el.scrollIntoView({ behavior: preferredScrollBehavior(), block: "center" });
               (el as HTMLElement).focus?.();
             }
-          }, 50);
+          }
         }
         return false;
       }

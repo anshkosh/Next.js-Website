@@ -23,6 +23,9 @@
   browser journey exposed dropdown labels containing option text; explicit label
   associations correct that accessibility issue. Required gates are rerunning.
   Owner explicitly authorized fixing and deploying; merge waits for passing CI.
+- Release verification found and fixed delayed wizard validation autofocus stealing
+  the next field’s input. Login-return assertions were updated and cold category
+  compilation gets a bounded 60-second warm-up with a required 200 response.
 
 ## 22 October 2026 — authorized account settings release
 

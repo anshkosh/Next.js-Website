@@ -350,6 +350,8 @@ test("signup, real verification token, login, photo editing, private deck and st
   await expect(page.getByLabel("Feature 1 title", { exact: true })).toHaveAttribute("aria-invalid", "true");
   await page.getByLabel("Feature 1 title", { exact: true }).fill("A saved feature");
   await page.getByLabel("Feature 1 description", { exact: true }).fill("This feature should survive a browser refresh.");
+  await expect(page.getByLabel("Feature 1 title", { exact: true })).toHaveValue("A saved feature");
+  await expect(page.getByLabel("Feature 1 description", { exact: true })).toHaveValue("This feature should survive a browser refresh.");
   await page.getByRole("button", { name: "Next", exact: true }).click();
   await expect(page.getByText("A saved feature", { exact: true })).toBeVisible();
   await expect(page.getByText("Draft saved at", { exact: false })).toBeVisible();
