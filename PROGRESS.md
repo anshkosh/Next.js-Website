@@ -35,6 +35,10 @@
   is now retained and Next launches directly from the installed dependency so
   a package-runner lookup cannot delay it. The readiness endpoint and deadline
   remain unchanged; the complete browser gate is still required before merge.
+- The observable run started successfully and returned an export. Its next
+  failure was reading the attachment through Chromium's response-debugging API.
+  The test now reads the actual saved download, requiring successful completion,
+  valid JSON and the same owner/privacy assertions before continuing to deletion.
 
 ## 22 October 2026 — local account download and deletion preparation
 

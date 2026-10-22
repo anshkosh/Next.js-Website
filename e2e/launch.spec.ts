@@ -2,6 +2,7 @@ import { test, expect, type Page, type Browser } from "@playwright/test";
 import { PrismaClient, type Prisma } from "@prisma/client";
 import sharp from "sharp";
 import { randomUUID } from "node:crypto";
+import { readFile } from "node:fs/promises";
 import { PDFDocument } from "pdf-lib";
 import { founderEntryPath } from "../lib/founder-journal-seo";
 
@@ -159,7 +160,12 @@ test("private data export and confirmed deletion isolate owners, roll back failu
       page.getByRole("button", { name: "Download my data", exact: true }).click(),
     ]);
     expect(exportResponse.status()).toBe(200);
-    const exported = await exportResponse.json();
+    // Chromium may omit an attachment response body from its debugging API.
+    // Validate the actual saved file, including complete JSON and private fields.
+    expect(await downloaded.failure()).toBeNull();
+    const downloadPath = await downloaded.path();
+    expect(downloadPath).not.toBeNull();
+    const exported = JSON.parse(await readFile(downloadPath!, "utf8"));
     expect(exported.account.dateOfBirth).toBe("1996-02-29");
     expect(exported.startups.map((startup: { id: string }) => startup.id)).toEqual([owned.id]);
     expect(JSON.stringify(exported)).not.toContain("DO-NOT-EXPORT");
