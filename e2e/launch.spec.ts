@@ -650,7 +650,7 @@ test("founder lesson submission, update feedback and direct sign-out work togeth
     expect((await signedOut).ok()).toBe(true);
     await expect(page).toHaveURL(/\/login$/, { timeout: 30000 });
     await page.goto("/dashboard");
-    await expect(page).toHaveURL(/\/login$/);
+    await expect(page).toHaveURL(/\/login\?next=%2Fdashboard$/);
   } finally {
     await db.founderJournalRevision.deleteMany({ where: { entry: { startupId, title } } });
     await db.founderJournalEntry.deleteMany({ where: { startupId, title } });
@@ -863,12 +863,12 @@ test("expanded profile, optional emails and verified sign-in changes persist", a
     await page.getByRole("button", { name: "Update password", exact: true }).click();
     await expect(page.getByRole("status").filter({ hasText: "Password updated." })).toBeVisible();
     await otherPage.goto("/dashboard");
-    await expect(otherPage).toHaveURL(/\/login$/);
+    await expect(otherPage).toHaveURL(/\/login\?next=%2Fdashboard$/);
     await login(otherPage, changedEmail, changedPassword);
     await page.getByRole("button", { name: "Sign out other sessions", exact: true }).click();
     await expect(page.getByRole("status").filter({ hasText: "Other sessions signed out." })).toBeVisible();
     await otherPage.goto("/dashboard");
-    await expect(otherPage).toHaveURL(/\/login$/);
+    await expect(otherPage).toHaveURL(/\/login\?next=%2Fdashboard$/);
     await page.reload();
     await expect(page.getByLabel("Bio", { exact: true })).toHaveValue(saved.bio);
     await expect(page.getByRole("button", { name: "Save profile", exact: true })).toBeEnabled();
