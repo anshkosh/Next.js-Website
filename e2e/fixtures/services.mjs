@@ -21,6 +21,7 @@ const server = http.createServer(async (req, res) => {
       messages.push(JSON.parse(body.toString())); res.setHeader("Content-Type", "application/json"); res.end(JSON.stringify({ messageId: `test-${messages.length}` })); return;
     }
     const objectPath = new URL(req.url, "http://127.0.0.1:3181").pathname;
+    if (req.method === "DELETE") { objects.delete(objectPath); res.statusCode = 204; res.end(); return; }
     if (req.method === "PUT") { objects.set(objectPath, { bytes: body, type: req.headers["content-type"] }); res.setHeader("ETag", '"test-etag"'); res.end(); return; }
     const object = objects.get(objectPath);
     if (object) { res.setHeader("Content-Type", object.type || "application/octet-stream"); res.end(object.bytes); return; }

@@ -10,5 +10,6 @@ export async function emailPreferenceAllows(template: TemplateName, to: string) 
     where: { email: { equals: to, mode: "insensitive" } },
     select: { notifyStartupReviews: true, notifyVoteMilestones: true },
   });
-  return !user || user[preference];
+  // These templates refer to owned startups; a deleted recipient no longer has one.
+  return !!user && user[preference];
 }

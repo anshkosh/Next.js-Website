@@ -1,5 +1,28 @@
 # Website changelog
 
+## 22 October 2026 — account data controls (local preparation)
+
+- Add account-data JSON download and permanent account deletion in settings,
+  each protected by a separate single-use emailed confirmation code.
+- Require a final DELETE confirmation, revoke all sessions and remove owned
+  startup/journal records atomically. Staff closure uses a handover contact.
+- Block queued upload links and retry storage removal durably. Keep password,
+  provider tokens and other people's private records out of downloads.
+- Explain separate records, device drafts and retained backup copies explicitly.
+
+## 22 October 2026 — CSP and private account settings
+
+- Enforce a fresh script nonce on HTML responses, while retaining CAPTCHA,
+  approved video embeds, image editing and the PDF download sandbox.
+- Add an optional private date of birth, including validation and removal.
+- Add a prominent password shortcut in settings and an email-password setup
+  path for Google-only accounts. Keep current-password verification and revocation
+  of other sessions in the existing auth service.
+- Label profile-save times explicitly in IST.
+- Remove the duplicate founder-mode section from settings. Group profile,
+  private personal details and notifications, with responsive section links.
+  Password controls come before email changes and signing out other devices.
+
 ## 22 October 2026 — dashboard founder-mode placement
 
 - Move the founder-mode switch beside the dashboard welcome heading, showing

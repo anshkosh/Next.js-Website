@@ -1,4 +1,8 @@
 import { z } from "zod";
+import { accountToday } from "../account-dates";
+
+export const dateOfBirthSchema = z.union([z.literal(""), z.iso.date()])
+  .refine(value => !value || value <= accountToday(), "Date of birth cannot be in the future.");
 
 export const founderModeSchema = z.object({ founderMode: z.boolean() }).strict();
 
@@ -19,6 +23,7 @@ export const profileSettingsSchema = z
     bio: z.string().trim().max(500, "Keep your bio under 500 characters."),
     location: z.string().trim().max(100),
     websiteUrl: profileWebsiteSchema,
+    dateOfBirth: dateOfBirthSchema.optional(),
     notifyStartupReviews: z.boolean(),
     notifyVoteMilestones: z.boolean(),
   })

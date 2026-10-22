@@ -1,5 +1,81 @@
 # Progress
 
+## 22 October 2026 — authorized account settings release
+
+- Owner explicitly requested deployment of the prepared CSP, account settings,
+  birth-date, data download and confirmed deletion changes. This supersedes the
+  earlier hold before pushing. Root SSH, administrator MFA and PDF filtering stay
+  outside this release, as previously agreed.
+- Release branch: `codex/csp-account-settings`, verified against current main
+  `544a2f1`. Local lint/typecheck/build, 685 unit tests, ten deployment-helper
+  tests and dependency policy passed. CI must additionally run the isolated
+  PostgreSQL/browser journey before merge; production will not substitute for it.
+- Both migrations are additive. Existing account preferences are preserved;
+  deployment uses the normal gated workflow and automatic worker restart. The
+  preceding release remains the rollback target; these columns are compatible
+  with the preceding application. No manual privileged server change is needed.
+
+## 22 October 2026 — local account download and deletion preparation
+
+- Owner authorized adding data download and account deletion to settings.
+  The earlier hold before pushing still applies. No production account is used.
+- Separate emailed, hashed, purpose-bound, 15-minute proofs protect both actions;
+  strict current-user/session checks, rate protection and final DELETE confirmation
+  protect erasure. Staff accounts use the support handover route.
+- Owner-only JSON projections omit auth secrets and other people's private data.
+  Dependent account content is removed in one transaction; failures roll back.
+- Additive media queue fields support bounded sync-worker erasure retries. Marked
+  files are denied immediately; uploads and deletion share a lock to prevent late
+  writes. Optional startup emails are suppressed once the recipient account is gone.
+- Privacy copy distinguishes device/unlinked records and retained backups. No
+  automatic backup expiry is promised. Root SSH, PDF filtering and 2FA are unchanged.
+- Verification: 685 unit tests passed, two opt-in skipped; lint, typecheck,
+  production build, ten deployment-helper tests and diff checks passed. The
+  dependency policy passed with its three existing reviewed unresolved advisories
+  (14 affected entries); no dependency or exception changes were made.
+- Desktop/phone sample-account previews checked at 1366px and 390px with no
+  horizontal overflow. The DB-backed browser journey, including real rollback,
+  remains unrun because Docker's local database service is unavailable. It is a
+  required release check; production was not substituted. No push, deployment,
+  real confirmation email, customer deletion or production migration occurred.
+
+## 22 October 2026 — local CSP and account settings preparation
+
+- Owner authorized CSP, a visible change-password option and date of birth.
+  **Do not push until the owner has reviewed the prepared changes.**
+- Branch `codex/csp-account-settings`, based on live `544a2f1`.
+- Root-level `proxy.ts` supplies matching fresh CSP/SSR nonces. Removed the
+  inactive `app/proxy.ts`; authorization stays in layouts/actions. The early
+  curtain script and dynamically loaded Turnstile script receive the nonce.
+- Optional birth dates use validated YYYY-MM-DD text; empty means unspecified.
+  An additive column migration preserves existing accounts. No public projection
+  adds birth dates. Settings and privacy copy explain saving and removal.
+- Settings has password/security shortcuts, existing password-change protection,
+  a Google-only recovery path and explicitly labelled IST save times.
+- Owner follow-up: removed the duplicate founder-mode section from settings.
+  Grouped profile, private personal details and notifications in one save form;
+  password, email and other devices follow in the security card. Responsive jump
+  navigation makes each area directly reachable. Founder mode stays on dashboard.
+  Follow-up checks: lint, typecheck, production build and 38 focused account tests
+  passed. A temporary sample-account render verified all six jump destinations,
+  no founder switch, and no horizontal overflow at 1366px and 390px. Private
+  preview images were captured; this does not replace the unavailable DB suite.
+- Read PO #373 and Grok's linked report: 21 open and 15 new reports, mostly from
+  the preceding release. This batch addresses account save-time clarity; the
+  wider bug backlog is triaged separately and is not represented as fixed.
+  Dense leaderboard ties and the owner's dashboard-only-toggle requirement remain.
+- SSH root-password policy, administrator MFA and the PDF finding are deferred
+  for the owner's discussion with Arush. No server configuration changes or
+  production account mutations are part of this work.
+- Local verification: 625 unit tests passed, two opt-in tests skipped; lint,
+  typecheck, production build and ten deployment-helper tests passed. A production
+  preview verified matching fresh CSP/SSR nonces on four routes, asset exclusion,
+  and working search, cookie dismissal, mobile navigation and FAQ interaction with
+  no browser CSP errors. The complete DB-backed browser suite was not run locally
+  because Docker's database engine was unavailable. The dependency service timed
+  out; its gate correctly failed closed. No clean dependency audit is asserted.
+- No push, PR creation, deployment or production migration has been performed.
+
 ## 22 October 2026 — dashboard founder-mode header control
 
 - Owner requested the founder toggle at the top right beside the welcome heading.

@@ -3,7 +3,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { NextRequest } from "next/server";
 const m = vi.hoisted(() => ({ session: vi.fn(), shared: vi.fn(), submitted: vi.fn(), storage: vi.fn() }));
 vi.mock("@/lib/auth", () => ({ auth: { api: { getSession: m.session } } }));
-vi.mock("@/lib/db", () => ({ db: { founderJournalEntry: { findFirst: m.shared }, founderJournalRevision: { findFirst: m.submitted } } }));
+vi.mock("@/lib/db", () => ({ db: { mediaUpload: { findUnique: async () => null }, founderJournalEntry: { findFirst: m.shared }, founderJournalRevision: { findFirst: m.submitted } } }));
 vi.mock("@/lib/storage/r2", () => ({ r2: { send: m.storage } }));
 import { GET } from "../app/api/uploads/serve/[...path]/route";
 const path = ["founder-journal", "owner", "12345678-1234-1234-1234-123456789abc.webp"];
