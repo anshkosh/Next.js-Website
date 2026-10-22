@@ -1,11 +1,18 @@
 // @vitest-environment node
 import { vi, beforeEach, expect, it } from "vitest";
-const mock = vi.hoisted(() => ({ aggregate: vi.fn(), create: vi.fn(), lock: vi.fn(), eval: vi.fn() }));
+const mock = vi.hoisted(() => ({ aggregate: vi.fn(), create: vi.fn(), owner: vi.fn(), lock: vi.fn(), eval: vi.fn() }));
 vi.mock("@/lib/auth", () => ({ auth: {} }));
-vi.mock("@/lib/db", () => ({ db: { $transaction: async (fn: (tx: object) => unknown) => fn({ $queryRaw: mock.lock, mediaUpload: { aggregate: mock.aggregate, create: mock.create } }) } }));
+vi.mock("@/lib/db", () => ({ db: { $transaction: async (fn: (tx: object) => unknown) => fn({ $queryRaw: mock.lock, user: { findUnique: mock.owner }, mediaUpload: { aggregate: mock.aggregate, create: mock.create } }) } }));
 vi.mock("ioredis", () => ({ default: class { on() {} disconnect() {} eval = mock.eval; } }));
 import { limitUploads, reserveUpload } from "../lib/uploads/safety";
-beforeEach(() => { vi.clearAllMocks(); mock.aggregate.mockResolvedValue({ _sum: { bytes: 0 } }); mock.create.mockResolvedValue({ id: "reserved" }); });
+beforeEach(() => { vi.clearAllMocks(); mock.owner.mockResolvedValue({ id: "owner", banned: false }); mock.aggregate.mockResolvedValue({ _sum: { bytes: 0 } }); mock.create.mockResolvedValue({ id: "reserved" }); });
+it("rejects a deleted or banned owner before reserving more media", async () => {
+  for (const owner of [null, { id: "owner", banned: true }]) {
+    mock.owner.mockResolvedValue(owner);
+    await expect(reserveUpload("owner", "gallery/test.webp", 1)).rejects.toMatchObject({ status: 401 });
+  }
+  expect(mock.create).not.toHaveBeenCalled();
+});
 it("serializes concurrent quota reservations per account", async () => {
   expect(await reserveUpload("owner", "gallery/test.webp", 1000)).toEqual({ id: "reserved" });
   expect(mock.lock).toHaveBeenCalledOnce();

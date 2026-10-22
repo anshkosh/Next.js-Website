@@ -68,7 +68,7 @@ redaction using synthetic strings and temporary local files, never production lo
 npx playwright test
 ```
 
-The active browser gate is `e2e/launch.spec.ts` (eleven real end-to-end scenarios,
+The active browser gate is `e2e/launch.spec.ts` (fifteen real end-to-end scenarios,
 selected by `playwright.config.ts`). Other older spec files still contain planning
 placeholders and are not claimed as coverage. The active suite uses a disposable
 database and captured email/storage services; it must never point at production.
@@ -118,7 +118,13 @@ Before navigating after a mutation, wait for its persisted result. A voting butt
 6. `python3 -m unittest` for `deploy/test_upload_limit.py`
 
 The browser job applies migrations to isolated PostgreSQL, checks signal scoring
-and concurrent quotas, then runs all eight launch scenarios. Submission tests
+and concurrent quotas, then runs all fifteen launch scenarios. The independent
+privacy journey runs first and verifies export privacy, proof replay/purpose,
+real deletion rollback, ownership isolation, session revocation and object cleanup.
+It parses the actual saved JSON download and requires the public deletion receipt
+before checking erased rows, revoked sessions and queued upload removal.
+Its account fixture uses the HTTP auth endpoint warmed by the suite setup;
+separate scenarios exercise registration and verification through the UI. Submission tests
 verify the persisted pending-review status before navigation; cold compilation
 does not replace the state assertion. Failed browser runs retain traces/screenshots
 and the report for three days. Release builds also run TypeScript on the VPS.

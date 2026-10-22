@@ -60,18 +60,9 @@ export default function AccountSecuritySettings({ email, emailVerified, hasPassw
     } catch { setSessionsError("We could not confirm the sign-out. Please try again."); }
     finally { setBusy(""); }
   }
-  return <section aria-labelledby="security-heading" className="mt-10 space-y-8 border-t border-gray-200 pt-8">
-    <h2 id="security-heading" className="text-xl font-semibold text-gray-900">Sign-in and security</h2>
-    <form method="post" onSubmit={changeEmail} className="space-y-4">
-      <fieldset disabled={!hydrated || !!busy} className="space-y-4">
-        <legend className="mb-2 font-semibold text-gray-800">Email address</legend>
-        <p className="break-all text-sm text-gray-700">{email} <span className="ml-2 text-xs text-gray-600">{emailVerified ? "Verified" : "Not verified"}</span></p>
-        {!emailVerified && <button type="button" onClick={resendVerification} className={buttonClass}>{busy === "verify" ? "Sending…" : "Resend verification email"}</button>}
-        <div><label htmlFor="new-email" className="text-sm font-semibold text-gray-800">New email address</label><input id="new-email" name="newEmail" autoComplete="email" type="email" required maxLength={254} value={newEmail} onChange={e => { setNewEmail(e.target.value); setEmailError(""); setEmailStatus(""); }} className={inputClass} /></div>
-        <button className={buttonClass}>{busy === "email" ? "Sending…" : "Change email"}</button>
-      </fieldset>
-      {emailError && <p role="alert" className="text-sm text-red-700">{emailError}</p>}<p role="status" className="text-sm text-green-800">{emailStatus}</p>
-    </form>
+  return <section aria-labelledby="security-heading" className="space-y-8 rounded-2xl border border-gray-200 bg-white p-5 sm:p-7">
+    <h2 id="security-heading" className="font-heading text-2xl font-bold text-gray-900">Sign-in and security</h2>
+    <div id="change-password" className="scroll-mt-6">
     {hasPassword ? <form method="post" onSubmit={changePassword} className="space-y-4">
       <fieldset disabled={!hydrated || !!busy} className="space-y-4">
         <legend className="mb-2 font-semibold text-gray-800">Change password</legend>
@@ -84,9 +75,21 @@ export default function AccountSecuritySettings({ email, emailVerified, hasPassw
         <button className={buttonClass}>{busy === "password" ? "Updating…" : "Update password"}</button>
       </fieldset>
       {passwordError && <p role="alert" className="text-sm text-red-700">{passwordError}</p>}<p role="status" className="text-sm text-green-800">{passwordStatus}</p>
-    </form> : <p className="text-sm leading-relaxed text-gray-600">You sign in with Google. Use password recovery to set a password for email sign-in.</p>}
+    </form> : <div className="space-y-3"><h3 className="font-semibold text-gray-800">Set an email sign-in password</h3><p className="text-sm leading-relaxed text-gray-600">You sign in with Google. Request a password-recovery email to set a password for email sign-in.</p><Link href="/forgot-password" className="inline-flex min-h-11 items-center text-sm font-semibold text-coral-700 underline underline-offset-4">Set password by email</Link></div>}
     <Link href="/forgot-password" className="inline-flex min-h-11 items-center text-sm font-semibold text-coral-700 underline underline-offset-4">Reset a forgotten password</Link>
-    <div className="space-y-3 border-t border-gray-200 pt-6">
+    </div>
+    <form id="email-address" method="post" onSubmit={changeEmail} className="scroll-mt-6 space-y-4 border-t border-gray-200 pt-6">
+      <fieldset disabled={!hydrated || !!busy} className="space-y-4">
+        <legend className="mb-2 font-semibold text-gray-800">Email address</legend>
+        <p className="break-all text-sm text-gray-700">{email} <span className="ml-2 text-xs text-gray-600">{emailVerified ? "Verified" : "Not verified"}</span></p>
+        {!emailVerified && <button type="button" onClick={resendVerification} className={buttonClass}>{busy === "verify" ? "Sending…" : "Resend verification email"}</button>}
+        <div><label htmlFor="new-email" className="text-sm font-semibold text-gray-800">New email address</label><input id="new-email" name="newEmail" autoComplete="email" type="email" required maxLength={254} value={newEmail} onChange={e => { setNewEmail(e.target.value); setEmailError(""); setEmailStatus(""); }} className={inputClass} /></div>
+        <p className="text-sm text-gray-600">{emailVerified ? "Confirm the change from your current email, then verify your new address." : "Your new address will need email verification."}</p>
+        <button className={buttonClass}>{busy === "email" ? "Sending…" : "Change email"}</button>
+      </fieldset>
+      {emailError && <p role="alert" className="text-sm text-red-700">{emailError}</p>}<p role="status" className="text-sm text-green-800">{emailStatus}</p>
+    </form>
+    <div id="other-devices" className="scroll-mt-6 space-y-3 border-t border-gray-200 pt-6">
       <h3 className="font-semibold text-gray-800">Other devices</h3><p className="text-sm text-gray-600">End your other signed-in sessions while keeping this device connected.</p>
       <button type="button" disabled={!hydrated || !!busy} onClick={revokeSessions} className={buttonClass}>{busy === "sessions" ? "Signing out…" : "Sign out other sessions"}</button>
       {sessionsError && <p role="alert" className="text-sm text-red-700">{sessionsError}</p>}<p role="status" className="text-sm text-green-800">{sessionsStatus}</p>

@@ -18,6 +18,8 @@ export async function GET(
     // Storage also holds encrypted operations backups; never expose arbitrary keys.
     if (!["logos", "gallery", "founders", "pitch-decks", "journal", "update-images", "founder-journal"].includes(resolvedParams.path[0])) return new NextResponse("Not Found", { status: 404 });
     if (resolvedParams.path.some(part => !/^[a-zA-Z0-9._-]+$/.test(part) || part === "." || part === "..")) return new NextResponse("Not Found", { status: 404 });
+    const recorded = await db.mediaUpload.findUnique({ where: { key }, select: { erasureRequestedAt: true } });
+    if (recorded?.erasureRequestedAt) return new NextResponse("Not Found", { status: 404, headers: { "Cache-Control": "private, no-store" } });
     const isPitchDeck = key.startsWith("pitch-decks/");
     const isFounderJournal = key.startsWith("founder-journal/");
     if (isFounderJournal) {

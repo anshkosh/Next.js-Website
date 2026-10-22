@@ -7,6 +7,7 @@ import { PreEntryCurtain } from "@/components/site/PreEntryCurtain";
 import { DEFAULT_SOCIAL_IMAGE, SITE_URL, absoluteUrl, PILOT_DESCRIPTION } from "@/lib/seo";
 import { viewerSession } from "@/lib/viewer-session";
 import { CURTAIN_SEEN_KEY } from "@/lib/curtain";
+import { headers } from "next/headers";
 
 const BASE_URL = SITE_URL;
 
@@ -50,6 +51,7 @@ export default async function RootLayout({
   children: React.ReactNode;
 }>) {
   const authenticated = Boolean(await viewerSession());
+  const nonce = (await headers()).get("x-nonce") ?? undefined;
   return (
     <html
       lang="en"
@@ -59,7 +61,7 @@ export default async function RootLayout({
     >
       <head>
         {/* Hide the preview curtain before first paint once this session has entered. */}
-        <script dangerouslySetInnerHTML={{ __html: `try{if(sessionStorage.getItem(${JSON.stringify(CURTAIN_SEEN_KEY)})==="1")document.documentElement.dataset.curtainSeen=""}catch(e){}` }} />
+        <script nonce={nonce} dangerouslySetInnerHTML={{ __html: `try{if(sessionStorage.getItem(${JSON.stringify(CURTAIN_SEEN_KEY)})==="1")document.documentElement.dataset.curtainSeen=""}catch(e){}` }} />
       </head>
       <body className="min-h-full flex flex-col">
         <PreEntryCurtain authenticated={authenticated} />

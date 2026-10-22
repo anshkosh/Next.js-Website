@@ -10,6 +10,7 @@ vi.mock("next/navigation", () => ({ useRouter: () => ({ push: vi.fn() }), usePat
 vi.mock("next/font/google", () => ({ Inter: () => ({ variable: "inter" }), Oswald: () => ({ variable: "oswald" }) }));
 vi.mock("@/components/site/PreEntryCurtain", () => ({ PreEntryCurtain: () => null }));
 vi.mock("@/lib/viewer-session", () => ({ viewerSession: async () => null }));
+vi.mock("next/headers", () => ({ headers: async () => new Headers({ "x-nonce": "root-test-nonce" }) }));
 
 let root: Root, host: HTMLDivElement;
 beforeEach(() => {
@@ -52,4 +53,5 @@ it("renders a light-only root without a script restoring dark preferences", asyn
   expect(html).toContain('color-scheme:light');
   expect(html).not.toContain('classList.add("dark")');
   expect(html).not.toContain("anshkosh-theme");
+  expect(html).toContain('nonce="root-test-nonce"');
 });

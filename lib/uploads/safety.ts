@@ -83,6 +83,8 @@ export async function reserveUpload(userId: string, key: string, bytes: number) 
   return db.$transaction(async tx => {
     // PostgreSQL returns void for this lock; cast so Prisma can deserialize the result.
     await tx.$queryRaw`SELECT pg_advisory_xact_lock(hashtext(${`uploads:${userId}`}))::text`;
+    const owner = await tx.user.findUnique({ where: { id: userId }, select: { id: true, banned: true } });
+    if (!owner || owner.banned) throw new UploadError("Sign in again before uploading.", 401);
     const total = await tx.mediaUpload.aggregate({ where: { userId }, _sum: { bytes: true } });
     const daily = await tx.mediaUpload.aggregate({ where: { userId, createdAt: { gte: new Date(Date.now() - 86400000) } }, _sum: { bytes: true } });
     if ((total._sum.bytes || 0) + bytes > 500 * 1024 * 1024) throw new UploadError("Your account's 500 MB media allowance is full. Contact support.", 429);

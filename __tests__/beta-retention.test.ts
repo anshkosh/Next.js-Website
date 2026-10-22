@@ -27,6 +27,7 @@ it("purges only closed old consent records, expired newsletter tokens and aged d
   await applyRequestRetention(now);
   expect(mock.remove).toHaveBeenCalledWith({ where: { id: { in: ["old-closed"] }, status: "DECLINED", reviewedAt: { lt: daysAgo(365, now) } } });
   expect(mock.verification).toHaveBeenCalledWith({ where: { identifier: { startsWith: "newsletter:" }, expiresAt: { lt: now } } });
+  expect(mock.verification).toHaveBeenCalledWith({ where: { identifier: { startsWith: "account-privacy:" }, expiresAt: { lt: now } } });
   expect(mock.outbox).toHaveBeenCalledWith({ where: { deliveredAt: { lt: daysAgo(7, now) } } });
   expect(mock.newsletter).toHaveBeenCalledWith({ where: { OR: [{ unsubscribedAt: { lt: daysAgo(180, now) } }, { confirmedAt: null, subscribedAt: { lt: daysAgo(180, now) } }] } });
 });

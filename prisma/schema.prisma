@@ -20,6 +20,8 @@ model User {
   bio           String    @default("")
   location      String    @default("")
   websiteUrl    String    @default("")
+  // Optional, private calendar date (YYYY-MM-DD); empty means not provided.
+  dateOfBirth   String    @default("")
   notifyStartupReviews Boolean @default(true)
   notifyVoteMilestones Boolean @default(true)
   banned        Boolean   @default(false)
@@ -159,8 +161,12 @@ model MediaUpload {
   key       String   @unique
   bytes     Int
   createdAt DateTime @default(now())
+  // Durable erasure queue, kept until object storage confirms removal.
+  erasureRequestedAt DateTime?
+  erasureAttempts Int @default(0)
 
   @@index([userId, createdAt])
+  @@index([erasureRequestedAt])
 }
 
 model StartupFounder {

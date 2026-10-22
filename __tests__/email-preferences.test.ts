@@ -16,7 +16,8 @@ it("keeps verification, newsletter consent and staff notifications independent",
     expect(await emailPreferenceAllows(template, "member@example.test")).toBe(true);
   expect(find).not.toHaveBeenCalled();
 });
-it("preserves existing delivery to recipients without an account", async () => {
+it("stops optional startup notifications after account deletion", async () => {
   find.mockResolvedValue(null);
-  expect(await emailPreferenceAllows("upvote_milestone", "visitor@example.test")).toBe(true);
+  expect(await emailPreferenceAllows("upvote_milestone", "visitor@example.test")).toBe(false);
+  expect(await emailPreferenceAllows("startup_approved", "visitor@example.test")).toBe(false);
 });

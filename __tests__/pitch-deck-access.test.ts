@@ -1,9 +1,9 @@
 // @vitest-environment node
 import { vi, beforeEach, expect, it } from "vitest";
 import { NextRequest } from "next/server";
-const mock = vi.hoisted(() => ({ session: vi.fn(), profiles: vi.fn(), send: vi.fn() }));
+const mock = vi.hoisted(() => ({ session: vi.fn(), profiles: vi.fn(), send: vi.fn(), media: vi.fn() }));
 vi.mock("@/lib/auth", () => ({ auth: { api: { getSession: mock.session } } }));
-vi.mock("@/lib/db", () => ({ db: { startup: { findMany: mock.profiles } } }));
+vi.mock("@/lib/db", () => ({ db: { mediaUpload: { findUnique: mock.media }, startup: { findMany: mock.profiles } } }));
 vi.mock("@/lib/storage/r2", () => ({ r2: { send: mock.send } }));
 import { GET } from "../app/api/uploads/serve/[...path]/route";
 import { publicPitchDeck } from "../lib/pitch-deck-access";
@@ -12,8 +12,15 @@ const parts = ["pitch-decks", owner, "6b0ef103-2a8d-4232-8cff-68cf9a8a1ea9.pdf"]
 const url = `/api/uploads/serve/${parts.join("/")}`;
 const get = (path = parts) => GET(new NextRequest(`https://www.anshkosh.com${url}`), { params: Promise.resolve({ path }) });
 beforeEach(() => {
-  vi.clearAllMocks(); mock.profiles.mockResolvedValue([]); mock.session.mockResolvedValue(null);
+  vi.clearAllMocks(); mock.media.mockResolvedValue(null); mock.profiles.mockResolvedValue([]); mock.session.mockResolvedValue(null);
   mock.send.mockResolvedValue({ Body: { transformToByteArray: async () => new Uint8Array([1]) }, ContentType: "application/pdf" });
+});
+it("blocks direct storage access immediately while account erasure is queued", async () => {
+  mock.media.mockResolvedValue({ erasureRequestedAt: new Date() });
+  mock.profiles.mockResolvedValue([{ metadata: { pitchDeckUrl: url, pitchDeckVisibility: "public" } }]);
+  const response = await get(); expect(response.status).toBe(404);
+  expect(response.headers.get("cache-control")).toBe("private, no-store");
+  expect(mock.send).not.toHaveBeenCalled();
 });
 it("denies direct unauthenticated access to unlinked or private decks", async () => {
   expect((await get()).status).toBe(404); expect(mock.send).not.toHaveBeenCalled();

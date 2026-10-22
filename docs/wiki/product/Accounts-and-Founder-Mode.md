@@ -5,6 +5,9 @@ to update their display name, profile photo, bio (500 characters), location,
 website, startup-review emails and vote-milestone emails. Photos use the existing
 image editor, rewrite, upload quotas and an owned-upload check on save. Profile
 details do not replace a startup's published founding-team fields.
+An optional date of birth is stored as a validated calendar date (YYYY-MM-DD),
+separate from public profile projections. Empty means unspecified. Owners can
+clear the input and save to remove it. It is not proof of age or a new age gate.
 The email worker checks optional notification preferences at delivery time;
 verification, recovery and essential messages remain independent. Newsletter
 consent retains its existing double-opt-in/unsubscribe flow.
@@ -14,6 +17,13 @@ sent to the new address; the sign-in identity changes only after both steps.
 Settings offers verification resend for unverified identities, current-password
 change (revoking other sessions), password recovery and signing out other devices.
 Google-only accounts use recovery to create an email sign-in password.
+Settings groups profile, private personal details and optional notifications before
+sign-in/security. A desktop side menu becomes a compact two-column jump menu on
+phones, with direct links to each group, password, email and other devices.
+The password form comes before email changes and device sign-out.
+Password accounts use the existing current-password change form; Google-only
+accounts see a labelled password-setup email path. Profile-save confirmations
+explicitly use Asia/Kolkata and include the IST label.
 Profile settings are linked from public, mobile, founder and admin navigation.
 
 Founder mode starts **off** for new accounts, including Google registration, via
@@ -22,7 +32,8 @@ unchecked opt-in. Existing accounts retain their saved preference. The original
 database column's `true` default remains for compatibility with the historical
 backfill; registrations explicitly persist the auth default or chosen opt-in.
 Anyone can change their own mode later using the dashboard switch, which saves
-immediately. The same control is also available in profile settings.
+immediately. Founder mode is managed on the dashboard only; settings has no
+duplicate toggle, explanation or Undo offer.
 
 With founder mode off, the dashboard offers discovery, stories and feedback rather
 than startup management. Starting a submission asks the member to enable founder
@@ -40,7 +51,7 @@ its existing permission checks. Founder mode grants no moderation or account
 administration rights. Backer accounts do not enable investments/payments.
 
 Profile settings accept a strict allowlist (`name`, `image`, `bio`, `location`,
-`websiteUrl`, `notifyStartupReviews`, `notifyVoteMilestones`) for the signed-in,
+`websiteUrl`, optional `dateOfBirth`, `notifyStartupReviews`, `notifyVoteMilestones`) for the signed-in,
 non-banned account. The dashboard action accepts only boolean `founderMode`.
 Better Auth updates the current user. Existing admin/reviewer roles are independent
 of this preference. No account ID, verification status or permission role is
@@ -57,8 +68,8 @@ The dashboard places a compact founder-mode toggle beside the welcome heading,
 at the top right on wider screens and below the greeting on phones. The old
 bottom-of-dashboard card is removed. Only the switch and “Founder mode On/Off”
 are visible in the dashboard header; help and save announcements remain available
-to screen readers. Profile settings retains its full explanation and short-lived
-Undo offer. Changes save immediately on both surfaces. Public
+to screen readers. Profile settings has no founder-mode control. Changes save
+immediately on the dashboard. Public
 visibility and review-state rules above remain the same. Startup deletion uses
 the shared confirmation dialog and stays at the bottom of each dashboard card.
 
@@ -98,6 +109,8 @@ reply action, rather than submitting another top-level comment.
 Public waitlist wording has been removed. The old `/waitlist` address remains only
 as a redirect for existing external links; it does not collect registrations.
 
-Account retirement, credential resets, bot execution and changes to ranking/test
-activity are outside this website change. The report's intermittent first-click
+Account settings also provides emailed-code account data downloads and deletion;
+see [Account privacy controls](../engineering/Account-Privacy-Controls.md).
+Credential resets, bot execution and changes to ranking/test activity are outside
+the site-review change. The report's intermittent first-click
 Turnstile failure remains unconfirmed; challenge protections stay enabled.

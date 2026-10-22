@@ -62,7 +62,7 @@ describe("self-service profiles through real auth endpoints", () => {
         new Request(`${origin}/api/auth/update-user`, {
           method: "POST",
           headers: { origin, cookie, "content-type": "application/json" },
-          body: JSON.stringify({ name: "Updated member", founderMode: false, bio: "Building useful things", location: "Hyderabad", websiteUrl: "https://example.test", notifyStartupReviews: false, notifyVoteMilestones: false }),
+          body: JSON.stringify({ name: "Updated member", founderMode: false, bio: "Building useful things", location: "Hyderabad", websiteUrl: "https://example.test", dateOfBirth: "1996-02-29", notifyStartupReviews: false, notifyVoteMilestones: false }),
         }),
       );
       expect(saved.status).toBe(200);
@@ -79,7 +79,7 @@ describe("self-service profiles through real auth endpoints", () => {
       expect((await session.json()).user).toMatchObject({
         name: "Updated member",
         founderMode: false,
-        bio: "Building useful things", location: "Hyderabad", websiteUrl: "https://example.test",
+        bio: "Building useful things", location: "Hyderabad", websiteUrl: "https://example.test", dateOfBirth: "1996-02-29",
         notifyStartupReviews: false, notifyVoteMilestones: false,
         role,
       });
@@ -94,6 +94,18 @@ describe("self-service profiles through real auth endpoints", () => {
       expect(data.user.find((row) => row.id === user.id)?.founderMode).toBe(
         false,
       );
+      const invalidBirthDate = await instance.handler(new Request(`${origin}/api/auth/update-user`, {
+        method: "POST", headers: { origin, cookie, "content-type": "application/json" },
+        body: JSON.stringify({ dateOfBirth: "2999-01-01" }),
+      }));
+      expect(invalidBirthDate.status).toBe(400);
+      expect(user.dateOfBirth).toBe("1996-02-29");
+      const clearedBirthDate = await instance.handler(new Request(`${origin}/api/auth/update-user`, {
+        method: "POST", headers: { origin, cookie, "content-type": "application/json" },
+        body: JSON.stringify({ dateOfBirth: "" }),
+      }));
+      expect(clearedBirthDate.status).toBe(200);
+      expect(data.user.find(row => row.id === user.id)?.dateOfBirth).toBe("");
     }
     const anonymous = await instance.handler(
       new Request(`${origin}/api/auth/update-user`, {

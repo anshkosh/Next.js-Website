@@ -58,6 +58,8 @@ function loadTurnstile(): Promise<void> {
     const newScript = document.createElement("script");
     newScript.id = TURNSTILE_SCRIPT_ID;
     newScript.src = TURNSTILE_SCRIPT_SRC;
+    const nonce = document.querySelector<HTMLScriptElement>("script[nonce]")?.nonce;
+    if (nonce) newScript.nonce = nonce;
     newScript.async = true;
     newScript.defer = true;
     newScript.addEventListener("load", handleLoad, { once: true });

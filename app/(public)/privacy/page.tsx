@@ -8,11 +8,17 @@ export const metadata = seoMetadata({
 });
 
 const sections = [
+  { title: "Account downloads and deletion", paragraphs: [
+    "Account settings offers a JSON download of your account profile, preferences, linked sign-in provider names, owned startups, journal content and upload links. File attachments are downloaded separately. Passwords, sign-in tokens, internal security or moderation records, other people's comments and beta applicants' contact details are excluded. Only records linked to your account are included; anonymous voting/comment records, beta applications to other startups and newsletter subscriptions are managed separately.",
+    "Both downloading account data and deleting an account require a separate, single-use confirmation code sent to the account's current verified email address. Codes expire after 15 minutes. Opening an email does not delete an account. Deletion requires entering the code and typing DELETE in settings. Accounts with staff access need a responsibility handover through hello@anshkosh.com before closure.",
+    "Confirmed deletion removes the active account, sign-in methods, sessions, owned startups and journal entries, including drafts and published content. Owned startups' beta programs and application records are also removed. Recorded uploads are blocked from new requests while object removal is queued and retried. Minimal upload identifiers remain until storage removal succeeds. Browser/device drafts, separately collected records, cached or downloaded copies held by others, and backup copies are not automatically erased by this action. Backups are managed separately and are not erased immediately; contact us about retained copies or a broader privacy request. Download any wanted data and attachments before confirming deletion.",
+  ] },
   { title: "Newsletter consent and confirmation", paragraphs: [
     "Newsletter signup is optional and uses a separate, unchecked consent choice. We verify your request by an email confirmation link valid for 24 hours. A submitted address is not an active subscriber until confirmed; older unconfirmed entries are not automatically activated. We record the request time, confirmation time and consent-notice version. Security checks and network/email request limits help prevent automated signups.",
     "You can withdraw newsletter consent without an account using your unsubscribe link, or email hello@anshkosh.com. Withdrawal excludes the address from newsletter delivery. Hourly housekeeping removes expired confirmation records; withdrawn and never-confirmed subscriber records are removed after 180 days. We do not use beta tester applications as newsletter consent.",
   ] },
   { title: "Information sent to Anshkosh", paragraphs: [
+    "You may optionally save a date of birth in account settings. It is private account information, is not displayed on public profiles, and can be removed by clearing the date and saving your profile. Providing it does not independently verify your age.",
     "Account registration and sign-in handle your name, email, credentials and session information. Startup submissions include the profile, founding team, links, media and contact details you provide. These records are stored on our servers for account, review and publishing workflows.",
     "Discussion forms send your display name, email and comment text for moderation. Contact forms send your contact details and message. Newsletter signups send your email so we can send the updates you request. These submissions are separate from the browser-only planning tools.",
   ] },
@@ -59,7 +65,7 @@ export default function PrivacyPage() {
       <div className="mx-auto max-w-3xl px-4">
         <span className="mb-4 block text-xs font-semibold uppercase tracking-widest text-coral-500">Pilot privacy notice</span>
         <h1 className="mb-4 font-heading text-4xl font-bold tracking-tight text-gray-900 md:text-5xl">Privacy Notice</h1>
-        <p className="mb-8 text-sm text-gray-600">Updated: 20 October 2026 · Data fiduciary/operator: Anshkosh Pvt Ltd · Grievance contact: Hyderabad, Telangana, India · <a className="font-medium text-coral-700 underline" href="mailto:hello@anshkosh.com">hello@anshkosh.com</a></p>
+        <p className="mb-8 text-sm text-gray-600">Updated: 22 October 2026 · Data fiduciary/operator: Anshkosh Pvt Ltd · Grievance contact: Hyderabad, Telangana, India · <a className="font-medium text-coral-700 underline" href="mailto:hello@anshkosh.com">hello@anshkosh.com</a></p>
         <p className="mb-8 text-base leading-relaxed text-gray-600">This notice describes personal information used for the Anshkosh startup discovery pilot, including accounts, discussions, voting, beta tester requests and free founder tools. The beta tester consent notice gives the specific details shown when you submit a tester request.</p>
         <div className="space-y-12">
           {sections.map(section => <section key={section.title} className="border-t border-gray-100 pt-8">

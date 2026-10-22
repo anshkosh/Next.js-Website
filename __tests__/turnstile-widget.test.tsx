@@ -18,6 +18,9 @@ describe("TurnstileWidget", () => {
   });
 
   it("renders when Cloudflare loads during script insertion", async () => {
+    const trustedScript = document.createElement("script");
+    trustedScript.nonce = "test-page-nonce";
+    document.head.appendChild(trustedScript);
     const render = vi.fn().mockReturnValue("widget-1");
     const remove = vi.fn();
     const appendChild = vi.spyOn(document.head, "appendChild").mockImplementation((node) => {
@@ -36,6 +39,7 @@ describe("TurnstileWidget", () => {
     });
 
     expect(appendChild).toHaveBeenCalledOnce();
+    expect((appendChild.mock.calls[0][0] as HTMLScriptElement).nonce).toBe("test-page-nonce");
     expect(render).toHaveBeenCalledOnce();
     expect(render.mock.calls[0][1]).toMatchObject({ sitekey: "test-site-key" });
 

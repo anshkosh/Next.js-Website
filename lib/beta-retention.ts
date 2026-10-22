@@ -26,6 +26,7 @@ export async function applyRequestRetention(now = new Date()) {
   const oldClosed = await db.betaTesterRequest.findMany({ where: { status: "DECLINED", reviewedAt: { lt: daysAgo(365, now) } }, take: 500, select: { id: true } });
   if (oldClosed.length) await db.betaTesterRequest.deleteMany({ where: { id: { in: oldClosed.map(row => row.id) }, status: "DECLINED", reviewedAt: { lt: daysAgo(365, now) } } });
   await db.verification.deleteMany({ where: { identifier: { startsWith: "newsletter:" }, expiresAt: { lt: now } } });
+  await db.verification.deleteMany({ where: { identifier: { startsWith: "account-privacy:" }, expiresAt: { lt: now } } });
   await db.newsletterSubscriber.deleteMany({ where: { OR: [{ unsubscribedAt: { lt: daysAgo(180, now) } }, { confirmedAt: null, subscribedAt: { lt: daysAgo(180, now) } }] } });
   await db.notificationOutbox.deleteMany({ where: { deliveredAt: { lt: daysAgo(7, now) } } });
   return { expired: expired.length, removedClosed: oldClosed.length };
