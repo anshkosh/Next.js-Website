@@ -1,6 +1,8 @@
 "use client";
 
-import { cloneElement, isValidElement, useId, type ReactElement, type ReactNode } from "react";
+import { cloneElement, isValidElement, useId, useState, type ReactElement, type ReactNode } from "react";
+import { useHydrated } from "@/components/useHydrated";
+import { authClient } from "@/lib/auth-client";
 import { FOUNDER_KEY, readFounder, type FounderDetails } from "@/lib/founder-toolkit";
 import { useBrowserDraft } from "./useBrowserDraft";
 
@@ -10,12 +12,14 @@ export const secondaryButton = "inline-flex items-center justify-center gap-2 ro
 
 export function Field({ label, hint, children }: { label: string; hint?: string; children: ReactNode }) {
   const hintId = useId();
-  const field = hint && isValidElement(children) ? cloneElement(children as ReactElement<{ "aria-describedby"?: string }>, { "aria-describedby": hintId }) : children;
+  const { isPending } = authClient.useSession();
+  const hydrated = useHydrated();
+  const field = isValidElement(children) ? cloneElement(children as ReactElement<{ "aria-describedby"?: string; disabled?: boolean }>, { ...(hint ? { "aria-describedby": hintId } : {}), ...(!hydrated || isPending ? { disabled: true } : {}) }) : children;
   return <div className="min-w-0"><label className="block text-sm font-semibold text-gray-900">{label}{field}</label>{hint && <p id={hintId} className="mt-2 text-xs leading-relaxed text-gray-600">{hint}</p>}</div>;
 }
 export function DraftNotice({ error }: { error?: string }) {
   return error ? <p role="alert" className="mb-6 rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-800">{error}</p> :
-    <p className="mb-6 text-sm leading-relaxed text-gray-600">No account needed. One startup workspace in this browser on this device. Details are shared across these tools. Download and clear your drafts before switching startups.</p>;
+    <p className="mb-6 text-sm leading-relaxed text-gray-600">Drafts stay on this device, separately for each signed-in account or signed-out visitor. They do not sync between devices or change your public profile. Signing out removes free-tool drafts from this browser. Shared startup details carry across these tools; download and clear drafts before switching startups.</p>;
 }
 const fields: Record<keyof FounderDetails, { label: string; placeholder: string; limit: number }> = {
   name: { label: "Startup name", placeholder: "e.g. DabbaLoop", limit: 120 },
@@ -34,6 +38,15 @@ export function FounderFields({ include }: { include: (keyof FounderDetails)[] }
   </Field>)}{storageError && <p role="alert" className="text-sm text-red-800">{storageError}</p>}</div>;
 }
 
-export function ClearDraft({ onClear, label = "Clear this draft" }: { onClear: () => void; label?: string }) {
-  return <button type="button" onClick={() => { if (window.confirm("Clear this draft from this browser? This cannot be undone.")) onClear(); }} className="text-sm font-medium text-gray-600 underline underline-offset-4 hover:text-coral-700">{label}</button>;
+export function ClearDraft({ onClear, label = "Clear this draft" }: { onClear: () => boolean | void; label?: string }) {
+  const [confirming, setConfirming] = useState(false);
+  const [status, setStatus] = useState("");
+  return <div>
+    <button type="button" aria-expanded={confirming} onClick={() => setConfirming(true)} className="text-sm font-medium text-gray-600 underline underline-offset-4 hover:text-coral-700">{label}</button>
+    {confirming && <div role="group" aria-label="Confirm clearing draft" className="mt-3 rounded-lg border border-gray-200 p-4 text-sm">
+      <p>Remove this saved draft from this browser? This cannot be undone.</p>
+      <div className="mt-3 flex flex-wrap gap-3"><button type="button" className={primaryButton} onClick={() => { const result = onClear(); setStatus(result === false ? "This browser could not remove the saved draft. Clear this site's browser storage before sharing the device." : "Draft cleared."); setConfirming(false); }}>Yes, clear draft</button><button type="button" className={secondaryButton} onClick={() => setConfirming(false)}>Keep draft</button></div>
+    </div>}
+    {status && <p role="status" className="mt-2 text-sm text-gray-700">{status}</p>}
+  </div>;
 }

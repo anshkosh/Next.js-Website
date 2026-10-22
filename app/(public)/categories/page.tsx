@@ -40,7 +40,7 @@ export default async function CategoriesPage() {
           Browse by <span className="text-coral-500">Category</span>
         </h1>
         <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-          Explore startups across different industries and sectors.
+          Explore startups across different industries and sectors. A category with 0 startups has no public listings yet; you can still browse it or add your startup.
         </p>
       </div>
 

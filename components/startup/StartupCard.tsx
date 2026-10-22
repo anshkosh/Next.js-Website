@@ -79,7 +79,7 @@ export default function StartupCard({ startup }: StartupCardProps) {
             <span className="rounded-full bg-purple-50 px-2.5 py-1 text-[11px] font-semibold text-purple-600">Est. {foundedYear}</span>
           )}
           {startup.updateCount != null && startup.updateCount > 1 && (
-            <span className="rounded-full bg-emerald-50 px-2.5 py-1 text-[11px] font-semibold text-emerald-700">{startup.updateCount} updates</span>
+            <span className="rounded-full bg-emerald-50 px-2.5 py-1 text-[11px] font-semibold text-emerald-700">{startup.updateCount} update{startup.updateCount === 1 ? "" : "s"}</span>
           )}
         </div>
         <div className="relative z-10 shrink-0">

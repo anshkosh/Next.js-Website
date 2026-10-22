@@ -21,6 +21,7 @@ const nextConfig: NextConfig = {
     formats: ["image/webp"],
     qualities: [75, 85],
   },
+  async redirects() { return [{ source: "/favicon.ico", destination: "/icon.svg", permanent: true }]; },
   async headers() {
     return [{
       source: "/(.*)",

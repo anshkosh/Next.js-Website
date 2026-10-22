@@ -5,7 +5,7 @@ import RegisterPage from "../app/(auth)/register/page";
 import AdminLoginPage from "../app/(auth)/admin/login/page";
 import ResetPasswordPage from "../app/(auth)/reset-password/page";
 import ForgotPasswordPage from "../app/(auth)/forgot-password/page";
-vi.mock("next/navigation", () => ({ useRouter: () => ({ push: vi.fn() }) }));
+vi.mock("next/navigation", () => ({ useSearchParams: () => new URLSearchParams(), useRouter: () => ({ push: vi.fn(), refresh: vi.fn() }) }));
 vi.mock("@/lib/auth-client", () => ({ authClient: {} }));
 
 it.each([["login", LoginPage], ["register", RegisterPage], ["admin login", AdminLoginPage], ["reset password", ResetPasswordPage], ["forgot password", ForgotPasswordPage]] as const)("keeps credentials out of URLs before hydration (%s)", (_, Page) => {

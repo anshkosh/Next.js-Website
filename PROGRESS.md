@@ -1,5 +1,23 @@
 # Progress
 
+## 22 October 2026 — Jerry QA report fixes (prepared, not deployed)
+
+- Owner authorized fixes for both Jerry reports. Branch `codex/jerry-report-fixes`
+  starts from main `84e4780`; unrelated worktrees and production data are untouched.
+- Added tool sign-out cleanup, disabled pending inputs, reliable clearing, corrected
+  pitch/MVP outputs, profile-kit access, optional tracker URLs and duplicate checks.
+- Corrected local login returns, mobile cookie/search layout, signup/favicon
+  redirects, verification resend, startup edit review/recovery, reply controls,
+  grapheme limits, section tabs, save feedback and search signal display.
+- Dense tie ranking, retired waitlist handling and pilot behavior remain intended.
+  Lakshmi’s Saree Second reply is present on current live; public page errors did
+  not recur. No fabricated data restoration, bot activity or ranking reweighting.
+- Evidence and every report item: `docs/wiki/engineering/Jerry-QA-2026-10-22.md`.
+  First full unit checkpoint: 695 pass, two optional skips; focused additions pass.
+  Local lint/typecheck/build, dependency policy and three deployment helper tests
+  pass; 390px production-preview forms/tools/search checked. Final CI must also
+  pass isolated PostgreSQL and browser regressions. No merge or deploy yet.
+
 ## 22 October 2026 — authorized account settings release
 
 - Owner explicitly requested deployment of the prepared CSP, account settings,

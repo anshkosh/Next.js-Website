@@ -44,7 +44,7 @@ export function safeLaunchUrl(value: string | null | undefined): string {
   if (value.startsWith("/") && !value.startsWith("//") && !/[\\\s]/.test(value)) return value;
   try {
     const url = new URL(value);
-    return ["https:", "http:"].includes(url.protocol) && !url.username && !url.password ? url.href : "";
+    return ["https:", "http:"].includes(url.protocol) && !url.username && !url.password ? (url.pathname === "/" && !url.search && !url.hash ? url.href.replace(/\/$/, "") : url.href) : "";
   } catch { return ""; }
 }
 

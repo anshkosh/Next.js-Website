@@ -1,3 +1,4 @@
+import { loginHref } from "@/lib/login-return";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
@@ -18,12 +19,12 @@ export const metadata = {
 
 export default async function SettingsPage() {
   const session = await auth.api.getSession({ headers: await headers() });
-  if (!session?.user) redirect("/login");
+  if (!session?.user) redirect(loginHref((await headers()).get("x-anshkosh-path")));
   const user = await db.user.findUnique({
     where: { id: session.user.id },
     select: { name: true, email: true, emailVerified: true, role: true, image: true, bio: true, location: true, websiteUrl: true, dateOfBirth: true, notifyStartupReviews: true, notifyVoteMilestones: true },
   });
-  if (!user) redirect("/login");
+  if (!user) redirect(loginHref((await headers()).get("x-anshkosh-path")));
   const hasPassword = await db.account.count({ where: { userId: session.user.id, providerId: "credential" } });
   return (
     <div className="mx-auto w-full max-w-5xl px-4 py-10 sm:px-6 sm:py-14">

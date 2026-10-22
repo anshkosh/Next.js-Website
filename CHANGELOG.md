@@ -1,5 +1,21 @@
 # Website changelog
 
+## Unreleased — Jerry's founder-tools and website QA
+
+- Remove device-only tool drafts at sign-out; protect loading and account changes,
+  make clearing persist, and explain storage consistently.
+- Correct manual MVP grouping, pitch grammar/formats, all-zero runway guidance,
+  filenames, website formatting, tracker duplicates and optional outreach URLs.
+- Link dashboard cards to profile-prefilled launch kits; keep reuse explicit.
+- Return protected-page logins to safe local paths; add signup/favicon redirects,
+  verification resend and visible signup/settings navigation.
+- Keep the phone cookie notice clear of forms; improve mobile search and filters.
+- Add startup-edit review, remove redundant recovery, require explicit reply edits
+  and deletion confirmation, and align emoji limits between client and server.
+- Correct section tabs, founder-mode feedback/Undo lifetime, singular wording,
+  journal-cover loading feedback and search's signal breakdown.
+
+
 ## 22 October 2026 — account data controls
 
 - Add account-data JSON download and permanent account deletion in settings,

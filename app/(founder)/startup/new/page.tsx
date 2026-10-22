@@ -1,3 +1,5 @@
+import { loginHref } from "@/lib/login-return";
+import { seoMetadata } from "@/lib/seo";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import Link from "next/link";
@@ -7,13 +9,15 @@ import { getSettingValue } from "@/app/actions/settings.actions";
 import { wizardFields, wizardStep } from "@/lib/startup-wizard";
 import StartupWizard from "./StartupWizard";
 
+export const metadata = { ...seoMetadata({ title: "Create startup — Anshkosh", description: "Manage your startup workspace.", path: "/dashboard" }), robots: { index: false, follow: false } };
+
 export default async function NewStartupPage({
   searchParams,
 }: {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const session = await auth.api.getSession({ headers: await headers() });
-  if (!session?.user) redirect("/register");
+  if (!session?.user) redirect(loginHref((await headers()).get("x-anshkosh-path")));
   const profile = await db.user.findUnique({
     where: { id: session.user.id },
     select: { founderMode: true },

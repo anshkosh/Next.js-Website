@@ -1,11 +1,11 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { useRouter } from "next/navigation";
 import { authClient } from "@/lib/auth-client";
+import { clearToolDrafts } from "@/lib/browser-tool-drafts";
+import { navigateAfterSignOut } from "@/lib/browser-navigation";
 
 export default function Logout() {
-  const router = useRouter();
   const started = useRef(false);
   const [error, setError] = useState("");
   const signOut = useCallback(async () => {
@@ -13,10 +13,12 @@ export default function Logout() {
     try {
       const result = await authClient.signOut();
       if (result.error) throw new Error("Sign out failed");
-      router.replace("/login");
-      router.refresh();
+      const cleared = clearToolDrafts();
+      if (!cleared) { setError("You are signed out, but this browser blocked draft cleanup. Clear this site's browser data before sharing the device."); return; }
+      // A full navigation discards every cached signed-in page and local form.
+      navigateAfterSignOut();
     } catch { setError("Could not sign you out. Please try again."); }
-  }, [router]);
+  }, []);
   useEffect(() => {
     if (started.current) return;
     started.current = true;

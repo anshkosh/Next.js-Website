@@ -1,3 +1,5 @@
+import { loginHref } from "@/lib/login-return";
+import { seoMetadata } from "@/lib/seo";
 import { db } from "@/lib/db";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
@@ -6,6 +8,8 @@ import { MessageSquare } from "lucide-react";
 import Link from "next/link";
 import FounderDiscussionPanel from "./FounderDiscussionPanel";
 
+export const metadata = { ...seoMetadata({ title: "Startup discussion — Anshkosh", description: "Manage your startup workspace.", path: "/dashboard" }), robots: { index: false, follow: false } };
+
 export default async function FounderDiscussionPage(props: {
   params: Promise<{ id: string }>;
 }) {
@@ -13,7 +17,7 @@ export default async function FounderDiscussionPage(props: {
   const session = await auth.api.getSession({ headers: await headers() });
 
   if (!session || !session.user) {
-    redirect("/login");
+    redirect(loginHref((await headers()).get("x-anshkosh-path")));
   }
 
   const startup = await db.startup.findUnique({

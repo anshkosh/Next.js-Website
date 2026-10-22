@@ -34,7 +34,7 @@ export default function FounderModeToggle({
         className="cursor-pointer font-semibold text-gray-900"
       >
         Founder mode{" "}
-        <span className="ml-1 text-sm font-normal text-gray-600">
+        <span className="ml-1 text-sm font-normal text-gray-800">
           {checked ? "On" : "Off"}
         </span>
       </label>

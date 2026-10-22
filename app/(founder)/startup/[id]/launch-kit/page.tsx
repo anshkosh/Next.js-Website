@@ -1,3 +1,4 @@
+import { loginHref } from "@/lib/login-return";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { headers } from "next/headers";
@@ -12,7 +13,7 @@ export const metadata: Metadata = { title: "Anshkosh — Your Startup Launch Kit
 
 export default async function StartupLaunchKitPage({ params }: { params: Promise<{ id: string }> }) {
   const session = await auth.api.getSession({ headers: await headers() });
-  if (!session?.user) redirect("/login");
+  if (!session?.user) redirect(loginHref((await headers()).get("x-anshkosh-path")));
   const { id } = await params;
   if (!startupIdSchema.safeParse(id).success) notFound();
   // Ownership is enforced in the query. Never load arbitrary users' drafts,

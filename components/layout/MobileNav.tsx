@@ -54,10 +54,11 @@ export default function MobileNav({ authenticated }: { authenticated: boolean })
         <nav id="mobile-navigation" aria-label="Mobile navigation" className={`t-dropdown${shown ? " is-open" : ""} absolute inset-x-0 top-full max-h-[calc(100dvh-4rem)] overflow-y-auto border-b border-gray-200 bg-[#FAF8F5] px-4 py-4 shadow-soft`}>
           <div className="flex flex-col gap-1">
             <NavigationLinks mobile onNavigate={() => setOpen(false)} />
+            {!authenticated && <Link href="/register" onClick={() => setOpen(false)} className="flex min-h-11 items-center rounded-xl px-3 font-semibold text-coral-700">Sign up</Link>}
             <Link href={authenticated ? "/dashboard" : "/login"} onClick={() => setOpen(false)} className="mt-2 rounded-xl bg-gray-900 px-3 py-3 text-center font-medium text-white hover:bg-gray-800">
               {authenticated ? "Dashboard" : "Login"}
             </Link>
-            {authenticated && <><Link href="/settings" onClick={() => setOpen(false)} className="flex min-h-11 items-center px-3 font-medium text-gray-700">Profile settings</Link><Link href="/logout" onClick={() => setOpen(false)} className="flex min-h-11 items-center px-3 font-medium text-red-700">Logout</Link></>}
+            {authenticated && <><Link href="/settings" onClick={() => setOpen(false)} className="flex min-h-11 items-center px-3 font-medium text-gray-700">Profile settings</Link><Link href="/logout" prefetch={false} onClick={() => setOpen(false)} className="flex min-h-11 items-center px-3 font-medium text-red-700">Logout</Link></>}
             <div className="mt-3 flex items-center justify-between border-t border-gray-200 pt-3 dark:border-gray-700">
               <FullSiteSearch align="left" />
             </div>

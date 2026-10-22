@@ -1,5 +1,6 @@
 "use client";
 
+import { characterCount, limitCharacters } from "@/lib/characters";
 import { useState, useTransition } from "react";
 import { MessageSquare, Save, Trash2, CheckCircle2, AlertCircle, CornerDownRight } from "lucide-react";
 import { replyToComment, deleteReply } from "@/app/actions/comment.actions";
@@ -33,6 +34,9 @@ function CommentReplyRow({ comment }: { comment: ApprovedComment }) {
   const [isDeleting, startDelete] = useTransition();
   const [feedback, setFeedback] = useState<{ type: "success" | "error"; msg: string } | null>(null);
 
+  const [editing, setEditing] = useState(false);
+  const [confirmDelete, setConfirmDelete] = useState(false);
+
   const isDirty = replyText.trim() !== savedReply.trim();
 
   const handleSave = () => {
@@ -45,6 +49,7 @@ function CommentReplyRow({ comment }: { comment: ApprovedComment }) {
       } else {
         setReplyText(replyText.trim());
         setSavedReply(replyText.trim());
+        setEditing(false);
         setFeedback({ type: "success", msg: "Reply saved and now live." });
       }
     });
@@ -59,6 +64,8 @@ function CommentReplyRow({ comment }: { comment: ApprovedComment }) {
       } else {
         setReplyText("");
         setSavedReply("");
+        setConfirmDelete(false);
+        setEditing(false);
         setFeedback({ type: "success", msg: "Reply deleted." });
       }
     });
@@ -86,17 +93,18 @@ function CommentReplyRow({ comment }: { comment: ApprovedComment }) {
           <CornerDownRight className="w-3.5 h-3.5" />
           Your Reply
         </div>
-        <textarea
+        {!editing && <><p className="whitespace-pre-wrap text-sm text-gray-700">{savedReply || "No reply yet."}</p><button type="button" onClick={() => setEditing(true)} className="min-h-11 text-sm font-semibold text-coral-700 underline">{savedReply ? "Edit reply" : "Write a reply"}</button></>}
+        {editing && <><textarea
           rows={3}
           disabled={isSaving || isDeleting}
           value={replyText}
-          onChange={(e) => setReplyText(e.target.value)}
+          onChange={(e) => setReplyText(limitCharacters(e.target.value, 2000))}
           placeholder="Write a reply as the founder…"
-          maxLength={2000}
           className="w-full px-4 py-3 text-sm rounded-xl border border-gray-200 bg-gray-50 text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-coral-400 focus:border-transparent resize-none transition-[border-color,box-shadow]"
         />
-        <div className="text-right text-xs text-gray-600 tabular-nums">{replyText.length}/2000</div>
+        <div className="text-right text-xs text-gray-600 tabular-nums">{characterCount(replyText)}/2000</div>
 
+        <button type="button" onClick={() => { setReplyText(savedReply); setEditing(false); }} className="min-h-11 text-sm underline">Cancel editing</button></>}
         {/* Feedback */}
         {feedback && (
           <div className={`flex items-center gap-2 text-sm rounded-xl px-4 py-2.5 ${
@@ -114,18 +122,20 @@ function CommentReplyRow({ comment }: { comment: ApprovedComment }) {
         )}
 
         <div className="flex items-center gap-3">
-          <button
+          {editing && <button
+            type="button"
             onClick={handleSave}
-            disabled={isSaving || isDeleting || !replyText.trim() || !isDirty}
+            disabled={isSaving || isDeleting || characterCount(replyText.trim()) < 5 || !isDirty}
             className="inline-flex items-center gap-2 px-4 py-2 bg-coral-600 hover:bg-coral-700 disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-semibold rounded-xl transition-colors"
           >
             <Save className="w-4 h-4" />
             {isSaving ? "Saving…" : savedReply ? "Update Reply" : "Post Reply"}
-          </button>
+          </button>}
 
           {savedReply && (
             <button
-              onClick={handleDelete}
+              type="button"
+              onClick={() => setConfirmDelete(true)}
               disabled={isDeleting || isSaving}
               className="inline-flex items-center gap-2 px-4 py-2 bg-red-50 hover:bg-red-100 disabled:opacity-50 text-red-600 text-sm font-semibold rounded-xl transition-colors"
             >
@@ -134,6 +144,7 @@ function CommentReplyRow({ comment }: { comment: ApprovedComment }) {
             </button>
           )}
         </div>
+        {confirmDelete && <div role="group" aria-label="Confirm reply deletion" className="rounded-xl border border-red-200 p-4 text-sm"><p>Delete your published reply? This cannot be undone.</p><div className="mt-3 flex gap-4"><button type="button" disabled={isDeleting} onClick={handleDelete} className="min-h-11 font-semibold text-red-700 underline">Delete reply permanently</button><button type="button" onClick={() => setConfirmDelete(false)} className="min-h-11 underline">Keep reply</button></div></div>}
       </div>
     </div>
   );

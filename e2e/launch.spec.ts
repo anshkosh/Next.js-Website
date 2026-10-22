@@ -126,6 +126,91 @@ test.beforeEach(async ({ page }) => {
 test.describe.configure({ mode: "serial", retries: 0 });
 test.setTimeout(180000);
 
+test("founder tools isolate two real accounts, clear drafts, and return to protected pages after login", async ({ page }) => {
+  test.setTimeout(300000);
+  const accounts = [`tool-a-${randomUUID()}@example.test`, `tool-b-${randomUUID()}@example.test`];
+  try {
+    for (const account of accounts) {
+      const response = await page.request.post("/api/auth/sign-up/email", { headers: { origin: "http://127.0.0.1:3100" }, data: { name: "Tool isolation fixture", email: account, password } });
+      expect(response.status()).toBe(200);
+      await db.user.update({ where: { email: account }, data: { emailVerified: true } });
+    }
+    await login(page, accounts[0]);
+    const paths = ["validation", "mvp", "runway", "pitch", "launch-card", "kit", "checklist", "tracker", "directories"];
+    for (const path of paths) {
+      await enter(page, `/launch-support/${path}`);
+      await expect(page.locator("fieldset[aria-busy]")).toHaveAttribute("aria-busy", "false");
+      const fields = page.locator('textarea:not([readonly])');
+      for (let index = 0; index < await fields.count(); index++) await fields.nth(index).fill(`Alice Wil ${path} ${index}`);
+      if (path === "runway") {
+        const amounts = page.locator('input[type="number"]');
+        for (const [index, value] of ["10000", "2500", "1000"].entries()) await amounts.nth(index).fill(value);
+      }
+      if (path === "launch-card") await page.getByLabel("Card format", { exact: true }).selectOption("square");
+      if (path === "kit") await expect(page.locator("#kit-name")).toHaveValue("Alice Wil kit 0");
+      if (path === "mvp") {
+        await page.getByLabel("Add a planned feature", { exact: true }).fill("Manual fixture");
+        await page.getByRole("button", { name: "Add feature", exact: true }).click();
+        await page.getByLabel("We can handle this manually during the test", { exact: true }).check();
+        await expect(page.getByRole("heading", { name: "Handle manually", exact: true })).toBeVisible();
+        await page.getByRole("button", { name: "Clear this draft", exact: true }).click();
+        await page.getByRole("button", { name: "Yes, clear draft", exact: true }).click();
+        await page.reload();
+        await expect(page.getByLabel("What result would make this test worthwhile?", { exact: true })).toHaveValue("");
+        await expect(page.getByRole("group", { name: "Manual fixture", exact: true })).toHaveCount(0);
+      }
+      if (path === "checklist") {
+        const tick = page.getByRole("checkbox").first();
+        await tick.check(); await page.reload(); await expect(tick).toBeChecked();
+        await tick.uncheck(); await page.reload(); await expect(tick).not.toBeChecked();
+      }
+    }
+    await enter(page, "/logout");
+    await expect(page).toHaveURL(/\/login$/);
+    expect(await page.evaluate(() => Object.keys(localStorage).filter(key => /anshkosh-(founder|mvp|validation|runway|launch-card|launch-checklist|submissions)/.test(key)))).toEqual([]);
+    await login(page, accounts[1]);
+    for (const path of paths) {
+      await enter(page, `/launch-support/${path}`);
+      await expect(page.locator("fieldset[aria-busy]")).toHaveAttribute("aria-busy", "false");
+      const fields = page.locator('textarea:not([readonly])');
+      for (let index = 0; index < await fields.count(); index++) await expect(fields.nth(index)).not.toHaveValue(/Alice|Wil/);
+      if (path === "runway") for (const input of await page.locator('input[type="number"]').all()) await expect(input).toHaveValue("");
+      if (path === "launch-card") await expect(page.getByLabel("Card format", { exact: true })).toHaveValue("landscape");
+    }
+    await enter(page, "/logout"); await expect(page).toHaveURL(/\/login$/);
+    await enter(page, "/settings");
+    await expect(page).toHaveURL(/\/login\?next=%2Fsettings$/);
+    await page.getByLabel("Email address", { exact: true }).fill(accounts[1]);
+    await page.locator('input[name="password"]').fill(password);
+    await page.getByRole("button", { name: /^Sign in$/i }).click();
+    await expect(page).toHaveURL(/\/settings$/);
+  } finally {
+    await db.user.deleteMany({ where: { email: { in: accounts } } });
+  }
+});
+
+test("390px cookie notice leaves auth controls reachable and mobile search opens a usable input", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  for (const path of ["/login", "/register"]) {
+    await page.goto(path);
+    const notice = page.getByRole("dialog", { name: "Cookie and browser storage notice" });
+    await expect(notice).toBeVisible();
+    const submit = page.getByRole("button", { name: path === "/login" ? /^Sign in$/i : /^Create account$/i });
+    if (path === "/register") { await page.locator('input[name="password"]').fill(password); await page.locator("#terms").check(); }
+    await submit.scrollIntoViewIfNeeded();
+    await submit.click({ trial: true });
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+  }
+  await page.goto("/launch-support");
+  await page.getByRole("button", { name: "Open navigation menu", exact: true }).click();
+  await page.getByRole("button", { name: "Search the site", exact: true }).click();
+  await expect(page.getByRole("textbox", { name: "Search the site", exact: true })).toBeVisible();
+  await page.getByRole("textbox", { name: "Search the site", exact: true }).fill("Tools");
+  await page.getByRole("button", { name: "Search", exact: true }).click();
+  await expect(page).toHaveURL(/\/search\?q=Tools$/);
+  await page.goto("/signup"); await expect(page).toHaveURL(/\/register$/);
+});
+
 // Verify privacy controls before the longer shared startup journey.
 test("private data export and confirmed deletion isolate owners, roll back failures and revoke all sessions", async ({ page, browser }) => {
   test.setTimeout(300000);
@@ -295,7 +380,7 @@ test("admin approves, edits remain unpublished, recovery survives refresh, revis
   ownerPage.on("dialog", dialog => dialog.accept()); await ownerPage.reload(); await reveal(ownerPage);
   await ownerPage.getByRole("button", { name: "Restore unfinished changes" }).click();
   await expect(ownerPage.locator('[name="tagline"]')).toHaveValue("Updated pilot evidence from real customer feedback");
-  await ownerPage.getByRole("button", { name: "Save Changes" }).click(); await expect(ownerPage).toHaveURL(/\/dashboard/);
+  await ownerPage.getByRole("button", { name: "Review changes", exact: true }).click(); await expect(ownerPage.getByRole("heading", { name: "Review your changes" })).toBeVisible(); await ownerPage.getByRole("button", { name: "Confirm and save changes", exact: true }).click(); await expect(ownerPage).toHaveURL(/\/dashboard/);
   const published = await db.startup.findUniqueOrThrow({ where: { id: startupId } });
   expect(published.status).toBe("LIVE"); expect(published.tagline).toBe(originalTagline);
   const metadata = published.metadata as { pitchDeckUrl: string };

@@ -19,6 +19,7 @@ export default function FounderTopbar({ user }: { user: { name?: string | null; 
     ...(user.founderMode ? [{ label: "Founder Journal", href: "/dashboard/journal", current: pathname?.startsWith("/dashboard/journal") ?? false }] : []),
     { label: "Discover", href: "/discover", current: false },
     { label: "Free tools", href: "/launch-support", current: false },
+    { label: "Settings", href: "/settings", current: pathname === "/settings" },
   ];
 
   // Mount the phone menu closed, then open it on the next frame so it can grow in.
@@ -78,7 +79,7 @@ export default function FounderTopbar({ user }: { user: { name?: string | null; 
                 {user.email && <p className="truncate text-sm text-gray-600">{user.email}</p>}
               </div>
             </div>
-            {[...links, { label: "Profile settings", href: "/settings", current: pathname === "/settings" }].map(link => (
+            {links.map(link => (
               <Link
                 key={link.href}
                 href={link.href}

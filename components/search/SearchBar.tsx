@@ -79,15 +79,15 @@ export default function SearchBar({ categories = [] }: SearchBarProps) {
   };
 
   return (
-    <div className="relative w-full max-w-3xl mx-auto flex items-center bg-white border border-gray-200 rounded-full shadow-sm overflow-hidden focus-within:ring-2 focus-within:ring-coral-500 focus-within:border-transparent transition-[border-color,box-shadow]">
+    <div className="relative w-full max-w-3xl mx-auto flex flex-col sm:flex-row items-stretch sm:items-center bg-white border border-gray-200 rounded-full shadow-sm overflow-hidden focus-within:ring-2 focus-within:ring-coral-500 focus-within:border-transparent transition-[border-color,box-shadow]">
       {categories.length > 0 && (
-        <div className="relative w-2/5 flex-shrink-0 border-r border-gray-200 bg-gray-50/50 sm:w-auto sm:max-w-[45%]">
+        <div className="relative w-full flex-shrink-0 border-b sm:border-b-0 sm:border-r border-gray-200 bg-gray-50/50 sm:w-auto sm:max-w-[45%]">
           <label htmlFor="startup-category" className="sr-only">Filter by category</label>
           <select
             id="startup-category"
             value={category}
             onChange={(e) => handleCategoryChange(e.target.value)}
-            className="w-full max-w-64 appearance-none truncate bg-transparent pl-4 pr-8 py-4 text-sm font-medium text-gray-700 outline-none cursor-pointer hover:bg-gray-100 transition-colors"
+            className="w-full sm:max-w-64 appearance-none bg-transparent pl-4 pr-8 py-4 text-sm font-medium text-gray-700 outline-none cursor-pointer hover:bg-gray-100 transition-colors"
           >
             <option value="all">All Categories</option>
             {categories.map((cat) => (
@@ -115,7 +115,7 @@ export default function SearchBar({ categories = [] }: SearchBarProps) {
           type="text"
           autoComplete="off"
           className="block min-w-0 w-full pl-11 pr-10 py-4 bg-transparent text-gray-900 placeholder-gray-500 outline-none"
-          placeholder="Search startups, founders, or locations..."
+          placeholder="Search startups…"
           value={text}
           onChange={(e) => setText(e.target.value)}
         />

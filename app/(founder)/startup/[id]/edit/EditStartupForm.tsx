@@ -24,24 +24,14 @@ const availableIcons = [
   "Activity", "TrendingUp", "Award", "Key", "Lock", "Cloud", "Server", "Database", "Cpu", "Code", "Monitor"
 ];
 
-export default function EditStartupForm({ initialData, userId }: { initialData: Partial<Startup> & Pick<Startup, "id" | "status"> & { revisionStatus?: string; revisionNotes?: string | null }; userId: string }) {
+export default function EditStartupForm({ initialData, userId, categories }: { categories: { id: string; name: string; iconName: string | null }[]; initialData: Partial<Startup> & Pick<Startup, "id" | "status"> & { revisionStatus?: string; revisionNotes?: string | null }; userId: string }) {
   const router = useRouter();
   const [isSaving, setIsSaving] = useState(false);
+  const [reviewing, setReviewing] = useState(false);
   const [mediaBusy, setMediaBusy] = useState<Record<string, boolean>>({});
   const isMediaBusy = Object.values(mediaBusy).some(Boolean);
   const setUploadBusy = (key: string, busy: boolean) => setMediaBusy(previous => previous[key] === busy ? previous : { ...previous, [key]: busy });
   const [errors, setErrors] = useState<Record<string, string[]>>({});
-  const [categories, setCategories] = useState<
-    { id: string; name: string; iconName: string | null }[]
-  >([]);
-
-  useEffect(() => {
-    fetch("/api/categories")
-      .then((res) => res.json())
-      .then((data) => setCategories(data))
-      .catch((err) => console.error(err));
-  }, []);
-
   const scrollToFirstError = useCallback(() => {
     const errorText = document.querySelector(".text-red-500");
     if (errorText) {
@@ -107,7 +97,7 @@ export default function EditStartupForm({ initialData, userId }: { initialData: 
     tractionEvidence: initialData.tractionEvidence || "",
   });
 
-  const draft = useDraftRecovery(`anshkosh-draft:${userId}:edit:${initialData.id}`, formData, recovered => { setErrors({}); setFormData(previous => ({ ...previous, ...recovered, id: initialData.id })); });
+  const draft = useDraftRecovery(`anshkosh-draft:${userId}:edit:${initialData.id}`, formData, recovered => { setErrors({}); setFormData(previous => ({ ...previous, ...recovered, id: initialData.id })); }, true, initialData.updatedAt ? new Date(initialData.updatedAt).getTime() : undefined);
 
   const handleChange = (
     e: React.ChangeEvent<
@@ -148,6 +138,7 @@ export default function EditStartupForm({ initialData, userId }: { initialData: 
     }
 
     if (Object.keys(manualErrors).length > 0) {
+      setReviewing(false);
       setErrors(manualErrors);
       setIsSaving(false);
       const firstKey = Object.keys(manualErrors)[0];
@@ -176,10 +167,13 @@ export default function EditStartupForm({ initialData, userId }: { initialData: 
 
     if (!result.success) {
       const fieldErrors = startupFieldErrors(result.error.issues);
+      setReviewing(false);
       setErrors(fieldErrors);
       setIsSaving(false);
       return;
     }
+
+    if (!reviewing) { setReviewing(true); setIsSaving(false); window.scrollTo({ top: 0, behavior: preferredScrollBehavior() }); return; }
 
     const data = new FormData();
     Object.entries(formData).forEach(([key, value]) => {
@@ -195,10 +189,17 @@ export default function EditStartupForm({ initialData, userId }: { initialData: 
       }
     });
 
-    const res = await updateStartup(data);
+    let res: Awaited<ReturnType<typeof updateStartup>>;
+    try { res = await updateStartup(data); }
+    catch {
+      setIsSaving(false); setReviewing(false);
+      setErrors({ form: ["We could not confirm the save. Check your dashboard before retrying; your recovery copy stays on this device."] });
+      return;
+    }
     setIsSaving(false);
 
     if (res.error) {
+      setReviewing(false);
       if (res.details) {
         setErrors(res.details as Record<string, string[]>);
       } else {
@@ -216,6 +217,8 @@ export default function EditStartupForm({ initialData, userId }: { initialData: 
       className="bg-white p-8 rounded-2xl shadow-sm border border-gray-100 space-y-6"
     >
       <DraftRecoveryNotice draft={draft} />
+      {reviewing && <section aria-labelledby="review-heading" className="space-y-5"><h2 id="review-heading" className="font-heading text-2xl font-bold">Review your changes</h2><p className="text-sm text-gray-600">Check your proposed profile before saving. Your current public profile stays live while changes are reviewed.</p><dl className="space-y-4">{[["Name", formData.name], ["Category", categories.find(item => item.id === formData.categoryId)?.name || formData.categoryId], ["Founder", formData.founderName], ["Contact phone (private)", formData.startupPhone], ["Tagline", formData.tagline], ["Description", formData.description], ["Website", formData.websiteUrl], ["Problem", formData.problemStatement], ["Solution", formData.solutionStatement], ["Audience", formData.targetAudience], ["Stage", formData.prototypeStatus], ["Evidence", formData.tractionEvidence], ["City", formData.city], ["Founded", formData.foundedYear], ["Logo", formData.logoUrl], ["Video", formData.videoUrl], ["Pitch deck", formData.pitchDeckUrl], ["Pitch deck visibility", formData.pitchDeckVisibility], ["X / Twitter", formData.twitterUrl], ["LinkedIn", formData.linkedinUrl], ["Features", formData.features.map(item => `${item.title}: ${item.description}`).join("; ")], ["Gallery", `${formData.galleryImages.length} images`]].map(([label, value]) => <div key={label}><dt className="text-sm font-semibold">{label}</dt><dd className="whitespace-pre-wrap break-words text-sm text-gray-700">{value || "Not provided"}</dd></div>)}</dl><button type="button" onClick={() => setReviewing(false)} className="min-h-11 font-semibold text-coral-700 underline">Back to editing</button></section>}
+      <div hidden={reviewing}>
       {initialData.revisionStatus && <p role="status" className="rounded-lg bg-gray-50 p-3 text-sm">{initialData.revisionStatus === "REJECTED" ? `Changes need attention: ${initialData.revisionNotes || "Please revise and resubmit."}` : "Your proposed changes are awaiting review. The published profile remains live."}</p>}
       {initialData.status === "LIVE" && (
         <div className="bg-amber-50 text-amber-900 p-4 rounded-xl text-sm border border-amber-200 flex items-start gap-3">
@@ -232,7 +235,7 @@ export default function EditStartupForm({ initialData, userId }: { initialData: 
                 href={`/startup/${initialData.id}/updates`}
                 className="underline font-semibold hover:text-amber-900"
               >
-                Go to Founders Updates →
+                Go to Founder updates →
               </Link>
             </p>
           </div>
@@ -679,7 +682,7 @@ export default function EditStartupForm({ initialData, userId }: { initialData: 
             <div>
               <h3 className="text-base font-semibold text-gray-900 flex items-center gap-2">
                 <Zap className="w-4 h-4 text-coral-500" />
-                Founders Updates
+                Founder updates
               </h3>
               <p className="text-sm text-gray-500 mt-0.5">
                 Post milestones and news — they go live immediately without re-review.
@@ -695,6 +698,7 @@ export default function EditStartupForm({ initialData, userId }: { initialData: 
         </div>
       )}
 
+      </div>
       {Object.keys(errors).length > 0 && (
         <div className="p-4 bg-red-50 border border-red-200 rounded-xl text-red-700 text-sm font-medium flex items-center justify-between gap-3 shadow-sm">
           <div className="flex items-center gap-2.5">
@@ -724,7 +728,7 @@ export default function EditStartupForm({ initialData, userId }: { initialData: 
           disabled={isSaving || isMediaBusy}
           className="px-6 py-2 bg-coral-600 text-white rounded-md hover:bg-coral-700 disabled:opacity-50 font-medium"
         >
-          {isSaving ? "Saving..." : "Save Changes"}
+          {isSaving ? "Saving..." : reviewing ? "Confirm and save changes" : "Review changes"}
         </button>
       </div>
     </form>

@@ -1,3 +1,4 @@
+import { loginHref } from "@/lib/login-return";
 import DashboardModeControl from "@/components/account/DashboardModeControl";
 
 export const metadata = { title: "Dashboard — Anshkosh", robots: { index: false, follow: false } };
@@ -55,7 +56,7 @@ export default async function DashboardPage() {
   });
 
   if (!session || !session.user) {
-    redirect("/login");
+    redirect(loginHref((await headers()).get("x-anshkosh-path")));
   }
 
   const profile = await db.user.findUnique({ where: { id: session.user.id }, select: { name: true, founderMode: true } });
@@ -322,6 +323,7 @@ export default async function DashboardPage() {
                   )}
                 </div>
 
+                <Link href={`/startup/${startup.id}/launch-kit`} className={`${actionClass} mx-4 mb-4`}>Open launch kit</Link>
                 {/* Permanent actions stay last, away from everyday ones. */}
                 <div className="mt-auto flex justify-end border-t border-gray-100 px-3 py-1">
                   <DeleteStartupButton startupId={startup.id} startupName={startup.name} />

@@ -6,6 +6,7 @@ import { MessageSquare, ChevronDown, Send, Clock, CheckCircle2, AlertCircle } fr
 import TurnstileWidget from "./TurnstileWidget";
 import { submitComment, fetchApprovedComments, getCommentAvailability } from "@/app/actions/comment.actions";
 import type { PublicComment, PendingComment } from "@/app/actions/comment.actions";
+import { characterCount, limitCharacters } from "@/lib/characters";
 
 type CommentAvailability = Awaited<ReturnType<typeof getCommentAvailability>>;
 type CommentViewer = { name: string; email: string };
@@ -93,9 +94,9 @@ function CommentCard({ comment, replyHref }: { comment: PublicComment; replyHref
                   Founder
                 </span>
                 {comment.repliedAt && (
-                  <span className="text-coral-700 text-xs ml-auto">
-                    {formatDate(comment.repliedAt)}
-                  </span>
+                  <time dateTime={comment.repliedAt} title={new Date(comment.repliedAt).toLocaleString("en-IN", { timeZone: "Asia/Kolkata" }) + " IST"} className="text-coral-700 text-xs ml-auto">
+                    Reply updated {formatDate(comment.repliedAt)}
+                  </time>
                 )}
               </div>
 
@@ -138,7 +139,7 @@ function CommentForm({ startupId, viewer, availability, setAvailability, onSubmi
   });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+    setForm((prev) => ({ ...prev, [e.target.name]: e.target.name === "body" ? limitCharacters(e.target.value, 2000) : e.target.value }));
     setError(null);
   };
 
@@ -236,11 +237,10 @@ function CommentForm({ startupId, viewer, availability, setAvailability, onSubmi
             value={form.body}
             onChange={handleChange}
             required
-            maxLength={2000}
             className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50 text-sm text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-coral-400 focus:border-transparent resize-none transition-[border-color,box-shadow]"
           />
           <div className="text-right text-xs text-gray-500 mt-1">
-            {form.body.length}/2000
+            {characterCount(form.body)}/2000
           </div>
         </div>
 
@@ -255,7 +255,7 @@ function CommentForm({ startupId, viewer, availability, setAvailability, onSubmi
           {availability.available && <p className="mt-1">Try again in about {Math.ceil(availability.retryAfterSeconds / 60)} minutes.</p>}
           <button type="button" disabled={isPending} onClick={checkAvailability} className="mt-2 min-h-11 font-semibold underline">Check availability again</button>
         </div>}
-        {availability.allowed && !form.token && <p role="status" className="text-sm text-gray-600">Complete the CAPTCHA above to post your comment.</p>}
+        {availability.allowed && !form.token && <p role="status" className="text-sm text-gray-600">The security check loads here automatically. If a challenge appears, complete it to post.</p>}
 
         {/* Error */}
         {error && (
@@ -269,7 +269,7 @@ function CommentForm({ startupId, viewer, availability, setAvailability, onSubmi
         <div className="flex items-center gap-4 flex-wrap">
           <button
             type="submit"
-            disabled={isPending || !form.token || !availability.allowed}
+            disabled={isPending || !form.token || !availability.allowed || !form.name.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email) || characterCount(form.body.trim()) < 5}
             className="inline-flex items-center gap-2 px-6 py-2.5 bg-coral-600 hover:bg-coral-700 disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-semibold rounded-xl transition-colors shadow-sm"
           >
             {isPending ? (

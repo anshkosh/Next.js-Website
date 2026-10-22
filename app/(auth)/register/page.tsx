@@ -82,7 +82,7 @@ export default function RegisterPage() {
               className="w-full flex justify-center py-2.5 px-4 border border-transparent rounded-lg shadow-sm text-sm font-semibold text-white bg-gray-900 hover:bg-gray-800 transition-colors"
             >
               Return to login
-            </Link>
+            </Link><Link href="/resend-verification" className="mt-3 block text-sm text-coral-700 underline">Resend verification email</Link>
           </div>
         </div>
       </div>
@@ -245,6 +245,8 @@ export default function RegisterPage() {
             </button>
             </fieldset>
           </form>
+          <Link href="/resend-verification" className="mt-4 inline-flex min-h-11 items-center text-sm text-coral-700 underline">Resend verification email</Link>
+
 
           <div className="mt-8 text-center text-sm">
             <span className="text-gray-500">Already have an account? </span>

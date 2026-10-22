@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Search, Rocket, BookOpen, Layers3 } from "lucide-react";
+import { withActivitySignals } from "@/lib/leaderboard";
 import { startupSearchWhere } from "@/lib/startup-search";
 import { db } from "@/lib/db";
 import { seoMetadata } from "@/lib/seo";
@@ -59,12 +60,12 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
     }),
   ]);
 
-  return <SearchShell query={query} startupResults={startupResults} journalResults={journalResults} categoryResults={categoryResults} />;
+  return <SearchShell query={query} startupResults={await withActivitySignals(startupResults)} journalResults={journalResults} categoryResults={categoryResults} />;
 }
 
 function SearchShell({ query, startupResults, journalResults, categoryResults }: {
   query: string;
-  startupResults: Array<{ id: string; slug: string; name: string; tagline: string; logoUrl: string | null; upvoteCount: number; downvoteCount: number; signalCount: number; founders: { name: string }[]; category: { name: string } }>;
+  startupResults: Array<{ id: string; slug: string; name: string; tagline: string; logoUrl: string | null; upvoteCount: number; downvoteCount: number; signalCount: number; activitySignals?: number; founders: { name: string }[]; category: { name: string } }>;
   journalResults: Array<{ id: string; slug: string; title: string; excerpt: string | null; authorName: string; updatedAt: Date }>;
   categoryResults: Array<{ id: string; slug: string; name: string; description: string | null }>;
 }) {
@@ -105,7 +106,7 @@ function SearchShell({ query, startupResults, journalResults, categoryResults }:
         ) : <div className="space-y-10">
           <p className="text-sm text-gray-500">{total} result{total === 1 ? "" : "s"} for <span className="font-semibold text-gray-700">“{query}”</span></p>
 
-          {startupResults.length > 0 && <ResultGroup icon={<Rocket size={19} />} title="Startups"><div className="grid gap-3 sm:grid-cols-2">{startupResults.map((startup) => <Link key={startup.id} href={`/startups/${startup.slug}`} className="rounded-xl border border-gray-200 bg-white p-5 transition-[translate,border-color,box-shadow] duration-(--duration-quick) hover:-translate-y-0.5 hover:border-coral-300 hover:shadow-md"><div className="flex items-start justify-between gap-4"><div><h3 className="font-heading text-xl font-bold text-gray-900">{startup.name}</h3><p className="mt-1 text-sm text-gray-500">{startup.tagline}</p></div><span className="text-xs font-medium text-coral-600">{startup.category.name}</span></div>{startup.founders.length > 0 && <p className="mt-3 text-xs text-gray-600">Founders: {startup.founders.map(founder => founder.name).join(", ")}</p>}<p className="mt-4 text-xs text-gray-500">{startup.signalCount} net vote{Math.abs(startup.signalCount) === 1 ? "" : "s"} · {startup.upvoteCount} upvotes − {startup.downvoteCount} downvotes</p></Link>)}</div></ResultGroup>}
+          {startupResults.length > 0 && <ResultGroup icon={<Rocket size={19} />} title="Startups"><div className="grid gap-3 sm:grid-cols-2">{startupResults.map((startup) => <Link key={startup.id} href={`/startups/${startup.slug}`} className="rounded-xl border border-gray-200 bg-white p-5 transition-[translate,border-color,box-shadow] duration-(--duration-quick) hover:-translate-y-0.5 hover:border-coral-300 hover:shadow-md"><div className="flex items-start justify-between gap-4"><div><h3 className="font-heading text-xl font-bold text-gray-900">{startup.name}</h3><p className="mt-1 text-sm text-gray-500">{startup.tagline}</p></div><span className="text-xs font-medium text-coral-600">{startup.category.name}</span></div>{startup.founders.length > 0 && <p className="mt-3 text-xs text-gray-600">Founders: {startup.founders.map(founder => founder.name).join(", ")}</p>}<p className="mt-4 text-xs text-gray-500">{startup.signalCount + (startup.activitySignals ?? 0)} signals · {startup.signalCount} net votes + {startup.activitySignals ?? 0} activity · {startup.upvoteCount} upvotes − {startup.downvoteCount} downvotes</p></Link>)}</div></ResultGroup>}
 
           {journalResults.length > 0 && <ResultGroup icon={<BookOpen size={19} />} title="Journal"><div className="space-y-3">{journalResults.map((post) => <Link key={post.id} href={`/journal/${post.slug}`} className="block rounded-xl border border-gray-200 bg-white p-5 transition-[translate,border-color,box-shadow] duration-(--duration-quick) hover:-translate-y-0.5 hover:border-coral-300 hover:shadow-md"><h3 className="font-heading text-xl font-bold text-gray-900">{post.title}</h3><p className="mt-1 text-sm text-gray-500">{resultText(post.excerpt) || `By ${post.authorName}`}</p><p className="mt-3 text-xs text-gray-500">Updated {post.updatedAt.toLocaleDateString("en-IN", { day: "numeric", month: "long", year: "numeric" })}</p></Link>)}</div></ResultGroup>}
 

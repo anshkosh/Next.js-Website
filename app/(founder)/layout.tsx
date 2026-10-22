@@ -3,6 +3,7 @@ import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import FounderTopbar from "./FounderTopbar";
 import { db } from "@/lib/db";
+import { loginHref } from "@/lib/login-return";
 
 export const dynamic = "force-dynamic";
 
@@ -12,7 +13,7 @@ export default async function FounderLayout({ children }: { children: React.Reac
   });
 
   if (!session || !session.user) {
-    redirect("/login");
+    redirect(loginHref((await headers()).get("x-anshkosh-path")));
   }
 
   const profile = await db.user.findUnique({ where: { id: session.user.id }, select: { name: true, image: true, founderMode: true } });

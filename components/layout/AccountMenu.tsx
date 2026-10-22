@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { ChevronDown, LayoutDashboard, LogOut, Settings } from "lucide-react";
 import AccountAvatar from "@/components/account/AccountAvatar";
+import { useHydrated } from "@/components/useHydrated";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -17,9 +18,11 @@ const itemClass = "min-h-11 px-3 text-gray-700 focus:bg-coral-50 focus:text-cora
 
 // The one account menu, shared by the public header and the founder top bar.
 export default function AccountMenu({ name, email, image }: { name: string; email?: string | null; image?: string | null }) {
+  const ready = useHydrated();
   return (
     <DropdownMenu>
       <DropdownMenuTrigger
+        disabled={!ready}
         aria-label={`Account menu for ${name}`}
         className="inline-flex min-h-11 items-center gap-2 rounded-full border border-gray-200 bg-white py-1 pr-3 pl-1.5 text-sm font-medium text-gray-800 transition-colors hover:border-gray-300 hover:bg-gray-50"
       >
