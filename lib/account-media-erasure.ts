@@ -1,6 +1,6 @@
 import { DeleteObjectCommand } from "@aws-sdk/client-s3";
-import { db } from "@/lib/db";
-import { r2 } from "@/lib/storage/r2";
+import { db } from "./db";
+import { r2 } from "./storage/r2";
 
 // Only recorded application uploads; never operations backups or arbitrary keys.
 export function isErasableUploadKey(key: string) {

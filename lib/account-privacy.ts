@@ -1,7 +1,7 @@
 import { createHash, randomBytes, timingSafeEqual } from "node:crypto";
 import type { Prisma, PrismaClient } from "@prisma/client";
 import { z } from "zod";
-import { db } from "@/lib/db";
+import { db } from "./db";
 
 export const privacyPurposeSchema = z.enum(["export", "delete"]);
 export const privacyCodeSchema = z.string().trim().toLowerCase().regex(/^[a-f0-9]{32}$/, "Paste the complete confirmation code from your email.");

@@ -39,6 +39,9 @@
   failure was reading the attachment through Chromium's response-debugging API.
   The test now reads the actual saved download, requiring successful completion,
   valid JSON and the same owner/privacy assertions before continuing to deletion.
+- The saved-file assertions passed. Direct privacy-helper imports now use the
+  same relative server-module paths as the existing vote-store browser checks,
+  avoiding Playwright's unresolved Next-only alias during rollback verification.
 
 ## 22 October 2026 — local account download and deletion preparation
 
