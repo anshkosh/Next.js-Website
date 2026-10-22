@@ -1,5 +1,16 @@
 # Progress
 
+## 22 October 2026 — dashboard founder-mode header control
+
+- Owner requested the founder toggle at the top right beside the welcome heading.
+- Moved the control into both dashboard greetings, showing only the switch and
+  “Founder mode On/Off,” with a stacked phone layout. Removed the old dashboard
+  card; profile settings retains its explanation and Undo. Saves remain automatic.
+- New registrations default off through the shared auth field and unchecked signup
+  opt-in. Existing saved preferences and the legacy database default are preserved.
+- Branch: `codex/founder-toggle-dashboard-header`, from verified live `3920596`.
+  No migrations, account-data changes, bot activity or scoring changes are needed.
+
 ## 22 October 2026 — site review deployment dependency follow-up
 
 - PR #48 passed all gates (616 unit tests and 14 browser journeys) and was

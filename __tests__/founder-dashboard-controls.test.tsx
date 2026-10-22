@@ -39,6 +39,20 @@ it("keeps the undo offer when the dashboard re-renders the control", async () =>
   expect([...host.querySelectorAll("button")].some(button => button.textContent === "Undo")).toBe(true);
 });
 
+it("saves the compact dashboard switch and reports a failed change without changing its state", async () => {
+  await act(async () => root.render(<DashboardModeControl enabled={false} compact />));
+  const toggle = host.querySelector<HTMLButtonElement>('[role="switch"]')!;
+  expect(toggle.getAttribute("aria-checked")).toBe("false");
+  await act(async () => toggle.click());
+  expect(m.save).toHaveBeenLastCalledWith({ founderMode: true });
+  expect(toggle.getAttribute("aria-checked")).toBe("true");
+  expect(host.querySelectorAll("button")).toHaveLength(1);
+  m.save.mockResolvedValueOnce({ error: "Please try again." });
+  await act(async () => toggle.click());
+  expect(toggle.getAttribute("aria-checked")).toBe("true");
+  expect(host.querySelector('[role="alert"]')?.textContent).toBe("Please try again.");
+});
+
 it("shows a failed delete inside the dialog instead of an alert", async () => {
   const alert = vi.fn(); vi.stubGlobal("alert", alert);
   m.remove.mockResolvedValue({ error: "Startup not found" });

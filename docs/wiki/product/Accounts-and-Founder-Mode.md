@@ -16,11 +16,13 @@ change (revoking other sessions), password recovery and signing out other device
 Google-only accounts use recovery to create an email sign-in password.
 Profile settings are linked from public, mobile, founder and admin navigation.
 
-Founder mode starts **on** for new accounts, including Google registration. The
-registration form lets members and backers switch it off before creating their
-account. Existing accounts retain founder mode through an additive `User` column
-with a `true` default. Anyone can change their own mode later using the dashboard
-switch, which saves immediately. Profile settings links to this dashboard control.
+Founder mode starts **off** for new accounts, including Google registration, via
+the shared Better Auth account-field default. The registration form offers an
+unchecked opt-in. Existing accounts retain their saved preference. The original
+database column's `true` default remains for compatibility with the historical
+backfill; registrations explicitly persist the auth default or chosen opt-in.
+Anyone can change their own mode later using the dashboard switch, which saves
+immediately. The same control is also available in profile settings.
 
 With founder mode off, the dashboard offers discovery, stories and feedback rather
 than startup management. Starting a submission asks the member to enable founder
@@ -51,8 +53,12 @@ The public header and founder top bar share an account menu with Dashboard,
 Profile settings and Logout. Signed-in visitors to `/login` and `/register`
 are redirected to their dashboard. Mobile navigation exposes the same destinations.
 
-Founder mode is available on both the dashboard and profile settings. Changes
-save immediately; a short-lived Undo offer restores the previous mode. Public
+The dashboard places a compact founder-mode toggle beside the welcome heading,
+at the top right on wider screens and below the greeting on phones. The old
+bottom-of-dashboard card is removed. Only the switch and “Founder mode On/Off”
+are visible in the dashboard header; help and save announcements remain available
+to screen readers. Profile settings retains its full explanation and short-lived
+Undo offer. Changes save immediately on both surfaces. Public
 visibility and review-state rules above remain the same. Startup deletion uses
 the shared confirmation dialog and stays at the bottom of each dashboard card.
 

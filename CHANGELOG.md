@@ -1,5 +1,12 @@
 # Website changelog
 
+## 22 October 2026 — dashboard founder-mode placement
+
+- Move the founder-mode switch beside the dashboard welcome heading, showing
+  only the switch and “Founder mode On/Off.” Stack it below the greeting on phones.
+- Default new registrations to founder mode off, with an unchecked signup opt-in.
+  Preserve existing preferences and the full explanatory control in profile settings.
+
 ## 22 October 2026 — test-tooling security patch
 
 - Upgrade Vitest and its matching coverage package to 4.1.12 to remove two
