@@ -48,6 +48,10 @@
   Root visibility invalidation and database session revocation remain intact;
   failed transactions cannot redirect or report success. The browser must verify
   both the receipt URL and confirmation before checking dependent data and files.
+- Final local build, lint/typecheck and all 687 unit tests pass (two optional
+  skips). The component regression now verifies the public receipt's authoritative
+  cookie refresh instead of the replaced inline sign-out flow. CI still must pass
+  for the final commit before the authorized merge and production release.
 
 ## 22 October 2026 — local account download and deletion preparation
 

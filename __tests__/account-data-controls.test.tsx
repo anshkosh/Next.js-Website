@@ -1,10 +1,11 @@
 import { act } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { beforeEach, afterEach, expect, it, vi } from "vitest";
-const m = vi.hoisted(() => ({ request: vi.fn(), erase: vi.fn(), signOut: vi.fn() }));
+const m = vi.hoisted(() => ({ request: vi.fn(), erase: vi.fn(), signOut: vi.fn(), getSession: vi.fn() }));
 vi.mock("@/app/actions/account-privacy.actions", () => ({ requestAccountPrivacyCode: m.request, deleteMyAccount: m.erase }));
-vi.mock("@/lib/auth-client", () => ({ authClient: { signOut: m.signOut } }));
+vi.mock("@/lib/auth-client", () => ({ authClient: { signOut: m.signOut, getSession: m.getSession } }));
 import AccountDataSettings from "@/components/account/AccountDataSettings";
+import AccountDeletionConfirmation from "@/components/account/AccountDeletionConfirmation";
 let host: HTMLDivElement, root: Root;
 beforeEach(() => {
   vi.stubGlobal("IS_REACT_ACT_ENVIRONMENT", true); vi.resetAllMocks();
@@ -24,13 +25,15 @@ it("requires exact final confirmation before invoking the destructive action", a
 it("does not claim deletion or sign out on a failed confirmation", async () => {
   m.erase.mockResolvedValue({ error: "The code is invalid or expired." });
   await mount(); await fill("delete-confirmation", "DELETE"); await fill("deletion-confirmation-code", "a".repeat(32)); await submit();
+  expect(m.erase).toHaveBeenCalledWith({ code: "a".repeat(32), confirmation: "DELETE" });
   expect(host.textContent).toContain("The code is invalid or expired."); expect(host.textContent).not.toContain("Your account has been deleted"); expect(m.signOut).not.toHaveBeenCalled();
 });
-it("signs out only after the server confirms erasure and explains remaining storage cleanup", async () => {
-  m.erase.mockResolvedValue({ success: true });
-  await mount(); await fill("delete-confirmation", "DELETE"); await fill("deletion-confirmation-code", "a".repeat(32)); await submit();
-  expect(m.erase).toHaveBeenCalledWith({ code: "a".repeat(32), confirmation: "DELETE" });
-  expect(m.signOut).toHaveBeenCalledOnce(); expect(host.textContent).toContain("Your account has been deleted"); expect(host.textContent).toContain("Upload removal is queued");
+it("shows the public receipt and refreshes revoked cookies without forcing a valid account to sign out", async () => {
+  m.getSession.mockResolvedValue({ data: null });
+  await act(async () => root.render(<AccountDeletionConfirmation />));
+  expect(m.getSession).toHaveBeenCalledWith({ query: { disableCookieCache: true } });
+  expect(m.signOut).not.toHaveBeenCalled();
+  expect(host.textContent).toContain("Your account has been deleted"); expect(host.textContent).toContain("Upload removal is queued");
 });
 it("offers staff-assisted closure without exposing the destructive form for staff accounts", async () => {
   await mount(false); expect(host.querySelector("#delete-account form")).toBeNull(); expect(host.textContent).toContain("responsibility handover"); expect(host.textContent).toContain("Download your data");

@@ -82,4 +82,11 @@ late upload rejection. The isolated browser journey covers JSON download, privat
 applicant exclusion, proof replay/purpose separation, actual database rollback,
 dependent deletion, another session's revocation and fixture object removal.
 It refuses non-loopback/non-test databases. Never substitute production for
-the isolated suite. The prepared change is held locally until owner review.
+the isolated suite. The owner authorized release on 22 October 2026; required CI
+must pass before merge and deployment.
+
+After the erasure transaction commits and public visibility is invalidated, the
+server redirects to `/account-deleted` outside the protected settings layout.
+The no-index receipt refreshes the authoritative session to expire revoked
+browser cookies; visiting it does not sign out a valid account. Failed erasure
+stays in settings with an error and cannot redirect to the completion receipt.

@@ -1,6 +1,6 @@
 # Website changelog
 
-## 22 October 2026 — account data controls (local preparation)
+## 22 October 2026 — account data controls
 
 - Add account-data JSON download and permanent account deletion in settings,
   each protected by a separate single-use emailed confirmation code.
@@ -9,6 +9,7 @@
 - Block queued upload links and retry storage removal durably. Keep password,
   provider tokens and other people's private records out of downloads.
 - Explain separate records, device drafts and retained backup copies explicitly.
+- Confirm completed deletion on a public receipt after revoking account sessions.
 
 ## 22 October 2026 — CSP and private account settings
 
