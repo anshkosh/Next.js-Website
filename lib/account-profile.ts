@@ -6,7 +6,7 @@ export const accountProfileFields = {
   founderMode: {
     type: "boolean",
     required: false,
-    defaultValue: true,
+    defaultValue: false,
     input: true,
     validator: { input: z.boolean() },
   },

@@ -12,7 +12,7 @@ import PasswordField from "@/components/auth/PasswordField";
 export default function RegisterPage() {
   const hydrated = useHydrated();
   const [name, setName] = useState("");
-  const [founderMode, setFounderMode] = useState(true);
+  const [founderMode, setFounderMode] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -202,7 +202,7 @@ export default function RegisterPage() {
 
             <div className="rounded-xl bg-gray-50 p-4">
               <label className="flex cursor-pointer items-start gap-3"><input name="founderMode" type="checkbox" checked={founderMode} onChange={e => setFounderMode(e.target.checked)} aria-describedby="register-mode-help" className="mt-1 h-5 w-5 accent-coral-600" /><span className="text-sm font-semibold text-gray-900">Enable founder mode</span></label>
-              <p id="register-mode-help" className="mt-2 text-sm leading-relaxed text-gray-600">Submitting a startup? Turn this on. Members and backers can turn it off. You can change it in Profile settings anytime.</p>
+              <p id="register-mode-help" className="mt-2 text-sm leading-relaxed text-gray-600">Submitting a startup? Turn this on. You can change it on your dashboard or in Profile settings anytime.</p>
             </div>
             <div className="flex items-start">
               <div className="flex items-center h-5">

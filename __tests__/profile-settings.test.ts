@@ -35,7 +35,6 @@ describe("self-service profiles through real auth endpoints", () => {
             name: "Member",
             email: `${role}@example.test`,
             password: "isolated-password-123",
-            ...(role === "user" ? { founderMode: false } : {}),
           }),
         }),
       );
@@ -44,7 +43,7 @@ describe("self-service profiles through real auth endpoints", () => {
         (user) => user.email === `${role}@example.test`,
       )!;
       expect(user.role).toBe("user");
-      expect(user.founderMode).toBe(role !== "user");
+      expect(user.founderMode).toBe(false);
       user.role = role;
       const cookie = signup.headers
         .getSetCookie()

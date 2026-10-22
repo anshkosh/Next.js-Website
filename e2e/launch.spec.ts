@@ -95,7 +95,7 @@ async function uploadPhoto(page: Page, label: string) {
 
 test.beforeAll(async ({ request }) => {
   categoryId = (await db.category.upsert({ where: { slug: "foodtech" }, update: {}, create: { name: "FoodTech", slug: "foodtech" } })).id;
-  const response = await request.post("/api/auth/sign-up/email", { headers: { origin: "http://127.0.0.1:3100" }, data: { name: "Test Reviewer", email: adminEmail, password } });
+  const response = await request.post("/api/auth/sign-up/email", { headers: { origin: "http://127.0.0.1:3100" }, data: { name: "Test Reviewer", email: adminEmail, password, founderMode: true } });
   expect(response.ok()).toBe(true);
   // Fixture privilege only inside the disposable database, never an app auth bypass.
   await db.user.update({ where: { email: adminEmail }, data: { role: "admin", emailVerified: true } });
@@ -477,8 +477,7 @@ test("founder lesson submission, update feedback and direct sign-out work togeth
 test("member registration and profile settings work across modes without losing founder data", async ({ page }) => {
   const memberEmail = `member-${randomUUID()}@example.test`;
   await enter(page, "/register");
-  await expect(page.getByRole("checkbox", { name: "Enable founder mode" })).toBeChecked();
-  await page.getByRole("checkbox", { name: "Enable founder mode" }).uncheck();
+  await expect(page.getByRole("checkbox", { name: "Enable founder mode" })).not.toBeChecked();
   await page.getByLabel("Full Name", { exact: true }).fill("Community Member");
   await page.locator('input[type="email"]').fill(memberEmail);
   await page.locator('input[name="password"]').fill(password);
@@ -526,7 +525,7 @@ test("founder mode hides every owned startup publicly and restores approved visi
   const visibilityEmail = `visibility-${randomUUID()}@example.test`;
   const signup = await page.request.post("/api/auth/sign-up/email", {
     headers: { origin: "http://127.0.0.1:3100" },
-    data: { name: "Visibility Founder", email: visibilityEmail, password },
+    data: { name: "Visibility Founder", email: visibilityEmail, password, founderMode: true },
   });
   expect(signup.ok()).toBe(true);
   const owner = await db.user.update({ where: { email: visibilityEmail }, data: { emailVerified: true } });
@@ -631,7 +630,7 @@ test("expanded profile, optional emails and verified sign-in changes persist", a
   const member = await db.user.update({ where: { email: originalEmail }, data: { emailVerified: true } });
   await login(page, originalEmail);
   await enter(page, "/settings");
-  await expect(page.getByRole("switch", { name: /Founder mode/ })).toBeChecked();
+  await expect(page.getByRole("switch", { name: /Founder mode/ })).not.toBeChecked();
   await uploadPhoto(page, "Upload profile photo");
   await page.getByLabel("Bio", { exact: true }).fill("A member interested in useful early-stage products.");
   await page.getByLabel("Location", { exact: true }).fill("Hyderabad");

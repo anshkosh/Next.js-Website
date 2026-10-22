@@ -59,7 +59,19 @@ export default async function DashboardPage() {
   }
 
   const profile = await db.user.findUnique({ where: { id: session.user.id }, select: { name: true, founderMode: true } });
-  if (!profile?.founderMode) return <div className="mx-auto w-full max-w-4xl px-4 py-12 sm:py-16"><DashboardModeControl enabled={false} /><h1 className="font-heading text-3xl font-bold text-gray-900">Welcome, {profile?.name || session.user.name}</h1><p className="mt-3 max-w-xl text-base leading-relaxed text-gray-600">Discover what people are building, ask useful questions and follow their progress. You don’t need a startup to take part.</p><div className="mt-8 flex flex-wrap gap-4"><Link href="/discover" className="inline-flex min-h-12 items-center rounded-xl bg-coral-600 px-5 font-semibold text-white hover:bg-coral-700">Explore startups</Link><Link href="/journal" className="inline-flex min-h-12 items-center rounded-xl border border-gray-300 bg-white px-5 font-semibold text-gray-800 hover:bg-gray-50">Read founder stories</Link></div><section className="mt-12 border-t border-gray-200 pt-6"><h2 className="text-lg font-semibold text-gray-900">Make yourself at home</h2><p className="mt-2 text-sm leading-relaxed text-gray-600">Your member or backer account can share feedback and apply to beta programs where available. Any saved startups and linked journal stories stay hidden publicly while founder mode is off. Building a startup? Turn founder mode on above.</p><Link href="/settings" className="mt-3 inline-flex min-h-11 items-center font-semibold text-coral-700 underline underline-offset-4">Profile settings</Link></section></div>;
+  if (!profile?.founderMode) return (
+    <div className="mx-auto w-full max-w-4xl px-4 py-12 sm:py-16">
+      <div className="flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">
+        <div className="min-w-0">
+          <h1 className="break-words font-heading text-3xl font-bold text-gray-900">Welcome, {profile?.name || session.user.name}</h1>
+          <p className="mt-3 max-w-xl text-base leading-relaxed text-gray-600">Discover what people are building, ask useful questions and follow their progress. You don’t need a startup to take part.</p>
+        </div>
+        <DashboardModeControl enabled={false} compact />
+      </div>
+      <div className="mt-8 flex flex-wrap gap-4"><Link href="/discover" className="inline-flex min-h-12 items-center rounded-xl bg-coral-600 px-5 font-semibold text-white hover:bg-coral-700">Explore startups</Link><Link href="/journal" className="inline-flex min-h-12 items-center rounded-xl border border-gray-300 bg-white px-5 font-semibold text-gray-800 hover:bg-gray-50">Read founder stories</Link></div>
+      <section className="mt-12 border-t border-gray-200 pt-6"><h2 className="text-lg font-semibold text-gray-900">Make yourself at home</h2><p className="mt-2 text-sm leading-relaxed text-gray-600">Your member or backer account can share feedback and apply to beta programs where available. Any saved startups and linked journal stories stay hidden publicly while founder mode is off. Building a startup? Turn founder mode on above.</p><Link href="/settings" className="mt-3 inline-flex min-h-11 items-center font-semibold text-coral-700 underline underline-offset-4">Profile settings</Link></section>
+    </div>
+  );
 
   const startups = await db.startup.findMany({
     where: { founderId: session.user.id },
@@ -143,11 +155,14 @@ export default async function DashboardPage() {
 
   return (
     <div className="container mx-auto max-w-6xl px-4 pt-7 pb-28 md:pt-10">
-      <div className="mb-6">
-        <h1 className="font-heading text-3xl font-bold tracking-tight text-gray-900 md:text-4xl">
-          Welcome back, <span className="text-coral-700">{firstName}</span>
-        </h1>
-        <p className="mt-2 text-base text-gray-600">Your startup, your progress, your next move.</p>
+      <div className="mb-6 flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">
+        <div className="min-w-0">
+          <h1 className="break-words font-heading text-3xl font-bold tracking-tight text-gray-900 md:text-4xl">
+            Welcome back, <span className="text-coral-700">{firstName}</span>
+          </h1>
+          <p className="mt-2 text-base text-gray-600">Your startup, your progress, your next move.</p>
+        </div>
+        <DashboardModeControl enabled compact />
       </div>
 
       <dl className="mb-8 grid grid-cols-3 divide-x divide-gray-100 rounded-2xl border border-gray-200 bg-white">
@@ -316,10 +331,6 @@ export default async function DashboardPage() {
           })}
         </div>
       )}
-
-      <div className="mt-10">
-        <DashboardModeControl enabled={true} />
-      </div>
 
       <p className="mt-8 border-t border-gray-200 pt-5 text-sm text-gray-600">Need a hand? <Link href="/contact" className="inline-flex min-h-11 items-center font-semibold text-coral-700 underline underline-offset-4">Contact us</Link></p>
     </div>
