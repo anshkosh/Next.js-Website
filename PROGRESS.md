@@ -13,10 +13,14 @@
   Lakshmi’s Saree Second reply is present on current live; public page errors did
   not recur. No fabricated data restoration, bot activity or ranking reweighting.
 - Evidence and every report item: `docs/wiki/engineering/Jerry-QA-2026-10-22.md`.
-  First full unit checkpoint: 695 pass, two optional skips; focused additions pass.
-  Local lint/typecheck/build, dependency policy and three deployment helper tests
-  pass; 390px production-preview forms/tools/search checked. Final CI must also
-  pass isolated PostgreSQL and browser regressions. No merge or deploy yet.
+  Final full local suite: 697 pass, two optional skips. Lint/typecheck/build,
+  dependency policy and ten deployment-helper tests pass; 390px production-preview
+  forms/tools/search checked.
+- Draft PR #52 (source `eebe02b`) is pushed. Required run `39801525023` did not
+  start its code or browser job: both annotations cite failed GitHub account
+  payments/spending limits. Local Docker startup also failed to expose an engine.
+  The database-backed browser journey remains unrun; restore Actions billing
+  and rerun both gates before release approval. No gate bypass, merge or deploy.
 
 ## 22 October 2026 — authorized account settings release
 
