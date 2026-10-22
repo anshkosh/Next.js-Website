@@ -753,7 +753,9 @@ test("founder mode hides every owned startup publicly and restores approved visi
     expect((await visitor.request.get(direct(oldSlug))).url()).toContain(direct(live.slug));
     expect(await (await visitor.request.get("/discover")).text()).toContain(`href="${direct(live.slug)}"`);
     expect(await (await visitor.request.get("/sitemap.xml")).text()).toContain(storyPath);
-    for (const route of publicPages) await visitor.request.get(route);
+    // This is the first category request on the on-demand CI development server.
+    // Give cold compilation its own budget, then require a successful warm-up.
+    for (const route of publicPages) expect((await visitor.request.get(route, { timeout: 60000 })).status()).toBe(200);
     await login(page, visibilityEmail);
     await enter(page, "/dashboard");
     await page.getByRole("switch", { name: /Founder mode/ }).click();
