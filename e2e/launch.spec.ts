@@ -125,6 +125,89 @@ test.beforeEach(async ({ page }) => {
 test.describe.configure({ mode: "serial", retries: 0 });
 test.setTimeout(180000);
 
+// Verify privacy controls before the longer shared startup journey.
+test("private data export and confirmed deletion isolate owners, roll back failures and revoke all sessions", async ({ page, browser }) => {
+  test.setTimeout(300000);
+  const ownerEmail = `privacy-${randomUUID()}@example.test`;
+  // Registration has separate HTTP coverage. Seed this isolated fixture
+  // through the real auth service, avoiding a late dev-manifest read race.
+  const { auth } = await import("../lib/auth");
+  const signup = await auth.api.signUpEmail({ body: { name: "Privacy fixture", email: ownerEmail, password } });
+  expect(signup.user.email).toBe(ownerEmail);
+  const owner = await db.user.update({ where: { email: ownerEmail }, data: { emailVerified: true, dateOfBirth: "1996-02-29" } });
+  await login(page, ownerEmail);
+  const owned = await db.startup.create({ data: {
+    founderId: owner.id, categoryId, name: `Privacy owned ${randomUUID()}`, slug: `privacy-${randomUUID()}`,
+    tagline: "Owned privacy fixture", description: "This isolated content must be deleted only with its owner.", websiteUrl: "https://example.test", founderName: owner.name, galleryImages: [],
+    revision: { create: { data: { tagline: "Pending owned revision" } } },
+    betaTesterProgram: { create: { enabled: true, description: "Private tester fixture", requests: { create: { name: "Private applicant", email: "DO-NOT-EXPORT@example.test", consentedAt: new Date(), consentVersion: "isolated" } } } },
+    comments: { create: { authorName: "Other commenter", authorEmail: "COMMENT-DO-NOT-EXPORT@example.test", body: "Other person's private record", reply: "Owner reply" } },
+  } });
+  const entry = await db.founderJournalEntry.create({ data: { authorId: owner.id, startupId: owned.id, title: "Owned journal", body: "Owned private journal content", revision: { create: { data: { title: "Pending journal" } } } } });
+  const controlOwner = await db.user.findUniqueOrThrow({ where: { email: adminEmail } });
+  const control = await db.startup.create({ data: { founderId: controlOwner.id, categoryId, name: "Unrelated privacy control", slug: `privacy-control-${randomUUID()}`, tagline: "Unrelated owner remains intact", description: "An isolated control that must survive another member's deletion.", websiteUrl: "https://example.test", founderName: controlOwner.name, galleryImages: [] } });
+  const otherDevice = await isolatedContext(browser);
+  try {
+    const otherPage = await otherDevice.newPage(); await login(otherPage, ownerEmail);
+    await enter(page, "/settings");
+    await uploadPhoto(page, "Upload profile photo");
+    const media = await db.mediaUpload.findFirstOrThrow({ where: { userId: owner.id } });
+    await page.getByRole("button", { name: "Email download code", exact: true }).click();
+    const downloadCode = await privacyCode(ownerEmail, "Your Anshkosh data download code");
+    await page.getByLabel("Download confirmation code", { exact: true }).fill(downloadCode);
+    const [exportResponse, downloaded] = await Promise.all([
+      page.waitForResponse(response => response.url().endsWith("/api/account/export") && response.request().method() === "POST").then(response => { expect(response.status()).toBe(200); return response; }),
+      page.waitForEvent("download"),
+      page.getByRole("button", { name: "Download my data", exact: true }).click(),
+    ]);
+    expect(exportResponse.status()).toBe(200);
+    const exported = await exportResponse.json();
+    expect(exported.account.dateOfBirth).toBe("1996-02-29");
+    expect(exported.startups.map((startup: { id: string }) => startup.id)).toEqual([owned.id]);
+    expect(JSON.stringify(exported)).not.toContain("DO-NOT-EXPORT");
+    expect(exported.linkedSignIns[0]).not.toHaveProperty("password");
+    expect(downloaded.suggestedFilename()).toBe("anshkosh-account-data.json");
+    expect((await page.request.post("/api/account/export", { headers: { origin: "http://127.0.0.1:3100" }, data: { code: downloadCode } })).status()).toBe(400);
+    await page.getByText("Delete account…", { exact: true }).click();
+    await page.getByRole("button", { name: "Email deletion code", exact: true }).click();
+    const deletionCode = await privacyCode(ownerEmail, "Confirm your Anshkosh account deletion");
+    expect((await page.request.post("/api/account/export", { headers: { origin: "http://127.0.0.1:3100" }, data: { code: deletionCode } })).status()).toBe(400);
+    // Inject a real transaction failure after dependent rows were deleted. Every
+    // content row and the confirmation proof must roll back, allowing a retry.
+    const { eraseAccount } = await import("../lib/account-privacy");
+    const active = await (await page.request.get("/api/auth/get-session")).json();
+    const failingClient = {
+      $transaction: <T,>(fn: (tx: Prisma.TransactionClient) => Promise<T>) => db.$transaction(tx => fn(new Proxy(tx, {
+        get(target, property) {
+          if (property === "user") return new Proxy(target.user, { get(model, method) { return method === "delete" ? async () => { throw new Error("isolated rollback injection"); } : Reflect.get(model, method); } });
+          return Reflect.get(target, property);
+        },
+      }))),
+    } as Pick<PrismaClient, "$transaction">;
+    await expect(eraseAccount({ userId: owner.id, sessionId: active.session.id }, deletionCode, failingClient)).rejects.toThrow("isolated rollback injection");
+    expect(await db.startup.count({ where: { id: owned.id } })).toBe(1);
+    expect(await db.founderJournalEntry.count({ where: { id: entry.id } })).toBe(1);
+    expect((await db.mediaUpload.findUniqueOrThrow({ where: { id: media.id } })).erasureRequestedAt).toBeNull();
+    await page.getByLabel("Deletion confirmation code", { exact: true }).fill(deletionCode);
+    await page.getByLabel("Type DELETE to confirm", { exact: true }).fill("DELETE");
+    await page.getByRole("button", { name: "Delete my account permanently", exact: true }).click();
+    await expect(page.getByRole("heading", { name: "Your account has been deleted", exact: true })).toBeVisible({ timeout: 30000 });
+    expect(await db.user.count({ where: { id: owner.id } })).toBe(0);
+    expect(await db.account.count({ where: { userId: owner.id } })).toBe(0);
+    expect(await db.session.count({ where: { userId: owner.id } })).toBe(0);
+    expect(await db.startup.count({ where: { id: owned.id } })).toBe(0);
+    expect(await db.founderJournalEntry.count({ where: { id: entry.id } })).toBe(0);
+    expect(await db.startup.count({ where: { id: control.id } })).toBe(1);
+    expect(await (await otherPage.request.get("/api/auth/get-session")).json()).toBeNull();
+    expect((await page.request.get(`/api/uploads/serve/${media.key}`)).status()).toBe(404);
+    expect((await db.mediaUpload.findUniqueOrThrow({ where: { id: media.id } })).erasureRequestedAt).not.toBeNull();
+    const { eraseQueuedAccountMedia } = await import("../lib/account-media-erasure");
+    await eraseQueuedAccountMedia();
+    expect(await db.mediaUpload.findUnique({ where: { id: media.id } })).toBeNull();
+    expect((await fetch(`http://127.0.0.1:3181/${process.env.R2_BUCKET_NAME}/${media.key}`)).status).toBe(404);
+  } finally { await otherDevice.close(); await db.startup.delete({ where: { id: control.id } }); }
+});
+
 test("signup, real verification token, login, photo editing, private deck and startup submission", async ({ page }) => {
   await enter(page, "/register");
   await page.getByLabel("Full Name", { exact: true }).fill("Test Founder");
@@ -706,81 +789,5 @@ test("expanded profile, optional emails and verified sign-in changes persist", a
       expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
       await page.screenshot({ path: `.impeccable/review/settings-${width}.png`, fullPage: true });
     }
-  } finally { await otherDevice.close(); }
-});
-
-test("private data export and confirmed deletion isolate owners, roll back failures and revoke all sessions", async ({ page, browser }) => {
-  test.setTimeout(300000);
-  const ownerEmail = `privacy-${randomUUID()}@example.test`;
-  const signup = await page.request.post("/api/auth/sign-up/email", { headers: { origin: "http://127.0.0.1:3100" }, data: { name: "Privacy fixture", email: ownerEmail, password } });
-  expect(signup.ok()).toBe(true);
-  const owner = await db.user.update({ where: { email: ownerEmail }, data: { emailVerified: true, dateOfBirth: "1996-02-29" } });
-  await login(page, ownerEmail);
-  const owned = await db.startup.create({ data: {
-    founderId: owner.id, categoryId, name: `Privacy owned ${randomUUID()}`, slug: `privacy-${randomUUID()}`,
-    tagline: "Owned privacy fixture", description: "This isolated content must be deleted only with its owner.", websiteUrl: "https://example.test", founderName: owner.name, galleryImages: [],
-    revision: { create: { data: { tagline: "Pending owned revision" } } },
-    betaTesterProgram: { create: { enabled: true, description: "Private tester fixture", requests: { create: { name: "Private applicant", email: "DO-NOT-EXPORT@example.test", consentedAt: new Date(), consentVersion: "isolated" } } } },
-    comments: { create: { authorName: "Other commenter", authorEmail: "COMMENT-DO-NOT-EXPORT@example.test", body: "Other person's private record", reply: "Owner reply" } },
-  } });
-  const entry = await db.founderJournalEntry.create({ data: { authorId: owner.id, startupId: owned.id, title: "Owned journal", body: "Owned private journal content", revision: { create: { data: { title: "Pending journal" } } } } });
-  const otherDevice = await isolatedContext(browser);
-  try {
-    const otherPage = await otherDevice.newPage(); await login(otherPage, ownerEmail);
-    await enter(page, "/settings");
-    await uploadPhoto(page, "Upload profile photo");
-    const media = await db.mediaUpload.findFirstOrThrow({ where: { userId: owner.id } });
-    await page.getByRole("button", { name: "Email download code", exact: true }).click();
-    const downloadCode = await privacyCode(ownerEmail, "Your Anshkosh data download code");
-    await page.getByLabel("Download confirmation code", { exact: true }).fill(downloadCode);
-    const responsePromise = page.waitForResponse(response => response.url().endsWith("/api/account/export") && response.request().method() === "POST");
-    const downloadPromise = page.waitForEvent("download");
-    await page.getByRole("button", { name: "Download my data", exact: true }).click();
-    const exportResponse = await responsePromise;
-    expect(exportResponse.status()).toBe(200);
-    const exported = await exportResponse.json();
-    expect(exported.account.dateOfBirth).toBe("1996-02-29");
-    expect(exported.startups.map((startup: { id: string }) => startup.id)).toEqual([owned.id]);
-    expect(JSON.stringify(exported)).not.toContain("DO-NOT-EXPORT");
-    expect(exported.linkedSignIns[0]).not.toHaveProperty("password");
-    expect((await downloadPromise).suggestedFilename()).toBe("anshkosh-account-data.json");
-    expect((await page.request.post("/api/account/export", { headers: { origin: "http://127.0.0.1:3100" }, data: { code: downloadCode } })).status()).toBe(400);
-    await page.getByText("Delete account…", { exact: true }).click();
-    await page.getByRole("button", { name: "Email deletion code", exact: true }).click();
-    const deletionCode = await privacyCode(ownerEmail, "Confirm your Anshkosh account deletion");
-    expect((await page.request.post("/api/account/export", { headers: { origin: "http://127.0.0.1:3100" }, data: { code: deletionCode } })).status()).toBe(400);
-    // Inject a real transaction failure after dependent rows were deleted. Every
-    // content row and the confirmation proof must roll back, allowing a retry.
-    const { eraseAccount } = await import("../lib/account-privacy");
-    const active = await (await page.request.get("/api/auth/get-session")).json();
-    const failingClient = {
-      $transaction: <T,>(fn: (tx: Prisma.TransactionClient) => Promise<T>) => db.$transaction(tx => fn(new Proxy(tx, {
-        get(target, property) {
-          if (property === "user") return new Proxy(target.user, { get(model, method) { return method === "delete" ? async () => { throw new Error("isolated rollback injection"); } : Reflect.get(model, method); } });
-          return Reflect.get(target, property);
-        },
-      }))),
-    } as Pick<PrismaClient, "$transaction">;
-    await expect(eraseAccount({ userId: owner.id, sessionId: active.session.id }, deletionCode, failingClient)).rejects.toThrow("isolated rollback injection");
-    expect(await db.startup.count({ where: { id: owned.id } })).toBe(1);
-    expect(await db.founderJournalEntry.count({ where: { id: entry.id } })).toBe(1);
-    expect((await db.mediaUpload.findUniqueOrThrow({ where: { id: media.id } })).erasureRequestedAt).toBeNull();
-    await page.getByLabel("Deletion confirmation code", { exact: true }).fill(deletionCode);
-    await page.getByLabel("Type DELETE to confirm", { exact: true }).fill("DELETE");
-    await page.getByRole("button", { name: "Delete my account permanently", exact: true }).click();
-    await expect(page.getByRole("heading", { name: "Your account has been deleted", exact: true })).toBeVisible({ timeout: 30000 });
-    expect(await db.user.count({ where: { id: owner.id } })).toBe(0);
-    expect(await db.account.count({ where: { userId: owner.id } })).toBe(0);
-    expect(await db.session.count({ where: { userId: owner.id } })).toBe(0);
-    expect(await db.startup.count({ where: { id: owned.id } })).toBe(0);
-    expect(await db.founderJournalEntry.count({ where: { id: entry.id } })).toBe(0);
-    expect(await db.startup.count({ where: { id: startupId } })).toBe(1);
-    expect(await (await otherPage.request.get("/api/auth/get-session")).json()).toBeNull();
-    expect((await page.request.get(`/api/uploads/serve/${media.key}`)).status()).toBe(404);
-    expect((await db.mediaUpload.findUniqueOrThrow({ where: { id: media.id } })).erasureRequestedAt).not.toBeNull();
-    const { eraseQueuedAccountMedia } = await import("../lib/account-media-erasure");
-    await eraseQueuedAccountMedia();
-    expect(await db.mediaUpload.findUnique({ where: { id: media.id } })).toBeNull();
-    expect((await fetch(`http://127.0.0.1:3181/${process.env.R2_BUCKET_NAME}/${media.key}`)).status).toBe(404);
   } finally { await otherDevice.close(); }
 });

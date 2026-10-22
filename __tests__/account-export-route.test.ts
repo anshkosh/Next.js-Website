@@ -52,3 +52,13 @@ it("never trusts loopback origins in production", async () => {
   const result = await POST(new NextRequest("http://127.0.0.1:3100/api/account/export", { method: "POST", headers: { origin: "http://127.0.0.1:3100" }, body: JSON.stringify({ code }) }));
   expect(result.status).toBe(403);
 });
+it("accepts the explicitly configured loopback browser when Next reports localhost", async () => {
+  vi.stubEnv("NODE_ENV", "development"); vi.stubEnv("BETTER_AUTH_URL", "http://127.0.0.1:3100");
+  const result = await POST(new NextRequest("http://localhost:3100/api/account/export", { method: "POST", headers: { origin: "http://127.0.0.1:3100", "content-type": "application/json" }, body: JSON.stringify({ code }) }));
+  expect(result.status).toBe(200);
+});
+it("does not add arbitrary configured origins in development", async () => {
+  vi.stubEnv("NODE_ENV", "development"); vi.stubEnv("BETTER_AUTH_URL", "https://evil.example");
+  expect((await POST(request({ code }, "https://evil.example"))).status).toBe(403);
+  expect(m.export).not.toHaveBeenCalled();
+});

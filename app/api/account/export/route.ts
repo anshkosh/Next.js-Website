@@ -8,7 +8,15 @@ const responseHeaders = { "Cache-Control": "private, no-store", "Vary": "Cookie"
 export async function POST(request: NextRequest) {
   try {
     const origins = getTrustedAuthOrigins();
-    if (process.env.NODE_ENV !== "production" && ["127.0.0.1", "localhost", "[::1]"].includes(request.nextUrl.hostname)) origins.push(request.nextUrl.origin);
+    if (process.env.NODE_ENV !== "production") {
+      // Next may report localhost while the configured browser uses 127.0.0.1.
+      for (const value of [process.env.BETTER_AUTH_URL, request.nextUrl.origin]) {
+        try {
+          const local = new URL(value ?? "");
+          if (["127.0.0.1", "localhost", "[::1]"].includes(local.hostname) && ["http:", "https:"].includes(local.protocol)) origins.push(local.origin);
+        } catch { /* Missing or invalid configuration adds no trust. */ }
+      }
+    }
     if (!origins.includes(request.headers.get("origin") ?? "")) throw new AccountPrivacyError("Invalid request origin.", 403);
     const actor = await privacyActor(request.headers);
     await limitPrivacyAction(actor.userId, "export", 10);

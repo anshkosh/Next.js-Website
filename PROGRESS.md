@@ -14,6 +14,17 @@
   deployment uses the normal gated workflow and automatic worker restart. The
   preceding release remains the rollback target; these columns are compatible
   with the preceding application. No manual privileged server change is needed.
+- PR #51's first browser run passed 14 journeys but hit a development manifest
+  JSON read race at the privacy fixture's registration step. A fresh isolated
+  rerun reached download and exposed a local-origin mismatch: Next reports
+  localhost while the configured browser uses 127.0.0.1. The export route now
+  accepts explicitly configured loopback origins only outside production, with
+  regressions for both the mismatch and arbitrary-origin denial. The privacy
+  fixture uses the real auth service; HTTP registration remains covered separately.
+  The independent privacy journey runs first for immediate feedback and retains
+  an unrelated owner's startup as an isolation control, then removes only that
+  disposable control. No product authorization or safety gate is relaxed.
+  All privacy response, rollback, ownership and deletion assertions remain required.
 
 ## 22 October 2026 — local account download and deletion preparation
 
