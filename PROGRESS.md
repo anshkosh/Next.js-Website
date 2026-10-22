@@ -1,5 +1,15 @@
 # Progress
 
+## 22 October 2026 — signup redirect behind the production proxy
+
+- Jerry fixes released as `d0c8910` via merged PR #52; 698 unit tests, all
+  17 browser scenarios and PostgreSQL checks passed. Public release/DB health
+  verified, along with home, login, registration and launch-tool pages.
+- Public smoke found `/signup` deriving its absolute redirect from the proxy’s
+  internal `localhost` URL. Return a relative `/register` Location instead.
+  The owner’s fix-and-deploy authorization covers this correction.
+
+
 ## 22 October 2026 — Jerry QA report fixes (prepared, not deployed)
 
 - Owner authorized fixes for both Jerry reports. Branch `codex/jerry-report-fixes`
