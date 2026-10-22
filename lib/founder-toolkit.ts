@@ -48,17 +48,20 @@ export function readKit(raw: string): LaunchKitData {
   };
 }
 export function buildPitch(details: FounderDetails) {
-  const name = details.name.trim(); const audience = details.audience.trim();
-  const problem = details.problem.trim(); const approach = details.approach.trim();
-  const outcome = details.outcome.trim();
+  const clean = (value: string) => value.trim().replace(/\s+/g, " ").replace(/[.!?\s]+$/, "");
+  const phrase = (value: string) => clean(value).replace(/^[A-Z](?=[a-z])/, first => first.toLowerCase());
+  const name = details.name.trim(); const audience = phrase(details.audience);
+  const problem = clean(details.problem); const approach = clean(details.approach);
+  const outcome = phrase(details.outcome);
   if (!name || !audience || !approach || !outcome) return null;
-  const promise = `${name} helps ${audience} ${outcome.replace(/[.!?]+$/, "")}`;
-  const standalone = /^[A-Z]/.test(approach) || /[.!?]\s+\S/.test(approach);
-  const oneLine = standalone ? `${promise}. ${approach.replace(/[.!?]+$/, "")}.`
-    : `${promise} by ${approach.replace(/[.!?]+$/, "")}.`;
-  const introduction = [oneLine, problem ? `The problem we are working on: ${problem}` : "", details.stage.trim() ? `Current stage: ${details.stage.trim()}.` : ""].filter(Boolean).join("\n\n");
+  const promise = `${name} helps ${audience} ${outcome}`;
+  // Avoid guessing verb inflections. A labelled sentence supports any approach.
+  const byClause = /^[a-z]+ing\b/.test(approach) && !/[.!?]\s+\S/.test(approach);
+  const candidate = byClause && `${promise} by ${approach}.`.length <= 180 ? `${promise} by ${approach}.` : `${promise}.`;
+  const oneLine = candidate.length > 180 ? `${candidate.slice(0, 177).trimEnd()}…` : candidate;
+  const introduction = [`${promise}.`, `How it works: ${approach}.`, problem ? `The problem: ${problem}.` : ""].filter(Boolean).join("\n\n");
   const website = safeLaunchUrl(details.websiteUrl);
-  const announcement = [`Meet ${name}.`, introduction, website ? `Explore it: ${website}` : "Get in touch to learn more."].join("\n\n");
+  const announcement = [`Meet ${name}.`, `For ${audience}: ${outcome}.`, `Our approach: ${approach}.`, details.stage.trim() ? `Current stage: ${clean(details.stage)}.` : "", website ? `Explore it: ${website}` : "Get in touch to learn more."].filter(Boolean).join("\n\n");
   return { oneLine, introduction, announcement };
 }
 
@@ -74,8 +77,9 @@ export function readMvp(raw: string): MvpDraft {
   return { features, success: text(data.success) };
 }
 export function featureBucket(feature: MvpFeature): "Build first" | "Handle manually" | "Save for later" {
+  if (feature.manual) return "Handle manually";
   if (!feature.promise && !feature.essential) return "Save for later";
-  return feature.manual ? "Handle manually" : "Build first";
+  return "Build first";
 }
 
 export const EVIDENCE_SIGNALS = ["No clear signal", "Problem confirmed", "Asked to try", "Committed to a next step"] as const;
@@ -93,8 +97,10 @@ export function readValidation(raw: string): ValidationDraft {
   };
 }
 export function interviewQuestions(details: FounderDetails): string[] {
+  const problem = details.problem.trim().replace(/^[\s“”"']+|[\s“”"'.!?]+$/g, "").split(/(?<=[.!?])\s/)[0];
+  const topic = problem.length > 160 ? `${problem.slice(0, 157).trimEnd()}…` : problem;
   return [
-    details.problem.trim() ? `You described the problem as “${details.problem.trim()}”. When did you last experience it? Walk me through what happened.` : "Tell me about the last time you experienced this problem. Walk me through what happened.",
+    topic ? `Thinking about “${topic}”: when did you last experience this? Walk me through what happened.` : "Tell me about the last time you experienced this problem. Walk me through what happened.",
     "What did you do to solve it? Walk me through the steps.",
     "Which part took the most time, effort or money?",
     "What alternatives have you tried, and why did you keep or stop using them?",
@@ -120,6 +126,7 @@ export function calculateRunway(data: RunwayDraft) {
   const cashPaise = Math.round(cash * 100); const revenuePaise = Math.round(revenue * 100);
   const expensePaise = Math.round(expenses * (1 + adjustment / 100) * 100);
   const burnPaise = expensePaise - revenuePaise;
+  if (cashPaise === 0 && expensePaise === 0 && revenuePaise === 0) return { error: "All three amounts are zero. There is no cash or monthly activity to estimate a runway. Enter your available cash and expected costs." } as const;
   return { cash: cashPaise / 100, expenses: expensePaise / 100, revenue: revenuePaise / 100, burn: burnPaise / 100,
     months: burnPaise > 0 ? cashPaise / burnPaise : null,
     balances: Array.from({ length: 12 }, (_, index) => ({ month: index + 1, balance: Math.max(0, cashPaise - burnPaise * (index + 1)) / 100 })),

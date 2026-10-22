@@ -4,6 +4,7 @@ import { afterEach, beforeEach, expect, it, vi } from "vitest";
 const m = vi.hoisted(() => ({ get: vi.fn(), create: vi.fn(), edit: vi.fn(), remove: vi.fn(), signOut: vi.fn(), replace: vi.fn(), refresh: vi.fn() }));
 vi.mock("@/app/actions/update.actions", () => ({ getUpdates: m.get, createUpdate: m.create, editUpdate: m.edit, deleteUpdate: m.remove }));
 vi.mock("@/lib/auth-client", () => ({ authClient: { signOut: m.signOut } }));
+vi.mock("@/lib/browser-navigation", () => ({ navigateAfterSignOut: () => m.replace("/login") }));
 vi.mock("next/navigation", () => ({ useRouter: () => ({ replace: m.replace, refresh: m.refresh }) }));
 // A plain image exposes load/error events without Next's image loader in this DOM test.
 // eslint-disable-next-line @next/next/no-img-element
@@ -44,7 +45,7 @@ it("recovers from a lost update response with the draft intact", async () => {
 });
 it("signs out through the auth client and clears the displayed session", async () => {
   await act(async () => root.render(<Logout />));
-  expect(m.signOut).toHaveBeenCalledOnce(); expect(m.replace).toHaveBeenCalledWith("/login"); expect(m.refresh).toHaveBeenCalledOnce();
+  expect(m.signOut).toHaveBeenCalledOnce(); expect(m.replace).toHaveBeenCalledWith("/login");
 });
 it("offers retry when sign-out fails", async () => {
   m.signOut.mockResolvedValueOnce({ error: { message: "unavailable" } });

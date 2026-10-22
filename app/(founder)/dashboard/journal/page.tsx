@@ -1,3 +1,4 @@
+import { loginHref } from "@/lib/login-return";
 import Link from "next/link";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
@@ -13,7 +14,7 @@ export const metadata = { title: "Founder Journal | Anshkosh", robots: { index: 
 
 export default async function JournalPage({ searchParams }: { searchParams: Promise<{ page?: string }> }) {
   const session = await auth.api.getSession({ headers: await headers() });
-  if (!session?.user) redirect("/login");
+  if (!session?.user) redirect(loginHref((await headers()).get("x-anshkosh-path")));
   const page = journalPage((await searchParams).page);
   const [rows, startups] = await Promise.all([
     db.founderJournalEntry.findMany({

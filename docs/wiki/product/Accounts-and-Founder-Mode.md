@@ -66,9 +66,7 @@ are redirected to their dashboard. Mobile navigation exposes the same destinatio
 
 The dashboard places a compact founder-mode toggle beside the welcome heading,
 at the top right on wider screens and below the greeting on phones. The old
-bottom-of-dashboard card is removed. Only the switch and “Founder mode On/Off”
-are visible in the dashboard header; help and save announcements remain available
-to screen readers. Profile settings has no founder-mode control. Changes save
+bottom-of-dashboard card is removed. The dashboard header shows the switch, “Founder mode On/Off,” and visible save/error feedback. A successful save shows its IST time and a 30-second Undo offer, kept in memory across the dashboard layout refresh but cleared on reload or navigation. Explanatory help remains available to screen readers. Profile settings has no founder-mode control. Changes save
 immediately on the dashboard. Public
 visibility and review-state rules above remain the same. Startup deletion uses
 the shared confirmation dialog and stays at the bottom of each dashboard card.
@@ -92,14 +90,14 @@ state and announces its time. Restore and navigation clear stale validation erro
 Device recovery stays separate from a confirmed server save. Unsaved changes are
 recoverable for seven days where browser storage works; unavailable storage is
 reported. Recovery keys are scoped to the account and draft. A recovery copy does
-not submit or publish a profile.
+not submit or publish a profile. Recovery copies identical to or older than the current server revision are discarded. Editing an existing startup has a validated review/confirm step before saving.
 
 ## Free tools and discussions
 
 Free-tool drafts, including the launch checklist, use separate storage namespaces
 for each signed-in user and for anonymous visitors. Legacy global drafts are not
 imported automatically because their owner is unknown. These are browser-local
-copies, not account sync or encrypted storage; users should avoid shared devices.
+copies, not account sync or encrypted storage. Inputs wait for identity and draft loading. Signing out removes all free-tool drafts from this browser, including old global keys and memory-only copies; blocked cleanup is reported. Download results first. Clear controls remove persisted data, including duplicated shared kit fields, and confirm the result. Each dashboard card links to its owner-checked launch kit for explicit profile reuse.
 
 Sentence-style pitch approaches remain separate sentences. Public discussion
 explains the CAPTCHA requirement and offers startup owners links to the reply
@@ -114,3 +112,17 @@ see [Account privacy controls](../engineering/Account-Privacy-Controls.md).
 Credential resets, bot execution and changes to ranking/test activity are outside
 the site-review change. The report's intermittent first-click
 Turnstile failure remains unconfirmed; challenge protections stay enabled.
+
+## 22 October QA follow-up
+
+Protected-page sign-in carries a validated local return path; a direct sign-in still
+lands on dashboard. `/signup` redirects to `/register`, and public navigation has
+Sign up. Login/registration link to verification resend. Search uses published
+founding-team names and displays votes plus the existing activity signal total.
+Guest votes do not require sign-in. Comment/reply counters and server limits count
+user-perceived characters consistently. Published replies open for editing only
+on request and require confirmation for deletion.
+
+The phone cookie notice is in document flow below content, so it cannot cover
+forms. See the [complete QA disposition](../engineering/Jerry-QA-2026-10-22.md)
+for both source reports, confirmed fixes and intentional product behavior.

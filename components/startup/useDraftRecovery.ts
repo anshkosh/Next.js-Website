@@ -12,7 +12,7 @@ export function readDraft<T>(raw: string | null, now = Date.now()): T | null {
 }
 
 // Device-only recovery: never submits a profile or sends unreviewed content live.
-export function useDraftRecovery<T extends object>(key: string | null, value: T, restore: (value: T) => void, active = true) {
+export function useDraftRecovery<T extends object>(key: string | null, value: T, restore: (value: T) => void, active = true, serverUpdatedAt?: number) {
   const serialized = JSON.stringify(value);
   const latest = useRef({ value, serialized, restore });
   useLayoutEffect(() => { latest.current = { value, serialized, restore }; });
@@ -33,15 +33,17 @@ export function useDraftRecovery<T extends object>(key: string | null, value: T,
       if (key) {
         try {
           const raw = window.localStorage.getItem(key), saved = readDraft<T>(raw);
-          setRecovery(saved);
-          if (raw && !saved) window.localStorage.removeItem(key);
+          const oldRevision = raw && serverUpdatedAt ? JSON.parse(raw).savedAt <= serverUpdatedAt : false;
+          const redundant = saved && JSON.stringify(saved) === initial;
+          setRecovery(saved && !oldRevision && !redundant ? saved : null);
+          if (raw && (!saved || oldRevision || redundant)) window.localStorage.removeItem(key);
         }
         catch { setStorageError(true); }
       }
       ready.current = true;
     });
     return () => { alive = false; ready.current = false; };
-  }, [key]);
+  }, [key, serverUpdatedAt]);
 
   useEffect(() => {
     if (!key || !active || !ready.current || recovery || !dirty) return;

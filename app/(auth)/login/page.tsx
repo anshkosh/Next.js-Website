@@ -1,15 +1,20 @@
 "use client";
 
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import { authClient } from "@/lib/auth-client";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
+import { safeReturnPath } from "@/lib/login-return";
 import Link from "next/link";
 import { Loader2, Mail } from "lucide-react";
 import AuthHomeIcon from "@/components/auth/AuthHomeIcon";
 import PasswordField from "@/components/auth/PasswordField";
 
 export default function LoginPage() {
+  return <Suspense fallback={<p role="status" className="p-8">Loading sign in…</p>}><LoginForm /></Suspense>;
+}
+function LoginForm() {
   const router = useRouter();
+  const next = safeReturnPath(useSearchParams().get("next"));
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
   const [error, setError] = useState("");
@@ -30,7 +35,8 @@ export default function LoginPage() {
       if (error) {
         setError(error.message || "Failed to login");
       } else {
-        router.push("/dashboard");
+        router.push(next);
+        router.refresh();
       }
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "An unexpected error occurred");
@@ -45,7 +51,7 @@ export default function LoginPage() {
     try {
       await authClient.signIn.social({
         provider: "google",
-        callbackURL: "/dashboard",
+        callbackURL: next,
       });
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "Failed to initialize Google login");
@@ -100,6 +106,7 @@ export default function LoginPage() {
             </div>
           </div>
 
+          <Link href="/resend-verification" className="mt-5 inline-flex min-h-11 items-center text-sm font-medium text-coral-700 underline">Resend verification email</Link>
           <form method="post" className="space-y-5 mt-6" onSubmit={handleEmailLogin}>
             {error && (
               <div role="alert" className="bg-red-50 border border-red-100 text-red-600 text-sm p-3 rounded-lg text-center">

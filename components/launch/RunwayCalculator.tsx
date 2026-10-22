@@ -1,12 +1,13 @@
 "use client";
 
-import { calculateRunway, readRunway, rupees } from "@/lib/founder-toolkit";
+import { calculateRunway, readRunway, rupees, FOUNDER_KEY, readFounder } from "@/lib/founder-toolkit";
 import { useBrowserDraft } from "./useBrowserDraft";
 import { ClearDraft, DraftNotice, Field, inputStyle } from "./ToolFields";
-import ToolExport from "./ToolExport";
+import ToolExport, { exportFilename } from "./ToolExport";
 
 export default function RunwayCalculator() {
   const { data, update, clear, storageError } = useBrowserDraft("anshkosh-runway-v1", readRunway);
+  const { data: founder } = useBrowserDraft(FOUNDER_KEY, readFounder);
   const result = calculateRunway(data);
   const valid = !('error' in result);
   const runway = valid ? (result.months === null ? "Cash is not shrinking" : `${result.months.toFixed(1)} months`) : "—";
@@ -27,7 +28,7 @@ export default function RunwayCalculator() {
           <table className="w-full text-left text-sm"><caption className="sr-only">Projected cash remaining with constant monthly costs and revenue</caption><thead><tr className="border-b border-coral-200"><th scope="col" className="pb-2">Month</th><th scope="col" className="pb-2 text-right">Cash remaining</th></tr></thead><tbody>{result.balances.map(row => <tr key={row.month} className="border-b border-coral-100"><th scope="row" className="py-2 font-normal">{row.month}</th><td className="py-2 text-right tabular-nums">{rupees(row.balance)}</td></tr>)}</tbody></table>
         </> : <p role="status" className="mt-6 text-sm leading-relaxed text-gray-600">{result.error}</p>}
         <p className="mt-5 text-xs leading-relaxed text-gray-600">Assumes constant monthly cash costs and revenue collected, with no new funding or one-off costs. Calculations round to the nearest paise; displayed amounts round to rupees. Cash is shown as zero once exhausted. This is a planning estimate.</p>
-        <ToolExport text={exportText} disabled={!valid} filename="startup-runway.txt" />
+        <ToolExport text={exportText} disabled={!valid} filename={exportFilename(founder.name, "runway.txt")} />
       </section>
     </div>
   </>;

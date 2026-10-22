@@ -110,7 +110,7 @@ export function SiteEnhancements() {
       )}
 
       {cookiesVisible && (
-        <div role="dialog" aria-label="Cookie and browser storage notice" className={`t-toast${cookiesOpen ? " is-open" : ""} fixed inset-x-4 bottom-4 z-[70] mx-auto max-w-2xl rounded-2xl border border-gray-200 bg-white p-4 shadow-2xl sm:flex sm:items-center sm:gap-5 dark:border-gray-700 dark:bg-gray-900 print:hidden`}>
+        <div role="dialog" aria-label="Cookie and browser storage notice" className={`t-toast${cookiesOpen ? " is-open" : ""} relative mx-4 my-4 max-w-2xl sm:fixed sm:inset-x-4 sm:bottom-4 sm:z-[70] sm:mx-auto sm:my-0 rounded-2xl border border-gray-200 bg-white p-4 shadow-2xl sm:flex sm:items-center sm:gap-5 dark:border-gray-700 dark:bg-gray-900 print:hidden`}>
           <p className="flex-1 pr-10 text-sm leading-relaxed text-gray-600 sm:pr-0 dark:text-gray-300">Anshkosh uses session and security cookies, a first-party cookie to remember your vote, and browser storage for preferences and drafts. CAPTCHA providers may process browser information. <a href="/privacy" className="font-medium text-coral-600 underline">Read our privacy notice.</a></p>
           <div className="mt-3 flex shrink-0 gap-2 sm:mt-0">
             <button type="button" onClick={dismissCookieNotice} className="rounded-lg bg-gray-900 px-3 py-2 text-sm font-semibold text-white transition-colors hover:bg-gray-700 dark:bg-coral-500 dark:hover:bg-coral-600">Got it</button>

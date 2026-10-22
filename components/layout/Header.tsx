@@ -25,9 +25,9 @@ export default async function Header() {
           {session ? (
             <AccountMenu name={session.user.name} email={session.user.email} image={session.user.image} />
           ) : (
-            <Link href="/login" className="inline-flex min-h-11 items-center rounded-xl bg-gray-900 px-4 py-2 font-medium text-white transition-colors hover:bg-gray-800">
+            <><Link href="/register" className="inline-flex min-h-11 items-center rounded-xl px-3 py-2 font-medium text-coral-700 hover:bg-coral-50">Sign up</Link><Link href="/login" className="inline-flex min-h-11 items-center rounded-xl bg-gray-900 px-4 py-2 font-medium text-white transition-colors hover:bg-gray-800">
               Login
-            </Link>
+            </Link></>
           )}
         </nav>
         <div className="flex min-w-0 items-center gap-2 lg:hidden">

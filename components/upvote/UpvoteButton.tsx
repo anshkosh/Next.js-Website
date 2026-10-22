@@ -50,7 +50,7 @@ export default function UpvoteButton({ startupId, startupName, initialCount, ini
     <div className="flex w-32 flex-col items-center gap-1">
       <div className="flex w-full items-center rounded-xl border border-gray-200 bg-white">
         <button type="button" onClick={event => vote(event, 1)} disabled={isPending} aria-pressed={optimistic.vote === 1} aria-busy={isPending} aria-describedby={error ? errorId : undefined}
-          aria-label={`${optimistic.vote === 1 ? "Remove upvote" : "Upvote"}${name}, ${optimistic.upvoteCount} upvotes`}
+          title="Voting is available without an account" aria-label={`${optimistic.vote === 1 ? "Remove upvote" : "Upvote"}${name}, ${optimistic.upvoteCount} upvotes`}
           className={`flex h-11 w-11 shrink-0 flex-col items-center justify-center rounded-l-[11px] transition-colors disabled:cursor-wait focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-coral-600 ${optimistic.vote === 1 ? "bg-coral-50 text-coral-700" : "text-gray-600 hover:bg-gray-50"}`}>
           <ChevronUp aria-hidden="true" className="h-4 w-4" />
           <span aria-hidden="true" className="text-[10px] font-medium tabular-nums">{compactCount(optimistic.upvoteCount)}</span>
@@ -59,7 +59,7 @@ export default function UpvoteButton({ startupId, startupName, initialCount, ini
           <span className="sr-only">{startupName ? `${startupName}: ` : ""}</span><PopNumber value={compactCount(signalCount(optimistic) + (activitySignals ?? 0))} /><span className="sr-only"> {activitySignals === undefined ? "net votes" : "signals"}, {optimistic.upvoteCount} upvotes minus {optimistic.downvoteCount} downvotes{activitySignals === undefined ? "" : ` plus ${activitySignals} activity points`}</span>
         </span>
         <button type="button" onClick={event => vote(event, -1)} disabled={isPending} aria-pressed={optimistic.vote === -1} aria-busy={isPending} aria-describedby={error ? errorId : undefined}
-          aria-label={`${optimistic.vote === -1 ? "Remove downvote" : "Downvote"}${name}, ${optimistic.downvoteCount} downvotes`}
+          title="Voting is available without an account" aria-label={`${optimistic.vote === -1 ? "Remove downvote" : "Downvote"}${name}, ${optimistic.downvoteCount} downvotes`}
           className={`flex h-11 w-11 shrink-0 flex-col items-center justify-center rounded-r-[11px] transition-colors disabled:cursor-wait focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-coral-600 ${optimistic.vote === -1 ? "bg-gray-100 text-gray-900" : "text-gray-600 hover:bg-gray-50"}`}>
           <ChevronDown aria-hidden="true" className="h-4 w-4" />
           <span aria-hidden="true" className="text-[10px] font-medium tabular-nums">{compactCount(optimistic.downvoteCount)}</span>

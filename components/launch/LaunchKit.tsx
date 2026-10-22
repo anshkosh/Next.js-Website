@@ -6,7 +6,7 @@ import { exportLaunchKit, type LaunchKitData } from "@/lib/launch-resources";
 import { launchLinkStyle } from "./LaunchToolLayout";
 import { EMPTY_KIT, FOUNDER_KEY, KIT_KEY, readFounder, readKit } from "@/lib/founder-toolkit";
 import { useBrowserDraft } from "./useBrowserDraft";
-import { ClearDraft } from "./ToolFields";
+import { ClearDraft, DraftNotice } from "./ToolFields";
 
 const fields = [
   ["name", "Startup name", 120], ["tagline", "Short pitch / tagline", 180],
@@ -53,10 +53,11 @@ export default function LaunchKit({ initialData = EMPTY_KIT, fromProfile = false
     <>
       <aside className="mb-7 rounded-xl border border-coral-200 bg-coral-50 p-5 text-sm leading-relaxed text-gray-700">
         {fromProfile ? "Prefilled from your saved startup profile. Pending revisions are not included." : "Your kit is saved in this browser on this device. Shared startup details carry across your free founder tools."}
-        <p className="mt-2">{fromProfile ? "Edits here are temporary and do not change your startup profile. Copy, download, or choose to reuse these details in your free tools before leaving." : "No account needed. To start from a saved profile, open its launch kit from your dashboard and choose to reuse its details."}</p>
+        <p className="mt-2">{fromProfile ? "Edits here are temporary and do not change your startup profile. Copy, download, or choose to reuse these details in your free tools before leaving." : "To start from a saved profile, choose Open launch kit on its dashboard card, then reuse its details."}</p>
         {fromProfile && <p className="mt-2">Reusing details replaces the shared startup details in this browser. Other tool drafts remain; download and clear them before switching startups.</p>}
         <p className="mt-2">No automatic submissions, invented traction or AI-generated claims.</p>
       </aside>
+      {!fromProfile && <DraftNotice />}
       {(draft.storageError || shared.storageError) && <p role="alert" className="mb-5 text-sm text-red-800">{draft.storageError || shared.storageError}</p>}
       <div className="mb-6 flex flex-wrap items-center gap-3">
         <button type="button" onClick={() => copy(exportLaunchKit(kit), "Full launch kit")} className="rounded-lg bg-coral-600 px-4 py-3 text-sm font-semibold text-white hover:bg-coral-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-coral-500">Copy full kit</button>
@@ -79,7 +80,7 @@ export default function LaunchKit({ initialData = EMPTY_KIT, fromProfile = false
         <p className="mt-2 text-sm text-gray-600">Assets remain in your startup profile. This kit shares links only; it does not upload, crop or download images in bulk. Check sharing rights before reuse.</p>
         {kit.assets.length ? <ul className="mt-4 space-y-3">{kit.assets.map(asset => <li key={`${asset.label}-${asset.url}`} className="flex flex-wrap items-center gap-4"><a href={asset.url} target="_blank" rel="noopener noreferrer" className={launchLinkStyle}>Open {asset.label.toLowerCase()}</a><button type="button" onClick={() => copy(asset.url, `${asset.label} link`)} className={launchLinkStyle}>Copy {asset.label.toLowerCase()} link</button></li>)}</ul> : <p className="mt-4 text-sm text-gray-600">No profile images loaded. Open a saved startup&apos;s kit from the dashboard, or add images in its profile editor.</p>}
       </section>
-      {!fromProfile && <div className="mt-7"><ClearDraft onClear={() => { draft.clear(); shared.clear(); }} label="Clear kit and shared startup details" /></div>}
+      {!fromProfile && <div className="mt-7"><ClearDraft onClear={() => { const kitCleared = draft.clear(); const sharedCleared = shared.clear(); return kitCleared && sharedCleared; }} label="Clear kit and shared startup details" /></div>}
     </>
   );
 }

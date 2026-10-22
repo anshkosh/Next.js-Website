@@ -1,3 +1,4 @@
+import { loginHref } from "@/lib/login-return";
 import { db } from "@/lib/db";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
@@ -13,7 +14,7 @@ export default async function StartupUpdatesPage(props: {
   const session = await auth.api.getSession({ headers: await headers() });
 
   if (!session || !session.user) {
-    redirect("/login");
+    redirect(loginHref((await headers()).get("x-anshkosh-path")));
   }
 
   const startup = await db.startup.findUnique({
@@ -50,7 +51,7 @@ export default async function StartupUpdatesPage(props: {
           </div>
           <div>
             <h1 className="text-2xl font-bold font-heading text-gray-900">
-              Founders Updates
+              Founder updates
             </h1>
             <p className="text-sm text-gray-500 mt-0.5">
               Post milestones and news for{" "}

@@ -4,7 +4,7 @@ import { hydrateRoot, type Root } from "react-dom/client";
 import { afterEach, expect, it, vi } from "vitest";
 const m = vi.hoisted(() => ({ signIn: vi.fn(), push: vi.fn() }));
 vi.mock("@/lib/auth-client", () => ({ authClient: { signIn: { email: m.signIn, social: vi.fn() } } }));
-vi.mock("next/navigation", () => ({ useRouter: () => ({ push: m.push }) }));
+vi.mock("next/navigation", () => ({ useSearchParams: () => new URLSearchParams(), useRouter: () => ({ push: m.push, refresh: vi.fn() }) }));
 vi.mock("@/components/auth/AuthHomeIcon", () => ({ default: () => null }));
 import Login from "@/app/(auth)/login/page";
 let root: Root | undefined;

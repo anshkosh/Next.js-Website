@@ -40,46 +40,21 @@ export default function StartupTabNav({ tabs }: Props) {
     return () => window.removeEventListener("resize", onResize);
   }, [activeTab]);
 
-  // Scroll-spy via IntersectionObserver
   useEffect(() => {
-    const sectionIds = tabs.map((t) => t.id);
-    const observers: IntersectionObserver[] = [];
-
-    // Track which sections are currently intersecting, pick the topmost
-    const intersecting = new Map<string, boolean>();
-
-    const pickActive = () => {
+    const select = () => {
       if (isClickScrolling.current) return;
-      for (const id of sectionIds) {
-        if (intersecting.get(id)) {
-          setActiveTab(id);
-          return;
-        }
+      const offset = (navRef.current?.getBoundingClientRect().bottom ?? 128) + 24;
+      let selected = tabs[0]?.id ?? "";
+      for (const tab of tabs) {
+        const section = document.getElementById(tab.id);
+        if (section && section.getBoundingClientRect().top <= offset) selected = tab.id;
       }
+      if (window.scrollY + window.innerHeight >= document.documentElement.scrollHeight - 4) selected = tabs.at(-1)?.id ?? selected;
+      setActiveTab(selected);
     };
-
-    sectionIds.forEach((id) => {
-      const el = document.getElementById(id);
-      if (!el) return;
-
-      const obs = new IntersectionObserver(
-        (entries) => {
-          entries.forEach((entry) => {
-            intersecting.set(id, entry.isIntersecting);
-          });
-          pickActive();
-        },
-        {
-          // Highlights a tab when the section enters the top portion of the viewport
-          rootMargin: "-10% 0px -70% 0px",
-          threshold: 0,
-        }
-      );
-      obs.observe(el);
-      observers.push(obs);
-    });
-
-    return () => observers.forEach((o) => o.disconnect());
+    window.addEventListener("scroll", select, { passive: true });
+    window.addEventListener("resize", select);
+    return () => { window.removeEventListener("scroll", select); window.removeEventListener("resize", select); };
   }, [tabs]);
 
   const handleTabClick = (event: React.MouseEvent<HTMLAnchorElement>, id: string) => {

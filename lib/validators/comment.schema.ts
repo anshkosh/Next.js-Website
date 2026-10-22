@@ -1,5 +1,10 @@
 import { z } from "zod";
 import { startupIdSchema, commentIdSchema } from "./id.schema";
+import { characterCount } from "../characters";
+
+const messageText = (label: string) => z.string().max(32000, `${label} is too large`).trim()
+  .refine(value => characterCount(value) >= 5, `${label} must be at least 5 characters`)
+  .refine(value => characterCount(value) <= 2000, `${label} cannot exceed 2000 characters`);
 
 export const submitCommentSchema = z.object({
   startupId: startupIdSchema,
@@ -14,21 +19,13 @@ export const submitCommentSchema = z.object({
     .max(254, "Email too long")
     .trim()
     .toLowerCase(),
-  body: z
-    .string()
-    .min(5, "Comment must be at least 5 characters")
-    .max(2000, "Comment cannot exceed 2000 characters")
-    .trim(),
+  body: messageText("Comment"),
   turnstileToken: z.string().min(1, "Please complete the CAPTCHA challenge"),
 });
 
 export const replyToCommentSchema = z.object({
   commentId: commentIdSchema,
-  reply: z
-    .string()
-    .min(5, "Reply must be at least 5 characters")
-    .max(2000, "Reply cannot exceed 2000 characters")
-    .trim(),
+  reply: messageText("Reply"),
 });
 
 export type SubmitCommentInput = z.infer<typeof submitCommentSchema>;

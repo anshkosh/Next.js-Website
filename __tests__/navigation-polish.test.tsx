@@ -59,9 +59,9 @@ it("closes search with Escape without closing its mobile navigation parent", asy
   act(() => host.querySelector<HTMLButtonElement>('[aria-controls="mobile-navigation"]')!.click());
   const search = host.querySelector<HTMLButtonElement>('[aria-label="Search the site"]')!;
   act(() => search.click());
-  const input = host.querySelector<HTMLInputElement>("#site-search-input")!;
+  const input = host.querySelector<HTMLInputElement>('input[id$="-input"]')!;
   act(() => input.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true })));
-  expect(host.querySelector("#site-search-panel")).toBeNull();
+  expect(host.querySelector('form[id$="-panel"]')).toBeNull();
   expect(host.querySelector("#mobile-navigation")).not.toBeNull();
   expect(document.activeElement).toBe(search);
 });

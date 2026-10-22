@@ -10,6 +10,7 @@ export function proxy(request: NextRequest) {
   const requestHeaders = new Headers(request.headers);
   // Overwrite visitor-supplied values before Next.js extracts the SSR nonce.
   requestHeaders.set("x-nonce", nonce);
+  requestHeaders.set("x-anshkosh-path", `${request.nextUrl.pathname}${request.nextUrl.search}`);
   requestHeaders.set("Content-Security-Policy", policy);
   const response = NextResponse.next({ request: { headers: requestHeaders } });
   response.headers.set("Content-Security-Policy", policy);

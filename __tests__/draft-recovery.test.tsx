@@ -45,3 +45,9 @@ it("flushes a just-typed change when the page is hidden", async () => {
   act(() => window.dispatchEvent(new Event("pagehide")));
   expect(readDraft(window.localStorage.getItem("draft:one"))).toEqual({ name: "Last keystroke" });
 });
+
+it("silently removes a recovery copy identical to the current server data", async () => {
+  window.localStorage.setItem("draft:one", JSON.stringify({ version: 1, savedAt: Date.now(), value: { name: "Published" } }));
+  await act(async () => root.render(<Harness name="Published" />));
+  expect(draft.recovery).toBeNull(); expect(window.localStorage.getItem("draft:one")).toBeNull();
+});

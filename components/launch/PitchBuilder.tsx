@@ -22,7 +22,7 @@ export default function PitchBuilder() {
         {pitch ? <div className="mt-6 space-y-6">{[["One-line pitch", pitch.oneLine], ["Short introduction", pitch.introduction], ["Launch announcement", pitch.announcement]].map(([label, value]) => <div key={label}><h3 className="text-sm font-semibold text-coral-800">{label}</h3><p className="mt-2 whitespace-pre-wrap break-words text-base leading-relaxed text-gray-900">{value}</p></div>)}</div> : <p className="mt-5 leading-relaxed text-gray-600">Add a startup name, audience, customer outcome and approach to see your copy here. Write the outcome as a phrase such as “organise lunch orders in minutes”.</p>}
         <ToolExport disabled={!pitch} text={results} filename={exportFilename(data.name, "pitch.txt")} />
         {pitch && <div className="mt-5 flex flex-wrap gap-3"><button type="button" onClick={() => update({ tagline: pitch.oneLine.slice(0, 180) })} className={secondaryButton}>Use pitch as card tagline</button><Link href="/launch-support/launch-card" className={secondaryButton}>Make a launch card →</Link></div>}
-        <p className="mt-5 text-xs leading-relaxed text-gray-600">Built from your own words. Review the wording and claims before sharing.</p>
+        <p className="mt-5 text-xs leading-relaxed text-gray-600">Built from your own words. The one-line pitch is shortened to 180 characters; the introduction keeps your full details. Review the wording and claims before sharing.</p>
       </section>
     </div>
   </>;

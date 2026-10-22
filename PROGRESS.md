@@ -1,5 +1,34 @@
 # Progress
 
+## 22 October 2026 — Jerry QA report fixes (prepared, not deployed)
+
+- Owner authorized fixes for both Jerry reports. Branch `codex/jerry-report-fixes`
+  starts from main `84e4780`; unrelated worktrees and production data are untouched.
+- Added tool sign-out cleanup, disabled pending inputs, reliable clearing, corrected
+  pitch/MVP outputs, profile-kit access, optional tracker URLs and duplicate checks.
+- Corrected local login returns, mobile cookie/search layout, signup/favicon
+  redirects, verification resend, startup edit review/recovery, reply controls,
+  grapheme limits, section tabs, save feedback and search signal display.
+- Dense tie ranking, retired waitlist handling and pilot behavior remain intended.
+  Lakshmi’s Saree Second reply is present on current live; public page errors did
+  not recur. No fabricated data restoration, bot activity or ranking reweighting.
+- Evidence and every report item: `docs/wiki/engineering/Jerry-QA-2026-10-22.md`.
+  Final full local suite: 697 pass, two optional skips. Lint/typecheck/build,
+  dependency policy and ten deployment-helper tests pass; 390px production-preview
+  forms/tools/search checked.
+- Draft PR #52 (source `eebe02b`) is pushed. Required run `39801525023` did not
+  start its code or browser job: both annotations cite failed GitHub account
+  payments/spending limits. Local Docker startup also failed to expose an engine.
+  Billing is restored and run `39803225559` passed the code/DB checks. The new
+  browser journey exposed dropdown labels containing option text; explicit label
+  associations correct that accessibility issue. Required gates are rerunning.
+  Owner explicitly authorized fixing and deploying; merge waits for passing CI.
+- Release verification found and fixed delayed wizard validation autofocus stealing
+  the next field’s input. Login-return assertions were updated and cold category
+  compilation gets a bounded 60-second warm-up with a required 200 response.
+  Fifteen browser cases pass; expanded route compilation exhausted the isolated
+  dev server’s 5 GB V8 cap, raised to 8 GB on the 16 GB public Actions runner.
+
 ## 22 October 2026 — authorized account settings release
 
 - Owner explicitly requested deployment of the prepared CSP, account settings,

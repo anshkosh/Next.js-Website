@@ -7,7 +7,7 @@ vi.mock("@/app/actions/profile.actions", () => ({ saveFounderMode: m.save }));
 vi.mock("@/app/actions/startup.actions", () => ({ deleteStartup: m.remove }));
 vi.mock("@/lib/auth-client", () => ({ authClient: { getSession: async () => ({}) } }));
 vi.mock("next/navigation", () => ({ useRouter: () => ({ refresh: m.refresh }) }));
-import DashboardModeControl from "../components/account/DashboardModeControl";
+import DashboardModeControl, { clearFounderModeFeedback } from "../components/account/DashboardModeControl";
 import DeleteStartupButton from "../components/dashboard/DeleteStartupButton";
 
 let host: HTMLDivElement;
@@ -15,6 +15,8 @@ let root: ReturnType<typeof createRoot>;
 beforeEach(() => {
   vi.stubGlobal("IS_REACT_ACT_ENVIRONMENT", true);
   window.sessionStorage.clear();
+  window.history.replaceState({}, "", "/dashboard");
+  clearFounderModeFeedback();
   m.save.mockReset().mockResolvedValue({ success: true });
   m.remove.mockReset();
   host = document.createElement("div"); document.body.append(host); root = createRoot(host);
@@ -46,7 +48,8 @@ it("saves the compact dashboard switch and reports a failed change without chang
   await act(async () => toggle.click());
   expect(m.save).toHaveBeenLastCalledWith({ founderMode: true });
   expect(toggle.getAttribute("aria-checked")).toBe("true");
-  expect(host.querySelectorAll("button")).toHaveLength(1);
+  expect(host.textContent).toContain("Saved at");
+  expect(host.textContent).toContain("IST");
   m.save.mockResolvedValueOnce({ error: "Please try again." });
   await act(async () => toggle.click());
   expect(toggle.getAttribute("aria-checked")).toBe("true");

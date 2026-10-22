@@ -1,3 +1,4 @@
+import { loginHref } from "@/lib/login-return";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { headers } from "next/headers";
@@ -11,7 +12,7 @@ export const dynamic = "force-dynamic";
 
 export default async function BetaTestersPage({ params, searchParams }: { params: Promise<{ id: string }>; searchParams?: Promise<{ page?: string }> }) {
   const session = await auth.api.getSession({ headers: await headers() });
-  if (!session?.user.emailVerified || session.user.banned) redirect("/login");
+  if (!session?.user.emailVerified || session.user.banned) redirect(loginHref((await headers()).get("x-anshkosh-path")));
   const { id } = await params;
   const page = pageNumber((await searchParams)?.page);
   const pageSize = 20;

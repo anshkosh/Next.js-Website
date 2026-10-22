@@ -58,7 +58,7 @@ describe("founder toolkit calculations and exports", () => {
     expect(featureBucket(base)).toBe("Save for later");
     expect(featureBucket({ ...base, promise: true })).toBe("Build first");
     expect(featureBucket({ ...base, essential: true, manual: true })).toBe("Handle manually");
-    expect(featureBucket({ ...base, manual: true })).toBe("Save for later");
+    expect(featureBucket({ ...base, manual: true })).toBe("Handle manually");
   });
   it("recovers safely from malformed drafts and validates enums, lengths and duplicate rows", () => {
     for (const raw of ["broken", "null", "[]"]) {
@@ -107,7 +107,8 @@ describe("founder toolkit workflows", () => {
   });
   it("keeps sentence-style approaches out of the by-clause", () => {
     const pitch = buildPitch(readFounder(JSON.stringify({ name: "CreatorLedger", audience: "creators", outcome: "manage invoices", approach: "Each deal becomes a card. Track its progress." })));
-    expect(pitch?.oneLine).toBe("CreatorLedger helps creators manage invoices. Each deal becomes a card. Track its progress.");
+    expect(pitch?.oneLine).toBe("CreatorLedger helps creators manage invoices.");
+    expect(pitch?.introduction).toContain("How it works: Each deal becomes a card. Track its progress.");
   });
 
   it("shares startup details between the pitch builder and kit and restores them on a new visit", async () => {
