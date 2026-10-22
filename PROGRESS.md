@@ -26,6 +26,8 @@
 - Release verification found and fixed delayed wizard validation autofocus stealing
   the next field’s input. Login-return assertions were updated and cold category
   compilation gets a bounded 60-second warm-up with a required 200 response.
+  Fifteen browser cases pass; expanded route compilation exhausted the isolated
+  dev server’s 5 GB V8 cap, raised to 8 GB on the 16 GB public Actions runner.
 
 ## 22 October 2026 — authorized account settings release
 

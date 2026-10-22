@@ -22,7 +22,9 @@ export default defineConfig({
     { command: "node node_modules/next/dist/bin/next dev --webpack --disable-source-maps --hostname 127.0.0.1 --port 3100", url: "http://127.0.0.1:3100/api/cron/health", reuseExistingServer: false, timeout: 120000,
       // Keep cold compilation/startup evidence when the database readiness probe fails.
       stdout: "pipe",
-      env: { NODE_OPTIONS: "--max-old-space-size=5120" },
+      // The public Ubuntu runner has 16 GB RAM. The expanded tool journey
+      // compiles more routes; leave room for those entries and the browser/DB.
+      env: { NODE_OPTIONS: "--max-old-space-size=8192" },
     },
   ],
   projects: [
