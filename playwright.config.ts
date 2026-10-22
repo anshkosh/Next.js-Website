@@ -7,11 +7,13 @@ export default defineConfig({
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
   workers: process.env.CI ? 1 : undefined,
+  // CI's on-demand server may still be completing a save after an input action.
+  expect: { timeout: process.env.CI ? 30000 : 5000 },
   reporter: process.env.CI ? [["line"], ["html", { open: "never" }]] : "html",
   use: {
     actionTimeout: 30000,
     baseURL: "http://127.0.0.1:3100",
-    trace: "on-first-retry",
+    trace: "retain-on-failure",
     screenshot: "only-on-failure",
   },
   webServer: [

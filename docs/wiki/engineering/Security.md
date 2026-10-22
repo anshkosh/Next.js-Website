@@ -106,3 +106,11 @@ A one-off npm 12 invocation resolved the compatible lockfile; a fresh normal npm
 10 `npm ci`, generated Prisma client and full checks verify reproducibility without
 changing the server/global package manager. Lifecycle scripts still run normally
 in the existing CI/deploy pipeline.
+
+On 22 October, the main deployment audit newly reported
+[manual mock code injection](https://github.com/advisories/GHSA-qxg6-89mg-rqv8)
+and [Windows mock redirect traversal](https://github.com/advisories/GHSA-xp26-3454-mjgp)
+in `@vitest/mocker` 4.1.11 after the site-review PR checks had passed. Vitest and
+its matching coverage package are upgraded to the compatible 4.1.12 patch,
+which includes the patched mocker. The existing audit gate and exceptions remain
+unchanged; this update introduces no production application behavior or migration.

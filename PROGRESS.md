@@ -1,5 +1,25 @@
 # Progress
 
+## 22 October 2026 — site review deployment dependency follow-up
+
+- PR #48 passed all gates (616 unit tests and 14 browser journeys) and was
+  owner-authorized merged as `771a075`. One profile-photo save timeout passed
+  unchanged on a fresh isolated browser run.
+- Main's subsequent audit newly reported two `@vitest/mocker` advisories and
+  stopped deployment. The public release remains `c128585` until checks pass.
+- Follow-up branch `codex/site-review-vitest-security` upgrades the Vitest family
+  to the compatible 4.1.12 security patch. No audit exceptions, deployment checks,
+  application code, migrations or manual server configuration are changed.
+- Browser runs exposed late development-server request timeouts and a logout
+  assertion that began its five-second navigation deadline before sign-out
+  finished. Isolated E2E config now retains compiled routes for the job duration;
+  the logout test requires a successful sign-out response and the existing login
+  navigation budget. Production and fixture-isolation guards remain unchanged.
+- A further first-journey screenshot showed the draft save still pending when
+  the default five-second assertion expired. CI assertions now use the existing
+  30-second action budget; failure traces are retained on first failure, matching
+  the serial suite's no-retry policy. Saved-content and DB assertions remain.
+
 ## 22 October 2026 — Claude site review release preparation
 
 - Owner authorized reviewing, pushing and merging `claude/site-review-fixes`.
