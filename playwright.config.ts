@@ -19,7 +19,9 @@ export default defineConfig({
   webServer: [
     { command: "node e2e/fixtures/services.mjs", url: "http://127.0.0.1:3181/ready", reuseExistingServer: false, timeout: 30000 },
     { command: "npx tsx lib/jobs/workers/email.worker.ts", url: "http://127.0.0.1:3181/worker-ready", reuseExistingServer: false, timeout: 30000 },
-    { command: "npx next dev --webpack --disable-source-maps --hostname 127.0.0.1 --port 3100", url: "http://127.0.0.1:3100/api/cron/health", reuseExistingServer: false, timeout: 120000,
+    { command: "node node_modules/next/dist/bin/next dev --webpack --disable-source-maps --hostname 127.0.0.1 --port 3100", url: "http://127.0.0.1:3100/api/cron/health", reuseExistingServer: false, timeout: 120000,
+      // Keep cold compilation/startup evidence when the database readiness probe fails.
+      stdout: "pipe",
       env: { NODE_OPTIONS: "--max-old-space-size=5120" },
     },
   ],

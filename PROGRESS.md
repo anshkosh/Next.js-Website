@@ -30,6 +30,11 @@
   account remains created and exercised through normal application authentication.
   The dependency check remains fail-closed and must pass before release.
   All privacy response, rollback, ownership and deletion assertions remain required.
+- A subsequent browser runner missed the unchanged 120-second database-backed
+  web readiness deadline, while the unit/dependency job passed. Startup output
+  is now retained and Next launches directly from the installed dependency so
+  a package-runner lookup cannot delay it. The readiness endpoint and deadline
+  remain unchanged; the complete browser gate is still required before merge.
 
 ## 22 October 2026 — local account download and deletion preparation
 
