@@ -121,8 +121,8 @@ The browser job applies migrations to isolated PostgreSQL, checks signal scoring
 and concurrent quotas, then runs all fifteen launch scenarios. The independent
 privacy journey runs first and verifies export privacy, proof replay/purpose,
 real deletion rollback, ownership isolation, session revocation and object cleanup.
-Its account fixture uses the real auth service; separate scenarios retain HTTP
-registration coverage. Submission tests
+Its account fixture uses the HTTP auth endpoint warmed by the suite setup;
+separate scenarios exercise registration and verification through the UI. Submission tests
 verify the persisted pending-review status before navigation; cold compilation
 does not replace the state assertion. Failed browser runs retain traces/screenshots
 and the report for three days. Release builds also run TypeScript on the VPS.

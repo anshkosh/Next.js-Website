@@ -20,10 +20,15 @@
   localhost while the configured browser uses 127.0.0.1. The export route now
   accepts explicitly configured loopback origins only outside production, with
   regressions for both the mismatch and arbitrary-origin denial. The privacy
-  fixture uses the real auth service; HTTP registration remains covered separately.
+  fixture retains HTTP registration, using the endpoint warmed by suite setup.
   The independent privacy journey runs first for immediate feedback and retains
   an unrelated owner's startup as an isolation control, then removes only that
   disposable control. No product authorization or safety gate is relaxed.
+- The next CI run exposed Playwright's inability to link Better Auth's ESM graph
+  when importing the server auth module directly, and a dependency-service timeout.
+  The independent first privacy fixture now uses the warmed HTTP endpoint; the
+  account remains created and exercised through normal application authentication.
+  The dependency check remains fail-closed and must pass before release.
   All privacy response, rollback, ownership and deletion assertions remain required.
 
 ## 22 October 2026 — local account download and deletion preparation

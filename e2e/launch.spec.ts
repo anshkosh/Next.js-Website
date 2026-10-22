@@ -129,11 +129,9 @@ test.setTimeout(180000);
 test("private data export and confirmed deletion isolate owners, roll back failures and revoke all sessions", async ({ page, browser }) => {
   test.setTimeout(300000);
   const ownerEmail = `privacy-${randomUUID()}@example.test`;
-  // Registration has separate HTTP coverage. Seed this isolated fixture
-  // through the real auth service, avoiding a late dev-manifest read race.
-  const { auth } = await import("../lib/auth");
-  const signup = await auth.api.signUpEmail({ body: { name: "Privacy fixture", email: ownerEmail, password } });
-  expect(signup.user.email).toBe(ownerEmail);
+  // The first journey uses the HTTP auth endpoint already compiled by beforeAll.
+  const signup = await page.request.post("/api/auth/sign-up/email", { headers: { origin: "http://127.0.0.1:3100" }, data: { name: "Privacy fixture", email: ownerEmail, password } });
+  expect(signup.status(), await signup.text()).toBe(200);
   const owner = await db.user.update({ where: { email: ownerEmail }, data: { emailVerified: true, dateOfBirth: "1996-02-29" } });
   await login(page, ownerEmail);
   const owned = await db.startup.create({ data: {
