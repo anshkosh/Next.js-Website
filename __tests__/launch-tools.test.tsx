@@ -3,6 +3,7 @@ import { createRoot, type Root } from "react-dom/client";
 import { renderToStaticMarkup } from "react-dom/server";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { exportLaunchKit, launchKitFromProfile, LAUNCH_CHECKLIST, LAUNCH_DIRECTORIES, readChecklist, safeLaunchUrl } from "../lib/launch-resources";
+import { Field } from "../components/launch/ToolFields";
 import LaunchChecklist from "../components/launch/LaunchChecklist";
 import LaunchKit from "../components/launch/LaunchKit";
 import DirectoryCatalogue from "../components/launch/DirectoryCatalogue";
@@ -22,6 +23,13 @@ async function mount(element: React.ReactNode) { root = createRoot(container); a
 const profile = { name: "Cane Theory", tagline: "Pressed to Perfection", description: "A sugarcane pilot.", websiteUrl: "https://example.com", targetAudience: "Hyderabad", prototypeStatus: "Preparing a pilot", tractionEvidence: "No sales claimed.", logoUrl: "/images/logo.png", galleryImages: ["https://example.com/image.png", "javascript:alert(1)"], founders: [{ name: "Jai", role: "CEO" }], metadata: { privateDeck: "secret" }, startupPhone: "private-number", adminNotes: "private-notes" };
 
 describe("free launch tools", () => {
+  it("labels dropdowns without including their option text", async () => {
+    await mount(<Field label="Card format" hint="Choose a size"><select defaultValue="landscape"><option value="landscape">Landscape</option><option value="square">Square</option></select></Field>);
+    const select = container.querySelector("select")!;
+    expect(select.labels?.[0].textContent).toBe("Card format");
+    expect(select.disabled).toBe(false);
+    expect(document.getElementById(select.getAttribute("aria-describedby")!)?.textContent).toBe("Choose a size");
+  });
   it("provides source-backed directory eligibility without pretending paid listings are free", () => {
     expect(LAUNCH_DIRECTORIES).toHaveLength(5);
     expect(new Set(LAUNCH_DIRECTORIES.map(item => item.name)).size).toBe(5);

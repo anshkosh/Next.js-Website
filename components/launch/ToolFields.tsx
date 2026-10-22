@@ -11,11 +11,14 @@ export const primaryButton = "inline-flex items-center justify-center gap-2 roun
 export const secondaryButton = "inline-flex items-center justify-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-3 text-sm font-semibold text-gray-800 hover:border-coral-400 disabled:cursor-not-allowed disabled:text-gray-400";
 
 export function Field({ label, hint, children }: { label: string; hint?: string; children: ReactNode }) {
-  const hintId = useId();
+  const generatedId = useId();
+  const control = isValidElement(children) ? children as ReactElement<{ id?: string; "aria-describedby"?: string; disabled?: boolean }> : null;
+  const fieldId = control?.props.id ?? generatedId;
+  const hintId = `${fieldId}-hint`;
   const { isPending } = authClient.useSession();
   const hydrated = useHydrated();
-  const field = isValidElement(children) ? cloneElement(children as ReactElement<{ "aria-describedby"?: string; disabled?: boolean }>, { ...(hint ? { "aria-describedby": hintId } : {}), ...(!hydrated || isPending ? { disabled: true } : {}) }) : children;
-  return <div className="min-w-0"><label className="block text-sm font-semibold text-gray-900">{label}{field}</label>{hint && <p id={hintId} className="mt-2 text-xs leading-relaxed text-gray-600">{hint}</p>}</div>;
+  const field = control ? cloneElement(control, { id: fieldId, ...(hint ? { "aria-describedby": hintId } : {}), ...(!hydrated || isPending ? { disabled: true } : {}) }) : children;
+  return <div className="min-w-0"><label htmlFor={fieldId} className="block text-sm font-semibold text-gray-900">{label}</label>{field}{hint && <p id={hintId} className="mt-2 text-xs leading-relaxed text-gray-600">{hint}</p>}</div>;
 }
 export function DraftNotice({ error }: { error?: string }) {
   return error ? <p role="alert" className="mb-6 rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-800">{error}</p> :

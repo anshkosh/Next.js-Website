@@ -19,8 +19,10 @@
 - Draft PR #52 (source `eebe02b`) is pushed. Required run `39801525023` did not
   start its code or browser job: both annotations cite failed GitHub account
   payments/spending limits. Local Docker startup also failed to expose an engine.
-  The database-backed browser journey remains unrun; restore Actions billing
-  and rerun both gates before release approval. No gate bypass, merge or deploy.
+  Billing is restored and run `39803225559` passed the code/DB checks. The new
+  browser journey exposed dropdown labels containing option text; explicit label
+  associations correct that accessibility issue. Required gates are rerunning.
+  Owner explicitly authorized fixing and deploying; merge waits for passing CI.
 
 ## 22 October 2026 — authorized account settings release
 
