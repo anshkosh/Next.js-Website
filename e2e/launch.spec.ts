@@ -654,9 +654,14 @@ test("founder lesson submission, update feedback and direct sign-out work togeth
     await page.getByRole("button", { name: "Post a New Update", exact: true }).click();
     await page.locator('input[type="text"]').fill(updateTitle);
     await page.locator("textarea").fill("A synthetic progress update for an isolated fixture.");
-    await page.getByRole("button", { name: "Publish Update", exact: true }).click();
-    await expect(page.getByRole("status")).toContainText("Update published successfully");
-    await expect.poll(async () => db.startupUpdate.count({ where: { startupId, title: updateTitle } })).toBe(1);
+    await page.getByRole("button", { name: "Submit update", exact: true }).click();
+    await expect(page.getByRole("status")).toContainText("Update saved for moderation");
+    await expect.poll(async () => db.startupUpdate.count({ where: { startupId, title: updateTitle, status: "PENDING" } })).toBe(1);
+    const other = await isolatedContext(page.context().browser()!);
+    try {
+      const publicPage = await other.newPage(); await enter(publicPage, `/startups/${slug}`);
+      await expect(publicPage.getByText(updateTitle, { exact: true })).toHaveCount(0);
+    } finally { await other.close(); }
     const signedOut = page.waitForResponse(response => response.request().method() === "POST"
       && new URL(response.url()).pathname === "/api/auth/sign-out");
     await enter(page, "/logout");
