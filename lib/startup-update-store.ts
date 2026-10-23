@@ -12,7 +12,7 @@ async function ownedStartup(tx: Prisma.TransactionClient, startupId: string, own
 }
 
 async function recount(tx: Prisma.TransactionClient, startupId: string) {
-  const updateCount = await tx.startupUpdate.count({ where: { startupId } });
+  const updateCount = await tx.startupUpdate.count({ where: { startupId, status: "APPROVED" } });
   await tx.startup.update({ where: { id: startupId }, data: { updateCount } });
 }
 

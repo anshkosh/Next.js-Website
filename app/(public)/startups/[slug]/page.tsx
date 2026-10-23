@@ -171,6 +171,7 @@ export default async function StartupDetailPage(props: {
         orderBy: { sortOrder: "asc" }
       },
       updates: {
+        where: { status: "APPROVED" },
         orderBy: { createdAt: "desc" },
       },
       betaTesterProgram: { select: { id: true, enabled: true, description: true, reward: true } },

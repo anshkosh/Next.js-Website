@@ -1,5 +1,11 @@
 # Progress
 
+## 23 October 2026 — moderation rollback visibility prerequisite
+
+- Prepare a small prerequisite release for AI moderation: additive StartupUpdate status defaulting to APPROVED and public visibility/counter filters. No pending writers or AI calls are introduced here.
+- Deploy this first and verify its release before the AI feature. Once AI moderation is active, rollback targets must contain this visibility guard or a later compatible implementation.
+- Existing published activity, new-update publication behavior, bot accounts, scoring weights and Cloudflare plans remain unchanged.
+
 ## 23 October 2026 — Search Console legacy campaign 404s
 
 - Owner authorized the fix list. Branch `codex/search-console-404-fix` starts from

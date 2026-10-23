@@ -13,9 +13,10 @@ export async function getUpdates(startupId: string) {
   try {
     const session = await auth.api.getSession({ headers: await headers() });
     const updates = await db.startupUpdate.findMany({
-      where: { startupId, startup: startupReadWhere(session?.user) },
+      where: { startupId, startup: startupReadWhere(session?.user),
+        OR: [{ status: "APPROVED" }, ...(session?.user.emailVerified && !session.user.banned ? [{ startup: { founderId: session.user.id } }, ...(["admin", "reviewer"].includes(session.user.role ?? "") ? [{}] : [])] : [])] },
       orderBy: { createdAt: "desc" },
-      select: { id: true, title: true, body: true, imageUrl: true, createdAt: true, updatedAt: true },
+      select: { id: true, title: true, body: true, imageUrl: true, status: true, createdAt: true, updatedAt: true },
     });
     return { data: updates };
   } catch (error) {
