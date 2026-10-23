@@ -6,7 +6,7 @@ import { createHash } from "node:crypto";
 const REVIEWED_MIGRATIONS = new Map([
   [
     "20261023130000_ai_content_moderation",
-    "6548a938864f0f7b433b20e96ce5ba552887fe7aa8e0184081644479584c47bb",
+    "598b2c853ba29c8376d97574161d24b56e195e0a0e639776b5c6410586fd6d8a",
   ],
   [
     "20261018150000_beta_tester_signups",

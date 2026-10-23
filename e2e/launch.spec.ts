@@ -409,6 +409,24 @@ test("admin approves, edits remain unpublished, recovery survives refresh, revis
   await anonymous.close(); await ownerContext.close();
 });
 
+test("pending and rejected startup updates stay hidden in the rollback-compatible public reader", async ({ page }) => {
+  const pendingTitle = `Private pending update ${randomUUID()}`;
+  const rejectedTitle = `Private rejected update ${randomUUID()}`;
+  const records = await Promise.all([
+    db.startupUpdate.create({ data: { startupId, title: pendingTitle, body: "Pending content must not appear publicly.", status: "PENDING" } }),
+    db.startupUpdate.create({ data: { startupId, title: rejectedTitle, body: "Rejected content must not appear publicly.", status: "REJECTED" } }),
+  ]);
+  try {
+    await enter(page, `/startups/${slug}`);
+    await expect(page.getByRole("heading", { name: "Founder Updates", exact: true })).toBeVisible();
+    await expect(page.getByText(pendingTitle, { exact: true })).toHaveCount(0);
+    await expect(page.getByText(rejectedTitle, { exact: true })).toHaveCount(0);
+    await enter(page, "/discover");
+    await expect(page.getByText(pendingTitle, { exact: true })).toHaveCount(0);
+    await expect(page.getByText(rejectedTitle, { exact: true })).toHaveCount(0);
+  } finally { await db.startupUpdate.deleteMany({ where: { id: { in: records.map(row => row.id) } } }); }
+});
+
 test("password reset uses a delivered token and mobile forms fit the viewport", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await enter(page, "/forgot-password"); await page.getByLabel("Email address", { exact: true }).fill(email);

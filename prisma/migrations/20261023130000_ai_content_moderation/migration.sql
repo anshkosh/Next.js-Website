@@ -1,7 +1,4 @@
 -- AlterTable
-ALTER TABLE "StartupUpdate" ADD COLUMN     "status" "CommentStatus" NOT NULL DEFAULT 'APPROVED';
-
--- AlterTable
 ALTER TABLE "Comment" ADD COLUMN     "pendingRepliedBy" TEXT,
 ADD COLUMN     "pendingReply" VARCHAR(2000);
 

@@ -63,7 +63,7 @@ These are root-owned on the server and change only through a deliberate install 
 ## Reviewed migration exceptions
 
 The AI moderation migration `20261023130000_ai_content_moderation` adds pending
-reply fields, an update status, a daily request-budget table and a moderation
+reply fields, a daily request-budget table and a moderation
 table. Its foreign keys cascade only newly linked moderation metadata when source
 records are removed. The scanner conservatively rejects `ON DELETE`/`ON UPDATE`
 clauses, so the policy pins this exact additive migration by name and SHA-256.

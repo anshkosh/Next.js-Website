@@ -7,6 +7,11 @@
 - Add a shared 100-request UTC daily cap, exact-content race protection, pending update visibility, staged replies, human publication overrides and privacy disclosures.
 - Preserve existing published records and scoring weights; Cloudflare Workers remains Free. Activation requires a scoped server credential and normal release approval.
 
+## Unreleased — moderation visibility prerequisite
+
+- Add an approved status default for startup updates and exclude non-approved updates from public profiles, cards, update helpers and activity counts. Existing content and new writes remain approved as before.
+- This visibility-only release must deploy before AI moderation, so automatic rollback of the AI release cannot expose pending/rejected updates. No AI jobs, credentials or paid services are enabled.
+
 ## 23 October 2026 — legacy campaign indexing fix
 
 - Permanently redirect the old Cane Theory campaign URL to its current startup

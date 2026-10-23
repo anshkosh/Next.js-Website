@@ -6,7 +6,14 @@
 - Implemented durable text checks, safe-only automatic publication, human journal/media review, exact-submission comparisons, staged reply edits, pending startup updates, shared daily request reservations and review overrides.
 - No production content, bot activity, account plans, paid credits or R2 settings changed. Existing published records remain approved; new pending updates are excluded from public reads/signals.
 - Typecheck, zero-warning lint and dependency policy pass; full local suite passed 745 tests with two existing skips, and ten deployment Python tests passed. Added migration-policy, moderation failure/race/authorization tests and isolated PostgreSQL/browser regressions; GitHub CI and activation are pending.
+- Safe rollout is split: deploy visibility guard PR #56 first, then AI PR #55. Both are reviewable drafts; no production changes.
 - Remaining activation: owner-authorized Workers AI credential scoped to Anshkosh account, private VPS configuration, and owner-approved merge/deployment after passing CI. See docs/wiki/operations/Content-Moderation.md.
+
+## 23 October 2026 — moderation rollback visibility prerequisite
+
+- Prepare a small prerequisite release for AI moderation: additive StartupUpdate status defaulting to APPROVED and public visibility/counter filters. No pending writers or AI calls are introduced here.
+- Deploy this first and verify its release before the AI feature. Once AI moderation is active, rollback targets must contain this visibility guard or a later compatible implementation.
+- Existing published activity, new-update publication behavior, bot accounts, scoring weights and Cloudflare plans remain unchanged.
 
 ## 23 October 2026 — Search Console legacy campaign 404s
 

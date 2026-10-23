@@ -96,23 +96,24 @@ the returned result is discarded and cannot publish it.
 
 ## Checks and rollout
 
-1. Run lint, typecheck, dependency policy and the complete unit suite.
-2. Run the PR's disposable PostgreSQL/browser gate. The new moderation fixture
+1. Deploy prerequisite [PR #56](https://github.com/anshkosh/Next.js-Website/pull/56) first and verify its release. It adds the update status/public filters without pending writers. This must be the rollback baseline (or a later compatible release) before [PR #55](https://github.com/anshkosh/Next.js-Website/pull/55) introduces pending updates. Never roll the AI release back to a pre-guard reader.
+2. Run lint, typecheck, dependency policy and the complete unit suite.
+3. Run the PR's disposable PostgreSQL/browser gate. The new moderation fixture
    replaces fetch with fixed responses and refuses any database other than
    loopback `anshkosh_e2e`; it never calls Cloudflare or production.
-3. Review the additive migration and approve the PR through the normal deployment
+4. Review the additive migration and approve the PR through the normal deployment
    workflow. The new table's cascade foreign keys are rejected by the conservative
    SQL scanner, so `deploy/deployment-policy.mjs` pins this exact migration's
-   SHA-256 (`6548a938864f0f7b433b20e96ce5ba552887fe7aa8e0184081644479584c47bb`).
+   SHA-256 (`598b2c853ba29c8376d97574161d24b56e195e0a0e639776b5c6410586fd6d8a`).
    Install that reviewed policy on the VPS using the existing [reviewed-migration
    procedure](Deployment.md#reviewed-migration-exceptions), with owner approval,
    deployment lock, backup, root ownership, syntax/policy checks and atomic
    replacement. Do not broaden or bypass the scanner. No bot runs, content
    backfills or production seed operations.
-4. Connect the account-scoped credential and verify representative English, Hindi
+5. Connect the account-scoped credential and verify representative English, Hindi
    and Hinglish samples against the live model before enabling automatic inference.
    Unit fixtures are not evidence of model accuracy in those languages.
-5. Verify a new submission, pending receipt, approval, human override and provider
+6. Verify a new submission, pending receipt, approval, human override and provider
    failure without exposing private data. Confirm Workers remains Free.
 
 Setting `AI_MODERATION_ENABLED=false` stops AI calls without publishing pending
