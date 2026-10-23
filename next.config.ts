@@ -21,7 +21,13 @@ const nextConfig: NextConfig = {
     formats: ["image/webp"],
     qualities: [75, 85],
   },
-  async redirects() { return [{ source: "/favicon.ico", destination: "/icon.svg", permanent: true }]; },
+  async redirects() {
+    return [
+      { source: "/favicon.ico", destination: "/icon.svg", permanent: true },
+      // Only map legacy campaigns with a verified current equivalent.
+      { source: "/campaigns/cane-theory", destination: "/startups/cane-theory", permanent: true },
+    ];
+  },
   async headers() {
     return [{
       source: "/(.*)",

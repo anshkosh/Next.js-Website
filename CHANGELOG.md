@@ -1,5 +1,13 @@
 # Website changelog
 
+## 23 October 2026 — legacy campaign indexing fix
+
+- Permanently redirect the old Cane Theory campaign URL to its current startup
+  profile, preserving query parameters. Keep absent legacy demo URLs as 404s.
+- Record Search Console evidence and add an HTTP routing regression check.
+- Update Next.js and its matching lint package to 16.4.2 to clear newly reported
+  critical/high Next.js advisories blocking the required release gate.
+
 ## Unreleased — Jerry's founder-tools and website QA
 
 - Remove device-only tool drafts at sign-out; protect loading and account changes,
