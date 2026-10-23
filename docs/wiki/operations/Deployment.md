@@ -62,6 +62,15 @@ These are root-owned on the server and change only through a deliberate install 
 
 ## Reviewed migration exceptions
 
+The AI moderation migration `20261023130000_ai_content_moderation` adds pending
+reply fields, an update status, a daily request-budget table and a moderation
+table. Its foreign keys cascade only newly linked moderation metadata when source
+records are removed. The scanner conservatively rejects `ON DELETE`/`ON UPDATE`
+clauses, so the policy pins this exact additive migration by name and SHA-256.
+Before deploying it, follow the root-owned policy installation procedure below;
+verify the exact moderation SQL is accepted and altered SQL is rejected. See
+[Content moderation](Content-Moderation.md) for activation and cost safeguards.
+
 The beta tester migration `20261018150000_beta_tester_signups` creates a new enum,
 two tables with row-level security, indexes and foreign keys. The conservative
 automatic scanner rejects enum creation and security changes even though this

@@ -35,6 +35,7 @@ This wiki lives in the repository so it is reviewed with the code it describes. 
 - [Contributing and releases](engineering/Contributing.md): branches, PRs, merging
 
 **Operations**
+- [Content moderation](operations/Content-Moderation.md): AI checks, human review, privacy and free-tier safeguards
 - [Deployment pipeline](operations/Deployment.md): `main` → GitHub Actions → VPS
 - [VPS operations](operations/VPS-Operations.md): access, layout, services, health checks
 - [Backups and restore](operations/Backups-and-Restore.md)

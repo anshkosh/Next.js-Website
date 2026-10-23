@@ -6,16 +6,17 @@ import { headers } from "next/headers";
 import { revalidateSavedPath as revalidatePath } from "@/lib/cache-after-save";
 import { createUpdateSchema, updateUpdateSchema } from "@/lib/validators/update.schema";
 import { startupReadWhere } from "@/lib/startup-read-access";
-import { createStartupUpdate, removeStartupUpdate, StartupUpdateError } from "@/lib/startup-update-store";
+import { createStartupUpdate, editStartupUpdate, removeStartupUpdate, StartupUpdateError } from "@/lib/startup-update-store";
 
 export async function getUpdates(startupId: string) {
   if (typeof startupId !== "string" || !startupId || startupId.length > 128) return { error: "Invalid startup ID" };
   try {
     const session = await auth.api.getSession({ headers: await headers() });
     const updates = await db.startupUpdate.findMany({
-      where: { startupId, startup: startupReadWhere(session?.user) },
+      where: { startupId, startup: startupReadWhere(session?.user),
+        OR: [{ status: "APPROVED" }, ...(session?.user.emailVerified && !session.user.banned ? [{ startup: { founderId: session.user.id } }, ...(["admin", "reviewer"].includes(session.user.role ?? "") ? [{}] : [])] : [])] },
       orderBy: { createdAt: "desc" },
-      select: { id: true, title: true, body: true, imageUrl: true, createdAt: true, updatedAt: true },
+      select: { id: true, title: true, body: true, imageUrl: true, status: true, createdAt: true, updatedAt: true },
     });
     return { data: updates };
   } catch (error) {
@@ -32,7 +33,7 @@ export async function createUpdate(data: {
 }) {
   try {
     const session = await auth.api.getSession({ headers: await headers() });
-    if (!session || !session.user) return { error: "Unauthorized" };
+    if (!session?.user.emailVerified || session.user.banned) return { error: "Sign in with a verified account." };
 
     const validated = createUpdateSchema.safeParse(data);
     if (!validated.success) {
@@ -62,7 +63,7 @@ export async function editUpdate(
 ) {
   try {
     const session = await auth.api.getSession({ headers: await headers() });
-    if (!session || !session.user) return { error: "Unauthorized" };
+    if (!session?.user.emailVerified || session.user.banned) return { error: "Sign in with a verified account." };
 
     const existing = await db.startupUpdate.findUnique({
       where: { id },
@@ -84,10 +85,7 @@ export async function editUpdate(
     const dataToUpdate = { title: validated.data.title, body: validated.data.body,
       imageUrl: validated.data.imageUrl === "" ? null : validated.data.imageUrl };
 
-    const update = await db.startupUpdate.update({
-      where: { id },
-      data: dataToUpdate,
-    });
+    const { update } = await editStartupUpdate(session.user.id, id, dataToUpdate);
 
     revalidatePath(`/startups/${existing.startup.slug}`);
     revalidatePath("/");

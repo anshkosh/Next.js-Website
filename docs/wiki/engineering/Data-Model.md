@@ -13,6 +13,8 @@ Source of truth: `prisma/schema.prisma`. The database is PostgreSQL 15.
 | `SlugRedirect` | Keeps old startup URLs working | |
 | `FeaturedStartup` | Home-page featured list | |
 | `StartupUpdate` | Founder progress posts | |
+| `ContentModeration` | Durable AI checks and human review metadata | Content hash/lease/reasons; cascades on source deletion; see [moderation operations](../operations/Content-Moderation.md) |
+| `ModerationBudget` | Shared daily request reservations | Hard maximum 100 AI requests per UTC day; Workers Free enforces the neuron limit |
 | `Comment` | Public discussion | `PENDING` → `APPROVED`/`REJECTED`; `authorEmail` is private and never shown |
 | `JournalPost`, `JournalCategory` | Journal content | Quill Delta JSON plus rendered HTML; `DRAFT`/`PUBLISHED` |
 | `NewsletterSubscriber` | Email signups | |

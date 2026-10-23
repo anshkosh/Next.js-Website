@@ -6,6 +6,7 @@ import { createTeamFounder } from "@/lib/startup-team-store";
 import { createStartupUpdate, removeStartupUpdate } from "@/lib/startup-update-store";
 
 const tx = {
+  contentModeration: { upsert: vi.fn() },
   $queryRaw: vi.fn(), startup: { findUnique: vi.fn(), update: vi.fn() },
   startupFounder: { findMany: vi.fn(), create: vi.fn() },
   startupUpdate: { count: vi.fn(), create: vi.fn(), findUnique: vi.fn(), delete: vi.fn() },

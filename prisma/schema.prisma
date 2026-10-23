@@ -378,6 +378,8 @@ model FounderJournalRevision {
   createdAt     DateTime            @default(now())
   updatedAt     DateTime            @updatedAt
 
+  moderations ContentModeration[]
+
   @@index([status, scheduledAt])
 }
 
@@ -390,6 +392,9 @@ model StartupUpdate {
   imageUrl  String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  status CommentStatus @default(APPROVED)
+  moderations ContentModeration[]
 
   @@index([startupId])
   @@index([createdAt(sort: Desc)])
@@ -420,6 +425,10 @@ model Comment {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  pendingReply String? @db.VarChar(2000)
+  pendingRepliedBy String?
+  moderations ContentModeration[]
+
   @@index([startupId, createdAt(sort: Desc)])
   @@index([status])
 }
@@ -446,4 +455,35 @@ model NotificationOutbox {
   createdAt DateTime @default(now())
 
   @@index([deliveredAt, nextAttemptAt])
+}
+
+model ContentModeration {
+  id            String                  @id @default(cuid())
+  kind          String                  @db.VarChar(20)
+  targetId      String
+  contentHash   String                  @db.VarChar(64)
+  status        String                  @default("PENDING") @db.VarChar(20)
+  reasons       String[]                @default([])
+  attempts      Int                     @default(0)
+  nextAttemptAt DateTime                @default(now())
+  leaseToken    String?
+  checkedAt     DateTime?
+  reviewedAt    DateTime?
+  reviewedBy    String?
+  commentId     String?
+  comment       Comment?                @relation(fields: [commentId], references: [id], onDelete: Cascade)
+  updateId      String?
+  update        StartupUpdate?          @relation(fields: [updateId], references: [id], onDelete: Cascade)
+  revisionId    String?
+  revision      FounderJournalRevision? @relation(fields: [revisionId], references: [id], onDelete: Cascade)
+  createdAt     DateTime                @default(now())
+  updatedAt     DateTime                @updatedAt
+
+  @@unique([kind, targetId])
+  @@index([status, nextAttemptAt])
+}
+
+model ModerationBudget {
+  day      String @id @db.VarChar(10)
+  requests Int    @default(0)
 }

@@ -21,6 +21,7 @@ const sections = [
     "Visitor cookies, a hash derived from request IP address and browser user-agent, and rate limits help reduce duplicate voting and abuse. These controls have limits and do not prove that every vote comes from a unique person. Do not buy, fabricate or automate votes.",
   ] },
   { title: "Discussion and conduct", paragraphs: [
+    "Comments, founder replies and startup updates receive automated text safety checks before publication. Flagged submissions and unavailable checks wait for human review. Public founder journal entries always need editorial approval. Images and videos need human review. Automated checks can make mistakes; contact hello@anshkosh.com to request reconsideration.",
     "Comments are reviewed before appearing publicly. Approved comments display the commenter’s name, text and posting date; comment email addresses remain private. Published founder replies are public too.",
     "Keep discussions respectful and useful. Do not submit harassment, hate speech, spam, deceptive impersonation, fabricated claims or material you do not have permission to share. Content that violates these standards may be rejected or removed.",
   ] },
@@ -43,7 +44,7 @@ export default function TrustSafetyPage() {
         <span className="text-xs font-semibold text-coral-500 tracking-widest uppercase mb-4 block">TRUST & SAFETY</span>
         <h1 className="text-4xl md:text-5xl font-bold font-heading text-gray-900 mb-4 tracking-tight">Trust & Safety</h1>
         <p className="text-xl text-gray-500 mb-4">Clear profiles, responsible feedback and an honest view of the pilot’s limits.</p>
-        <p className="text-sm text-gray-600 mb-8">Updated: 18 October 2026 · Operator: Anshkosh Pvt Ltd · Hyderabad, Telangana, India</p>
+        <p className="text-sm text-gray-600 mb-8">Updated: 23 October 2026 · Operator: Anshkosh Pvt Ltd · Hyderabad, Telangana, India</p>
         <div className="space-y-12">
           {sections.map(section => (
             <section key={section.title} className="pt-8 border-t border-gray-100">

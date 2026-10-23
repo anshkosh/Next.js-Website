@@ -67,6 +67,7 @@ export async function exportAccountData(actor: PrivacyActor, code: string, clien
         UNION ALL SELECT octet_length(to_jsonb(b)::text)::bigint FROM "BetaTesterProgram" b JOIN "Startup" s ON s.id = b."startupId" WHERE s."founderId" = ${user.id}
         UNION ALL SELECT octet_length(to_jsonb(u)::text)::bigint FROM "StartupUpdate" u JOIN "Startup" s ON s.id = u."startupId" WHERE s."founderId" = ${user.id}
         UNION ALL SELECT octet_length(c.reply)::bigint FROM "Comment" c JOIN "Startup" s ON s.id = c."startupId" WHERE s."founderId" = ${user.id} AND c.reply IS NOT NULL
+        UNION ALL SELECT octet_length(c."pendingReply")::bigint FROM "Comment" c JOIN "Startup" s ON s.id = c."startupId" WHERE s."founderId" = ${user.id} AND c."pendingReply" IS NOT NULL
         UNION ALL SELECT octet_length(to_jsonb(j)::text)::bigint FROM "FounderJournalEntry" j WHERE j."authorId" = ${user.id}
         UNION ALL SELECT octet_length(to_jsonb(r)::text)::bigint FROM "FounderJournalRevision" r JOIN "FounderJournalEntry" j ON j.id = r."entryId" WHERE j."authorId" = ${user.id}
         UNION ALL SELECT octet_length(to_jsonb(j)::text)::bigint FROM "JournalPost" j WHERE j."authorId" = ${user.id}
@@ -93,7 +94,7 @@ export async function exportAccountData(actor: PrivacyActor, code: string, clien
       betaTesterProgram: { select: { enabled: true, description: true, reward: true } },
     } });
     const updates = await tx.startupUpdate.findMany({ where: { startup: { founderId: user.id } }, take: 10001, select: { startupId: true, title: true, body: true, imageUrl: true, createdAt: true, updatedAt: true } });
-    const replies = await tx.comment.findMany({ where: { startup: { founderId: user.id }, reply: { not: null } }, take: 10001, select: { startupId: true, reply: true, repliedAt: true, repliedBy: true } });
+    const replies = await tx.comment.findMany({ where: { startup: { founderId: user.id }, OR: [{ reply: { not: null } }, { pendingReply: { not: null } }] }, take: 10001, select: { startupId: true, reply: true, repliedAt: true, repliedBy: true, pendingReply: true, pendingRepliedBy: true } });
     const journal = await tx.founderJournalEntry.findMany({ where: { authorId: user.id }, take: 10001, select: {
       id: true, startupId: true, title: true, body: true, contentJson: true, mediaKeys: true,
       prompt: true, visibility: true, milestone: true, milestoneDone: true, publishedAt: true,

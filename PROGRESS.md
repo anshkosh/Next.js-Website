@@ -1,5 +1,13 @@
 # Progress
 
+## 23 October 2026 — AI content moderation
+
+- Owner requested implementation after confirming the account split: Anshkosh Workers Free for AI/Turnstile, Arush R2 for storage. Separate branch/worktree starts at current origin/main c97d049.
+- Implemented durable text checks, safe-only automatic publication, human journal/media review, exact-submission comparisons, staged reply edits, pending startup updates, shared daily request reservations and review overrides.
+- No production content, bot activity, account plans, paid credits or R2 settings changed. Existing published records remain approved; new pending updates are excluded from public reads/signals.
+- Typecheck, zero-warning lint and dependency policy pass; full local suite passed 745 tests with two existing skips, and ten deployment Python tests passed. Added migration-policy, moderation failure/race/authorization tests and isolated PostgreSQL/browser regressions; GitHub CI and activation are pending.
+- Remaining activation: owner-authorized Workers AI credential scoped to Anshkosh account, private VPS configuration, and owner-approved merge/deployment after passing CI. See docs/wiki/operations/Content-Moderation.md.
+
 ## 23 October 2026 — Search Console legacy campaign 404s
 
 - Owner authorized the fix list. Branch `codex/search-console-404-fix` starts from

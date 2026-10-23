@@ -6,6 +6,7 @@ import { getUpdates, createUpdate, editUpdate, deleteUpdate } from "@/app/action
 import Image from "next/image";
 
 type Update = {
+  status?: string;
   id: string;
   title: string;
   body: string;
@@ -158,7 +159,7 @@ export default function UpdateManager({ startupId }: { startupId: string }) {
         } else if (res.data) {
           setUpdates([res.data as Update, ...updates]);
           setIsEditing(null);
-          setStatus("Update published successfully.");
+          setStatus("Update saved for moderation. It will appear publicly after approval.");
         }
       } else if (isEditing) {
         const res = await editUpdate(isEditing, {
@@ -171,7 +172,7 @@ export default function UpdateManager({ startupId }: { startupId: string }) {
         } else if (res.data) {
           setUpdates(updates.map((u) => (u.id === isEditing ? (res.data as Update) : u)));
           setIsEditing(null);
-          setStatus("Update changes saved.");
+          setStatus("Changes saved for moderation. This update is hidden publicly until approved.");
         }
       }
 
@@ -230,6 +231,7 @@ export default function UpdateManager({ startupId }: { startupId: string }) {
                       {updates.length - (showAll ? idx : idx)}
                     </span>
                     <h4 className="font-semibold text-gray-900 truncate">{update.title}</h4>
+                    {update.status && update.status !== "APPROVED" && <span className="text-xs font-semibold text-amber-900">{update.status === "REJECTED" ? "Changes needed" : "Awaiting moderation"}</span>}
                   </div>
                   <p className="text-sm text-gray-600 line-clamp-2 ml-8">{update.body}</p>
                   {update.imageUrl && (
@@ -377,7 +379,7 @@ export default function UpdateManager({ startupId }: { startupId: string }) {
               {isSaving
                 ? "Saving..."
                 : isEditing === "new"
-                  ? "Publish Update"
+                  ? "Submit update"
                   : "Save Changes"}
             </button>
           </div>

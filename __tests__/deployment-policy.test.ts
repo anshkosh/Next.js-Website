@@ -11,6 +11,7 @@ it("keeps the founder journal release migrations within the automatic deploy gat
     "20261018210000_notification_outbox",
     "20261022040000_account_date_of_birth",
     "20261022060000_account_media_erasure",
+    "20261023130000_ai_content_moderation",
   ]) {
     const sql = readFileSync(`prisma/migrations/${name}/migration.sql`, "utf8");
     expect(() => assertAdditiveMigration(sql, name)).not.toThrow();
@@ -24,6 +25,15 @@ it("allows the exact reviewed beta tester migration, but blocks modified SQL", (
   expect(() => assertAdditiveMigration(`${sql}\nDROP TABLE \"Startup\";`, name)).toThrow();
   expect(() => assertAdditiveMigration(sql, "unreviewed_migration")).toThrow();
   expect(() => assertAdditiveMigration(sql.replace("ENABLE ROW", "DISABLE ROW"), name)).toThrow();
+});
+
+it("pins only the reviewed additive moderation migration including cascade foreign keys", () => {
+  const name = "20261023130000_ai_content_moderation";
+  const sql = readFileSync(`prisma/migrations/${name}/migration.sql`, "utf8");
+  expect(() => assertAdditiveMigration(sql, name)).not.toThrow();
+  expect(() => assertAdditiveMigration(`${sql}\nDROP TABLE \"Comment\";`, name)).toThrow();
+  expect(() => assertAdditiveMigration(sql.replace("ON DELETE CASCADE", "ON DELETE SET NULL"), name)).toThrow();
+  expect(() => assertAdditiveMigration(sql, "unreviewed_migration")).toThrow();
 });
 
 it("allows additive tables, indexes, nullable columns and defaulted columns", () => {

@@ -7,10 +7,12 @@ import { publishScheduledJournals } from "@/lib/journal-publication";
 import { retryNotifications } from "@/lib/notification-outbox";
 import { applyRequestRetention } from "@/lib/beta-retention";
 import { eraseQueuedAccountMedia } from "@/lib/account-media-erasure";
+import { processModeration } from "@/lib/moderation-worker";
 
 export const syncWorker = new Worker(
   "sync",
   async (job) => {
+    if (job.name === "content-moderation") return processModeration();
     if (job.name === "journal-publication") return publishScheduledJournals();
     if (job.name === "notification-outbox") return retryNotifications();
     if (job.name === "request-retention") return applyRequestRetention();
@@ -40,6 +42,7 @@ syncWorker.on("failed", (job, err) => {
 
 // Register repeatable job
 async function registerSyncJob() {
+  await syncQueue.upsertJobScheduler("content-moderation", { every: 60000 }, { name: "content-moderation", data: {}, opts: { attempts: 1, removeOnComplete: 100, removeOnFail: 100 } });
   await syncQueue.upsertJobScheduler("account-media-erasure", { every: 60000 }, { name: "account-media-erasure", data: {}, opts: { attempts: 3, removeOnComplete: 100, removeOnFail: 100 } });
   await syncQueue.upsertJobScheduler("notification-outbox", { every: 60000 }, { name: "notification-outbox", data: {}, opts: { attempts: 3, removeOnComplete: 100, removeOnFail: 100 } });
   await syncQueue.upsertJobScheduler("request-retention", { every: 3600000 }, { name: "request-retention", data: {}, opts: { attempts: 3, removeOnComplete: 24, removeOnFail: 100 } });

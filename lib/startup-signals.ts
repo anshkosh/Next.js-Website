@@ -30,14 +30,14 @@ export function signalSnapshotQuery(now = new Date()) {
     SELECT s.id, s.name,
       (SELECT COUNT(*)::int FROM "Upvote" v WHERE v."startupId" = s.id) AS "upvoteCount",
       (SELECT COUNT(*)::int FROM "Downvote" v WHERE v."startupId" = s.id) AS "downvoteCount",
-      (SELECT COUNT(*)::int FROM "StartupUpdate" u WHERE u."startupId" = s.id) AS "updateCount",
+      (SELECT COUNT(*)::int FROM "StartupUpdate" u WHERE u."startupId" = s.id AND u.status = 'APPROVED') AS "updateCount",
       EXISTS (
         SELECT 1 FROM "FeaturedStartup" f WHERE f."startupId" = s.id
           AND (f."featuredUntil" IS NULL OR f."featuredUntil" > ${now})
       ) AS featured,
       (SELECT COUNT(DISTINCT activity.day)::int FROM (
         SELECT u."createdAt"::date AS day FROM "StartupUpdate" u
-          WHERE u."startupId" = s.id AND NULLIF(BTRIM(u.body), '') IS NOT NULL
+          WHERE u."startupId" = s.id AND u.status = 'APPROVED' AND NULLIF(BTRIM(u.body), '') IS NOT NULL
             AND u."createdAt" <= (${now}::timestamptz AT TIME ZONE 'UTC')
         UNION
         SELECT j."publishedAt"::date AS day FROM "FounderJournalEntry" j

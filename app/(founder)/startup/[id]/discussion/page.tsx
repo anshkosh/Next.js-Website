@@ -41,6 +41,7 @@ export default async function FounderDiscussionPage(props: {
       reply: true,
       repliedBy: true,
       repliedAt: true,
+      pendingReply: true,
       createdAt: true,
     },
   });
@@ -63,7 +64,7 @@ export default async function FounderDiscussionPage(props: {
             >
               {startup.name}
             </Link>
-            . Your replies appear immediately on the public page.
+            . Replies appear publicly after moderation. An approved reply stays visible while an edit is reviewed.
           </p>
         </div>
         <span className="inline-flex items-center px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-sm font-semibold">

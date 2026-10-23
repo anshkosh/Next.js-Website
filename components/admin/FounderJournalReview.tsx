@@ -5,8 +5,9 @@ import JournalRichContent from "@/components/journal/JournalRichContent";
 import { reviewFounderEntry } from "@/app/actions/founder-journal-review.actions";
 import type { FounderEntryInput } from "@/lib/founder-journal";
 
-export default function FounderJournalReview({ id, version, data, status, scheduledAt, notes, startup, hasLiveVersion }: {
+export default function FounderJournalReview({ id, version, data, status, scheduledAt, notes, startup, hasLiveVersion, aiStatus, aiReasons = [] }: {
   id: string; version: number; data: FounderEntryInput; status: string; scheduledAt: string | null; notes: string | null; startup: string; hasLiveVersion: boolean;
+  aiStatus?: string; aiReasons?: string[];
 }) {
   const [note, setNote] = useState(notes ?? ""); const [message, setMessage] = useState(""); const [pending, start] = useTransition(); const router = useRouter();
   function review(decision: "APPROVE" | "CHANGES") {
@@ -16,6 +17,7 @@ export default function FounderJournalReview({ id, version, data, status, schedu
     });
   }
   return <article className="space-y-4 rounded-xl border border-gray-200 bg-white p-5">
+    {aiStatus && <div className="rounded-lg bg-gray-50 p-3 text-sm"><p className="font-semibold">AI text check: {aiStatus === "SAFE" ? "No text safety issue detected; editorial review still required" : aiStatus.replaceAll("_", " ").toLowerCase()}</p>{aiReasons.map(reason => <p key={reason} className="mt-1">{reason}</p>)}</div>}
     <div><p className="text-xs font-semibold text-blue-800">{status.replaceAll("_", " ")} · {startup}{hasLiveVersion ? " · Existing approved version stays live" : ""}</p><h2 className="mt-2 text-xl font-bold">{data.title}</h2></div>
     {scheduledAt && <p className="text-sm">Requested publication: {new Date(scheduledAt).toLocaleString("en-IN", { timeZone: "Asia/Kolkata" })} IST</p>}
     <JournalRichContent content={data.contentJson} fallback={data.body ?? ""} />
