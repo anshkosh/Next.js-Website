@@ -1,5 +1,19 @@
 # Progress
 
+## 23 October 2026 — Search Console legacy campaign 404s
+
+- Owner authorized the fix list. Branch `codex/search-console-404-fix` starts from
+  current main `837e0cb` in a separate worktree; unrelated changes are preserved.
+- Added an explicit permanent Cane Theory campaign-to-startup redirect. Archived
+  source identifies LoopLane/GlassWing Robotics as fictional demos; no public
+  replacements exist, so their 404s remain. No content/account/activity changes.
+- The audit checked all 92 sitemap pages and found no campaign HTML links.
+- Verification and release status will be recorded after the required gates.
+- The dependency gate found three unreviewed Next.js advisories, including critical
+  findings. Updated Next.js/eslint-config-next from 16.3.8 to 16.4.2; the dependency
+  gate now passes with the same three existing, version-pinned exceptions. No
+  security exception or release gate was relaxed.
+
 ## 22 October 2026 — signup redirect behind the production proxy
 
 - Jerry fixes released as `d0c8910` via merged PR #52; 698 unit tests, all

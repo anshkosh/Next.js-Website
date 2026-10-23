@@ -126,6 +126,17 @@ test.beforeEach(async ({ page }) => {
 test.describe.configure({ mode: "serial", retries: 0 });
 test.setTimeout(180000);
 
+test("legacy campaigns redirect verified replacements and keep missing demos as 404s", async ({ request }) => {
+  const response = await request.get("/campaigns/cane-theory?utm_source=legacy", { maxRedirects: 0 });
+  expect(response.status()).toBe(308);
+  const destination = new URL(response.headers().location, "http://127.0.0.1:3100");
+  expect(destination.pathname).toBe("/startups/cane-theory");
+  expect(destination.search).toBe("?utm_source=legacy");
+  for (const slug of ["looplane", "glasswing-robotics", "unknown-legacy-campaign"]) {
+    expect((await request.get(`/campaigns/${slug}`, { maxRedirects: 0 })).status()).toBe(404);
+  }
+});
+
 test("founder tools isolate two real accounts, clear drafts, and return to protected pages after login", async ({ page }) => {
   test.setTimeout(300000);
   const accounts = [`tool-a-${randomUUID()}@example.test`, `tool-b-${randomUUID()}@example.test`];

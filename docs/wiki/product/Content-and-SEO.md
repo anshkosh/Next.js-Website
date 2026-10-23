@@ -18,6 +18,25 @@ Use `seoMetadata()` from `lib/seo.ts` on every new public page so it gets a titl
 - Startups get dynamic Open Graph images from `app/api/og/[slug]`.
 - `scripts/verify-seo.mjs` checks a built site's SEO, and the deploy pipeline checks SEO on each candidate release before switching traffic to it.
 
+## Legacy campaign URLs
+
+The 22 October 2026 Search Console alert listed three old `/campaigns/` URLs.
+`/campaigns/cane-theory` permanently redirects (308, preserving query parameters)
+to the verified public `/startups/cane-theory` profile. Keep this mapping explicit;
+do not redirect every old campaign to a nonexistent startup or the homepage.
+
+LoopLane and GlassWing Robotics are fictional demo profiles in the archived
+legacy source (`src/data/enrolled-startups.js`, commit `4c1694a`). Neither has a
+current public profile or sitemap entry, so their old campaign URLs remain genuine
+404s. This change does not restore records or alter startup visibility/activity.
+If an equivalent public page is introduced later, verify it before adding a mapping.
+
+On 23 October, all 92 sitemap pages were checked for HTML links: none linked to
+`/campaigns/`. Search Console's homepage referring-page entries are historical
+discovery evidence, not proof of a current broken homepage link. After release,
+verify the redirect and destination, then validate the repaired issue in Search
+Console; intentionally absent pages do not need indexing requests.
+
 ## Journal
 
 Journal detail pages avoid showing an excerpt twice when it already opens the
