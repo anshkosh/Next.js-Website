@@ -8,7 +8,12 @@ export const MODERATION_MODEL = "@cf/meta/llama-guard-3-8b";
 export const MODERATION_POLICY = "2026-10-23-v1";
 
 export function contentHash(content: ModerationContent) {
-  return createHash("sha256").update(JSON.stringify([MODERATION_POLICY, content])).digest("hex");
+  // PostgreSQL JSONB can reorder object keys. Preserve array order, but sort
+  // object keys so a journal hashes identically before and after persistence.
+  const serialized = JSON.stringify([MODERATION_POLICY, content], (_key, value) =>
+    value && typeof value === "object" && !Array.isArray(value)
+      ? Object.fromEntries(Object.entries(value).sort(([a], [b]) => a.localeCompare(b, "en"))) : value);
+  return createHash("sha256").update(serialized).digest("hex");
 }
 
 export function commentContent(row: { authorName: string; body: string }): ModerationContent {

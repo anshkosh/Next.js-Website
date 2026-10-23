@@ -91,6 +91,7 @@ async function main() {
     respond = async () => Response.json({ success: true, result: { response: "safe" } });
     await processModeration();
     assert.equal((await db.founderJournalRevision.findUniqueOrThrow({ where: { id: revision.id } })).status, "PENDING_REVIEW");
+    assert.equal((await db.contentModeration.findUniqueOrThrow({ where: { kind_targetId: { kind: "JOURNAL", targetId: revision.id } } })).status, "SAFE", "JSONB persistence must not invalidate the journal content hash");
     assert.equal((await db.founderJournalEntry.findUniqueOrThrow({ where: { id: entry.id } })).approvedAt, null);
 
     // Reviewers can remove an AI-approved update, with its counter committed too.

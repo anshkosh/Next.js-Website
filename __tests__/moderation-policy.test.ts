@@ -30,6 +30,11 @@ it("binds a journal result to its exact revision and attachments", () => {
 it("treats embedded video as unchecked media", () => {
   expect(journalContent({ title: "Progress", visibility: "PUBLIC", startupId: "startup", contentJson: { ops: [{ insert: "An interview" }, { insert: { video: "https://www.youtube.com/embed/abcdef" } }] } }, 1).hasMedia).toBe(true);
 });
+it("keeps journal hashes stable across PostgreSQL JSONB object-key reordering", () => {
+  const entry = { title: "A lesson", body: "Customers asked for fewer features.", visibility: "PUBLIC", startupId: "startup", contentJson: { ops: [{ insert: "A lesson", attributes: { bold: true, italic: true } }] } };
+  const reordered = { ...entry, contentJson: { ops: [{ attributes: { italic: true, bold: true }, insert: "A lesson" }] } };
+  expect(contentHash(journalContent(entry, 1))).toBe(contentHash(journalContent(reordered, 1)));
+});
 it("uses only the fixed moderation model with bounded, uncached inference", async () => {
   const request = vi.fn().mockResolvedValue(Response.json({ success: true, result: { response: "safe" } }));
   vi.stubGlobal("fetch", request);
