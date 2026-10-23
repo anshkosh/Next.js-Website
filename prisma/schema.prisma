@@ -388,6 +388,7 @@ model StartupUpdate {
   title     String   @db.VarChar(200)
   body      String
   imageUrl  String?
+  status    CommentStatus @default(APPROVED)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 

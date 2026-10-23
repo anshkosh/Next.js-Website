@@ -16,7 +16,7 @@ export async function verifySignalsPostgres(db: PrismaClient) {
         '"Upvote" ("startupId" text)',
         '"Downvote" ("startupId" text)',
         '"FeaturedStartup" ("startupId" text, "featuredUntil" timestamp)',
-        '"StartupUpdate" ("startupId" text, "createdAt" timestamp, body text DEFAULT \'Progress fixture\')',
+        '"StartupUpdate" ("startupId" text, "createdAt" timestamp, body text DEFAULT \'Progress fixture\', status text DEFAULT \'APPROVED\')',
         '"FounderJournalEntry" ("startupId" text, "authorId" text, visibility text, "approvedAt" timestamp, "publishedAt" timestamp, body text DEFAULT \'Journal fixture\')',
         '"Comment" ("startupId" text, "authorEmail" text, body text, status text, reply text, "repliedAt" timestamp, "createdAt" timestamp, "authorName" text DEFAULT \'Fixture commenter\')',
       ];
@@ -28,6 +28,7 @@ export async function verifySignalsPostgres(db: PrismaClient) {
       await tx.$executeRawUnsafe(`INSERT INTO "FeaturedStartup" ("startupId") VALUES ('one')`);
       await tx.$executeRawUnsafe(`INSERT INTO "StartupUpdate" ("startupId","createdAt") VALUES ('one','2026-10-01 00:01'),('one','2026-10-01 23:59'),('one','2026-10-02'),('two','2026-10-01')`);
       await tx.$executeRawUnsafe(`INSERT INTO "StartupUpdate" VALUES ('one','2026-10-10','   ')`);
+      await tx.$executeRawUnsafe(`INSERT INTO "StartupUpdate" ("startupId","createdAt",body,status) VALUES ('one','2026-10-08','Pending update','PENDING'),('one','2026-10-09','Rejected update','REJECTED')`);
       await tx.$executeRawUnsafe(`INSERT INTO "FounderJournalEntry" ("startupId","authorId",visibility,"approvedAt","publishedAt") VALUES
         ('one','owner','PUBLIC','2026-10-01','2026-10-01'),
         ('one','owner','PUBLIC','2026-10-17 23:59','2026-10-17 23:59'),

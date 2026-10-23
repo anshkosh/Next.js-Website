@@ -4,7 +4,7 @@ export function publicStartupCardSelect(cookieId?: string) {
   return {
     id: true, slug: true, name: true, tagline: true, logoUrl: true, problemStatement: true,
     upvoteCount: true, downvoteCount: true, updateCount: true, metadata: true,
-    updates: { orderBy: { createdAt: "desc" }, take: 1, select: { title: true, createdAt: true } },
+    updates: { where: { status: "APPROVED" }, orderBy: { createdAt: "desc" }, take: 1, select: { title: true, createdAt: true } },
     category: { select: { name: true, iconName: true } },
     upvotes: cookieId ? { where: { cookieId }, select: { id: true } } : false,
     downvotes: cookieId ? { where: { cookieId }, select: { id: true } } : false,
