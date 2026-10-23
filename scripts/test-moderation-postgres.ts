@@ -109,6 +109,12 @@ async function main() {
     const failure = await db.contentModeration.findUniqueOrThrow({ where: { kind_targetId: { kind: "COMMENT", targetId: unavailable.id } } });
     assert.equal(failure.status, "UNAVAILABLE");
 
+    const banned = await comment();
+    await db.user.update({ where: { id: owner }, data: { banned: true } });
+    const beforeBan = requests; await processModeration(); assert.equal(requests, beforeBan, "Do not infer or auto-publish for a banned founder");
+    assert.equal((await db.comment.findUniqueOrThrow({ where: { id: banned.id } })).status, "PENDING");
+    await db.user.update({ where: { id: owner }, data: { banned: false } });
+
     const reservations = await Promise.all(Array.from({ length: 120 }, () => reserveModerationRequest(new Date(`${futureDay}T12:00:00Z`))));
     assert.equal(reservations.filter(Boolean).length, 100, "Concurrent workers must share the hard request cap");
     assert.equal((await db.moderationBudget.findUniqueOrThrow({ where: { day: futureDay } })).requests, 100);

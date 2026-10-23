@@ -12,7 +12,7 @@ export function contentHash(content: ModerationContent) {
   // object keys so a journal hashes identically before and after persistence.
   const serialized = JSON.stringify([MODERATION_POLICY, content], (_key, value) =>
     value && typeof value === "object" && !Array.isArray(value)
-      ? Object.fromEntries(Object.entries(value).sort(([a], [b]) => a.localeCompare(b, "en"))) : value);
+      ? Object.fromEntries(Object.entries(value).sort(([a], [b]) => a < b ? -1 : a > b ? 1 : 0)) : value);
   return createHash("sha256").update(serialized).digest("hex");
 }
 
