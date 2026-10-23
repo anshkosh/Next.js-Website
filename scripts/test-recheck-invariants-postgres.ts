@@ -57,7 +57,8 @@ async function main() {
     const saved = await createStartupUpdate(owner, updateData, client);
     await assert.rejects(removeStartupUpdate(owner, saved.update.id, failingClient), /Injected counter/);
     assert.equal(await client.startupUpdate.count({ where: { startupId } }), 1);
-    assert.equal((await client.startup.findUniqueOrThrow({ where: { id: startupId } })).updateCount, 1);
+    assert.equal((await client.startup.findUniqueOrThrow({ where: { id: startupId } })).updateCount, 0);
+    assert.equal(saved.update.status, "PENDING");
     await removeStartupUpdate(owner, saved.update.id, client);
     assert.equal((await client.startup.findUniqueOrThrow({ where: { id: startupId } })).updateCount, 0);
     console.log("Recheck invariants: concurrent team/feature limits and update rollback passed against PostgreSQL");

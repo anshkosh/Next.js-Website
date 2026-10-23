@@ -6,6 +6,7 @@ import { MessageSquare, Save, Trash2, CheckCircle2, AlertCircle, CornerDownRight
 import { replyToComment, deleteReply } from "@/app/actions/comment.actions";
 
 interface ApprovedComment {
+  pendingReply?: string | null;
   id: string;
   authorName: string;
   body: string;
@@ -28,8 +29,9 @@ function formatDate(dateStr: string): string {
 }
 
 function CommentReplyRow({ comment }: { comment: ApprovedComment }) {
-  const [replyText, setReplyText] = useState(comment.reply ?? "");
-  const [savedReply, setSavedReply] = useState(comment.reply ?? "");
+  const [replyText, setReplyText] = useState(comment.pendingReply ?? comment.reply ?? "");
+  const [savedReply, setSavedReply] = useState(comment.pendingReply ?? comment.reply ?? "");
+  const [awaitingReview, setAwaitingReview] = useState(Boolean(comment.pendingReply));
   const [isSaving, startSave] = useTransition();
   const [isDeleting, startDelete] = useTransition();
   const [feedback, setFeedback] = useState<{ type: "success" | "error"; msg: string } | null>(null);
@@ -49,8 +51,9 @@ function CommentReplyRow({ comment }: { comment: ApprovedComment }) {
       } else {
         setReplyText(replyText.trim());
         setSavedReply(replyText.trim());
+        setAwaitingReview(true);
         setEditing(false);
-        setFeedback({ type: "success", msg: "Reply saved and now live." });
+        setFeedback({ type: "success", msg: result.message ?? "Reply saved for moderation." });
       }
     });
   };
@@ -64,6 +67,7 @@ function CommentReplyRow({ comment }: { comment: ApprovedComment }) {
       } else {
         setReplyText("");
         setSavedReply("");
+        setAwaitingReview(false);
         setConfirmDelete(false);
         setEditing(false);
         setFeedback({ type: "success", msg: "Reply deleted." });
@@ -73,6 +77,7 @@ function CommentReplyRow({ comment }: { comment: ApprovedComment }) {
 
   return (
     <div id={`comment-${comment.id}`} className="scroll-mt-24 bg-white rounded-2xl border border-gray-100 shadow-sm p-5 space-y-4">
+      {awaitingReview && <p className="text-sm font-semibold text-amber-900">Your latest reply is awaiting moderation.</p>}
       {/* Comment from visitor */}
       <div className="space-y-2">
         <div className="flex items-center gap-2 flex-wrap">

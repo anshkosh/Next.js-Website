@@ -6,10 +6,10 @@ vi.mock("next/headers", () => ({ headers: async () => new Headers() }));
 vi.mock("next/cache", () => ({ revalidatePath: mock.cache }));
 vi.mock("@/lib/logger", () => ({ logger: { error: vi.fn(), warn: vi.fn() } }));
 vi.mock("@/lib/db", () => ({ db: { startupUpdate: { findUnique: mock.find, update: mock.edit } } }));
-vi.mock("@/lib/startup-update-store", () => ({ createStartupUpdate: mock.create, removeStartupUpdate: mock.remove, StartupUpdateError: class extends Error {} }));
+vi.mock("@/lib/startup-update-store", () => ({ createStartupUpdate: mock.create, editStartupUpdate: async () => ({ update: await mock.edit() }), removeStartupUpdate: mock.remove, StartupUpdateError: class extends Error {} }));
 import { createUpdate, deleteUpdate, editUpdate } from "@/app/actions/update.actions";
 beforeEach(() => {
-  vi.resetAllMocks(); mock.session.mockResolvedValue({ user: { id: "owner" } });
+  vi.resetAllMocks(); mock.session.mockResolvedValue({ user: { id: "owner", emailVerified: true } });
   mock.cache.mockImplementation(() => { throw new Error("cache unavailable after commit"); });
   mock.create.mockResolvedValue({ update: { id: "saved" }, slug: "startup" });
   mock.remove.mockResolvedValue({ slug: "startup" });

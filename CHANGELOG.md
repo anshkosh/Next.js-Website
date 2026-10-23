@@ -1,5 +1,12 @@
 # Website changelog
 
+## Unreleased — AI content moderation
+
+- Add durable Cloudflare Workers AI text checks for new comments, founder replies, public journal revisions and startup updates.
+- Keep private drafts out of AI; hold unsafe, malformed, unavailable and image/video submissions for human review. Public journals retain editorial approval.
+- Add a shared 100-request UTC daily cap, exact-content race protection, pending update visibility, staged replies, human publication overrides and privacy disclosures.
+- Preserve existing published records and scoring weights; Cloudflare Workers remains Free. Activation requires a scoped server credential and normal release approval.
+
 ## Unreleased — moderation visibility prerequisite
 
 - Add an approved status default for startup updates and exclude non-approved updates from public profiles, cards, update helpers and activity counts. Existing content and new writes remain approved as before.

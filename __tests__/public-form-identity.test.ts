@@ -4,12 +4,13 @@ const mock = vi.hoisted(() => ({ headers: vi.fn(), rate: vi.fn(), send: vi.fn(),
 vi.mock("next/headers", () => ({ headers: mock.headers, cookies: async () => ({ get: () => undefined, set: vi.fn() }) }));
 vi.mock("next/cache", () => ({ revalidatePath: vi.fn() }));
 vi.mock("@/lib/auth", () => ({ auth: { api: { getSession: vi.fn() } } }));
-vi.mock("@/lib/db", () => ({ db: {
+vi.mock("@/lib/db", () => { const tx = {
   startup: { findUnique: async () => ({ id: "startup", slug: "startup" }) }, comment: { create: mock.comment },
   betaTesterProgram: { findFirst: async () => ({ id: "program", startup: { slug: "startup" } }) },
   betaTesterRequest: { findUnique: async () => null, create: mock.request },
   appSetting: { findUnique: async () => null },
-} }));
+  contentModeration: { upsert: vi.fn() },
+}; return { db: { ...tx, $transaction: async (fn: (tx: object) => unknown) => fn(tx) } }; });
 vi.mock("@/lib/utils/rate-limit", () => ({ checkRateLimit: mock.rate, readRateLimit: async () => ({ allowed: true, available: true, retryAfterSeconds: 1 }) }));
 vi.mock("@/lib/utils/turnstile", () => ({ verifyTurnstileToken: async () => true }));
 vi.mock("@/lib/email/adapter", () => ({ sendEmail: mock.send }));

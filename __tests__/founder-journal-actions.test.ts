@@ -5,7 +5,7 @@ vi.mock("@/lib/auth", () => ({ auth: { api: { getSession: m.session } } }));
 vi.mock("next/headers", () => ({ headers: async () => new Headers() }));
 vi.mock("next/cache", () => ({ revalidatePath: m.revalidate }));
 vi.mock("@/lib/db", () => {
-  const tx = { founderJournalEntry: { findFirst: m.find, create: m.create, updateMany: m.update, deleteMany: m.remove }, startup: { findFirst: m.startup }, $queryRaw: m.query, founderJournalRevision: { upsert: m.revision, deleteMany: m.clearRevision } };
+  const tx = { contentModeration: { upsert: vi.fn() }, founderJournalEntry: { findFirst: m.find, create: m.create, updateMany: m.update, deleteMany: m.remove }, startup: { findFirst: m.startup }, $queryRaw: m.query, founderJournalRevision: { upsert: m.revision, deleteMany: m.clearRevision } };
   return { db: { ...tx, mediaUpload: { count: m.media }, $transaction: async (fn: (tx: object) => unknown) => fn(tx) } };
 });
 import { saveFounderEntry, deleteFounderEntry } from "../app/actions/founder-journal.actions";
@@ -14,6 +14,7 @@ beforeEach(() => {
   vi.clearAllMocks(); m.session.mockResolvedValue({ user: { id: "owner", emailVerified: true, banned: false } });
   m.find.mockResolvedValue({ id: "entry", visibility: "PUBLIC", approvedAt: new Date("2026-10-01"), publishedAt: new Date("2026-10-01"), startup: { slug: "old-startup" } });
   m.create.mockResolvedValue({ id: "new-entry" }); m.query.mockResolvedValue([]);
+  m.revision.mockResolvedValue({ id: "revision", version: 1 });
   m.startup.mockResolvedValue({ id: "startup", slug: "new-startup", status: "LIVE" });
   m.update.mockResolvedValue({ count: 1 }); m.remove.mockResolvedValue({ count: 1 });
 });

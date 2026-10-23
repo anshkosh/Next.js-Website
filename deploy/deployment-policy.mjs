@@ -5,6 +5,10 @@ import { createHash } from "node:crypto";
 // additive operations from broadening the automatic-deploy allowlist.
 const REVIEWED_MIGRATIONS = new Map([
   [
+    "20261023130000_ai_content_moderation",
+    "598b2c853ba29c8376d97574161d24b56e195e0a0e639776b5c6410586fd6d8a",
+  ],
+  [
     "20261018150000_beta_tester_signups",
     "7c6c04824dd1f58822f539ebc7e0473714e7adba9b1bbab0d372dc50c9e930df",
   ],

@@ -30,18 +30,18 @@ async function writeUpdate() {
   await fill(container.querySelector('input[type="text"]')!, "A progress update");
   await fill(container.querySelector("textarea")!, "Our pilot reached another milestone.");
 }
-it("announces a published update and keeps it in the visible list", async () => {
+it("announces an update awaiting moderation and keeps it in the owner's list", async () => {
   m.create.mockResolvedValue({ data: { id: "saved", title: "A progress update", body: "Our pilot reached another milestone.", createdAt: new Date() } });
-  await writeUpdate(); await act(async () => button("Publish Update").click());
-  expect(container.querySelector('[role="status"]')?.textContent).toBe("Update published successfully.");
+  await writeUpdate(); await act(async () => button("Submit update").click());
+  expect(container.querySelector('[role="status"]')?.textContent).toBe("Update saved for moderation. It will appear publicly after approval.");
   expect(container.querySelector("h4")?.textContent).toBe("A progress update");
 });
 it("recovers from a lost update response with the draft intact", async () => {
   m.create.mockRejectedValue(new Error("network")); await writeUpdate();
-  await act(async () => button("Publish Update").click());
+  await act(async () => button("Submit update").click());
   expect(container.querySelector('[role="alert"]')?.textContent).toContain("check your updates");
   expect(container.querySelector("textarea")?.value).toContain("another milestone");
-  expect(button("Publish Update").disabled).toBe(false);
+  expect(button("Submit update").disabled).toBe(false);
 });
 it("signs out through the auth client and clears the displayed session", async () => {
   await act(async () => root.render(<Logout />));

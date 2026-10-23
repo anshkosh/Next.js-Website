@@ -9,6 +9,8 @@ import { journalMediaKeys, journalPlainText } from "@/lib/journal-rich-text";
 import { Prisma } from "@prisma/client";
 import { parseJournalSchedule } from "@/lib/journal-scheduling";
 import { lockFounderEntry } from "@/lib/journal-publication";
+import { queueModeration } from "@/lib/moderation-store";
+import { journalContent } from "@/lib/moderation-policy";
 
 function invalidate(slugs: (string | null | undefined)[]) {
   revalidatePath("/dashboard");
@@ -62,11 +64,12 @@ export async function saveFounderEntry(id: string | null, input: unknown) {
         const base = existing ?? await tx.founderJournalEntry.create({ data: { ...data, authorId: session.user.id } });
         if (existing?.visibility === "PRIVATE") await tx.founderJournalEntry.updateMany({ where: { id: base.id, authorId: session.user.id }, data: { visibility: "PUBLIC" } });
         const submitted = { ...entry, body: rich ? journalPlainText(rich) : entry.body, contentJson: rich ?? null };
-        await tx.founderJournalRevision.upsert({
+        const revision = await tx.founderJournalRevision.upsert({
           where: { entryId: base.id },
           create: { entryId: base.id, data: submitted, scheduledAt, status: "PENDING_REVIEW" },
           update: { data: submitted, scheduledAt, status: "PENDING_REVIEW", version: { increment: 1 }, reviewerNotes: null, reviewedAt: null, reviewedBy: null },
         });
+        await queueModeration(tx, "JOURNAL", revision.id, journalContent(submitted, revision.version));
       } else if (existing) {
         const changed = await tx.founderJournalEntry.updateMany({ where: { id: existing.id, authorId: session.user.id }, data });
         if (changed.count !== 1) return { error: "Entry not found." };

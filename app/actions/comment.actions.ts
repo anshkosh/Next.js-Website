@@ -3,6 +3,8 @@
 import { publicStartupWhere } from "@/lib/startup-visibility";
 
 import { db } from "@/lib/db";
+import { queueModeration } from "@/lib/moderation-store";
+import { commentContent, replyContent } from "@/lib/moderation-policy";
 import { auth } from "@/lib/auth";
 import { cookies, headers } from "next/headers";
 import { revalidateSavedPath as revalidatePath } from "@/lib/cache-after-save";
@@ -95,7 +97,8 @@ export async function submitComment(formData: {
       return { error: "Startup not found." };
     }
 
-    const comment = await db.comment.create({
+    const comment = await db.$transaction(async tx => {
+      const saved = await tx.comment.create({
       data: {
         startupId,
         authorName,
@@ -104,6 +107,9 @@ export async function submitComment(formData: {
         status: "PENDING",
       },
       select: { id: true, authorName: true, body: true, createdAt: true },
+      });
+      await queueModeration(tx, "COMMENT", saved.id, commentContent(saved));
+      return saved;
     });
 
     // A private, signed receipt allows reloads without exposing pending comments
@@ -182,16 +188,20 @@ export async function approveComment(commentId: string) {
   try {
     const session = await auth.api.getSession({ headers: await headers() });
     if (
-      !session ||
+      !session?.user.emailVerified || session.user.banned ||
       (session.user.role !== "admin" && session.user.role !== "reviewer")
     ) {
       return { error: "Unauthorized" };
     }
 
-    const comment = await db.comment.update({
+    const comment = await db.$transaction(async tx => {
+      const saved = await tx.comment.update({
       where: { id: commentId },
       data: { status: "APPROVED" },
       include: { startup: { select: { slug: true } } },
+      });
+      await tx.contentModeration.updateMany({ where: { kind: "COMMENT", targetId: commentId }, data: { status: "APPROVED", leaseToken: null, reviewedBy: session.user.id, reviewedAt: new Date() } });
+      return saved;
     });
 
     revalidatePath(`/startups/${comment.startup.slug}`);
@@ -212,16 +222,20 @@ export async function rejectComment(commentId: string) {
   try {
     const session = await auth.api.getSession({ headers: await headers() });
     if (
-      !session ||
+      !session?.user.emailVerified || session.user.banned ||
       (session.user.role !== "admin" && session.user.role !== "reviewer")
     ) {
       return { error: "Unauthorized" };
     }
 
-    const comment = await db.comment.update({
+    const comment = await db.$transaction(async tx => {
+      const saved = await tx.comment.update({
       where: { id: commentId },
       data: { status: "REJECTED" },
       include: { startup: { select: { slug: true } } },
+      });
+      await tx.contentModeration.updateMany({ where: { kind: "COMMENT", targetId: commentId }, data: { status: "REJECTED", leaseToken: null, reviewedBy: session.user.id, reviewedAt: new Date() } });
+      return saved;
     });
 
     revalidatePath(`/startups/${comment.startup.slug}`);
@@ -244,7 +258,7 @@ export async function replyToComment(data: {
 }) {
   try {
     const session = await auth.api.getSession({ headers: await headers() });
-    if (!session) return { error: "Unauthorized" };
+    if (!session?.user.emailVerified || session.user.banned) return { error: "Sign in with a verified account." };
 
     const parsed = replyToCommentSchema.safeParse(data);
     if (!parsed.success) {
@@ -264,19 +278,18 @@ export async function replyToComment(data: {
       return { error: "You can only reply to comments on your own startup." };
     }
 
-    await db.comment.update({
-      where: { id: commentId },
-      data: {
-        reply,
-        repliedAt: new Date(),
-        repliedBy: session.user.name ?? "Founder",
-      },
+    await db.$transaction(async tx => {
+      const saved = await tx.comment.update({
+        where: { id: commentId, status: "APPROVED", startup: { founderId: session.user.id, ...publicStartupWhere } },
+        data: { pendingReply: reply, pendingRepliedBy: session.user.name ?? "Founder" },
+      });
+      await queueModeration(tx, "REPLY", commentId, replyContent(saved));
     });
 
     revalidatePath(`/startups/${comment.startup.slug}`);
     revalidatePath("/");
     revalidatePath("/leaderboard");
-    return { success: true };
+    return { success: true, message: "Reply saved for moderation. Your published reply stays visible until the replacement is approved." };
   } catch (err) {
     logger.error("replyToComment error:", err);
     return { error: "Failed to save reply." };
@@ -289,7 +302,7 @@ export async function replyToComment(data: {
 export async function deleteReply(commentId: string) {
   try {
     const session = await auth.api.getSession({ headers: await headers() });
-    if (!session) return { error: "Unauthorized" };
+    if (!session?.user.emailVerified || session.user.banned) return { error: "Unauthorized" };
 
     const comment = await db.comment.findUnique({
       where: { id: commentId },
@@ -306,9 +319,12 @@ export async function deleteReply(commentId: string) {
       return { error: "Unauthorized" };
     }
 
-    await db.comment.update({
-      where: { id: commentId },
-      data: { reply: null, repliedAt: null, repliedBy: null },
+    await db.$transaction(async tx => {
+      await tx.comment.update({
+        where: { id: commentId },
+        data: { reply: null, repliedAt: null, repliedBy: null, pendingReply: null, pendingRepliedBy: null },
+      });
+      await tx.contentModeration.deleteMany({ where: { kind: "REPLY", targetId: commentId } });
     });
 
     revalidatePath(`/startups/${comment.startup.slug}`);

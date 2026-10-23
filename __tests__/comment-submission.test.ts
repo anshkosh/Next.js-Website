@@ -3,7 +3,10 @@ import { beforeEach, afterEach, expect, it, vi } from "vitest";
 import { addCommentReceipt, readCommentReceipts, COMMENT_RECEIPT_COOKIE } from "../lib/comment-receipts";
 
 const mock = vi.hoisted(() => ({ create: vi.fn(), findMany: vi.fn(), startup: vi.fn(), readLimit: vi.fn(), consume: vi.fn(), verify: vi.fn(), revalidate: vi.fn(), warn: vi.fn(), getCookie: vi.fn(), setCookie: vi.fn() }));
-vi.mock("@/lib/db", () => ({ db: { comment: { create: mock.create, findMany: mock.findMany }, startup: { findUnique: mock.startup } } }));
+vi.mock("@/lib/db", () => {
+  const tx = { comment: { create: mock.create, findMany: mock.findMany }, startup: { findUnique: mock.startup }, contentModeration: { upsert: vi.fn() } };
+  return { db: { ...tx, $transaction: async (fn: (tx: object) => unknown) => fn(tx) } };
+});
 vi.mock("@/lib/auth", () => ({ auth: { api: { getSession: vi.fn() } } }));
 vi.mock("next/headers", () => ({ headers: async () => new Headers({ "x-real-ip": "192.0.2.1" }), cookies: async () => ({ get: mock.getCookie, set: mock.setCookie }) }));
 vi.mock("@/lib/utils/rate-limit", () => ({ readRateLimit: mock.readLimit, checkRateLimit: mock.consume }));

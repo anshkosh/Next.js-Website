@@ -27,12 +27,14 @@ export async function reviewFounderEntry(id: string, version: number, decision: 
       const revision = await tx.founderJournalRevision.findUnique({ where: { id }, include: { entry: true } });
       if (!revision || revision.version !== version || revision.entry.visibility !== "PUBLIC" || !["PENDING_REVIEW", "SCHEDULED"].includes(revision.status)) return { error: "This submission changed. Refresh before reviewing it." };
       const now = new Date();
-      if (decision === "CHANGES" || revision.status === "PENDING_REVIEW" && revision.scheduledAt && revision.scheduledAt <= now) {
+      if (decision === "APPROVE" && revision.status !== "PENDING_REVIEW") return { error: "This entry is already approved and scheduled." };
+      const changes = decision === "CHANGES" || revision.status === "PENDING_REVIEW" && revision.scheduledAt && revision.scheduledAt <= now;
+      await tx.contentModeration.updateMany({ where: { kind: "JOURNAL", targetId: id }, data: { status: changes ? "REJECTED" : "APPROVED", leaseToken: null, reviewedBy: user.id, reviewedAt: now } });
+      if (changes) {
         const note = decision === "CHANGES" ? notes.trim() : "The requested publication time passed before approval. Choose a new future time or publish after approval, then submit again.";
         await tx.founderJournalRevision.update({ where: { id }, data: { status: "CHANGES_REQUESTED", reviewerNotes: note, reviewedBy: user.id, reviewedAt: now } });
         return { success: true, message: "Returned to the founder with a note." };
       }
-      if (revision.status !== "PENDING_REVIEW") return { error: "This entry is already approved and scheduled." };
       await tx.founderJournalRevision.update({ where: { id }, data: { reviewedBy: user.id, reviewedAt: now, reviewerNotes: notes.trim() || null, status: revision.scheduledAt ? "SCHEDULED" : "PENDING_REVIEW" } });
       if (!revision.scheduledAt) {
         const published = await publishFounderRevision(tx, revision, now);
