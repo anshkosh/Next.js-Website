@@ -5,9 +5,9 @@
 - Owner requested implementation after confirming the account split: Anshkosh Workers Free for AI/Turnstile, Arush R2 for storage. Separate branch/worktree starts at current origin/main c97d049.
 - Implemented durable text checks, safe-only automatic publication, human journal/media review, exact-submission comparisons, staged reply edits, pending startup updates, shared daily request reservations and review overrides.
 - No production content, bot activity, account plans, paid credits or R2 settings changed. Existing published records remain approved; new pending updates are excluded from public reads/signals.
-- Typecheck, zero-warning lint and dependency policy pass; full local suite passed 745 tests with two existing skips, and ten deployment Python tests passed. Added migration-policy, moderation failure/race/authorization tests and isolated PostgreSQL/browser regressions; GitHub CI and activation are pending.
-- Safe rollout is split: deploy visibility guard PR #56 first, then AI PR #55. Both are reviewable drafts; no production changes.
-- Remaining activation: owner-authorized Workers AI credential scoped to Anshkosh account, private VPS configuration, and owner-approved merge/deployment after passing CI. See docs/wiki/operations/Content-Moderation.md.
+- Typecheck, zero-warning lint and dependency policy pass; CI passed 747 unit tests with two existing skips, ten deployment Python tests and all isolated PostgreSQL checks including moderation races and the shared cap. The browser job reached journey sixteen without an assertion failure before its twenty-minute job deadline; dependency installation consumed ten minutes. Increase only the job budget to thirty-five minutes and rerun the complete gate.
+- Safe rollout is split: visibility guard PR #56 passed and is merged as 5ab87cf; its production workflow is running. AI PR #55 follows after the guard is verified live and its own complete CI passes.
+- Owner explicitly authorized commit, merge, VPS deployment and creation/private VPS storage of the restricted Workers AI token. Activation still requires live synthetic English/Hindi/Hinglish checks, protected configuration and the reviewed root-owned migration policy installation. See docs/wiki/operations/Content-Moderation.md.
 
 ## 23 October 2026 — moderation rollback visibility prerequisite
 

@@ -9,7 +9,9 @@ permissions:
 jobs:
   browser:
     runs-on: ubuntu-24.04
-    timeout-minutes: 20
+    # Browser dependencies can take ten minutes on a fresh Ubuntu runner; retain
+    # enough time for all nineteen cold-compiled journeys and failure evidence.
+    timeout-minutes: 35
     services:
       postgres:
         image: postgres:15
