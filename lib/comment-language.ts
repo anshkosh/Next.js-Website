@@ -8,6 +8,7 @@ const PERSONAL_ATTACK = [
 ];
 const THREAT = [
   /\b(?:i|we)(?:['’]ll| will| am going to| are going to| gonna|'m going to|'re going to)\s+(?:(?:find|hunt)\s+you\s+and\s+)?(?:kill|murder|hurt|stab|shoot|beat|rape|burn)\s+(?:you|u|him|her|them|the founder|your family|your house)\b/i,
+  /\b(?:i|we)(?:['’]ll| will| am going to| are going to| gonna|'m going to|'re going to)\s+(?:show up|come|turn up)\b.{0,120}\b(?:smash|break|destroy|burn|attack|wreck|damage|vandalize)\b.{0,60}\b(?:your|the)\s+(?:register(?:\s+table)?|desk|shop|store|house|home|booth|equipment|property|car|office|fixture|prototype)\b/i,
   /\b(?:kill yourself|you (?:should|deserve to) die|hope you die|death to you)\b/i,
   /\b(?:watch your back|i know where you live)\b/i,
   /\b(?:jaan se maar|maar (?:dunga|dungi|denge)|goli maar)\b/i,
@@ -26,4 +27,4 @@ export function commentLanguageReasons(text: string): string[] {
   return reasons;
 }
 
-export const COMMENT_LANGUAGE_WARNING = "Criticize the product as bluntly as you need, but remove threats, personal insults and profanity. Comments containing these are held for review. Please rewrite your feedback before posting again.";
+export const COMMENT_LANGUAGE_WARNING = "Criticize the product as bluntly as you need, but remove threats, personal insults and profanity. Comments containing these are held for review. Please rewrite your feedback before submitting.";

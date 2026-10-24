@@ -60,8 +60,8 @@ it("rejects invalid CAPTCHA without consuming the comment allowance", async () =
   expect(mock.consume).not.toHaveBeenCalled(); expect(mock.create).not.toHaveBeenCalled();
 });
 
-it("warns the commenter about abusive wording while saving it privately for review", async () => {
-  expect(await submitComment({ ...input, body: "You are an idiot." })).toMatchObject({ success: true, warning: expect.stringContaining("remove threats, personal insults and profanity") });
+it.each(["You are an idiot.", "We will show up at the test booth and smash your register table."])("warns the commenter about abusive wording while saving it privately for review: %s", async body => {
+  expect(await submitComment({ ...input, body })).toMatchObject({ success: true, warning: expect.stringContaining("remove threats, personal insults and profanity") });
   expect(mock.create).toHaveBeenCalledWith(expect.objectContaining({ data: expect.objectContaining({ status: "PENDING" }) }));
 });
 

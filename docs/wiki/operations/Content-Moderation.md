@@ -22,10 +22,15 @@ writes explicitly set PENDING. All public update reads and scoring SQL require
 APPROVED; this preserves existing signals and excludes new unapproved content.
 Blunt negative product feedback such as “this product sucks”, “your app is useless”
 or “the design is garbage” does not trigger a language flag on its own. Possible
-threats, attacks on people and profanity add review hints that prevent automatic
+physical threats, attacks on people and profanity add review hints that prevent automatic
 publication even if the model returns safe. The shared English/Hindi/Hinglish
 patterns are conservative review aids, not a complete toxicity classifier or
 proof of misconduct. An unsafe or unavailable AI result still stays pending.
+
+Physical threat patterns include explicit plans to arrive at a place and damage
+people's property, including fixture and booth damage. Ambiguous or new threat
+wording can still escape phrase matching, so the safety model and review queue
+remain important.
 
 The comment composer shows a warning when it detects threatening language,
 personal insults or profanity, so the author can rewrite before submitting.

@@ -48,6 +48,11 @@ async function main() {
     assert.equal((await db.comment.findUniqueOrThrow({ where: { id: abusive.id } })).status, "PENDING", "A safe model response cannot publish a detected personal attack");
     assert.equal((await db.contentModeration.findUniqueOrThrow({ where: { kind_targetId: { kind: "COMMENT", targetId: abusive.id } } })).status, "FLAGGED");
 
+    const threat = await comment("Shut down this fake WardDesk pilot right now or we will show up at the test booth and smash your register table.");
+    await processModeration();
+    assert.equal((await db.comment.findUniqueOrThrow({ where: { id: threat.id } })).status, "PENDING", "A safe model response cannot publish a detected physical threat");
+    assert.equal((await db.contentModeration.findUniqueOrThrow({ where: { kind_targetId: { kind: "COMMENT", targetId: threat.id } } })).status, "FLAGGED");
+
     const held = await comment();
     respond = async () => Response.json({ success: true, result: { response: "unsafe\nS10" } });
     await processModeration();

@@ -72,6 +72,10 @@ it("overrides a safe model response when an obvious personal attack is present",
     reasons: ["Possible personal abuse; human review required."],
   });
 });
+it("overrides a safe model response for a non-profane physical threat to property", async () => {
+  vi.stubGlobal("fetch", vi.fn().mockResolvedValue(Response.json({ success: true, result: { response: "safe" } })));
+  expect(await checkContent({ ...content, text: "Shut down this fake WardDesk pilot right now or we will show up at the test booth and smash your register table." }, "fixture-token", "a".repeat(32))).toMatchObject({ safe: false, reasons: ["Possible threat; human review required."] });
+});
 it.each(["This product sucks. I would not pay for it.", "Your app is useless and the design is garbage."])("accepts blunt product criticism when the model finds no safety issue: %s", async text => {
   vi.stubGlobal("fetch", vi.fn().mockResolvedValue(Response.json({ success: true, result: { response: "safe" } })));
   expect(await checkContent({ ...content, text }, "fixture-token", "a".repeat(32))).toEqual({ safe: true, reasons: [] });

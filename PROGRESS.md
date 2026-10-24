@@ -1,5 +1,17 @@
 # Progress
 
+## 24 October 2026 — physical threat moderation follow-up
+
+- Grok's authorized MODTEST-R2 report found one false negative on deployed
+  `b8f765e6`: a non-profane threat to show up and smash a test booth's register
+  table passed automatic review. The report says Kosh later hid it; an independent
+  public page check confirmed the threat text and blunt product examples are no
+  longer visible.
+- Add a conservative pattern for explicit threats to arrive at a place and damage
+  property, with regressions through compose warning, AI-safe verdict override,
+  and disposable PostgreSQL worker publication. Keep blunt product criticism
+  eligible for auto-publication. CI and release checks pending.
+
 ## 24 October 2026 — comment abuse safety follow-up
 
 - The WardDesk test showed that Llama Guard marked an obvious personal attack
