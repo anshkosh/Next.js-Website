@@ -16,7 +16,8 @@ Only `LIVE` startups appear in Discover, categories, search, the sitemap and cat
 
 ## Flow
 
-1. **Apply.** A founder with a verified account creates a startup at `/startup/new`: name, tagline, description, website, category, co-founders, proposition fields and media (logo, gallery, optional PDF pitch deck).
+1. **Apply.** A founder with a verified account creates a startup at `/startup/new`: name, tagline, description, website, category, co-founders, proposition fields and media (logo, gallery, optional PDF pitch deck). Login, signup, verification resend and the return-to-sign-in link preserve a validated local destination so a visitor who chose to list can return to the form. Listing intent checks founder mode during registration with a clear opt-out; existing account preferences are unchanged.
+   The first step names the startup name, tagline and category constraints before saving. Save Draft can create the server draft once those fields pass validation. Browser recovery remains a separate copy and does not mean that a server draft exists.
 2. **Submit for review.** The status moves to `PENDING_REVIEW` and a `new_submission` notification job emails the admin team.
 3. **Review.** Reviewers and admins work from `/admin/moderation`. They review the submitted profile and approve or reject with notes (`adminNotes`, `reviewedBy`, `reviewedAt`). Publication is not identity certification or independent verification of every claim. Founders remain responsible for the accuracy of their profile and evidence.
 4. **Outcome email.** `startup_approved` or `startup_rejected` is queued to the founder.
@@ -27,6 +28,14 @@ Only `LIVE` startups appear in Discover, categories, search, the sitemap and cat
 ## Featured listings
 
 Admins choose featured startups at `/admin/featured` (`FeaturedStartup`); they appear on the home page.
+
+## Dashboard guidance
+
+The founder dashboard leads with creating a first listing when the account has no
+startup. Existing drafts take precedence, then suspended listings direct founders
+to support, rejected or changes-requested listings link to editing and feedback,
+and pending-review listings show their status. Guidance for live profiles and
+journal activity follows those setup and review actions.
 
 ## Uploads on a startup
 

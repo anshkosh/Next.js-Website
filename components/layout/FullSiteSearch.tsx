@@ -4,7 +4,7 @@ import { Search, X } from "lucide-react";
 import { FormEvent, useId, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 
-export default function FullSiteSearch({ align = "right" }: { align?: "left" | "right" }) {
+export default function FullSiteSearch({ align = "right", onSubmit }: { align?: "left" | "right"; onSubmit?: () => void }) {
   const router = useRouter();
   const searchId = useId();
   const [open, setOpen] = useState(false);
@@ -16,6 +16,7 @@ export default function FullSiteSearch({ align = "right" }: { align?: "left" | "
     const value = query.trim();
     if (!value) return;
     setOpen(false);
+    onSubmit?.();
     router.push(`/search?q=${encodeURIComponent(value)}`);
   };
 

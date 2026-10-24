@@ -5,12 +5,16 @@ import { ChevronDown } from "lucide-react";
 import CategoryIcon from "@/components/category/CategoryIcon";
 
 interface IconSelectProps {
+  id?: string;
+  ariaLabel?: string;
   value: string;
   onChange: (value: string) => void;
   availableIcons: string[];
 }
 
 export default function IconSelect({
+  id,
+  ariaLabel,
   value,
   onChange,
   availableIcons,
@@ -36,6 +40,8 @@ export default function IconSelect({
   return (
     <div className="relative" ref={dropdownRef}>
       <button
+        id={id}
+        aria-label={ariaLabel}
         type="button"
         onClick={() => setIsOpen(!isOpen)}
         className="w-full flex items-center justify-between border border-gray-200 rounded-md p-2 bg-white text-sm focus:ring-coral-500 focus:border-coral-500 outline-none hover:border-gray-300 transition-colors"

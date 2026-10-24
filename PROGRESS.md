@@ -1,5 +1,13 @@
 # Progress
 
+## 24 October 2026 — website journey review fixes (in progress)
+
+- Start from current verified `origin/main` in an isolated `codex/website-flow-fixes-luna` worktree; no other checkout or production state changed.
+- Address the seven review findings: startup field labels/errors and draft saving; safe listing return through auth verification/resend; mobile search dismissal; first-listing and review dashboard guidance; beta CAPTCHA retry and post-save cache failure behavior.
+- Focused regressions cover first draft save/repeated save/Next, local return-path validation, field messages, dashboard priorities (including suspended/revision conflict), mobile menu closure, beta retry/duplicate handling and cache refresh failure.
+- Verification: full Vitest suite passes (797 passed, 2 skipped across 116 passing files and one skipped); focused journey/action regressions pass; lint, typecheck, dependency policy, `git diff --check` and the three upload-limit Python tests pass. The dependency policy reports the two existing reviewed advisories expiring 18 November 2026.
+- A browser/PostgreSQL end-to-end run was not attempted because this checkout has no verified empty disposable database and browser test service. Pull request CI remains the isolated browser/database gate. No deploy, merge, production data change or bot activity is included.
+
 ## 24 October 2026 — moderation controls (in progress)
 
 - Add searchable, paginated comment controls for pending, published and hidden/rejected comments; staff can restore or hide comments and see the latest AI review reasons.

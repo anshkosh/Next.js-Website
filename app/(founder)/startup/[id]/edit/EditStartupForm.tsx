@@ -243,40 +243,55 @@ export default function EditStartupForm({ initialData, userId, categories }: { c
       )}
 
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">
+        <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
           Startup Name
         </label>
         <input
+          id="name"
           name="name"
+          minLength={2}
+          maxLength={100}
+          aria-invalid={Boolean(errors.name)}
+          aria-describedby={errors.name ? "edit-error-name" : "edit-help-name"}
           value={formData.name}
           onChange={handleChange}
           className={`w-full border rounded-md p-2 ${errors.name ? "border-red-500 bg-red-50/20" : ""}`}
         />
+        <p id="edit-help-name" className="mt-1 text-xs text-gray-600">2–100 characters</p>
         {errors.name && (
-          <p className="text-red-500 text-xs mt-1">{errors.name[0]}</p>
+          <p id="edit-error-name" className="text-red-700 text-xs mt-1">{errors.name[0]}</p>
         )}
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">
+        <label htmlFor="tagline" className="block text-sm font-medium text-gray-700 mb-1">
           Tagline
         </label>
         <input
+          id="tagline"
           name="tagline"
+          minLength={10}
+          maxLength={120}
+          aria-invalid={Boolean(errors.tagline)}
+          aria-describedby={errors.tagline ? "edit-error-tagline" : "edit-help-tagline"}
           value={formData.tagline}
           onChange={handleChange}
           className={`w-full border rounded-md p-2 ${errors.tagline ? "border-red-500 bg-red-50/20" : ""}`}
         />
+        <p id="edit-help-tagline" className="mt-1 text-xs text-gray-600">10–120 characters</p>
         {errors.tagline && (
-          <p className="text-red-500 text-xs mt-1">{errors.tagline[0]}</p>
+          <p id="edit-error-tagline" className="text-red-700 text-xs mt-1">{errors.tagline[0]}</p>
         )}
       </div>
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">
+        <label htmlFor="categoryId" className="block text-sm font-medium text-gray-700 mb-1">
           Category
         </label>
         <select
+          id="categoryId"
           name="categoryId"
+          aria-invalid={Boolean(errors.categoryId)}
+          aria-describedby={errors.categoryId ? "edit-error-categoryId" : undefined}
           value={formData.categoryId}
           onChange={handleChange}
           className={`w-full border rounded-md p-2 bg-white ${errors.categoryId ? "border-red-500 bg-red-50/20" : ""}`}
@@ -289,42 +304,48 @@ export default function EditStartupForm({ initialData, userId, categories }: { c
           ))}
         </select>
         {errors.categoryId && (
-          <p className="text-red-500 text-xs mt-1">{errors.categoryId[0]}</p>
+          <p id="edit-error-categoryId" className="text-red-700 text-xs mt-1">{errors.categoryId[0]}</p>
         )}
       </div>
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">
+        <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-1">
           Description
         </label>
         <textarea
+          id="description"
           name="description"
+          aria-invalid={Boolean(errors.description)}
+          aria-describedby={errors.description ? "edit-error-description" : undefined}
           value={formData.description}
           onChange={handleChange}
           className={`w-full border rounded-md p-2 h-32 ${errors.description ? "border-red-500 bg-red-50/20" : ""}`}
         />
         {errors.description && (
-          <p className="text-red-500 text-xs mt-1">{errors.description[0]}</p>
+          <p id="edit-error-description" className="text-red-700 text-xs mt-1">{errors.description[0]}</p>
         )}
       </div>
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">
+        <label htmlFor="websiteUrl" className="block text-sm font-medium text-gray-700 mb-1">
           Website URL
         </label>
         <input
+          id="websiteUrl"
           name="websiteUrl"
+          aria-invalid={Boolean(errors.websiteUrl)}
+          aria-describedby={errors.websiteUrl ? "edit-error-websiteUrl" : undefined}
           value={formData.websiteUrl}
           onChange={handleChange}
           className={`w-full border rounded-md p-2 ${errors.websiteUrl ? "border-red-500 bg-red-50/20" : ""}`}
         />
         {errors.websiteUrl && (
-          <p className="text-red-500 text-xs mt-1">{errors.websiteUrl[0]}</p>
+          <p id="edit-error-websiteUrl" className="text-red-700 text-xs mt-1">{errors.websiteUrl[0]}</p>
         )}
       </div>
 
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">
+      <div id="logoUrl">
+        <p className="block text-sm font-medium text-gray-700 mb-2">
           Startup Logo
-        </label>
+        </p>
 
         <EditableImageUpload kind="logo" label="Startup logo" value={formData.logoUrl} onChange={url => setFormData(previous => ({ ...previous, logoUrl: url }))} onBusyChange={busy => setUploadBusy("logo", busy)} />
         {errors.logoUrl && (
@@ -334,71 +355,86 @@ export default function EditStartupForm({ initialData, userId, categories }: { c
 
       <div className="pt-4 border-t border-gray-100 grid grid-cols-2 gap-4">
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+          <label htmlFor="twitterUrl" className="block text-sm font-medium text-gray-700 mb-1">
             Twitter URL
           </label>
           <input
+            id="twitterUrl"
             name="twitterUrl"
+            aria-invalid={Boolean(errors.twitterUrl)}
+            aria-describedby={errors.twitterUrl ? "edit-error-twitterUrl" : undefined}
             value={formData.twitterUrl}
             onChange={handleChange}
             className={`w-full border rounded-md p-2 ${errors.twitterUrl ? "border-red-500 bg-red-50/20" : ""}`}
           />
           {errors.twitterUrl && (
-            <p className="text-red-500 text-xs mt-1">{errors.twitterUrl[0]}</p>
+            <p id="edit-error-twitterUrl" className="text-red-700 text-xs mt-1">{errors.twitterUrl[0]}</p>
           )}
         </div>
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+          <label htmlFor="linkedinUrl" className="block text-sm font-medium text-gray-700 mb-1">
             LinkedIn URL
           </label>
           <input
+            id="linkedinUrl"
             name="linkedinUrl"
+            aria-invalid={Boolean(errors.linkedinUrl)}
+            aria-describedby={errors.linkedinUrl ? "edit-error-linkedinUrl" : undefined}
             value={formData.linkedinUrl}
             onChange={handleChange}
             className={`w-full border rounded-md p-2 ${errors.linkedinUrl ? "border-red-500 bg-red-50/20" : ""}`}
           />
           {errors.linkedinUrl && (
-            <p className="text-red-500 text-xs mt-1">{errors.linkedinUrl[0]}</p>
+            <p id="edit-error-linkedinUrl" className="text-red-700 text-xs mt-1">{errors.linkedinUrl[0]}</p>
           )}
         </div>
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+          <label htmlFor="startupPhone" className="block text-sm font-medium text-gray-700 mb-1">
             Phone Number <span className="text-red-500">*</span>
           </label>
           <input
+            id="startupPhone"
             type="tel"
             name="startupPhone"
+            aria-invalid={Boolean(errors.startupPhone)}
+            aria-describedby={errors.startupPhone ? "edit-error-startupPhone" : "edit-help-startupPhone"}
             value={formData.startupPhone}
             onChange={handleChange}
             placeholder="e.g. 9876543210"
             maxLength={10}
             className={`w-full border rounded-md p-2 ${errors.startupPhone ? "border-red-500 bg-red-50/20" : ""}`}
           />
-          <p className="text-xs text-gray-500 mt-1">10-digit mobile number</p>
+          <p id="edit-help-startupPhone" className="text-xs text-gray-500 mt-1">10-digit mobile number</p>
           {errors.startupPhone && (
-            <p className="text-red-500 text-xs mt-1">{errors.startupPhone[0]}</p>
+            <p id="edit-error-startupPhone" className="text-red-700 text-xs mt-1">{errors.startupPhone[0]}</p>
           )}
         </div>
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+          <label htmlFor="city" className="block text-sm font-medium text-gray-700 mb-1">
             City <span className="text-red-500">*</span>
           </label>
           <input
+            id="city"
             name="city"
+            aria-invalid={Boolean(errors.city)}
+            aria-describedby={errors.city ? "edit-error-city" : undefined}
             value={formData.city}
             onChange={handleChange}
             className={`w-full border rounded-md p-2 ${errors.city ? "border-red-500 bg-red-50/20" : ""}`}
           />
           {errors.city && (
-            <p className="text-red-500 text-xs mt-1">{errors.city[0]}</p>
+            <p id="edit-error-city" className="text-red-700 text-xs mt-1">{errors.city[0]}</p>
           )}
         </div>
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+          <label htmlFor="foundedYear" className="block text-sm font-medium text-gray-700 mb-1">
             Founded Year <span className="text-red-500">*</span>
           </label>
           <select
+            id="foundedYear"
             name="foundedYear"
+            aria-invalid={Boolean(errors.foundedYear)}
+            aria-describedby={errors.foundedYear ? "edit-error-foundedYear" : undefined}
             value={formData.foundedYear}
             onChange={handleChange}
             className={`w-full border rounded-md p-2 bg-white ${errors.foundedYear ? "border-red-500 bg-red-50/20" : ""}`}
@@ -411,7 +447,7 @@ export default function EditStartupForm({ initialData, userId, categories }: { c
             ))}
           </select>
           {errors.foundedYear && (
-            <p className="text-red-500 text-xs mt-1">{errors.foundedYear[0]}</p>
+            <p id="edit-error-foundedYear" className="text-red-700 text-xs mt-1">{errors.foundedYear[0]}</p>
           )}
         </div>
       </div>
@@ -423,7 +459,7 @@ export default function EditStartupForm({ initialData, userId, categories }: { c
         {/* Problem Statement */}
         <div>
           <div className="flex items-center justify-between mb-1">
-            <label className="block text-sm font-medium text-gray-700">
+            <label htmlFor="problemStatement" className="block text-sm font-medium text-gray-700">
               The Problem <span className="text-red-500">*</span>
             </label>
             <span className={`text-xs ${
@@ -436,7 +472,10 @@ export default function EditStartupForm({ initialData, userId, categories }: { c
             </span>
           </div>
           <textarea
+            id="problemStatement"
             name="problemStatement"
+            aria-invalid={Boolean(errors.problemStatement)}
+            aria-describedby={errors.problemStatement ? "edit-error-problemStatement" : undefined}
             value={formData.problemStatement}
             onChange={handleChange}
             rows={5}
@@ -447,14 +486,14 @@ export default function EditStartupForm({ initialData, userId, categories }: { c
             }`}
           />
           {errors.problemStatement && (
-            <p className="text-red-500 text-xs mt-1">{errors.problemStatement[0]}</p>
+            <p id="edit-error-problemStatement" className="text-red-700 text-xs mt-1">{errors.problemStatement[0]}</p>
           )}
         </div>
 
         {/* Solution & Value Proposition */}
         <div>
           <div className="flex items-center justify-between mb-1">
-            <label className="block text-sm font-medium text-gray-700">
+            <label htmlFor="solutionStatement" className="block text-sm font-medium text-gray-700">
               Solution & Value Proposition <span className="text-red-500">*</span>
             </label>
             <span className={`text-xs ${
@@ -467,7 +506,10 @@ export default function EditStartupForm({ initialData, userId, categories }: { c
             </span>
           </div>
           <textarea
+            id="solutionStatement"
             name="solutionStatement"
+            aria-invalid={Boolean(errors.solutionStatement)}
+            aria-describedby={errors.solutionStatement ? "edit-error-solutionStatement" : undefined}
             value={formData.solutionStatement}
             onChange={handleChange}
             rows={5}
@@ -478,20 +520,23 @@ export default function EditStartupForm({ initialData, userId, categories }: { c
             }`}
           />
           {errors.solutionStatement && (
-            <p className="text-red-500 text-xs mt-1">{errors.solutionStatement[0]}</p>
+            <p id="edit-error-solutionStatement" className="text-red-700 text-xs mt-1">{errors.solutionStatement[0]}</p>
           )}
         </div>
 
         {/* Target Audience */}
         <div>
           <div className="flex items-center justify-between mb-1">
-            <label className="block text-sm font-medium text-gray-700">
+            <label htmlFor="targetAudience" className="block text-sm font-medium text-gray-700">
               Target Audience & Ideal Customer <span className="text-red-500">*</span>
             </label>
             <span className="text-xs text-gray-500">{formData.targetAudience.length}/500</span>
           </div>
           <textarea
+            id="targetAudience"
             name="targetAudience"
+            aria-invalid={Boolean(errors.targetAudience)}
+            aria-describedby={errors.targetAudience ? "edit-error-targetAudience" : undefined}
             value={formData.targetAudience}
             onChange={handleChange}
             rows={3}
@@ -502,17 +547,20 @@ export default function EditStartupForm({ initialData, userId, categories }: { c
             }`}
           />
           {errors.targetAudience && (
-            <p className="text-red-500 text-xs mt-1">{errors.targetAudience[0]}</p>
+            <p id="edit-error-targetAudience" className="text-red-700 text-xs mt-1">{errors.targetAudience[0]}</p>
           )}
         </div>
 
         {/* Prototype Status */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+          <label htmlFor="prototypeStatus" className="block text-sm font-medium text-gray-700 mb-1">
             Prototype / Build Status <span className="text-red-500">*</span>
           </label>
           <select
+            id="prototypeStatus"
             name="prototypeStatus"
+            aria-invalid={Boolean(errors.prototypeStatus)}
+            aria-describedby={errors.prototypeStatus ? "edit-error-prototypeStatus" : undefined}
             value={formData.prototypeStatus}
             onChange={handleChange}
             className={`w-full border rounded-md p-2 bg-white ${
@@ -523,20 +571,21 @@ export default function EditStartupForm({ initialData, userId, categories }: { c
             {STARTUP_STAGES.map(stage => <option key={stage} value={stage}>{stage}</option>)}
           </select>
           {errors.prototypeStatus && (
-            <p className="text-red-500 text-xs mt-1">{errors.prototypeStatus[0]}</p>
+            <p id="edit-error-prototypeStatus" className="text-red-700 text-xs mt-1">{errors.prototypeStatus[0]}</p>
           )}
         </div>
 
         {/* Traction Evidence (optional) */}
         <div>
           <div className="flex items-center justify-between mb-1">
-            <label className="block text-sm font-medium text-gray-700">
+            <label htmlFor="tractionEvidence" className="block text-sm font-medium text-gray-700">
               Existing Proof Points & Traction
               <span className="ml-1.5 text-xs font-normal text-gray-500">(Optional)</span>
             </label>
             <span className="text-xs text-gray-500">{formData.tractionEvidence.length}/600</span>
           </div>
           <textarea
+            id="tractionEvidence"
             name="tractionEvidence"
             value={formData.tractionEvidence}
             onChange={handleChange}
@@ -550,10 +599,11 @@ export default function EditStartupForm({ initialData, userId, categories }: { c
 
       {/* Video Link */}
       <div className="pt-6 border-t border-gray-100">
-        <label className="block text-sm font-medium text-gray-700 mb-1">
+        <label htmlFor="videoUrl" className="block text-sm font-medium text-gray-700 mb-1">
           Video Demo URL (Optional)
         </label>
         <input
+          id="videoUrl"
           name="videoUrl"
           value={formData.videoUrl}
           onChange={handleChange}
@@ -578,14 +628,14 @@ export default function EditStartupForm({ initialData, userId, categories }: { c
         )}
       </div>
 
-      <GalleryImageEditor images={formData.galleryImages} onChange={images => setFormData(previous => ({ ...previous, galleryImages: images }))} onBusyChange={busy => setUploadBusy("gallery", busy)} />
-      <PitchDeckUpload value={formData.pitchDeckUrl} visibility={formData.pitchDeckVisibility} onVisibilityChange={visibility => setFormData(previous => ({ ...previous, pitchDeckVisibility: visibility }))} onChange={url => setFormData(previous => ({ ...previous, pitchDeckUrl: url }))} onBusyChange={busy => setUploadBusy("deck", busy)} />
+      <div id="galleryImages"><GalleryImageEditor images={formData.galleryImages} onChange={images => setFormData(previous => ({ ...previous, galleryImages: images }))} onBusyChange={busy => setUploadBusy("gallery", busy)} /></div>
+      <div id="pitchDeckUrl"><PitchDeckUpload value={formData.pitchDeckUrl} visibility={formData.pitchDeckVisibility} onVisibilityChange={visibility => setFormData(previous => ({ ...previous, pitchDeckVisibility: visibility }))} onChange={url => setFormData(previous => ({ ...previous, pitchDeckUrl: url }))} onBusyChange={busy => setUploadBusy("deck", busy)} /></div>
       {/* Key Features Builder */}
       <div className="pt-6 border-t border-gray-100">
         <div className="flex items-center justify-between mb-4">
-          <label className="block text-sm font-medium text-gray-700">
+          <p className="block text-sm font-medium text-gray-700">
             Key Features (Max 6)
-          </label>
+          </p>
           <span className="text-xs text-gray-500">{formData.features.length}/6 added</span>
         </div>
 
@@ -601,8 +651,10 @@ export default function EditStartupForm({ initialData, userId, categories }: { c
               </button>
               <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                 <div className="md:col-span-1">
-                  <label className="block text-xs font-medium text-gray-500 mb-1">Icon</label>
+                  <label htmlFor={`features.${idx}.icon`} className="block text-xs font-medium text-gray-500 mb-1">Icon</label>
                   <IconSelect
+              id={`features.${idx}.icon`}
+              ariaLabel={`Feature ${idx + 1} icon`}
                     value={feature.icon}
                     onChange={(iconName) => {
                       const newFeatures = [...formData.features];
@@ -613,8 +665,9 @@ export default function EditStartupForm({ initialData, userId, categories }: { c
                   />
                 </div>
                 <div className="md:col-span-3">
-                  <label className="block text-xs font-medium text-gray-500 mb-1">Title</label>
+                  <label htmlFor={`features.${idx}.title`} className="block text-xs font-medium text-gray-500 mb-1">Title</label>
                   <input
+                    id={`features.${idx}.title`}
                     name={`features.${idx}.title`}
                     aria-label={`Feature ${idx + 1} title`}
                     aria-invalid={Boolean(errors[`features.${idx}.title`])}
@@ -633,8 +686,9 @@ export default function EditStartupForm({ initialData, userId, categories }: { c
                   {errors[`features.${idx}.title`] && <p id={`feature-${idx}-title-error`} className="text-red-500 text-xs mt-1">{errors[`features.${idx}.title`][0]}</p>}
                 </div>
                 <div className="md:col-span-4">
-                  <label className="block text-xs font-medium text-gray-500 mb-1">Description (Max 150 chars)</label>
+                  <label htmlFor={`features.${idx}.description`} className="block text-xs font-medium text-gray-500 mb-1">Description (Max 150 chars)</label>
                   <input
+                    id={`features.${idx}.description`}
                     name={`features.${idx}.description`}
                     aria-label={`Feature ${idx + 1} description`}
                     aria-invalid={Boolean(errors[`features.${idx}.description`])}

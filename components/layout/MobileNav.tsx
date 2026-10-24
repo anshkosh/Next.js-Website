@@ -60,7 +60,10 @@ export default function MobileNav({ authenticated }: { authenticated: boolean })
             </Link>
             {authenticated && <><Link href="/settings" onClick={() => setOpen(false)} className="flex min-h-11 items-center px-3 font-medium text-gray-700">Profile settings</Link><Link href="/logout" prefetch={false} onClick={() => setOpen(false)} className="flex min-h-11 items-center px-3 font-medium text-red-700">Logout</Link></>}
             <div className="mt-3 flex items-center justify-between border-t border-gray-200 pt-3 dark:border-gray-700">
-              <FullSiteSearch align="left" />
+              <FullSiteSearch align="left" onSubmit={() => {
+                setOpen(false);
+                toggle.current?.focus();
+              }} />
             </div>
           </div>
         </nav>
