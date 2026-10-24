@@ -31,10 +31,17 @@ export function journalContent(data: unknown, version: number): ModerationConten
   return { text: `${entry.title}\n${text}\n${entry.milestone}`, hasMedia: Boolean(entry.contentJson?.ops.some(op => typeof op.insert !== "string")), stamp: [version, data] };
 }
 
+const PERSONAL_ATTACK_PATTERNS = [
+  /\b(?:you|you're|u|tum|tu|aap)\b.{0,48}\b(?:idiot|moron|fool|stupid|dumbass?|useless|worthless|loser|clown|fraud|scammer|bewakoof|gadha|pagal|chutiya)\b/i,
+  /\b(?:nobody|no one)\b.{0,32}\b(?:with a brain|with a mind|brain|mind)\b/i,
+  /\b(?:this|that|your)\b.{0,40}\b(?:garbage|trash|crap|shit)\b/i,
+];
+
 // Review, rather than ban, contextual business language and personal information.
 // These supplement a safety model; they do not establish whether a claim is true.
 export function policyReasons(content: ModerationContent): string[] {
   const reasons: string[] = [];
+  if (PERSONAL_ATTACK_PATTERNS.some(pattern => pattern.test(content.text))) reasons.push("Possible insult or personal attack; human review required.");
   if (content.hasMedia) reasons.push("Media needs human review; AI checked text only.");
   if (/(?:guaranteed|risk[- ]?free|assured)\s+(?:\d+[%x]?\s+)?(?:returns?|profits?|income)|double\s+your\s+money/i.test(content.text)) reasons.push("Potential guaranteed-return promotion.");
   if (/\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b/i.test(content.text) || /(?:\+?\d[\s().-]*){10,}/.test(content.text)) reasons.push("Possible personal contact information.");

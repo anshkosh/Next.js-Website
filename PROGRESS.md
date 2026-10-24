@@ -1,5 +1,21 @@
 # Progress
 
+## 24 October 2026 — comment abuse safety follow-up
+
+- The WardDesk test showed that Llama Guard marked an obvious personal attack
+  safe and it was published. Every new comment will now require human approval
+  even when AI returns safe; safe replies and startup updates keep their existing
+  automatic path.
+- Add a narrow personal-attack hint for direct insults, including the reproduced
+  test text and a Hinglish example. This heuristic is only a review aid; it is
+  not a complete toxicity classifier or proof of misconduct.
+- Existing published comments, bot activity and ranking treatment are unchanged.
+- Branch `codex/comment-abuse-gate` starts from deployed `main` `1d18b8f` in the
+  clean AI moderation worktree. All 752 unit tests (two skips), lint, typecheck,
+  `git diff --check` and ten deployment helper checks pass. Dependency policy
+  currently fails on six pre-existing advisory findings; full browser and
+  disposable-PostgreSQL checks are delegated to PR CI. No production deploy yet.
+
 ## 23 October 2026 — AI content moderation
 
 - Owner requested implementation after confirming the account split: Anshkosh Workers Free for AI/Turnstile, Arush R2 for storage. Separate branch/worktree starts at current origin/main c97d049.

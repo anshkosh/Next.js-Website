@@ -41,6 +41,14 @@ async function main() {
     }
     const safe = await comment();
     await processModeration();
+    assert.equal((await db.comment.findUniqueOrThrow({ where: { id: safe.id } })).status, "PENDING", "AI-safe comments still require human approval");
+    assert.equal((await db.contentModeration.findUniqueOrThrow({ where: { kind_targetId: { kind: "COMMENT", targetId: safe.id } } })).status, "FLAGGED");
+    const moderation = await db.contentModeration.findUniqueOrThrow({ where: { kind_targetId: { kind: "COMMENT", targetId: safe.id } } });
+    await db.$transaction(async tx => {
+      await tx.$queryRaw`SELECT id FROM "Startup" WHERE id = ${startup.id} FOR UPDATE`;
+      await tx.contentModeration.update({ where: { id: moderation.id }, data: { status: "APPROVED", reviewedAt: new Date() } });
+      assert.ok(await applyModeration(tx, moderation, true), "A human review can publish the exact current comment");
+    });
     assert.equal((await db.comment.findUniqueOrThrow({ where: { id: safe.id } })).status, "APPROVED");
 
     const held = await comment();

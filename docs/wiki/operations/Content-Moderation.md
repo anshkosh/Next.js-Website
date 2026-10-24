@@ -8,7 +8,7 @@ R2 account. Keep the Anshkosh Cloudflare account on **Workers Free**.
 
 | Submission | Behavior |
 | --- | --- |
-| New public comment | Save pending; publish only after an unambiguous safe AI result or human approval. Comment email is never sent to AI. |
+| New public comment | Save pending; AI may add review hints, but every comment stays pending until a human approves it. Comment email is never sent to AI. |
 | Founder reply or reply edit | Stage the replacement privately; retain any approved reply until the replacement is approved. Rejection discards only the staged replacement. |
 | Startup update or edit | Save pending and hide from public projections and activity counts until approval. Editing an approved update hides that update during review. |
 | Public founder journal revision | Show an AI assessment alongside the submission; a reviewer still approves publication/scheduling. The approved version remains live during review. |
@@ -20,12 +20,16 @@ test/bot accounts, ranking weights and legacy content are not reclassified. The
 additive migration defaults existing startup updates to APPROVED. New application
 writes explicitly set PENDING. All public update reads and scoring SQL require
 APPROVED; this preserves existing signals and excludes new unapproved content.
+Direct personal-attack patterns add a conservative review hint. They are not a
+complete toxicity classifier and do not establish misconduct; human review remains
+required for every new comment regardless of the AI verdict.
 
 ## Review screens
 
 - `/admin/content-review`: pending, flagged and unavailable checks, with exact-text
-  approval/rejection for verified, non-banned admins/reviewers. Open submitted image
-  attachments and review them before approving.
+  approval/rejection for verified, non-banned admins/reviewers. AI-safe comments
+  also remain here for human approval. Open submitted image attachments and review
+  them before approving.
 - `/admin/content-review?view=published`: reviewed/AI-approved content; reviewers
   can hide a current comment, reply or update after publication.
 - `/admin/founder-journal`: editorial decisions and AI assessment for public
