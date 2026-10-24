@@ -10,6 +10,7 @@ vi.mock("@/lib/db", () => { const tx = {
   betaTesterRequest: { findUnique: async () => null, create: mock.request },
   appSetting: { findUnique: async () => null },
   contentModeration: { upsert: vi.fn() },
+  commenterBlock: { findUnique: async () => null },
 }; return { db: { ...tx, $transaction: async (fn: (tx: object) => unknown) => fn(tx) } }; });
 vi.mock("@/lib/utils/rate-limit", () => ({ checkRateLimit: mock.rate, readRateLimit: async () => ({ allowed: true, available: true, retryAfterSeconds: 1 }) }));
 vi.mock("@/lib/utils/turnstile", () => ({ verifyTurnstileToken: async () => true }));
