@@ -1,4 +1,5 @@
 import { loginHref } from "@/lib/login-return";
+import { founderSetupNextStep } from "@/lib/founder-next-step";
 import DashboardModeControl from "@/components/account/DashboardModeControl";
 
 export const metadata = { title: "Dashboard — Anshkosh", robots: { index: false, follow: false } };
@@ -140,7 +141,7 @@ export default async function DashboardPage() {
     }),
   ]);
   const needsJournal = !latestJournal || latestJournal.updatedAt < journalDueSince;
-  const nextStep = draftStartup ? { title: `Finish ${draftStartup.name}`, detail: "Complete your draft and send it for review.", href: `/startup/${draftStartup.id}/edit`, label: "Continue draft" }
+  const nextStep = founderSetupNextStep(startups) ?? (draftStartup ? { title: `Finish ${draftStartup.name}`, detail: "Complete your draft and send it for review.", href: `/startup/${draftStartup.id}/edit`, label: "Continue draft" }
     : incomplete ? { title: "Help people understand your startup", detail: "Add your logo, the problem you solve, and your solution to your profile.", href: `/startup/${liveStartup.id}/edit`, label: "Complete profile" }
     : needsJournal ? { title: "Capture a lesson from your journey", detail: "What worked, what surprised you, and what will you try next? Keep it private or submit a journal story to share.", href: "/dashboard/journal", label: "Write in your journal" }
     : liveStartup && !latestUpdate ? { title: liveStartup.updateCount === 0 ? "Share your first startup update" : "Share what you’re working on", detail: "Tell people about a product improvement, a customer insight, or what you plan to try next.", href: `/startup/${liveStartup.id}/updates`, label: "Write an update" }
@@ -148,7 +149,7 @@ export default async function DashboardPage() {
     : liveStartup && !recentFounderReply ? { title: "Continue a conversation", detail: "Reply to a question or piece of feedback on your startup. A thoughtful response helps your community take part.", href: `/startup/${liveStartup.id}/discussion`, label: "Join your discussion" }
     : communityStartup ? { title: `Join ${communityStartup.name}’s discussion`, detail: "Offer one specific observation or ask a thoughtful question that helps this founder test an assumption.", href: `/startups/${communityStartup.slug}#section-questions`, label: "Share feedback" }
     : liveStartup ? { title: "Keep building in public", detail: "Add a journal reflection, share a recent update, or celebrate a new milestone when you have something meaningful to share.", href: "/dashboard/journal", label: "Open your journal" }
-    : { title: "Explore another founder’s journey", detail: "Browse startups and share a useful question or piece of feedback with a founder.", href: "/discover", label: "Explore startups" };
+    : { title: "Explore another founder’s journey", detail: "Browse startups and share a useful question or piece of feedback with a founder.", href: "/discover", label: "Explore startups" });
 
   const actionClass = "inline-flex min-h-11 items-center justify-center gap-1.5 rounded-xl border border-gray-200 bg-white px-3 text-sm font-medium text-gray-700 transition-colors hover:border-coral-300 hover:text-coral-700";
   const countClass = "rounded-full bg-gray-100 px-1.5 text-xs font-semibold tabular-nums text-gray-700";

@@ -2,17 +2,25 @@
 
 import { useHydrated } from "@/components/useHydrated";
 
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import { authClient } from "@/lib/auth-client";
+import { useSearchParams } from "next/navigation";
+import { loginHref, safeReturnPath } from "@/lib/login-return";
 import Link from "next/link";
 import { Loader2, Mail, User, CheckCircle2 } from "lucide-react";
 import AuthHomeIcon from "@/components/auth/AuthHomeIcon";
 import PasswordField from "@/components/auth/PasswordField";
 
 export default function RegisterPage() {
+  return <Suspense fallback={<p role="status" className="p-8">Loading registration…</p>}><RegisterForm /></Suspense>;
+}
+
+function RegisterForm() {
   const hydrated = useHydrated();
+  const next = safeReturnPath(useSearchParams().get("next"));
+  const listingIntent = next === "/startup/new";
   const [name, setName] = useState("");
-  const [founderMode, setFounderMode] = useState(false);
+  const [founderMode, setFounderMode] = useState(listingIntent);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -47,6 +55,7 @@ export default function RegisterPage() {
         email,
         password,
         founderMode,
+        callbackURL: loginHref(next),
       });
 
       if (error) {
@@ -78,11 +87,11 @@ export default function RegisterPage() {
               verify your email to continue.
             </p>
             <Link
-              href="/login"
+              href={loginHref(next)}
               className="w-full flex justify-center py-2.5 px-4 border border-transparent rounded-lg shadow-sm text-sm font-semibold text-white bg-gray-900 hover:bg-gray-800 transition-colors"
             >
               Return to login
-            </Link><Link href="/resend-verification" className="mt-3 block text-sm text-coral-700 underline">Resend verification email</Link>
+            </Link><Link href={`/resend-verification?next=${encodeURIComponent(next)}`} className="mt-3 block text-sm text-coral-700 underline">Resend verification email</Link>
           </div>
         </div>
       </div>
@@ -201,8 +210,8 @@ export default function RegisterPage() {
             </div>
 
             <div className="rounded-xl bg-gray-50 p-4">
-              <label className="flex cursor-pointer items-start gap-3"><input name="founderMode" type="checkbox" checked={founderMode} onChange={e => setFounderMode(e.target.checked)} aria-describedby="register-mode-help" className="mt-1 h-5 w-5 accent-coral-600" /><span className="text-sm font-semibold text-gray-900">Enable founder mode</span></label>
-              <p id="register-mode-help" className="mt-2 text-sm leading-relaxed text-gray-600">Submitting a startup? Turn this on. You can change it on your dashboard or in Profile settings anytime.</p>
+              <label className="flex cursor-pointer items-start gap-3"><input name="founderMode" type="checkbox" checked={founderMode} onChange={e => setFounderMode(e.target.checked)} aria-describedby="register-mode-help" className="mt-1 h-5 w-5 accent-coral-600" /><span className="text-sm font-semibold text-gray-900">{listingIntent ? "Turn on founder mode to list your startup" : "Enable founder mode"}</span></label>
+              <p id="register-mode-help" className="mt-2 text-sm leading-relaxed text-gray-600">{listingIntent ? "You chose to list a startup. Founder mode lets you create and manage its listing; you can change this choice later in Profile settings." : "Submitting a startup? Turn this on. You can change it on your dashboard or in Profile settings anytime."}</p>
             </div>
             <div className="flex items-start">
               <div className="flex items-center h-5">
@@ -245,13 +254,13 @@ export default function RegisterPage() {
             </button>
             </fieldset>
           </form>
-          <Link href="/resend-verification" className="mt-4 inline-flex min-h-11 items-center text-sm text-coral-700 underline">Resend verification email</Link>
+          <Link href={`/resend-verification?next=${encodeURIComponent(next)}`} className="mt-4 inline-flex min-h-11 items-center text-sm text-coral-700 underline">Resend verification email</Link>
 
 
           <div className="mt-8 text-center text-sm">
             <span className="text-gray-500">Already have an account? </span>
             <Link
-              href="/login"
+              href={loginHref(next)}
               className="font-medium text-gray-900 hover:text-gray-700"
             >
               Log in

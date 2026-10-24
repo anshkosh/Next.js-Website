@@ -14,6 +14,7 @@ const mocks = vi.hoisted(() => ({
   revalidatePath: vi.fn(),
   checkRateLimit: vi.fn(),
   verifyTurnstileToken: vi.fn(),
+  revalidateSavedPath: vi.fn(),
 }));
 
 vi.mock("@/lib/auth", () => ({ auth: { api: { getSession: mocks.getSession } } }));
@@ -23,7 +24,7 @@ vi.mock("@/lib/db", () => ({ db: {
   startup: { findFirst: mocks.startupFindFirst },
 } }));
 vi.mock("next/headers", () => ({ headers: vi.fn(async () => new Headers({ "user-agent": "test" })) }));
-vi.mock("next/cache", () => ({ revalidatePath: mocks.revalidatePath }));
+vi.mock("@/lib/cache-after-save", () => ({ revalidateSavedPath: mocks.revalidateSavedPath }));
 vi.mock("@/lib/utils/rate-limit", () => ({ checkRateLimit: mocks.checkRateLimit }));
 vi.mock("@/lib/utils/turnstile", () => ({ verifyTurnstileToken: mocks.verifyTurnstileToken }));
 vi.mock("@/lib/utils/fingerprint", () => ({ generateFingerprint: () => "test-fingerprint" }));
@@ -42,6 +43,7 @@ describe("beta tester signup and founder review", () => {
     mocks.requestUpdateMany.mockResolvedValue({ count: 1 });
     mocks.checkRateLimit.mockResolvedValue(true);
     mocks.verifyTurnstileToken.mockResolvedValue(true);
+    mocks.revalidateSavedPath.mockImplementation(() => undefined);
     mocks.startupFindFirst.mockResolvedValue({ id: "startup-1", slug: "sample", status: "LIVE" });
   });
 
@@ -68,6 +70,15 @@ describe("beta tester signup and founder review", () => {
       consentedAt: new Date("2026-10-18T10:00:00.000Z"), consentVersion: BETA_TESTER_CONSENT_VERSION,
     } });
     expect(result).not.toHaveProperty("email");
+  });
+
+  it("treats a concurrent duplicate as already saved and refreshes public/dashboard paths", async () => {
+    const duplicate = Object.assign(new Error("unique constraint"), { code: "P2002" });
+    mocks.requestCreate.mockRejectedValueOnce(duplicate);
+    mocks.requestFindUnique.mockResolvedValueOnce(null).mockResolvedValueOnce({ id: "concurrent-request" });
+    expect(await submitBetaTesterRequest(validApplication)).toEqual({ success: true });
+    expect(mocks.revalidateSavedPath).toHaveBeenCalledWith("/startups/sample");
+    expect(mocks.revalidateSavedPath).toHaveBeenCalledWith("/dashboard");
   });
 
   it("does not store applications after signups close", async () => {

@@ -82,6 +82,20 @@ current step; refresh loads only an owned DRAFT from the server. A save-triggere
 refresh must render the wizard in place, rather than redirecting to Step 1.
 Controlled form fields wait for hydration before accepting input.
 
+When a visitor arrives from an anonymous `/startup/new` request, the validated
+local return path is retained through registration, email verification, resend,
+and sign-in. Registration explains that founder mode is needed for listing and
+checks it for this explicit listing journey; the person can opt out. Other new
+registrations keep the existing unchecked preference, and established accounts
+retain their saved mode. Signed-in visits to login or registration return to the
+validated requested page when supplied, or the dashboard by default.
+
+Startup fields use programmatic labels and connect inline validation to each
+control. The step summary links to the affected fields, and schema validation
+messages describe the limits and correction. The first-step account draft save
+is available once the required name, tagline and category are valid. Saving a
+browser recovery copy alone does not mean the draft is saved to the account.
+
 Feature title/description errors identify their input, and the review includes
 category, complete proposition, logo, contact/social details, team, media and all
 features, with links back to each step. A successful draft save resets the unsaved

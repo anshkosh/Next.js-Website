@@ -45,6 +45,25 @@ describe("UUID edit action", () => {
     expect(result.error).toBeUndefined(); expect(mock.revision).not.toHaveBeenCalled();
     expect(mock.update).toHaveBeenCalledWith(expect.objectContaining({ data: expect.objectContaining({ status: "DRAFT", name: "Cane Theory" }) }));
   });
+  it("accepts a repeated first-step draft save while later-step fields remain blank", async () => {
+    mock.find.mockResolvedValue({ id, founderId: owner, status: "DRAFT", metadata: {} });
+    const result = await updateStartup(form({
+      name: "Example startup",
+      tagline: "A helpful product for teams",
+      categoryId: "cm12345678901234567890123",
+      description: "",
+      websiteUrl: "",
+      startupPhone: "",
+      problemStatement: "",
+      solutionStatement: "",
+      targetAudience: "",
+      prototypeStatus: "",
+    }));
+    expect(result.error).toBeUndefined();
+    expect(mock.update).toHaveBeenCalledWith(expect.objectContaining({
+      data: expect.objectContaining({ name: "Example startup", tagline: "A helpful product for teams", categoryId: "cm12345678901234567890123" }),
+    }));
+  });
   it("still rejects another user's startup", async () => {
     mock.session.mockResolvedValue({ user: { id: "someone-else" } });
     expect(await updateStartup(form())).toEqual({ error: "Unauthorized" });

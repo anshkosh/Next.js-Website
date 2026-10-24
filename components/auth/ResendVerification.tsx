@@ -4,7 +4,7 @@ import { useState } from "react";
 import { authClient } from "@/lib/auth-client";
 import { useHydrated } from "@/components/useHydrated";
 
-export default function ResendVerification() {
+export default function ResendVerification({ next = "/dashboard" }: { next?: string }) {
   const ready = useHydrated();
   const [busy, setBusy] = useState(false);
   const [sent, setSent] = useState(false);
@@ -14,7 +14,7 @@ export default function ResendVerification() {
     const email = String(new FormData(event.currentTarget).get("email") ?? "");
     setBusy(true); setError("");
     try {
-      const result = await authClient.sendVerificationEmail({ email, callbackURL: "/dashboard" });
+      const result = await authClient.sendVerificationEmail({ email, callbackURL: `/login?next=${encodeURIComponent(next)}` });
       if (result.error) { setError("We could not send a verification link. Wait a minute and try again."); return; }
       setSent(true);
     } catch { setError("We could not confirm the request. Wait a minute and try again."); }

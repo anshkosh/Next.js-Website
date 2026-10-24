@@ -106,7 +106,7 @@ function LoginForm() {
             </div>
           </div>
 
-          <Link href="/resend-verification" className="mt-5 inline-flex min-h-11 items-center text-sm font-medium text-coral-700 underline">Resend verification email</Link>
+          <Link href={`/resend-verification?next=${encodeURIComponent(next)}`} className="mt-5 inline-flex min-h-11 items-center text-sm font-medium text-coral-700 underline">Resend verification email</Link>
           <form method="post" className="space-y-5 mt-6" onSubmit={handleEmailLogin}>
             {error && (
               <div role="alert" className="bg-red-50 border border-red-100 text-red-600 text-sm p-3 rounded-lg text-center">
@@ -163,7 +163,7 @@ function LoginForm() {
           
           <div className="mt-8 text-center text-sm">
             <span className="text-gray-500">Don&apos;t have an account? </span>
-            <Link href="/register" className="font-medium text-coral-600 hover:text-coral-500">
+            <Link href={`/register?next=${encodeURIComponent(next)}`} className="font-medium text-coral-600 hover:text-coral-500">
               Register here
             </Link>
           </div>

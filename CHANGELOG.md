@@ -1,5 +1,18 @@
 # Website changelog
 
+## Unreleased — website journey review fixes
+
+- Preserve the safe local startup-listing destination through login, registration,
+  email verification, verification resend and sign-in; make founder mode an
+  explicit listing choice for that new-account journey.
+- Associate startup creation and edit labels with their controls, give validation
+  errors actionable messages and descriptions, and let the first valid step create
+  an explicit server draft.
+- Close the mobile menu after embedded search submits and prioritize first-listing,
+  draft and review-status actions on the founder dashboard.
+- Refresh single-use beta signup CAPTCHA tokens after every attempt, preserve
+  entries on errors and keep duplicate requests idempotent after concurrent saves.
+
 ## Unreleased — moderation controls
 
 - Expand comment review with status filters, search, pagination, restore and hide controls.

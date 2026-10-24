@@ -19,6 +19,7 @@ export default function BetaTesterSignup({
 }) {
   const [isPending, startTransition] = useTransition();
   const [turnstileToken, setTurnstileToken] = useState("");
+  const [captchaAttempt, setCaptchaAttempt] = useState(0);
   const [consent, setConsent] = useState(false);
   const [adultConfirmed, setAdultConfirmed] = useState(false);
   const [notice, setNotice] = useState<{ type: "success" | "error"; text: string } | null>(null);
@@ -29,24 +30,32 @@ export default function BetaTesterSignup({
     const form = new FormData(formElement);
     setNotice(null);
 
+    const submittedToken = turnstileToken;
     startTransition(async () => {
-      const result = await submitBetaTesterRequest({
-        startupId,
-        name: String(form.get("name") ?? ""),
-        email: String(form.get("email") ?? ""),
-        message: String(form.get("message") ?? ""),
-        consent,
-        adultConfirmed,
-        turnstileToken,
-      });
-      if (result.error) {
-        setNotice({ type: "error", text: result.error });
-      } else {
-        setNotice({ type: "success", text: `Your interest has been sent to ${startupName}’s founder. If approved, they’ll contact you directly.` });
-        formElement.reset();
+      try {
+        const result = await submitBetaTesterRequest({
+          startupId,
+          name: String(form.get("name") ?? ""),
+          email: String(form.get("email") ?? ""),
+          message: String(form.get("message") ?? ""),
+          consent,
+          adultConfirmed,
+          turnstileToken: submittedToken,
+        });
+        if (result.error) {
+          setNotice({ type: "error", text: result.error });
+        } else {
+          setNotice({ type: "success", text: `Your interest has been sent to ${startupName}’s founder. If approved, they’ll contact you directly.` });
+          formElement.reset();
+          setConsent(false);
+          setAdultConfirmed(false);
+        }
+      } catch {
+        setNotice({ type: "error", text: "We couldn’t confirm your request. Your entries are still here; please try again." });
+      } finally {
+        // Turnstile tokens are single-use, including when later server work fails.
         setTurnstileToken("");
-        setConsent(false);
-        setAdultConfirmed(false);
+        setCaptchaAttempt(attempt => attempt + 1);
       }
     });
   };
@@ -92,7 +101,7 @@ export default function BetaTesterSignup({
         </label>
 
         <div>
-          <TurnstileWidget onToken={setTurnstileToken} onExpire={() => setTurnstileToken("")} />
+        <TurnstileWidget key={captchaAttempt} onToken={setTurnstileToken} onExpire={() => setTurnstileToken("")} />
         </div>
         <p className="text-xs leading-relaxed text-gray-500">The founder decides whom to accept and provides any product access, onboarding, support, and reward directly. A request does not guarantee selection or access. Please don’t include sensitive information.</p>
         <button type="submit" disabled={isPending || !turnstileToken || !consent || !adultConfirmed} className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-xl bg-coral-600 px-5 py-3 font-semibold text-white transition-colors hover:bg-coral-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-coral-600 disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto">

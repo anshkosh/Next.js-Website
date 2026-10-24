@@ -297,7 +297,7 @@ export default function StartupWizard({ userId, initialId, initialStep, initialD
             ☕ Grab a coffee — this takes about <strong className="text-gray-700">13 minutes</strong> to complete.
           </span>
           <span className="inline-flex items-center gap-1 text-xs font-medium text-green-700 bg-green-50 border border-green-200 px-2.5 py-0.5 rounded-full">
-            ✓ Save as draft anytime
+            Save your draft to your account after entering the name, tagline, and category
           </span>
         </div>
       )}
@@ -337,49 +337,67 @@ export default function StartupWizard({ userId, initialId, initialStep, initialD
       })()}
       {(step === 1 || step === 6) && <div className="mb-6" />}
 
-      <fieldset disabled={!hydrated || isSaving} className="min-w-0 bg-white p-5 sm:p-8 rounded-2xl shadow-sm border border-gray-100">
+      <fieldset disabled={!hydrated || isSaving} aria-labelledby="startup-step-heading" className="min-w-0 bg-white p-5 sm:p-8 rounded-2xl shadow-sm border border-gray-100">
         {step === 1 && (
           <div className="space-y-6">
             <div className="flex items-center justify-between mb-1">
-              <h2 className="text-xl font-bold font-heading">Step 1: Basic Info</h2>
+              <h2 id="startup-step-heading" className="text-xl font-bold font-heading">Step 1: Basic Info</h2>
               <span className="text-xs font-semibold text-gray-500 bg-gray-50 border border-gray-100 px-3 py-1 rounded-full shrink-0 ml-3">{STEP_META[0].pill}</span>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
                 Startup Name
               </label>
               <input
+                id="name"
                 name="name"
+                required
+                minLength={2}
+                maxLength={100}
+                aria-invalid={Boolean(errors.name)}
+                aria-describedby={errors.name ? "startup-error-name" : "startup-help-name"}
                 value={formData.name}
                 onChange={handleChange}
                 className="w-full border rounded-md p-2"
               />
+              <p id="startup-help-name" className="mt-1 text-xs text-gray-600">Required · 2–100 characters</p>
               {errors.name && (
-                <p className="text-red-500 text-xs mt-1">{errors.name[0]}</p>
+                <p id="startup-error-name" className="text-red-700 text-xs mt-1">{errors.name[0]}</p>
               )}
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="tagline" className="block text-sm font-medium text-gray-700 mb-1">
                 Tagline
               </label>
               <input
+                id="tagline"
                 name="tagline"
+                required
+                minLength={10}
+                maxLength={120}
+                aria-invalid={Boolean(errors.tagline)}
+                aria-describedby={errors.tagline ? "startup-error-tagline" : "startup-help-tagline"}
                 value={formData.tagline}
                 onChange={handleChange}
                 className="w-full border rounded-md p-2"
                 placeholder="Brief one-liner"
               />
+              <p id="startup-help-tagline" className="mt-1 text-xs text-gray-600">Required · 10–120 characters</p>
               {errors.tagline && (
-                <p className="text-red-500 text-xs mt-1">{errors.tagline[0]}</p>
+                <p id="startup-error-tagline" className="text-red-700 text-xs mt-1">{errors.tagline[0]}</p>
               )}
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="categoryId" className="block text-sm font-medium text-gray-700 mb-1">
                 Category
               </label>
               <select
+                id="categoryId"
                 name="categoryId"
+                required
+                aria-invalid={Boolean(errors.categoryId)}
+                aria-describedby={errors.categoryId ? "startup-error-categoryId" : "startup-help-categoryId"}
                 value={formData.categoryId}
                 onChange={handleChange}
                 className="w-full border rounded-md p-2 bg-white"
@@ -391,8 +409,9 @@ export default function StartupWizard({ userId, initialId, initialStep, initialD
                   </option>
                 ))}
               </select>
+              <p id="startup-help-categoryId" className="mt-1 text-xs text-gray-600">Required · choose the closest match</p>
               {errors.categoryId && (
-                <p className="text-red-500 text-xs mt-1">
+                <p id="startup-error-categoryId" className="text-red-700 text-xs mt-1">
                   {errors.categoryId[0]}
                 </p>
               )}
@@ -403,45 +422,52 @@ export default function StartupWizard({ userId, initialId, initialStep, initialD
         {step === 2 && (
           <div className="space-y-6">
             <div className="flex items-center justify-between mb-1">
-              <h2 className="text-xl font-bold font-heading">Step 2: Details</h2>
+              <h2 id="startup-step-heading" className="text-xl font-bold font-heading">Step 2: Details</h2>
               <span className="text-xs font-semibold text-gray-500 bg-gray-50 border border-gray-100 px-3 py-1 rounded-full shrink-0 ml-3">{STEP_META[1].pill}</span>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-1">
                 Description
               </label>
               <textarea
+                id="description"
                 name="description"
+                aria-invalid={Boolean(errors.description)}
+                aria-describedby={errors.description ? "startup-error-description" : "startup-help-description"}
                 value={formData.description}
                 onChange={handleChange}
                 className="w-full border rounded-md p-2 h-32"
               />
+              <p id="startup-help-description" className="mt-1 text-xs text-gray-600">Required before submission · 50–5,000 characters</p>
               {errors.description && (
-                <p className="text-red-500 text-xs mt-1">
+                <p id="startup-error-description" className="text-red-700 text-xs mt-1">
                   {errors.description[0]}
                 </p>
               )}
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="websiteUrl" className="block text-sm font-medium text-gray-700 mb-1">
                 Website URL
               </label>
               <input
+                id="websiteUrl"
                 name="websiteUrl"
+                aria-invalid={Boolean(errors.websiteUrl)}
+                aria-describedby={errors.websiteUrl ? "startup-error-websiteUrl" : undefined}
                 value={formData.websiteUrl}
                 onChange={handleChange}
                 className="w-full border rounded-md p-2"
               />
               {errors.websiteUrl && (
-                <p className="text-red-500 text-xs mt-1">
+                <p id="startup-error-websiteUrl" className="text-red-700 text-xs mt-1">
                   {errors.websiteUrl[0]}
                 </p>
               )}
             </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+            <div id="logoUrl">
+              <p className="block text-sm font-medium text-gray-700 mb-2">
                 Startup Logo
-              </label>
+              </p>
 
               <EditableImageUpload kind="logo" label="Startup logo" value={formData.logoUrl} onChange={url => setFormData(previous => ({ ...previous, logoUrl: url }))} onBusyChange={busy => setUploadBusy("logo", busy)} />
         {errors.logoUrl && (
@@ -451,71 +477,86 @@ export default function StartupWizard({ userId, initialId, initialStep, initialD
 
             <div className="pt-4 border-t border-gray-100 grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label htmlFor="twitterUrl" className="block text-sm font-medium text-gray-700 mb-1">
                   Twitter URL
                 </label>
                 <input
+                  id="twitterUrl"
                   name="twitterUrl"
+                  aria-invalid={Boolean(errors.twitterUrl)}
+                  aria-describedby={errors.twitterUrl ? "startup-error-twitterUrl" : undefined}
                   value={formData.twitterUrl}
                   onChange={handleChange}
                   className={`w-full border rounded-md p-2 ${errors.twitterUrl ? "border-red-500 bg-red-50/20" : ""}`}
                 />
                 {errors.twitterUrl && (
-                  <p className="text-red-500 text-xs mt-1">{errors.twitterUrl[0]}</p>
+                  <p id="startup-error-twitterUrl" className="text-red-700 text-xs mt-1">{errors.twitterUrl[0]}</p>
                 )}
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label htmlFor="linkedinUrl" className="block text-sm font-medium text-gray-700 mb-1">
                   LinkedIn URL
                 </label>
                 <input
+                  id="linkedinUrl"
                   name="linkedinUrl"
+                  aria-invalid={Boolean(errors.linkedinUrl)}
+                  aria-describedby={errors.linkedinUrl ? "startup-error-linkedinUrl" : undefined}
                   value={formData.linkedinUrl}
                   onChange={handleChange}
                   className={`w-full border rounded-md p-2 ${errors.linkedinUrl ? "border-red-500 bg-red-50/20" : ""}`}
                 />
                 {errors.linkedinUrl && (
-                  <p className="text-red-500 text-xs mt-1">{errors.linkedinUrl[0]}</p>
+                  <p id="startup-error-linkedinUrl" className="text-red-700 text-xs mt-1">{errors.linkedinUrl[0]}</p>
                 )}
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label htmlFor="startupPhone" className="block text-sm font-medium text-gray-700 mb-1">
                   Phone Number <span className="text-red-500">*</span>
                 </label>
                 <input
+                  id="startupPhone"
                   type="tel"
                   name="startupPhone"
+                  aria-invalid={Boolean(errors.startupPhone)}
+                  aria-describedby={errors.startupPhone ? "startup-error-startupPhone" : "startup-help-startupPhone"}
                   value={formData.startupPhone}
                   onChange={handleChange}
                   placeholder="e.g. 9876543210"
                   maxLength={10}
                   className={`w-full border rounded-md p-2 ${errors.startupPhone ? "border-red-500 bg-red-50/20" : ""}`}
                 />
-                <p className="text-xs text-gray-500 mt-1">10-digit mobile number</p>
+                <p id="startup-help-startupPhone" className="text-xs text-gray-500 mt-1">10-digit mobile number</p>
                 {errors.startupPhone && (
-                  <p className="text-red-500 text-xs mt-1">{errors.startupPhone[0]}</p>
+                  <p id="startup-error-startupPhone" className="text-red-700 text-xs mt-1">{errors.startupPhone[0]}</p>
                 )}
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label htmlFor="city" className="block text-sm font-medium text-gray-700 mb-1">
                   City <span className="text-red-500">*</span>
                 </label>
                 <input
+                  id="city"
                   name="city"
+                  aria-invalid={Boolean(errors.city)}
+                  aria-describedby={errors.city ? "startup-error-city" : undefined}
                   value={formData.city}
                   onChange={handleChange}
                   className={`w-full border rounded-md p-2 ${errors.city ? "border-red-500 bg-red-50/20" : ""}`}
                 />
                 {errors.city && (
-                  <p className="text-red-500 text-xs mt-1">{errors.city[0]}</p>
+                  <p id="startup-error-city" className="text-red-700 text-xs mt-1">{errors.city[0]}</p>
                 )}
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label htmlFor="foundedYear" className="block text-sm font-medium text-gray-700 mb-1">
                   Founded Year <span className="text-red-500">*</span>
                 </label>
                 <select
+                  id="foundedYear"
                   name="foundedYear"
+                  aria-invalid={Boolean(errors.foundedYear)}
+                  aria-describedby={errors.foundedYear ? "startup-error-foundedYear" : undefined}
                   value={formData.foundedYear}
                   onChange={handleChange}
                   className={`w-full border rounded-md p-2 bg-white ${errors.foundedYear ? "border-red-500 bg-red-50/20" : ""}`}
@@ -528,7 +569,7 @@ export default function StartupWizard({ userId, initialId, initialStep, initialD
                   ))}
                 </select>
                 {errors.foundedYear && (
-                  <p className="text-red-500 text-xs mt-1">{errors.foundedYear[0]}</p>
+                  <p id="startup-error-foundedYear" className="text-red-700 text-xs mt-1">{errors.foundedYear[0]}</p>
                 )}
               </div>
             </div>
@@ -538,14 +579,14 @@ export default function StartupWizard({ userId, initialId, initialStep, initialD
         {step === 3 && (
           <div className="space-y-6">
             <div className="flex items-center justify-between mb-1">
-              <h2 className="text-xl font-bold font-heading">Step 3: Core Proposition</h2>
+              <h2 id="startup-step-heading" className="text-xl font-bold font-heading">Step 3: Core Proposition</h2>
               <span className="text-xs font-semibold text-gray-500 bg-gray-50 border border-gray-100 px-3 py-1 rounded-full shrink-0 ml-3">{STEP_META[2].pill}</span>
             </div>
 
             {/* Problem Statement */}
             <div>
               <div className="flex items-center justify-between mb-1">
-                <label className="block text-sm font-medium text-gray-700">
+                <label htmlFor="problemStatement" className="block text-sm font-medium text-gray-700">
                   The Problem <span className="text-red-500">*</span>
                 </label>
                 <span className={`text-xs ${
@@ -558,7 +599,10 @@ export default function StartupWizard({ userId, initialId, initialStep, initialD
                 </span>
               </div>
               <textarea
+                id="problemStatement"
                 name="problemStatement"
+                aria-invalid={Boolean(errors.problemStatement)}
+                aria-describedby={errors.problemStatement ? "startup-error-problemStatement" : undefined}
                 value={formData.problemStatement}
                 onChange={handleChange}
                 rows={5}
@@ -569,14 +613,14 @@ export default function StartupWizard({ userId, initialId, initialStep, initialD
                 }`}
               />
               {errors.problemStatement && (
-                <p className="text-red-500 text-xs mt-1">{errors.problemStatement[0]}</p>
+                <p id="startup-error-problemStatement" className="text-red-700 text-xs mt-1">{errors.problemStatement[0]}</p>
               )}
             </div>
 
             {/* Solution & Value Proposition */}
             <div>
               <div className="flex items-center justify-between mb-1">
-                <label className="block text-sm font-medium text-gray-700">
+                <label htmlFor="solutionStatement" className="block text-sm font-medium text-gray-700">
                   Solution & Value Proposition <span className="text-red-500">*</span>
                 </label>
                 <span className={`text-xs ${
@@ -589,7 +633,10 @@ export default function StartupWizard({ userId, initialId, initialStep, initialD
                 </span>
               </div>
               <textarea
+                id="solutionStatement"
                 name="solutionStatement"
+                aria-invalid={Boolean(errors.solutionStatement)}
+                aria-describedby={errors.solutionStatement ? "startup-error-solutionStatement" : undefined}
                 value={formData.solutionStatement}
                 onChange={handleChange}
                 rows={5}
@@ -600,20 +647,23 @@ export default function StartupWizard({ userId, initialId, initialStep, initialD
                 }`}
               />
               {errors.solutionStatement && (
-                <p className="text-red-500 text-xs mt-1">{errors.solutionStatement[0]}</p>
+                <p id="startup-error-solutionStatement" className="text-red-700 text-xs mt-1">{errors.solutionStatement[0]}</p>
               )}
             </div>
 
             {/* Target Audience */}
             <div>
               <div className="flex items-center justify-between mb-1">
-                <label className="block text-sm font-medium text-gray-700">
+                <label htmlFor="targetAudience" className="block text-sm font-medium text-gray-700">
                   Target Audience & Ideal Customer <span className="text-red-500">*</span>
                 </label>
                 <span className="text-xs text-gray-500">{formData.targetAudience.length}/500</span>
               </div>
               <textarea
+                id="targetAudience"
                 name="targetAudience"
+                aria-invalid={Boolean(errors.targetAudience)}
+                aria-describedby={errors.targetAudience ? "startup-error-targetAudience" : undefined}
                 value={formData.targetAudience}
                 onChange={handleChange}
                 rows={3}
@@ -624,17 +674,20 @@ export default function StartupWizard({ userId, initialId, initialStep, initialD
                 }`}
               />
               {errors.targetAudience && (
-                <p className="text-red-500 text-xs mt-1">{errors.targetAudience[0]}</p>
+                <p id="startup-error-targetAudience" className="text-red-700 text-xs mt-1">{errors.targetAudience[0]}</p>
               )}
             </div>
 
             {/* Prototype Status */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="prototypeStatus" className="block text-sm font-medium text-gray-700 mb-1">
                 Prototype / Build Status <span className="text-red-500">*</span>
               </label>
               <select
+                id="prototypeStatus"
                 name="prototypeStatus"
+                aria-invalid={Boolean(errors.prototypeStatus)}
+                aria-describedby={errors.prototypeStatus ? "startup-error-prototypeStatus" : undefined}
                 value={formData.prototypeStatus}
                 onChange={handleChange}
                 className={`w-full border rounded-md p-2 bg-white ${
@@ -645,20 +698,21 @@ export default function StartupWizard({ userId, initialId, initialStep, initialD
                 {STARTUP_STAGES.map(stage => <option key={stage} value={stage}>{stage}</option>)}
               </select>
               {errors.prototypeStatus && (
-                <p className="text-red-500 text-xs mt-1">{errors.prototypeStatus[0]}</p>
+                <p id="startup-error-prototypeStatus" className="text-red-700 text-xs mt-1">{errors.prototypeStatus[0]}</p>
               )}
             </div>
 
             {/* Traction Evidence (optional) */}
             <div>
               <div className="flex items-center justify-between mb-1">
-                <label className="block text-sm font-medium text-gray-700">
+                <label htmlFor="tractionEvidence" className="block text-sm font-medium text-gray-700">
                   Existing Proof Points & Traction
                   <span className="ml-1.5 text-xs font-normal text-gray-500">(Optional)</span>
                 </label>
                 <span className="text-xs text-gray-500">{formData.tractionEvidence.length}/600</span>
               </div>
               <textarea
+                id="tractionEvidence"
                 name="tractionEvidence"
                 value={formData.tractionEvidence}
                 onChange={handleChange}
@@ -674,7 +728,7 @@ export default function StartupWizard({ userId, initialId, initialStep, initialD
         {step === 4 && (
           <div className="space-y-4">
             <div className="flex items-center justify-between">
-              <h2 className="text-xl font-bold font-heading">Step 4: Founders &amp; Team</h2>
+              <h2 id="startup-step-heading" className="text-xl font-bold font-heading">Step 4: Founders &amp; Team</h2>
               <span className="text-xs font-semibold text-gray-500 bg-gray-50 border border-gray-100 px-3 py-1 rounded-full shrink-0 ml-3">{STEP_META[3].pill}</span>
             </div>
             <FounderManager startupId={startupId!} onBusyChange={busy => setUploadBusy("founders", busy)} />
@@ -684,22 +738,26 @@ export default function StartupWizard({ userId, initialId, initialStep, initialD
         {step === 5 && (
           <div className="space-y-8">
             <div className="flex items-center justify-between mb-1">
-              <h2 className="text-xl font-bold font-heading">Step 5: Media &amp; Features</h2>
+              <h2 id="startup-step-heading" className="text-xl font-bold font-heading">Step 5: Media &amp; Features</h2>
               <span className="text-xs font-semibold text-gray-500 bg-gray-50 border border-gray-100 px-3 py-1 rounded-full shrink-0 ml-3">{STEP_META[4].pill}</span>
             </div>
 
             {/* Video Link */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="videoUrl" className="block text-sm font-medium text-gray-700 mb-1">
                 Video Demo URL (Optional)
               </label>
               <input
+                id="videoUrl"
                 name="videoUrl"
+                aria-invalid={Boolean(errors.videoUrl)}
+                aria-describedby={errors.videoUrl ? "startup-error-videoUrl" : undefined}
                 value={formData.videoUrl}
                 onChange={handleChange}
                 placeholder="https://youtube.com/watch?v=..."
                 className="w-full border rounded-md p-2 bg-white"
               />
+              {errors.videoUrl && <p id="startup-error-videoUrl" className="mt-1 text-xs text-red-700">{errors.videoUrl[0]}</p>}
               {formData.videoUrl && (
                 <div className="mt-4 w-full md:w-3/4 aspect-video bg-gray-100 rounded-xl overflow-hidden border">
                   {(() => {
@@ -718,8 +776,8 @@ export default function StartupWizard({ userId, initialId, initialStep, initialD
               )}
             </div>
 
-            <GalleryImageEditor images={formData.galleryImages} onChange={images => setFormData(previous => ({ ...previous, galleryImages: images }))} onBusyChange={busy => setUploadBusy("gallery", busy)} />
-      <PitchDeckUpload value={formData.pitchDeckUrl} visibility={formData.pitchDeckVisibility} onVisibilityChange={visibility => setFormData(previous => ({ ...previous, pitchDeckVisibility: visibility }))} onChange={url => setFormData(previous => ({ ...previous, pitchDeckUrl: url }))} onBusyChange={busy => setUploadBusy("deck", busy)} />
+      <div id="galleryImages"><GalleryImageEditor images={formData.galleryImages} onChange={images => setFormData(previous => ({ ...previous, galleryImages: images }))} onBusyChange={busy => setUploadBusy("gallery", busy)} /></div>
+      <div id="pitchDeckUrl"><PitchDeckUpload value={formData.pitchDeckUrl} visibility={formData.pitchDeckVisibility} onVisibilityChange={visibility => setFormData(previous => ({ ...previous, pitchDeckVisibility: visibility }))} onChange={url => setFormData(previous => ({ ...previous, pitchDeckUrl: url }))} onBusyChange={busy => setUploadBusy("deck", busy)} /></div>
       {/* Key Features Builder */}
             <div className="pt-6 border-t border-gray-100 mt-8">
               <div className="flex items-center justify-between mb-4">
@@ -742,8 +800,10 @@ export default function StartupWizard({ userId, initialId, initialStep, initialD
                     </button>
                     <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                       <div className="md:col-span-1">
-                        <label className="block text-xs font-medium text-gray-500 mb-1">Icon</label>
+                        <label htmlFor={`features.${idx}.icon`} className="block text-xs font-medium text-gray-500 mb-1">Icon</label>
                         <IconSelect
+                          id={`features.${idx}.icon`}
+                          ariaLabel={`Feature ${idx + 1} icon`}
                           value={feature.icon}
                           onChange={(iconName) => {
                             const newFeatures = [...formData.features];
@@ -754,7 +814,7 @@ export default function StartupWizard({ userId, initialId, initialStep, initialD
                         />
                       </div>
                       <div className="md:col-span-3">
-                        <label className="block text-xs font-medium text-gray-500 mb-1">Title</label>
+                        <label htmlFor={`features.${idx}.title`} className="block text-xs font-medium text-gray-500 mb-1">Title</label>
                         <input
                           id={`features.${idx}.title`}
                           name={`features.${idx}.title`}
@@ -775,7 +835,7 @@ export default function StartupWizard({ userId, initialId, initialStep, initialD
                         {errors[`features.${idx}.title`] && <p id={`feature-${idx}-title-error`} className="mt-1 text-xs text-red-700">{errors[`features.${idx}.title`][0]}</p>}
                       </div>
                       <div className="md:col-span-4">
-                        <label className="block text-xs font-medium text-gray-500 mb-1">Description (Max 150 chars)</label>
+                        <label htmlFor={`features.${idx}.description`} className="block text-xs font-medium text-gray-500 mb-1">Description (Max 150 chars)</label>
                         <input
                           id={`features.${idx}.description`}
                           name={`features.${idx}.description`}
@@ -818,7 +878,7 @@ export default function StartupWizard({ userId, initialId, initialStep, initialD
         {step === 6 && (
           <div className="space-y-6">
             <div className="flex items-center justify-between mb-1">
-              <h2 className="text-xl font-bold font-heading">Step 6: Review &amp; Submit</h2>
+              <h2 id="startup-step-heading" className="text-xl font-bold font-heading">Step 6: Review &amp; Submit</h2>
               <span className="text-xs font-semibold text-green-600 bg-green-50 border border-green-200 px-3 py-1 rounded-full shrink-0 ml-3">{STEP_META[5].pill}</span>
             </div>
             <StartupReview data={formData} startupId={startupId!} category={categories.find(category => category.id === formData.categoryId)?.name || ""} version={reviewVersion} onEdit={changeStep} />
@@ -830,13 +890,20 @@ export default function StartupWizard({ userId, initialId, initialStep, initialD
           {Object.keys(errors).length > 0 && (
             <div role="alert" className="p-3.5 bg-red-50 border border-red-200 rounded-xl text-red-700 text-sm font-medium flex items-center gap-2.5 shadow-sm">
               <AlertCircle className="w-4 h-4 text-red-500 shrink-0" />
-              <span>
+              <div className="min-w-0">
                 {errors.form ? (
                   <strong>{errors.form.join(", ")}</strong>
                 ) : (
-                  <>Please check: <strong>{Object.keys(errors).map(startupFieldLabel).join(", ")}</strong>. {Object.values(errors).flat()[0]}</>
+                  <>
+                    <p>Please check these fields. {Object.values(errors).flat()[0]}</p>
+                    <ul className="mt-1 flex flex-wrap gap-x-3 gap-y-1">
+                      {Object.keys(errors).filter(key => key !== "form").map(key => (
+                        <li key={key}><a className="underline" href={`#${key}`}>{startupFieldLabel(key)}</a></li>
+                      ))}
+                    </ul>
+                  </>
                 )}
-              </span>
+              </div>
             </div>
           )}
         </div>
@@ -853,8 +920,8 @@ export default function StartupWizard({ userId, initialId, initialStep, initialD
 
           <div className="flex items-center gap-3">
             <button
-              onClick={() => saveDraft()}
-              disabled={isSaving || isMediaBusy || !startupId}
+              onClick={() => { if (!startupId && step === 1 && !validateStep()) return; void saveDraft(); }}
+              disabled={isSaving || isMediaBusy}
               className="px-5 py-2.5 text-sm font-semibold text-gray-500 hover:text-gray-800 disabled:opacity-40 transition-colors"
             >
               {isSaving ? "Saving…" : "Save Draft"}

@@ -4,14 +4,15 @@ import { afterEach, beforeEach, expect, it, vi } from "vitest";
 import NavigationLinks from "../components/layout/NavigationLinks";
 import MobileNav from "../components/layout/MobileNav";
 
-const route = vi.hoisted(() => ({ pathname: "/journal/example" }));
-vi.mock("next/navigation", () => ({ usePathname: () => route.pathname, useRouter: () => ({ push: vi.fn() }) }));
+const route = vi.hoisted(() => ({ pathname: "/journal/example", push: vi.fn() }));
+vi.mock("next/navigation", () => ({ usePathname: () => route.pathname, useRouter: () => ({ push: route.push }) }));
 
 let host: HTMLDivElement;
 let root: Root;
 beforeEach(() => {
   vi.stubGlobal("IS_REACT_ACT_ENVIRONMENT", true);
   route.pathname = "/journal/example";
+  route.push.mockClear();
   host = document.createElement("div");
   document.body.append(host);
   root = createRoot(host);
@@ -64,4 +65,23 @@ it("closes search with Escape without closing its mobile navigation parent", asy
   expect(host.querySelector('form[id$="-panel"]')).toBeNull();
   expect(host.querySelector("#mobile-navigation")).not.toBeNull();
   expect(document.activeElement).toBe(search);
+});
+
+it("closes mobile navigation when site search submits, including on the search route", async () => {
+  route.pathname = "/search";
+  await act(async () => root.render(<MobileNav authenticated={false} />));
+  const toggle = host.querySelector<HTMLButtonElement>('[aria-controls="mobile-navigation"]')!;
+  act(() => toggle.click());
+  act(() => host.querySelector<HTMLButtonElement>('[aria-label="Search the site"]')!.click());
+  const input = host.querySelector<HTMLInputElement>('input[id$="-input"]')!;
+  await act(async () => {
+    const setter = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, "value")!.set!;
+    setter.call(input, "founder tools");
+    input.dispatchEvent(new Event("input", { bubbles: true }));
+  });
+  const form = host.querySelector<HTMLFormElement>('form[id$="-panel"]')!;
+  await act(async () => form.dispatchEvent(new Event("submit", { bubbles: true, cancelable: true })));
+  expect(route.push).toHaveBeenCalledWith("/search?q=founder%20tools");
+  expect(host.querySelector("#mobile-navigation")).toBeNull();
+  expect(document.activeElement).toBe(toggle);
 });

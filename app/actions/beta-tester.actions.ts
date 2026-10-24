@@ -5,7 +5,7 @@ import { publicStartupWhere } from "@/lib/startup-visibility";
 import { db } from "@/lib/db";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
-import { revalidatePath } from "next/cache";
+import { revalidateSavedPath as revalidatePath } from "@/lib/cache-after-save";
 import { generateFingerprint } from "@/lib/utils/fingerprint";
 import { checkRateLimit } from "@/lib/utils/rate-limit";
 import { verifyTurnstileToken } from "@/lib/utils/turnstile";
@@ -51,16 +51,26 @@ export async function submitBetaTesterRequest(input: unknown): Promise<{ success
       select: { id: true },
     });
     if (!existing) {
-      await db.betaTesterRequest.create({
-        data: {
-          programId: program.id,
-          name,
-          email: normalizedEmail,
-          message: message || null,
-          consentedAt: new Date(),
-          consentVersion: BETA_TESTER_CONSENT_VERSION,
-        },
-      });
+      try {
+        await db.betaTesterRequest.create({
+          data: {
+            programId: program.id,
+            name,
+            email: normalizedEmail,
+            message: message || null,
+            consentedAt: new Date(),
+            consentVersion: BETA_TESTER_CONSENT_VERSION,
+          },
+        });
+      } catch (error) {
+        // A concurrent duplicate can win the unique-key race after the lookup.
+        if (!(error && typeof error === "object" && "code" in error && error.code === "P2002")) throw error;
+        const concurrentDuplicate = await db.betaTesterRequest.findUnique({
+          where: { programId_email: { programId: program.id, email: normalizedEmail } },
+          select: { id: true },
+        });
+        if (!concurrentDuplicate) throw error;
+      }
     }
 
     revalidatePath(`/startups/${program.startup.slug}`);
