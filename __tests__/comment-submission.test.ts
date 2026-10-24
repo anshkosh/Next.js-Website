@@ -7,7 +7,6 @@ vi.mock("@/lib/db", () => {
   const tx = { comment: { create: mock.create, findMany: mock.findMany }, commenterBlock: { findUnique: mock.block }, startup: { findUnique: mock.startup }, contentModeration: { upsert: vi.fn() } };
   return { db: { ...tx, $transaction: async (fn: (tx: object) => unknown) => fn(tx) } };
 });
-vi.mock("server-only", () => ({}));
 vi.mock("@/lib/auth", () => ({ auth: { api: { getSession: vi.fn() } } }));
 vi.mock("next/headers", () => ({ headers: async () => new Headers({ "x-real-ip": "192.0.2.1" }), cookies: async () => ({ get: mock.getCookie, set: mock.setCookie }) }));
 vi.mock("@/lib/utils/rate-limit", () => ({ readRateLimit: mock.readLimit, checkRateLimit: mock.consume }));

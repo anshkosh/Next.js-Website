@@ -1,4 +1,3 @@
-import "server-only";
 import { createHmac } from "node:crypto";
 
 export type ModerationBanDuration = "1d" | "7d" | "30d" | "permanent";

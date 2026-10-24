@@ -9,7 +9,6 @@ const m = vi.hoisted(() => {
   };
 });
 vi.mock("@/lib/db", () => ({ db: { $transaction: m.transaction } }));
-vi.mock("server-only", () => ({}));
 import { deleteAccountSchema, eraseAccount, exportAccountData, issuePrivacyCode } from "@/lib/account-privacy";
 
 const actor = { userId: "member", sessionId: "session" };
