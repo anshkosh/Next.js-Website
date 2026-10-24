@@ -414,8 +414,13 @@ model Comment {
   // Public commenter (anonymous)
   authorName  String
   authorEmail String // stored privately, never shown publicly
+  // Link only when the signed-in account's verified email matches authorEmail.
+  authorUserId String?
   body        String        @db.VarChar(2000)
   status      CommentStatus @default(PENDING)
+  reviewedAt  DateTime?
+  reviewedBy  String?
+  reviewNote  String?       @db.VarChar(500)
 
   // Founder reply (one level deep, posted from authenticated dashboard)
   reply     String?   @db.VarChar(2000)
@@ -431,6 +436,41 @@ model Comment {
 
   @@index([startupId, createdAt(sort: Desc)])
   @@index([status])
+  @@index([authorUserId, createdAt(sort: Desc)])
+}
+
+// Email-based comment restrictions keep a keyed digest rather than a second raw email copy.
+model CommenterBlock {
+  id              String   @id @default(cuid())
+  emailHash       String   @unique @db.VarChar(64)
+  reason          String   @db.VarChar(500)
+  sourceCommentId String?
+  accountBanId    String?
+  expiresAt       DateTime?
+  createdAt       DateTime @default(now())
+  createdById     String?
+  revokedAt       DateTime?
+  revokedById     String?
+
+  @@index([revokedAt, expiresAt])
+  @@index([sourceCommentId])
+  @@index([accountBanId])
+}
+
+// Audit metadata for a ban applied through a verified comment identity.
+model ModerationAccountBan {
+  id              String   @id @default(cuid())
+  targetUserId    String
+  sourceCommentId String?  @unique
+  reason          String   @db.VarChar(500)
+  banMarker       String   @unique @db.VarChar(80)
+  expiresAt       DateTime?
+  createdAt       DateTime @default(now())
+  createdById     String?
+  revokedAt       DateTime?
+  revokedById     String?
+
+  @@index([targetUserId, revokedAt, expiresAt])
 }
 
 model NewsletterSubscriber {

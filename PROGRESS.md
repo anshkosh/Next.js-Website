@@ -1,5 +1,13 @@
 # Progress
 
+## 24 October 2026 — moderation controls (in progress)
+
+- Add searchable, paginated comment controls for pending, published and hidden/rejected comments; staff can restore or hide comments and see the latest AI review reasons.
+- Add reasoned, expiring account bans from comments linked at submission to a verified account. Admins and reviewers can ban ordinary users; staff accounts are protected, and reviewers gain no general user/session-management API access.
+- Add keyed-hash comment-only email blocks for verified identities, an active restrictions page with unblock/revoke controls, and session revocation on account bans.
+- Anonymous unverified email addresses are not ban targets; blunt product criticism remains reviewable and publishable.
+- Additive schema work also clears linked commenter identity and restrictions during account erasure. Implementation and release gates still in progress.
+
 ## 24 October 2026 — physical threat moderation follow-up
 
 - Grok's authorized MODTEST-R2 report found one false negative on deployed

@@ -14,12 +14,13 @@ import { generateFingerprint } from "@/lib/utils/fingerprint";
 import { checkRateLimit, readRateLimit } from "@/lib/utils/rate-limit";
 import { verifyTurnstileToken } from "@/lib/utils/turnstile";
 import { clientIp } from "@/lib/utils/client-ip";
-import { startupIdSchema } from "@/lib/validators/id.schema";
+import { commentIdSchema, startupIdSchema } from "@/lib/validators/id.schema";
 import { addCommentReceipt, readCommentReceipts, COMMENT_RECEIPT_COOKIE, COMMENT_RECEIPT_TTL } from "@/lib/comment-receipts";
 import {
   submitCommentSchema,
   replyToCommentSchema,
 } from "@/lib/validators/comment.schema";
+import { commenterEmailHash } from "@/lib/commenter-restrictions";
 
 const COMMENTS_PAGE_SIZE = 10;
 const COMMENT_LIMIT_MESSAGE = "This network has reached its limit of 3 comments per hour. Please try again later.";
@@ -98,12 +99,28 @@ export async function submitComment(formData: {
       return { error: "Startup not found." };
     }
 
+    // Block anonymous commenters by a keyed email digest. The private email
+    // remains on the source comment and is never copied into a ban record.
+    const emailHash = commenterEmailHash(authorEmail);
+    if (emailHash) {
+      const block = await db.commenterBlock.findUnique({ where: { emailHash }, select: { revokedAt: true, expiresAt: true } });
+      if (block && !block.revokedAt && (!block.expiresAt || block.expiresAt > new Date())) {
+        return { error: "We cannot accept this comment right now. Contact hello@anshkosh.com if you think this is a mistake." };
+      }
+    }
+
+    const signedIn = await auth.api.getSession({ headers: headersList });
+    const authorUserId = signedIn?.user.emailVerified && !signedIn.user.banned && signedIn.user.email.trim().toLowerCase() === authorEmail
+      ? signedIn.user.id
+      : null;
+
     const comment = await db.$transaction(async tx => {
       const saved = await tx.comment.create({
       data: {
         startupId,
         authorName,
         authorEmail,
+        authorUserId,
         body,
         status: "PENDING",
       },
@@ -185,69 +202,43 @@ export async function fetchApprovedComments(
 // ──────────────────────────────────────────────────────────────────────────────
 // Admin — Approve a comment
 // ──────────────────────────────────────────────────────────────────────────────
-export async function approveComment(commentId: string) {
+async function changeLegacyCommentStatus(commentId: string, nextStatus: "APPROVED" | "REJECTED") {
   try {
     const session = await auth.api.getSession({ headers: await headers() });
-    if (
-      !session?.user.emailVerified || session.user.banned ||
-      (session.user.role !== "admin" && session.user.role !== "reviewer")
-    ) {
-      return { error: "Unauthorized" };
-    }
+    if (!session?.user.emailVerified || session.user.banned || !["admin", "reviewer"].includes(session.user.role ?? "")) return { error: "Unauthorized" };
+    if (!commentIdSchema.safeParse(commentId).success) return { error: "Invalid comment." };
 
-    const comment = await db.$transaction(async tx => {
-      const saved = await tx.comment.update({
-      where: { id: commentId },
-      data: { status: "APPROVED" },
-      include: { startup: { select: { slug: true } } },
-      });
-      await tx.contentModeration.updateMany({ where: { kind: "COMMENT", targetId: commentId }, data: { status: "APPROVED", leaseToken: null, reviewedBy: session.user.id, reviewedAt: new Date() } });
-      return saved;
+    const result = await db.$transaction(async tx => {
+      const current = await tx.comment.findUnique({ where: { id: commentId }, select: { status: true, startup: { select: { slug: true } } } });
+      if (!current) return { error: "Comment no longer exists." };
+      const reviewedAt = new Date();
+      const changed = await tx.comment.updateMany({ where: { id: commentId, status: current.status }, data: { status: nextStatus, reviewedBy: session.user.id, reviewedAt, reviewNote: nextStatus === "REJECTED" ? "Rejected by staff" : null } });
+      if (!changed.count) return { error: "This comment changed in another review. Refresh before deciding." };
+      await tx.contentModeration.updateMany({ where: { kind: "COMMENT", targetId: commentId }, data: { status: nextStatus, leaseToken: null, reviewedBy: session.user.id, reviewedAt } });
+      return { slug: current.startup.slug };
     });
-
-    revalidatePath(`/startups/${comment.startup.slug}`);
+    if ("error" in result) return result;
+    revalidatePath(`/startups/${result.slug}`);
     revalidatePath("/admin/comments");
+    revalidatePath("/admin/content-review");
     revalidatePath("/");
     revalidatePath("/leaderboard");
     return { success: true };
   } catch (err) {
-    logger.error("approveComment error:", err);
-    return { error: "Failed to approve comment." };
+    logger.error("changeCommentStatus error:", err);
+    return { error: "Failed to save the comment decision." };
   }
+}
+
+export async function approveComment(commentId: string) {
+  return changeLegacyCommentStatus(commentId, "APPROVED");
 }
 
 // ──────────────────────────────────────────────────────────────────────────────
 // Admin — Reject a comment
 // ──────────────────────────────────────────────────────────────────────────────
 export async function rejectComment(commentId: string) {
-  try {
-    const session = await auth.api.getSession({ headers: await headers() });
-    if (
-      !session?.user.emailVerified || session.user.banned ||
-      (session.user.role !== "admin" && session.user.role !== "reviewer")
-    ) {
-      return { error: "Unauthorized" };
-    }
-
-    const comment = await db.$transaction(async tx => {
-      const saved = await tx.comment.update({
-      where: { id: commentId },
-      data: { status: "REJECTED" },
-      include: { startup: { select: { slug: true } } },
-      });
-      await tx.contentModeration.updateMany({ where: { kind: "COMMENT", targetId: commentId }, data: { status: "REJECTED", leaseToken: null, reviewedBy: session.user.id, reviewedAt: new Date() } });
-      return saved;
-    });
-
-    revalidatePath(`/startups/${comment.startup.slug}`);
-    revalidatePath("/admin/comments");
-    revalidatePath("/");
-    revalidatePath("/leaderboard");
-    return { success: true };
-  } catch (err) {
-    logger.error("rejectComment error:", err);
-    return { error: "Failed to reject comment." };
-  }
+  return changeLegacyCommentStatus(commentId, "REJECTED");
 }
 
 // ──────────────────────────────────────────────────────────────────────────────

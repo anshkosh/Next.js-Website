@@ -118,7 +118,7 @@ export default function AdminManager({ admins, currentUserId }: { admins: { id: 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Role</label>
                 <select name="role" className="w-full border rounded-md p-2 outline-none focus:border-coral-500 bg-white">
-                  <option value="reviewer">Reviewer (Can approve/reject startups)</option>
+                  <option value="reviewer">Reviewer (Content review; limited commenter bans)</option>
                   <option value="admin">Admin (Full access to settings/users)</option>
                 </select>
               </div>

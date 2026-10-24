@@ -2,9 +2,9 @@
 import { beforeEach, afterEach, expect, it, vi } from "vitest";
 import { addCommentReceipt, readCommentReceipts, COMMENT_RECEIPT_COOKIE } from "../lib/comment-receipts";
 
-const mock = vi.hoisted(() => ({ create: vi.fn(), findMany: vi.fn(), startup: vi.fn(), readLimit: vi.fn(), consume: vi.fn(), verify: vi.fn(), revalidate: vi.fn(), warn: vi.fn(), getCookie: vi.fn(), setCookie: vi.fn() }));
+const mock = vi.hoisted(() => ({ create: vi.fn(), findMany: vi.fn(), block: vi.fn(), startup: vi.fn(), readLimit: vi.fn(), consume: vi.fn(), verify: vi.fn(), revalidate: vi.fn(), warn: vi.fn(), getCookie: vi.fn(), setCookie: vi.fn() }));
 vi.mock("@/lib/db", () => {
-  const tx = { comment: { create: mock.create, findMany: mock.findMany }, startup: { findUnique: mock.startup }, contentModeration: { upsert: vi.fn() } };
+  const tx = { comment: { create: mock.create, findMany: mock.findMany }, commenterBlock: { findUnique: mock.block }, startup: { findUnique: mock.startup }, contentModeration: { upsert: vi.fn() } };
   return { db: { ...tx, $transaction: async (fn: (tx: object) => unknown) => fn(tx) } };
 });
 vi.mock("@/lib/auth", () => ({ auth: { api: { getSession: vi.fn() } } }));
@@ -26,6 +26,7 @@ beforeEach(() => {
   mock.startup.mockResolvedValue({ id: startupId, slug: "fixture" });
   mock.create.mockResolvedValue({ id, authorName: input.authorName, body: input.body, createdAt: new Date("2026-10-20T00:00:00Z") });
   mock.findMany.mockResolvedValue([]);
+  mock.block.mockResolvedValue(null);
 });
 afterEach(() => vi.unstubAllEnvs());
 

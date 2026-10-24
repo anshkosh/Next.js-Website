@@ -16,7 +16,7 @@ export default async function AdminLayout({
     headers: await headers(),
   });
 
-  if (!session || (session.user.role !== "admin" && session.user.role !== "reviewer")) {
+  if (!session?.user.emailVerified || session.user.banned || (session.user.role !== "admin" && session.user.role !== "reviewer")) {
     redirect("/admin/login");
   }
 
@@ -29,10 +29,16 @@ export default async function AdminLayout({
   const pendingCommentCount = await db.comment.count({
     where: { status: "PENDING" },
   });
+  const contentReviewCount = await db.contentModeration.count({
+    where: { OR: [
+      { kind: { not: "JOURNAL" }, status: { in: ["PENDING", "CHECKING", "FLAGGED", "UNAVAILABLE"] } },
+      { kind: "JOURNAL", status: "SAFE", revision: { status: "PENDING_REVIEW", entry: { visibility: "PUBLIC" } } },
+    ] },
+  });
 
   return (
     <div className="flex h-screen bg-gray-50 overflow-hidden font-sans">
-      <AdminSidebar role={role} pendingReviewCount={pendingReviewCount} pendingCommentCount={pendingCommentCount} />
+      <AdminSidebar role={role} pendingReviewCount={pendingReviewCount} pendingCommentCount={pendingCommentCount} contentReviewCount={contentReviewCount} />
       
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
         <AdminTopbar user={{ name: session.user.name, role: session.user.role }} />

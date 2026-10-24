@@ -1,5 +1,12 @@
 # Website changelog
 
+## Unreleased — moderation controls
+
+- Expand comment review with status filters, search, pagination, restore and hide controls.
+- Allow reviewers to temporarily or permanently ban ordinary accounts only from a comment linked at submission to a verified account; keep staff roles and general account/session management protected.
+- Add comment-only email blocks for verified identities, with keyed hashes, reason, expiry and a reversible staff list. Anonymous unverified addresses cannot be blocked from a comment.
+- Add review queue counts and enforce verified, non-banned staff access at the admin layout.
+
 ## Unreleased — AI content moderation
 
 - Add durable Cloudflare Workers AI text checks for new comments, founder replies, public journal revisions and startup updates.
