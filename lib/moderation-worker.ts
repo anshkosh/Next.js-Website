@@ -46,14 +46,10 @@ export async function processModeration() {
       const verdict = await checkContent(source.content, config.token, config.accountId);
       await db.$transaction(async tx => {
         await tx.$queryRaw`SELECT id FROM "Startup" WHERE id = ${source.startupId} FOR UPDATE`;
-        const publishAutomatically = verdict.safe && job.kind !== "COMMENT";
-        const reasons = verdict.safe && job.kind === "COMMENT"
-          ? ["AI found no text safety issue; comments still require human approval."]
-          : verdict.reasons;
-        const saved = await tx.contentModeration.updateMany({ where: lease, data: { status: verdict.safe ? (publishAutomatically ? "SAFE" : "FLAGGED") : "FLAGGED", reasons, checkedAt: new Date(), leaseToken: null } });
+        const saved = await tx.contentModeration.updateMany({ where: lease, data: { status: verdict.safe ? "SAFE" : "FLAGGED", reasons: verdict.reasons, checkedAt: new Date(), leaseToken: null } });
         if (!saved.count) return;
         const fresh = await moderationSource(tx, job);
-        if (!fresh || contentHash(fresh.content) !== job.contentHash || publishAutomatically && !await applyModeration(tx, job, true)) {
+        if (!fresh || contentHash(fresh.content) !== job.contentHash || verdict.safe && !await applyModeration(tx, job, true)) {
           await tx.contentModeration.update({ where: { id: job.id }, data: { status: "STALE" } });
         }
       });

@@ -7,6 +7,7 @@ import TurnstileWidget from "./TurnstileWidget";
 import { submitComment, fetchApprovedComments, getCommentAvailability } from "@/app/actions/comment.actions";
 import type { PublicComment, PendingComment } from "@/app/actions/comment.actions";
 import { characterCount, limitCharacters } from "@/lib/characters";
+import { commentLanguageReasons, COMMENT_LANGUAGE_WARNING } from "@/lib/comment-language";
 
 type CommentAvailability = Awaited<ReturnType<typeof getCommentAvailability>>;
 type CommentViewer = { name: string; email: string };
@@ -126,7 +127,7 @@ function CommentForm({ startupId, viewer, availability, setAvailability, onSubmi
   viewer?: CommentViewer;
   availability: CommentAvailability;
   setAvailability: (status: CommentAvailability) => void;
-  onSubmitted: (comment: PendingComment) => void;
+  onSubmitted: (comment: PendingComment, warning?: string) => void;
 }) {
   const [form, setForm] = useState<FormState>({ name: viewer?.name ?? "", email: viewer?.email ?? "", body: "", token: "" });
   const [error, setError] = useState<string | null>(null);
@@ -168,7 +169,7 @@ function CommentForm({ startupId, viewer, availability, setAvailability, onSubmi
           setError(result.error);
           setAvailability(await getCommentAvailability());
         } else if (result.pendingComment) {
-          onSubmitted(result.pendingComment);
+          onSubmitted(result.pendingComment, result.warning);
           setForm({ name: viewer?.name ?? "", email: viewer?.email ?? "", body: "", token: "" });
         }
       } catch {
@@ -242,6 +243,7 @@ function CommentForm({ startupId, viewer, availability, setAvailability, onSubmi
           <div className="text-right text-xs text-gray-500 mt-1">
             {characterCount(form.body)}/2000
           </div>
+          {commentLanguageReasons(`${form.name}\n${form.body}`).length > 0 && <p role="status" className="mt-2 text-sm text-amber-900">{COMMENT_LANGUAGE_WARNING}</p>}
         </div>
 
         {/* Turnstile */}
@@ -326,6 +328,7 @@ export default function DiscussionSection({
   const [nextCursor, setNextCursor] = useState<string | null>(initialNextCursor);
   const [isLoadingMore, startLoadMore] = useTransition();
   const [submitted, setSubmitted] = useState<string | null>(null); // commenter name after success
+  const [submissionWarning, setSubmissionWarning] = useState<string | undefined>();
   const [pendingComments, setPendingComments] = useState(initialPendingComments);
   const [availability, setAvailability] = useState(initialAvailability);
 
@@ -339,8 +342,9 @@ export default function DiscussionSection({
     });
   }, [startupId, nextCursor]);
 
-  const handleSubmitted = (comment: PendingComment) => {
+  const handleSubmitted = (comment: PendingComment, warning?: string) => {
     setSubmitted(comment.authorName);
+    setSubmissionWarning(warning);
     setPendingComments(previous => [comment, ...previous.filter(item => item.id !== comment.id)]);
     setAvailability({ allowed: false, available: false, retryAfterSeconds: 1, message: "Checking comment availability…" });
     getCommentAvailability().then(setAvailability).catch(() => setAvailability({ allowed: false, available: false, retryAfterSeconds: 60, message: "Could not check comment availability. Please try again." }));
@@ -406,7 +410,8 @@ export default function DiscussionSection({
         )}
 
         {/* Post-submit success banner */}
-        {submitted && (
+        {submitted && submissionWarning && <p role="alert" className="rounded-xl border border-amber-200 bg-amber-50 px-5 py-4 text-sm text-amber-900">Your comment is held for human review. {submissionWarning}</p>}
+        {submitted && !submissionWarning && (
           <div className="flex items-center gap-3 bg-green-50 border border-green-200 rounded-xl px-5 py-4 text-sm text-green-700">
             <CheckCircle2 className="w-5 h-5 flex-shrink-0 text-green-500" />
             <span>

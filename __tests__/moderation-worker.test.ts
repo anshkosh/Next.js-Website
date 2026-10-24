@@ -35,10 +35,10 @@ it("keeps all work pending when the server credentials or enable switch are miss
   expect(await processModeration()).toEqual({ checked: 0, configured: false });
   expect(m.first).not.toHaveBeenCalled(); expect(m.check).not.toHaveBeenCalled();
 });
-it("keeps a safe comment pending for a human reviewer", async () => {
+it("publishes a safe comment without requiring a human reviewer", async () => {
   expect(await processModeration()).toMatchObject({ checked: 1 });
-  expect(record.status).toBe("FLAGGED"); expect(record.reasons).toEqual(["AI found no text safety issue; comments still require human approval."]);
-  expect(m.apply).not.toHaveBeenCalled();
+  expect(record.status).toBe("SAFE"); expect(record.reasons).toEqual([]);
+  expect(m.apply).toHaveBeenCalledOnce();
 });
 it("publishes only a safe, current, claimed non-comment submission", async () => {
   m.first.mockReset().mockResolvedValueOnce({ ...record, kind: "UPDATE" }).mockResolvedValue(null);

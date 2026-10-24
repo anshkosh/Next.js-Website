@@ -3,7 +3,7 @@
 ## Unreleased — AI content moderation
 
 - Add durable Cloudflare Workers AI text checks for new comments, founder replies, public journal revisions and startup updates.
-- Keep every new comment pending for human approval, even when AI marks it safe; add a narrow direct-personal-attack review hint. Safe replies and startup updates may still publish automatically.
+- Allow blunt negative product feedback to publish after a safe AI check; hold possible threats, personal abuse and profanity even if AI returns safe. Warn commenters while writing and after submitting flagged language.
 - Refresh compatible lockfile patches for body-parser, fast-uri and zod advisories.
 - Keep private drafts out of AI; hold unsafe, malformed, unavailable and image/video submissions for human review. Public journals retain editorial approval.
 - Add a shared 100-request UTC daily cap, exact-content race protection, pending update visibility, staged replies, human publication overrides and privacy disclosures.
