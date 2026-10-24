@@ -57,3 +57,25 @@ it("keeps an image-bearing submission held even when text is classified safe", a
   vi.stubGlobal("fetch", vi.fn().mockResolvedValue(Response.json({ success: true, result: { response: "safe" } })));
   expect(await checkContent({ ...content, hasMedia: true }, "fixture-token", "a".repeat(32))).toMatchObject({ safe: false });
 });
+
+it.each([
+  "You are a useless fraud and an idiot. Nobody with a brain would use this garbage, shut it down.",
+  "YOU'RE A COMPLETE MORON.",
+  "The founder is a stupid loser.",
+  "You idiot, stop wasting everyone's time.",
+])("holds a direct personal attack even when the provider labels it safe: %s", async text => {
+  vi.stubGlobal("fetch", vi.fn().mockResolvedValue(Response.json({ success: true, result: { response: "safe" } })));
+  const verdict = await checkContent({ ...content, text }, "fixture-token", "a".repeat(32));
+  expect(verdict.safe).toBe(false);
+  expect(verdict.reasons).toContain("Possible direct personal abuse; human review required.");
+});
+
+it.each([
+  "I'm not convinced yet. I'd want real examples of complaints that were fixed before trusting the dashboard.",
+  "This feature is useless to me until it can export the underlying data.",
+  "You are missing the evidence. How do you avoid fraud and false resolution reports?",
+  "A customer called me an idiot. I would like advice on answering politely.",
+])("preserves civil criticism and discussion of abuse when the provider labels it safe: %s", async text => {
+  vi.stubGlobal("fetch", vi.fn().mockResolvedValue(Response.json({ success: true, result: { response: "safe" } })));
+  expect(await checkContent({ ...content, text }, "fixture-token", "a".repeat(32))).toEqual({ safe: true, reasons: [] });
+});

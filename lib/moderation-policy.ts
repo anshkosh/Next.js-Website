@@ -36,6 +36,12 @@ export function journalContent(data: unknown, version: number): ModerationConten
 export function policyReasons(content: ModerationContent): string[] {
   const reasons: string[] = [];
   if (content.hasMedia) reasons.push("Media needs human review; AI checked text only.");
+  // A model safety label does not establish civility. Hold explicit personal
+  // attacks for a reviewer, while leaving negative product/evidence feedback
+  // eligible. This bounded English hint is not a complete harassment detector;
+  // quoted or ambiguous matches need a person's contextual decision.
+  const personalAttack = /\b(?:you(?:['’]re|\s+are)\s+[^.!?\n]{0,100}\b|you\s+(?:(?:complete|total|absolute|useless)\s+){0,3}|(?:the|this|that|your)\s+(?:founder|owner|team|developer)\s+(?:is|are)\s+[^.!?\n]{0,100}\b)(?:idiot|moron|imbecile|scumbag|loser|stupid|dumb)s?\b/iu;
+  if (personalAttack.test(content.text.normalize("NFKC"))) reasons.push("Possible direct personal abuse; human review required.");
   if (/(?:guaranteed|risk[- ]?free|assured)\s+(?:\d+[%x]?\s+)?(?:returns?|profits?|income)|double\s+your\s+money/i.test(content.text)) reasons.push("Potential guaranteed-return promotion.");
   if (/\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b/i.test(content.text) || /(?:\+?\d[\s().-]*){10,}/.test(content.text)) reasons.push("Possible personal contact information.");
   if ((content.text.match(/https?:\/\//gi)?.length ?? 0) > 3) reasons.push("Many links; check for spam.");

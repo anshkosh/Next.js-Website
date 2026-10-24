@@ -1,5 +1,15 @@
 # Website changelog
 
+## Unreleased — direct personal-abuse moderation safeguard
+
+- Hold explicit personal attacks for human review even if the safety model labels
+  their text safe; preserve ordinary product criticism and evidence questions.
+- Add isolated regression cases for the reported public test insult and civil
+  feedback. No existing comments, accounts or moderation settings are changed.
+- Refresh compatible body-parser, fast-uri and zod lockfile versions to clear six
+  newly reported advisory findings blocking the required dependency gate. Existing
+  reviewed exceptions and direct dependency ranges remain unchanged.
+
 ## Unreleased — AI content moderation
 
 - Add durable Cloudflare Workers AI text checks for new comments, founder replies, public journal revisions and startup updates.
