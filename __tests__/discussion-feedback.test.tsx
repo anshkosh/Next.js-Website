@@ -31,6 +31,7 @@ it("shows an exhausted allowance without mounting a challenge", () => {
 it.each([
   { body: "A new pilot question", warning: undefined },
   { body: "You are an idiot.", warning: COMMENT_LANGUAGE_WARNING },
+  { body: "We will show up at the test booth and smash your register table.", warning: COMMENT_LANGUAGE_WARNING },
 ])("shows a private receipt and any language warning for $body", async ({ body, warning }) => {
   mocks.submit.mockResolvedValue({ success: true, warning, pendingComment: { id: "pending", authorName: "Kosh", body, createdAt: new Date().toISOString() } });
   await act(async () => root.render(<DiscussionSection {...props} />));

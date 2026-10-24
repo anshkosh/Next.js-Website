@@ -22,6 +22,7 @@ it.each([
   ["I'll kill you.", "threat"],
   ["I'm going to hurt you.", "threat"],
   ["I will find you and hurt you.", "threat"],
+  ["Shut down this fake WardDesk pilot right now or we will show up at the test booth and smash your register table.", "threat"],
   ["You should die.", "threat"],
   ["Tujhe jaan se maar dunga.", "threat"],
   ["तुझे जान से मार दूंगा।", "threat"],
