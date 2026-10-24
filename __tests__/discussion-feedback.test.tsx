@@ -3,6 +3,7 @@ import { createRoot, type Root } from "react-dom/client";
 import { renderToStaticMarkup } from "react-dom/server";
 import { afterEach, beforeEach, expect, it, vi } from "vitest";
 import DiscussionSection from "../components/startup/DiscussionSection";
+import { COMMENT_LANGUAGE_WARNING } from "../lib/comment-language";
 const mocks = vi.hoisted(() => ({ submit: vi.fn(), availability: vi.fn() }));
 vi.mock("@/app/actions/comment.actions", () => ({ submitComment: mocks.submit, fetchApprovedComments: vi.fn(), getCommentAvailability: mocks.availability }));
 vi.mock("@/components/startup/TurnstileWidget", () => ({ default: ({ onToken }: { onToken: (token: string) => void }) => <button type="button" onClick={() => onToken("test-token")}>CAPTCHA fixture</button> }));
@@ -27,18 +28,23 @@ it("shows an exhausted allowance without mounting a challenge", () => {
   expect(host.querySelector<HTMLButtonElement>('button[type="submit"]')?.disabled).toBe(true);
 });
 
-it("shows a private pending receipt after a successful submission", async () => {
-  mocks.submit.mockResolvedValue({ success: true, pendingComment: { id: "pending", authorName: "Kosh", body: "A new pilot question", createdAt: new Date().toISOString() } });
+it.each([
+  { body: "A new pilot question", warning: undefined },
+  { body: "You are an idiot.", warning: COMMENT_LANGUAGE_WARNING },
+])("shows a private receipt and any language warning for $body", async ({ body, warning }) => {
+  mocks.submit.mockResolvedValue({ success: true, warning, pendingComment: { id: "pending", authorName: "Kosh", body, createdAt: new Date().toISOString() } });
   await act(async () => root.render(<DiscussionSection {...props} />));
   const textarea = host.querySelector<HTMLTextAreaElement>("#comment-body")!;
   await act(async () => {
-    Object.getOwnPropertyDescriptor(HTMLTextAreaElement.prototype, "value")!.set!.call(textarea, "A new pilot question");
+    Object.getOwnPropertyDescriptor(HTMLTextAreaElement.prototype, "value")!.set!.call(textarea, body);
     textarea.dispatchEvent(new Event("input", { bubbles: true }));
     [...host.querySelectorAll("button")].find(button => button.textContent === "CAPTCHA fixture")!.click();
   });
+  expect(host.textContent?.includes(COMMENT_LANGUAGE_WARNING)).toBe(Boolean(warning));
   await act(async () => { host.querySelector("form")!.dispatchEvent(new Event("submit", { bubbles: true, cancelable: true })); });
   const pending = host.querySelector('[aria-label="Your pending comments"]');
-  expect(pending?.textContent).toContain("A new pilot question");
+  expect(pending?.textContent).toContain(body);
   expect(pending?.textContent).toContain("Awaiting review");
   expect(pending?.textContent).not.toContain("kosh@example.test");
+  if (warning) expect(host.querySelector('[role="alert"]')?.textContent).toContain("held for human review");
 });

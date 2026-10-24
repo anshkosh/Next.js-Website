@@ -33,15 +33,20 @@ async function main() {
     owner = (await db.user.create({ data: { name: "Moderation fixture", email: `moderation-${suffix}@example.test`, emailVerified: true } })).id;
     category = (await db.category.create({ data: { name: "Moderation fixture", slug: `moderation-${suffix}` } })).id;
     const startup = await db.startup.create({ data: { founderId: owner, categoryId: category, status: "LIVE", name: "Moderation fixture", slug: `moderation-${suffix}`, tagline: "Disposable fixture", description: "Not production data", websiteUrl: "https://example.test", founderName: "Fixture", galleryImages: [] } });
-    async function comment() {
+    async function comment(body = "What did the interviews teach you?") {
       return db.$transaction(async tx => {
-        const row = await tx.comment.create({ data: { startupId: startup.id, authorName: "Visitor", authorEmail: "never-send@example.test", body: "What did the interviews teach you?" } });
+        const row = await tx.comment.create({ data: { startupId: startup.id, authorName: "Visitor", authorEmail: "never-send@example.test", body } });
         await queueModeration(tx, "COMMENT", row.id, commentContent(row)); return row;
       });
     }
-    const safe = await comment();
+    const safe = await comment("This product sucks. I would not pay for it. Build something useful.");
     await processModeration();
     assert.equal((await db.comment.findUniqueOrThrow({ where: { id: safe.id } })).status, "APPROVED");
+
+    const abusive = await comment("You are a useless fraud and an idiot. Nobody with a brain would use this garbage, shut it down.");
+    await processModeration();
+    assert.equal((await db.comment.findUniqueOrThrow({ where: { id: abusive.id } })).status, "PENDING", "A safe model response cannot publish a detected personal attack");
+    assert.equal((await db.contentModeration.findUniqueOrThrow({ where: { kind_targetId: { kind: "COMMENT", targetId: abusive.id } } })).status, "FLAGGED");
 
     const held = await comment();
     respond = async () => Response.json({ success: true, result: { response: "unsafe\nS10" } });

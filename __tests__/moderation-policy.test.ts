@@ -19,8 +19,16 @@ it.each([
   { ...content, text: "Visit https://a.test https://b.test https://c.test https://d.test" },
   { ...content, hasMedia: true },
 ])("holds policy hints and unchecked media for a person", input => expect(policyReasons(input).length).toBeGreaterThan(0));
+it.each([
+  "You are a useless fraud and an idiot. Nobody with a brain would use this garbage, shut it down.",
+  "Tum ek idiot ho; nobody with a brain would use your product.",
+  "This app is trash and you are a moron.",
+])("flags direct personal attacks for human review: %s", text => {
+  expect(policyReasons({ ...content, text })).toContain("Possible personal abuse; human review required.");
+});
 it("does not flag ordinary founder language or mixed Hindi/English by keyword alone", () => {
   expect(policyReasons({ ...content, text: "आज हमने पांच founders से बात की। अगला कदम onboarding सुधारना है।" })).toEqual([]);
+  expect(policyReasons({ ...content, text: "I'm not convinced yet. I'd need examples of complaints that were actually fixed." })).toEqual([]);
 });
 it("binds a journal result to its exact revision and attachments", () => {
   const entry = { title: "A lesson", body: "Customers asked for fewer features.", visibility: "PUBLIC", startupId: "startup" };
@@ -56,4 +64,15 @@ it("does not truncate a long submission and approve only its prefix", async () =
 it("keeps an image-bearing submission held even when text is classified safe", async () => {
   vi.stubGlobal("fetch", vi.fn().mockResolvedValue(Response.json({ success: true, result: { response: "safe" } })));
   expect(await checkContent({ ...content, hasMedia: true }, "fixture-token", "a".repeat(32))).toMatchObject({ safe: false });
+});
+it("overrides a safe model response when an obvious personal attack is present", async () => {
+  vi.stubGlobal("fetch", vi.fn().mockResolvedValue(Response.json({ success: true, result: { response: "safe" } })));
+  expect(await checkContent({ ...content, text: "You are a useless fraud and an idiot. Nobody with a brain would use this garbage, shut it down." }, "fixture-token", "a".repeat(32))).toEqual({
+    safe: false,
+    reasons: ["Possible personal abuse; human review required."],
+  });
+});
+it.each(["This product sucks. I would not pay for it.", "Your app is useless and the design is garbage."])("accepts blunt product criticism when the model finds no safety issue: %s", async text => {
+  vi.stubGlobal("fetch", vi.fn().mockResolvedValue(Response.json({ success: true, result: { response: "safe" } })));
+  expect(await checkContent({ ...content, text }, "fixture-token", "a".repeat(32))).toEqual({ safe: true, reasons: [] });
 });

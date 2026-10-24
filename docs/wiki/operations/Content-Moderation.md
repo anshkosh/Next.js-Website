@@ -8,7 +8,7 @@ R2 account. Keep the Anshkosh Cloudflare account on **Workers Free**.
 
 | Submission | Behavior |
 | --- | --- |
-| New public comment | Save pending; publish only after an unambiguous safe AI result or human approval. Comment email is never sent to AI. |
+| New public comment | Save pending; publish automatically after a safe AI result with no policy flags, or after human approval. Blunt criticism of the product is allowed. Comment email is never sent to AI. |
 | Founder reply or reply edit | Stage the replacement privately; retain any approved reply until the replacement is approved. Rejection discards only the staged replacement. |
 | Startup update or edit | Save pending and hide from public projections and activity counts until approval. Editing an approved update hides that update during review. |
 | Public founder journal revision | Show an AI assessment alongside the submission; a reviewer still approves publication/scheduling. The approved version remains live during review. |
@@ -20,12 +20,24 @@ test/bot accounts, ranking weights and legacy content are not reclassified. The
 additive migration defaults existing startup updates to APPROVED. New application
 writes explicitly set PENDING. All public update reads and scoring SQL require
 APPROVED; this preserves existing signals and excludes new unapproved content.
+Blunt negative product feedback such as “this product sucks”, “your app is useless”
+or “the design is garbage” does not trigger a language flag on its own. Possible
+threats, attacks on people and profanity add review hints that prevent automatic
+publication even if the model returns safe. The shared English/Hindi/Hinglish
+patterns are conservative review aids, not a complete toxicity classifier or
+proof of misconduct. An unsafe or unavailable AI result still stays pending.
+
+The comment composer shows a warning when it detects threatening language,
+personal insults or profanity, so the author can rewrite before submitting.
+If submitted anyway, the server saves it privately for review and returns the
+same warning on screen. The filter does not silently rewrite the author's words.
 
 ## Review screens
 
 - `/admin/content-review`: pending, flagged and unavailable checks, with exact-text
   approval/rejection for verified, non-banned admins/reviewers. Open submitted image
-  attachments and review them before approving.
+  attachments and review them before approving. Review threats and personal abuse
+  separately from harsh feedback about a product's quality or commercial value.
 - `/admin/content-review?view=published`: reviewed/AI-approved content; reviewers
   can hide a current comment, reply or update after publication.
 - `/admin/founder-journal`: editorial decisions and AI assessment for public

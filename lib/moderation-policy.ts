@@ -1,6 +1,7 @@
 import { createHash } from "node:crypto";
 import { founderEntrySchema } from "./founder-journal";
 import { journalPlainText } from "./journal-rich-text";
+import { commentLanguageReasons } from "./comment-language";
 
 export type ModerationKind = "COMMENT" | "REPLY" | "UPDATE" | "JOURNAL";
 export type ModerationContent = { text: string; hasMedia: boolean; stamp: unknown };
@@ -34,7 +35,7 @@ export function journalContent(data: unknown, version: number): ModerationConten
 // Review, rather than ban, contextual business language and personal information.
 // These supplement a safety model; they do not establish whether a claim is true.
 export function policyReasons(content: ModerationContent): string[] {
-  const reasons: string[] = [];
+  const reasons = commentLanguageReasons(content.text);
   if (content.hasMedia) reasons.push("Media needs human review; AI checked text only.");
   if (/(?:guaranteed|risk[- ]?free|assured)\s+(?:\d+[%x]?\s+)?(?:returns?|profits?|income)|double\s+your\s+money/i.test(content.text)) reasons.push("Potential guaranteed-return promotion.");
   if (/\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b/i.test(content.text) || /(?:\+?\d[\s().-]*){10,}/.test(content.text)) reasons.push("Possible personal contact information.");

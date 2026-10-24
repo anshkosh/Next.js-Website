@@ -5,6 +5,7 @@ import { publicStartupWhere } from "@/lib/startup-visibility";
 import { db } from "@/lib/db";
 import { queueModeration } from "@/lib/moderation-store";
 import { commentContent, replyContent } from "@/lib/moderation-policy";
+import { commentLanguageReasons, COMMENT_LANGUAGE_WARNING } from "@/lib/comment-language";
 import { auth } from "@/lib/auth";
 import { cookies, headers } from "next/headers";
 import { revalidateSavedPath as revalidatePath } from "@/lib/cache-after-save";
@@ -121,7 +122,7 @@ export async function submitComment(formData: {
     } catch { logger.warn("Comment saved; private browser receipt unavailable"); }
 
     revalidatePath(`/startups/${startup.slug}`);
-    return { success: true, pendingComment: { ...comment, createdAt: comment.createdAt.toISOString() } };
+    return { success: true, warning: commentLanguageReasons(`${authorName}\n${body}`).length ? COMMENT_LANGUAGE_WARNING : undefined, pendingComment: { ...comment, createdAt: comment.createdAt.toISOString() } };
   } catch (err) {
     logger.error("submitComment error:", err);
     return { error: "Something went wrong. Please try again." };
