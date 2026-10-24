@@ -10,7 +10,8 @@ export const accessControl = createAccessControl({
 } as const);
 
 // These are runtime Role objects, not permission dictionaries hidden by a cast.
-// Reviewers moderate content but cannot administer accounts or sessions.
+// Reviewers have no Better Auth account/session-management permission. The separate
+// moderation action can ban only ordinary accounts linked to a verified comment.
 export const accountRoles = {
   user: accessControl.newRole({ startup: ["create", "read", "update"], category: ["read"] }),
   reviewer: accessControl.newRole({ startup: ["read", "moderate"], category: ["read", "create", "update"] }),

@@ -49,6 +49,22 @@ same warning on screen. The filter does not silently rewrite the author's words.
   journal revisions. A human may override the AI assessment.
 - `/admin/comments`: existing manual comment approval remains available, including
   pre-release pending comments that have no AI job.
+- `/admin/comments`: filter the queue by pending, published or hidden/rejected;
+  search commenter, private email, comment text and startup; restore a hidden
+  comment or hide a published one. Product criticism remains eligible to publish.
+- `/admin/bans`: review and reverse account bans and comment-only email blocks.
+  A reviewer can ban an ordinary account only when a comment was linked at
+  submission to that account's verified email. The action records a reason and
+  duration, writes Better Auth's supported ban fields and revokes current sessions.
+  Staff accounts are not ban targets, and reviewers do not gain general account,
+  role or session-management access.
+- An email-only block is available only for a verified account-linked comment.
+  Its email key is an HMAC using the server's `BETTER_AUTH_SECRET`; raw email is
+  not duplicated into the restriction table. Anonymous, unverified email values
+  cannot be used to restrict someone else's address. Expired blocks stop applying;
+  moderators can remove active restrictions from `/admin/bans`. Preserve the
+  HMAC key during secret rotation or re-key active blocks before removing the old
+  secret; account deletion removes that account's linked ban and hash records.
 
 Rejected updates remain editable by their owner. Rejected reply replacements can
 be resubmitted through the reply editor. Contact `hello@anshkosh.com` for human

@@ -4,11 +4,12 @@ import { createHash } from "node:crypto";
 const m = vi.hoisted(() => {
   const many = () => ({ findMany: vi.fn(), deleteMany: vi.fn(), updateMany: vi.fn() });
   return {
-    tx: { $queryRaw: vi.fn(), user: { findUnique: vi.fn(), delete: vi.fn() }, session: { findFirst: vi.fn() }, verification: { findFirst: vi.fn(), create: vi.fn(), deleteMany: vi.fn(), delete: vi.fn() }, account: many(), startup: many(), startupUpdate: many(), comment: many(), founderJournalEntry: many(), founderJournalRevision: many(), startupRevision: many(), journalPost: many(), mediaUpload: many(), notificationOutbox: many() },
+    tx: { $queryRaw: vi.fn(), user: { findUnique: vi.fn(), delete: vi.fn() }, session: { findFirst: vi.fn() }, verification: { findFirst: vi.fn(), create: vi.fn(), deleteMany: vi.fn(), delete: vi.fn() }, account: many(), startup: many(), startupUpdate: many(), comment: many(), commenterBlock: many(), moderationAccountBan: many(), founderJournalEntry: many(), founderJournalRevision: many(), startupRevision: many(), journalPost: many(), mediaUpload: many(), notificationOutbox: many() },
     transaction: vi.fn(),
   };
 });
 vi.mock("@/lib/db", () => ({ db: { $transaction: m.transaction } }));
+vi.mock("server-only", () => ({}));
 import { deleteAccountSchema, eraseAccount, exportAccountData, issuePrivacyCode } from "@/lib/account-privacy";
 
 const actor = { userId: "member", sessionId: "session" };

@@ -13,10 +13,11 @@ import {
   Star,
   BookOpen,
   MessageSquare,
+  ShieldAlert,
 } from "lucide-react";
 import { useState } from "react";
 
-export default function AdminSidebar({ role, pendingReviewCount, pendingCommentCount }: { role: string, pendingReviewCount: number, pendingCommentCount: number }) {
+export default function AdminSidebar({ role, pendingReviewCount, pendingCommentCount, contentReviewCount }: { role: string, pendingReviewCount: number, pendingCommentCount: number, contentReviewCount: number }) {
   const pathname = usePathname();
   const [collapsed, setCollapsed] = useState(false);
 
@@ -26,7 +27,8 @@ export default function AdminSidebar({ role, pendingReviewCount, pendingCommentC
     { name: "Featured", href: "/admin/featured", icon: Star, roles: ["admin"] },
     { name: "Moderation", href: "/admin/moderation", icon: ShieldCheck, roles: ["admin", "reviewer"], badge: pendingReviewCount },
     { name: "Comments", href: "/admin/comments", icon: MessageSquare, roles: ["admin", "reviewer"], badge: pendingCommentCount },
-    { name: "Content review", href: "/admin/content-review", icon: ShieldCheck, roles: ["admin", "reviewer"] },
+    { name: "Content review", href: "/admin/content-review", icon: ShieldCheck, roles: ["admin", "reviewer"], badge: contentReviewCount },
+    { name: "Bans", href: "/admin/bans", icon: ShieldAlert, roles: ["admin", "reviewer"] },
     { name: "Categories", href: "/admin/categories", icon: Tags, roles: ["admin", "reviewer"] },
     { name: "Journal", href: "/admin/journal", icon: BookOpen, roles: ["admin"] },
     { name: "Founder Journal review", href: "/admin/founder-journal", icon: BookOpen, roles: ["admin", "reviewer"] },

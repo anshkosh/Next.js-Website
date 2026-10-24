@@ -2,6 +2,7 @@ import { createHash, randomBytes, timingSafeEqual } from "node:crypto";
 import type { Prisma, PrismaClient } from "@prisma/client";
 import { z } from "zod";
 import { db } from "./db";
+import { commenterEmailHash } from "./commenter-restrictions";
 
 export const privacyPurposeSchema = z.enum(["export", "delete"]);
 export const privacyCodeSchema = z.string().trim().toLowerCase().regex(/^[a-f0-9]{32}$/, "Paste the complete confirmation code from your email.");
@@ -72,6 +73,7 @@ export async function exportAccountData(actor: PrivacyActor, code: string, clien
         UNION ALL SELECT octet_length(to_jsonb(r)::text)::bigint FROM "FounderJournalRevision" r JOIN "FounderJournalEntry" j ON j.id = r."entryId" WHERE j."authorId" = ${user.id}
         UNION ALL SELECT octet_length(to_jsonb(j)::text)::bigint FROM "JournalPost" j WHERE j."authorId" = ${user.id}
         UNION ALL SELECT octet_length(to_jsonb(m)::text)::bigint FROM "MediaUpload" m WHERE m."userId" = ${user.id}
+        UNION ALL SELECT octet_length(to_jsonb(c)::text)::bigint FROM "Comment" c WHERE c."authorUserId" = ${user.id}
       ) owned_content`;
     if (!estimated[0] || estimated[0].bytes > BigInt(20 * 1024 * 1024)) throw new AccountPrivacyError("This account needs a larger export. Contact hello@anshkosh.com for assistance.", 413);
     // Explicit projections: never spread auth rows or export applicants/commenters.
@@ -95,6 +97,9 @@ export async function exportAccountData(actor: PrivacyActor, code: string, clien
     } });
     const updates = await tx.startupUpdate.findMany({ where: { startup: { founderId: user.id } }, take: 10001, select: { startupId: true, title: true, body: true, imageUrl: true, createdAt: true, updatedAt: true } });
     const replies = await tx.comment.findMany({ where: { startup: { founderId: user.id }, OR: [{ reply: { not: null } }, { pendingReply: { not: null } }] }, take: 10001, select: { startupId: true, reply: true, repliedAt: true, repliedBy: true, pendingReply: true, pendingRepliedBy: true } });
+    const comments = await tx.comment.findMany({ where: { authorUserId: user.id }, take: 10001, select: {
+      id: true, startupId: true, authorName: true, authorEmail: true, body: true, status: true, createdAt: true, updatedAt: true,
+    } });
     const journal = await tx.founderJournalEntry.findMany({ where: { authorId: user.id }, take: 10001, select: {
       id: true, startupId: true, title: true, body: true, contentJson: true, mediaKeys: true,
       prompt: true, visibility: true, milestone: true, milestoneDone: true, publishedAt: true,
@@ -102,12 +107,12 @@ export async function exportAccountData(actor: PrivacyActor, code: string, clien
     } });
     const editorialPosts = await tx.journalPost.findMany({ where: { authorId: user.id }, take: 10001, select: { id: true, title: true, slug: true, excerpt: true, authorName: true, contentJson: true, contentHtml: true, coverImageUrl: true, status: true, tags: true, metaTitle: true, metaDescription: true, metaKeywords: true, canonicalUrl: true, createdAt: true, updatedAt: true, publishedAt: true, scheduledAt: true } });
     const uploads = await tx.mediaUpload.findMany({ where: { userId: user.id, erasureRequestedAt: null }, take: 10001, select: { key: true, bytes: true, createdAt: true } });
-    if ([startups, updates, replies, journal, editorialPosts, uploads].some(rows => rows.length > 10000)) throw new AccountPrivacyError("This account needs a larger export. Contact hello@anshkosh.com for assistance.", 413);
+    if ([startups, updates, replies, comments, journal, editorialPosts, uploads].some(rows => rows.length > 10000)) throw new AccountPrivacyError("This account needs a larger export. Contact hello@anshkosh.com for assistance.", 413);
     const result = {
       formatVersion: 1, exportedAt: new Date().toISOString(), account, linkedSignIns,
-      startups, updates, replies, journal, editorialPosts,
+      startups, updates, replies, comments, journal, editorialPosts,
       uploads: uploads.map(upload => ({ ...upload, downloadPath: `/api/uploads/serve/${upload.key}` })),
-      notes: ["Uploads are listed as download paths; their file bytes are not included.", "Other people's comments and beta application/contact details are excluded.", "Anonymous votes/comments, beta applications and newsletter subscriptions are separate from account-linked records.", "Passwords, session tokens, OAuth secrets and internal security/moderation records are excluded."],
+      notes: ["Uploads are listed as download paths; their file bytes are not included.", "Other people's comments and beta application/contact details are excluded.", "Comments linked to this verified account are included; anonymous comments that only used an unverified email are not linked to this export.", "Anonymous votes, beta applications and newsletter subscriptions are separate from account-linked records.", "Passwords, session tokens, OAuth secrets and internal security/moderation records are excluded."],
     };
     const json = JSON.stringify(result, null, 2);
     if (Buffer.byteLength(json) > 25 * 1024 * 1024) throw new AccountPrivacyError("This account needs a larger export. Contact hello@anshkosh.com for assistance.", 413);
@@ -121,6 +126,7 @@ export async function eraseAccount(actor: PrivacyActor, code: string, client: Cl
     await tx.$queryRaw`SELECT pg_advisory_xact_lock(hashtext(${`uploads:${actor.userId}`}))::text`;
     const user = await lockedMember(tx, actor, true);
     await consumePrivacyCode(tx, user, "delete", code);
+    const authoredComments = await tx.comment.findMany({ where: { authorUserId: user.id }, select: { id: true, authorEmail: true } });
     await tx.mediaUpload.updateMany({ where: { userId: user.id }, data: { erasureRequestedAt: new Date() } });
     await tx.founderJournalRevision.deleteMany({ where: { entry: { authorId: user.id } } });
     await tx.founderJournalEntry.deleteMany({ where: { authorId: user.id } });
@@ -129,6 +135,17 @@ export async function eraseAccount(actor: PrivacyActor, code: string, client: Cl
     await tx.startupRevision.deleteMany({ where: { startup: { founderId: user.id } } });
     await tx.startup.deleteMany({ where: { founderId: user.id } });
     await tx.journalPost.deleteMany({ where: { authorId: user.id } });
+    const oldEmailHashes = [...new Set(authoredComments.map(comment => commenterEmailHash(comment.authorEmail)).filter((hash): hash is string => Boolean(hash)))];
+    if (oldEmailHashes.length) await tx.commenterBlock.deleteMany({ where: { emailHash: { in: oldEmailHashes } } });
+    await tx.commenterBlock.deleteMany({ where: { sourceCommentId: { in: authoredComments.map(comment => comment.id) } } });
+    await tx.comment.updateMany({ where: { authorUserId: user.id }, data: { authorUserId: null } });
+    await tx.moderationAccountBan.deleteMany({ where: { targetUserId: user.id } });
+    await tx.moderationAccountBan.updateMany({ where: { createdById: user.id }, data: { createdById: null } });
+    await tx.moderationAccountBan.updateMany({ where: { revokedById: user.id }, data: { revokedById: null } });
+    await tx.commenterBlock.updateMany({ where: { createdById: user.id }, data: { createdById: null } });
+    await tx.commenterBlock.updateMany({ where: { revokedById: user.id }, data: { revokedById: null } });
+    const emailHash = commenterEmailHash(user.email);
+    if (emailHash) await tx.commenterBlock.deleteMany({ where: { emailHash } });
     await tx.notificationOutbox.deleteMany({ where: { payload: { path: ["to"], equals: user.email } } });
     await tx.verification.deleteMany({ where: { OR: [{ value: user.id }, { identifier: user.email }, { identifier: { startsWith: `account-privacy:${user.id}:` } }] } });
     await tx.user.delete({ where: { id: user.id } }); // Sessions and provider accounts cascade.
