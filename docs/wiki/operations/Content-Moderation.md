@@ -75,6 +75,27 @@ Sources: [Workers AI pricing](https://developers.cloudflare.com/workers-ai/platf
 
 ## Reliability and privacy
 
+### Personal-abuse review hint
+
+The application holds explicit English personal-attack patterns for human review
+even when the safety model returns `safe`. This covers direct constructions such
+as "you are ... an idiot", "you're ... a moron", "you idiot" and attacks on the
+founder, owner, developer or team. The hint normalizes Unicode compatibility forms
+and adds a review reason; it does not reject or delete content automatically.
+
+Negative feedback about the product, requests for evidence, discussion of fraud
+and reporting that somebody insulted the author remain eligible when no other
+review reason is present. This is a bounded heuristic, not a complete harassment
+classifier: quoted, ambiguous or negated direct-attack wording can be held for a
+person to interpret. It does not establish coverage of other languages, all
+insults, or actual model accuracy.
+
+The regression suite supplies a mocked `safe` provider response and verifies that
+the reported WardDesk test insult cannot pass automatic approval, while civil
+criticism and the other review/failure rules retain their behavior. Existing
+public comments are not rescanned or removed by this change. Cleanup is a separate
+exact-record administrative action requiring direct owner authorization.
+
 `ContentModeration` stores a content hash, verdict/reasons, attempts, lease and
 reviewer metadata. Text remains only on its owning source record. Foreign keys
 cascade when comments, updates or revisions are deleted, including account erasure.

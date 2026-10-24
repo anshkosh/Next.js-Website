@@ -1,5 +1,38 @@
 # Progress
 
+## 24 October 2026 — direct personal-abuse review safeguard
+
+- Daily operating session independently found the reported Gaurav/WardDesk test
+  insult still public on release `1d18b8f`. Existing review hints did not cover
+  personal abuse; a `safe` provider response therefore passed it in an isolated
+  regression. Four attack cases failed before the patch, with 32 cases passing.
+- Added a bounded English direct-personal-attack hint that sends matches to human
+  review. Civil criticism, requests for evidence, fraud discussion and a report of
+  being insulted remain eligible in the negative regression cases. Quoted or
+  ambiguous direct-attack wording can be held for contextual human review.
+- Focused policy/worker/review suites pass: 55 tests. Lint, typecheck and all ten
+  deployment-helper Python tests pass. The full suite initially had three
+  pre-existing reviewed-migration hash failures from this Windows checkout's CRLF
+  conversion. Restored the two SQL fixtures to their canonical LF bytes, verified
+  both pinned hashes without changing Git content/policy, and all 15 deployment
+  policy tests pass.
+- The complete moderation suite passed 755 tests with two existing skips after
+  restoring the canonical SQL fixture bytes. The dependency gate then exposed six
+  newly unreviewed findings in the existing lockfile. Compatible lockfile updates
+  to body-parser 2.4.0, fast-uri 3.1.9 and zod 4.6.7 clear those six findings.
+  Dependency policy now passes with zero policy failures; the two existing
+  version-pinned exceptions remain unresolved and were not broadened/extended.
+  Final checks against the updated lockfile pass: 755 unit tests/two existing
+  skips, zero-warning lint, typecheck and the dependency gate. All ten deployment
+  Python tests pass. This library/policy change adds no database/schema or route
+  behavior; no isolated browser/DB or live-provider run is claimed.
+- No live model call, bot run, production data/configuration change,
+  existing-comment rescan or deletion was performed.
+- Grok relayed a five-test-comment cleanup request. Exact public IDs were captured;
+  the two held IDs still require a private administrative lookup. Cleanup remains
+  separate and awaits direct owner authorization; unrelated WardDesk discussion,
+  accounts, votes and ranking policy must remain intact.
+
 ## 23 October 2026 — AI content moderation
 
 - Owner requested implementation after confirming the account split: Anshkosh Workers Free for AI/Turnstile, Arush R2 for storage. Separate branch/worktree starts at current origin/main c97d049.
