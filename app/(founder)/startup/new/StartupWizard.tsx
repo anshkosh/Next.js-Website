@@ -297,7 +297,7 @@ export default function StartupWizard({ userId, initialId, initialStep, initialD
             ☕ Grab a coffee — this takes about <strong className="text-gray-700">13 minutes</strong> to complete.
           </span>
           <span className="inline-flex items-center gap-1 text-xs font-medium text-green-700 bg-green-50 border border-green-200 px-2.5 py-0.5 rounded-full">
-            Save a server draft after entering the name, tagline, and category
+            Save your draft to your account after entering the name, tagline, and category
           </span>
         </div>
       )}

@@ -92,9 +92,9 @@ validated requested page when supplied, or the dashboard by default.
 
 Startup fields use programmatic labels and connect inline validation to each
 control. The step summary links to the affected fields, and schema validation
-messages describe the limits and correction. The first-step server draft action
+messages describe the limits and correction. The first-step account draft save
 is available once the required name, tagline and category are valid. Saving a
-browser recovery copy alone is not described as a server save.
+browser recovery copy alone does not mean the draft is saved to the account.
 
 Feature title/description errors identify their input, and the review includes
 category, complete proposition, logo, contact/social details, team, media and all

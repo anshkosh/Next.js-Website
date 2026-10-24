@@ -50,7 +50,7 @@ it("creates a first-step server draft, saves it again, then continues with the s
   await act(async () => root.render(<StartupWizard userId="founder" initialId={null} initialStep={1} initialData={wizardFields(null)} />));
   expect(host.querySelector('label[for="name"]')?.textContent).toContain("Startup Name");
   expect(host.querySelector('input[name="name"]')?.getAttribute("aria-describedby")).toBe("startup-help-name");
-  expect(host.textContent).toContain("Save a server draft after entering the name, tagline, and category");
+  expect(host.textContent).toContain("Save your draft to your account after entering the name, tagline, and category");
   await setValue('[name="name"]', "Example startup");
   await setValue('[name="tagline"]', "A helpful product for teams");
   await setValue('[name="categoryId"]', startupId);
