@@ -31,6 +31,8 @@ it("shows an exhausted allowance without mounting a challenge", () => {
 it.each([
   { body: "A new pilot question", warning: undefined },
   { body: "You are an idiot.", warning: COMMENT_LANGUAGE_WARNING },
+  { body: "[MODTEST-R3 #3] You are a clueless fraud and a complete idiot, nobody with a working brain would trust an incompetent clown like you.", warning: COMMENT_LANGUAGE_WARNING },
+  { body: "This product is useless right now; the team should rethink the problem instead of putting a volunteer with a paper register in a ward office.", warning: undefined },
   { body: "We will show up at the test booth and smash your register table.", warning: COMMENT_LANGUAGE_WARNING },
 ])("shows a private receipt and any language warning for $body", async ({ body, warning }) => {
   mocks.submit.mockResolvedValue({ success: true, warning, pendingComment: { id: "pending", authorName: "Kosh", body, createdAt: new Date().toISOString() } });

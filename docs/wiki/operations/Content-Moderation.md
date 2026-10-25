@@ -27,6 +27,13 @@ publication even if the model returns safe. The shared English/Hindi/Hinglish
 patterns are conservative review aids, not a complete toxicity classifier or
 proof of misconduct. An unsafe or unavailable AI result still stays pending.
 
+Personal-attack hints cover the reported non-profane wording “you are a clueless
+fraud” and “an incompetent clown”, including the “nobody with a working brain”
+variant. Adjective allowances remain bounded and person-directed; criticism of
+an app, its onboarding or a fraud-detection product does not trigger those hints
+by keyword alone. Quoted or ambiguous personal-attack wording can still be held
+for context; the hint never automatically bans a user or deletes a submission.
+
 Physical threat patterns include explicit plans to arrive at a place and damage
 people's property, including fixture and booth damage. Ambiguous or new threat
 wording can still escape phrase matching, so the safety model and review queue

@@ -1,5 +1,12 @@
 # Website changelog
 
+## Unreleased — R3 personal-insult safeguard
+
+- Warn and hold the reported non-profane personal attack using “clueless fraud”,
+  “incompetent clown” and “nobody with a working brain” wording, including when
+  the AI model returns safe. Preserve blunt product criticism and existing human
+  review, account, budget and publication controls.
+
 ## Unreleased — moderation controls
 
 - Expand comment review with status filters, search, pagination, restore and hide controls.

@@ -1,9 +1,9 @@
 // Conservative review hints, not a complete harassment classifier. Product
 // criticism (including "sucks", "trash" and "useless") is allowed on its own.
 const PERSONAL_ATTACK = [
-  /\b(?:you(?:'re| are)?|u(?: r)?|tum|tu|aap)\s+(?:(?:are|ho|hai|ek|an?|such|so|just|complete|total|useless)\s+){0,4}(?:idiot|moron|fool|stupid|dumbass|useless|worthless|loser|clown|fraud|scammer|bewakoof|gadha|chutiya)\b/i,
-  /\b(?:founder|founders|developer|developers|team)\s+(?:is|are)\s+(?:(?:an?|such|so|just|complete|total|useless)\s+){0,3}(?:idiots?|morons?|fools?|stupid|losers?|frauds?|scammers?)\b/i,
-  /\b(?:nobody|no one)\s+with\s+(?:a\s+)?(?:brain|mind)\b/i,
+  /\b(?:you(?:'re| are)?|u(?: r)?|tum|tu|aap)\s+(?:(?:are|ho|hai|ek|an?|such|so|just|complete|total|useless|clueless|incompetent)\s+){0,4}(?:idiot|moron|fool|stupid|dumbass|useless|worthless|loser|clown|fraud|scammer|bewakoof|gadha|chutiya)\b/i,
+  /\b(?:founder|founders|developer|developers|team)\s+(?:is|are)\s+(?:(?:an?|such|so|just|complete|total|useless|clueless|incompetent)\s+){0,3}(?:idiots?|morons?|fools?|stupid|losers?|frauds?|scammers?)\b/i,
+  /\b(?:nobody|no one)\s+with\s+(?:a\s+)?(?:working\s+)?(?:brain|mind)\b/i,
   /(?:तुम|तू|आप)\s+(?:(?:एक|बहुत|बड़े)\s+){0,3}(?:बेवकूफ|गधे|गधा|चूतिया|निकम्मे|निकम्मा)/u,
 ];
 const THREAT = [
