@@ -1,5 +1,31 @@
 # Progress
 
+## 25 October 2026 — R3 personal-insult regression
+
+- Start from verified `origin/main` c29766ce in the existing clean isolated
+  moderation worktree, on `codex/moderation-r3-personal-attack`; preserve older
+  branch/PR #57 and unrelated checkouts. No duplicate active fix was found in the
+  inspected recent work/PR state.
+- Independently reproduce the R3 #3 source gap: the exact reported insult gives
+  no language warning and remains safe with a mocked safe provider result. The
+  baseline selected suites returned seven failures and 72 passes; product-directed
+  criticism controls passed.
+- Add bounded clueless/incompetent modifiers before existing person-directed
+  insult nouns and the working-brain phrase. Cover the exact report, narrower
+  variants, submission warning, composer feedback, provider-safe override and
+  disposable PostgreSQL worker publication; retain harsh product criticism.
+- Focused language/policy/submission/composer/worker suites pass 97 tests. The
+  complete unit suite passes 797 tests with two existing skips; lint, regenerated
+  Prisma-client typecheck, dependency policy (zero failures, two existing reviewed
+  advisories), ten deployment-helper tests and diff checks pass. Two unchanged
+  hash-pinned SQL fixtures required canonical Git LF bytes for local policy tests;
+  no migration content/policy changed. PR browser/database CI remains the next
+  isolated gate. No Cloudflare call, new production test, bot run, comment cleanup,
+  merge or deployment was performed.
+- Operating coordination: one Sunday availability check sent to Claude Desktop;
+  Grok asked for the missing read-only journey/customer-question brief, with
+  evidence due by 21:30 IST. No return or new assignment acceptance inferred.
+
 ## 24 October 2026 — moderation controls (in progress)
 
 - Add searchable, paginated comment controls for pending, published and hidden/rejected comments; staff can restore or hide comments and see the latest AI review reasons.
