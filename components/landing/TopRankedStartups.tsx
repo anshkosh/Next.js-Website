@@ -10,7 +10,7 @@ export default async function TopRankedStartups() {
   const cookieId = process.env.DATABASE_URL
     ? (await cookies()).get("anshkosh_vid")?.value
     : undefined;
-  const { entries } = await getLeaderboard(1, cookieId);
+  const { entries } = await getLeaderboard(1, cookieId, false, HOMEPAGE_STARTUP_COUNT);
   const topStartups = entries.slice(0, HOMEPAGE_STARTUP_COUNT);
 
   if (topStartups.length === 0) return null;

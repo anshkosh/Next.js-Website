@@ -1,6 +1,8 @@
 import { db } from "@/lib/db";
+import { cache } from "react";
 import { publicStartupWhere } from "@/lib/startup-visibility";
-import { activitySignals, rankSignals, signalSnapshotQuery, type SignalSnapshot, type SignalActivity } from "@/lib/startup-signals";
+import { activitySignals, rankSignals, type SignalActivity } from "@/lib/startup-signals";
+import { publicSignals } from "@/lib/public-signals";
 
 export const LEADERBOARD_PAGE_SIZE = 20;
 
@@ -28,7 +30,7 @@ export function leaderboardPageNumber(value?: string | string[]) {
   return Number.isSafeInteger(page) ? page : 1;
 }
 
-export async function getLeaderboard(requestedPage = 1, cookieId?: string, featuredOnly = false) {
+export async function getLeaderboard(requestedPage = 1, cookieId?: string, featuredOnly = false, pageSize = LEADERBOARD_PAGE_SIZE) {
   if (!process.env.DATABASE_URL) {
     return { entries: [] as LeaderboardEntry[], totalCount: 0, page: 1, totalPages: 1 };
   }
@@ -36,16 +38,17 @@ export async function getLeaderboard(requestedPage = 1, cookieId?: string, featu
   // Aggregate only counts/IDs globally; load profile fields for the current page.
   // RepeatableRead keeps activity, ranks, and visitor votes in one snapshot.
   return db.$transaction(async (tx) => {
-    const ranked = rankSignals(await tx.$queryRaw<SignalSnapshot[]>(signalSnapshotQuery()));
+    const ranked = rankSignals(await publicSignals(tx));
     const eligible = featuredOnly ? ranked.filter(row => row.featured) : ranked;
     const totalCount = eligible.length;
-    const totalPages = Math.max(1, Math.ceil(totalCount / LEADERBOARD_PAGE_SIZE));
+    const limit = Number.isSafeInteger(pageSize) && pageSize > 0 ? Math.min(pageSize, LEADERBOARD_PAGE_SIZE) : LEADERBOARD_PAGE_SIZE;
+    const totalPages = Math.max(1, Math.ceil(totalCount / limit));
     const page = Number.isSafeInteger(requestedPage) && requestedPage > 0
       ? Math.min(requestedPage, totalPages)
       : 1;
     if (!totalCount) return { entries: [] as LeaderboardEntry[], totalCount, page, totalPages };
     const selected = featuredOnly ? eligible.slice(0, 6)
-      : eligible.slice((page - 1) * LEADERBOARD_PAGE_SIZE, page * LEADERBOARD_PAGE_SIZE);
+      : eligible.slice((page - 1) * limit, page * limit);
 
     const startups = await tx.startup.findMany({
       where: { ...publicStartupWhere, id: { in: selected.map(row => row.id) } },
@@ -68,12 +71,18 @@ export async function getLeaderboard(requestedPage = 1, cookieId?: string, featu
   }, { isolationLevel: "RepeatableRead" });
 }
 
+// Discover's grid and featured carousel share one request-scoped read. Only
+// aggregate public fields enter the shared cache; visitor votes are read above.
+const activitySnapshot = cache(() => db.$transaction(
+  tx => publicSignals(tx), { isolationLevel: "RepeatableRead" },
+));
+
 // Activity points for cards and profiles, so every surface shows the same signal
 // total as the leaderboard. Startups outside the ranking get no entry.
 export async function getActivitySignals(ids: string[]) {
   const wanted = new Set(ids);
   if (!process.env.DATABASE_URL || wanted.size === 0) return new Map<string, number>();
-  const rows = await db.$queryRaw<SignalSnapshot[]>(signalSnapshotQuery());
+  const rows = await activitySnapshot();
   return new Map(rows.filter(row => wanted.has(row.id)).map(row => [row.id, activitySignals(row)]));
 }
 

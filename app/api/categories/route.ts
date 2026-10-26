@@ -7,8 +7,9 @@ export async function GET() {
       orderBy: { sortOrder: 'asc' },
       select: { id: true, name: true, iconName: true }
     });
-    return NextResponse.json(categories);
+    // Reference labels only: never include startup counts or viewer state here.
+    return NextResponse.json(categories, { headers: { "Cache-Control": "public, max-age=60, s-maxage=60" } });
   } catch {
-    return NextResponse.json({ error: "Failed to fetch categories" }, { status: 500 });
+    return NextResponse.json({ error: "Failed to fetch categories" }, { status: 500, headers: { "Cache-Control": "no-store" } });
   }
 }

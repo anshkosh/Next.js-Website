@@ -1,0 +1,55 @@
+name: Public loading performance
+
+on:
+  workflow_dispatch:
+  workflow_run:
+    workflows: [Deploy website to VPS]
+    types: [completed]
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  lighthouse:
+    if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38
+        with:
+          node-version: '22'
+      - name: Audit public mobile routes sequentially
+        shell: bash
+        env:
+          CHROME_PATH: /usr/bin/google-chrome
+        run: |
+          set -euo pipefail
+          mkdir -p lighthouse-reports
+          for page in home discover leaderboard; do
+            route="$page"
+            if [ "$page" = home ]; then route=""; fi
+            npx --yes lighthouse@13.5.0 "https://www.anshkosh.com/$route" \
+              --only-categories=performance --output=html --output=json \
+              --output-path="lighthouse-reports/$page" \
+              --chrome-flags="--headless=new --no-sandbox --disable-gpu" --quiet
+          done
+      - name: Summarize lab results
+        shell: bash
+        run: |
+          node --input-type=module <<'JS' >> "$GITHUB_STEP_SUMMARY"
+          import fs from 'node:fs';
+          console.log('| Mobile route | Performance | LCP | Blocking time |\n|---|---:|---:|---:|');
+          for (const page of ['home', 'discover', 'leaderboard']) {
+            const report = JSON.parse(fs.readFileSync(`lighthouse-reports/${page}.report.json`, 'utf8'));
+            if (report.runtimeError) throw new Error(`Lighthouse failed for ${page}: ${report.runtimeError.code}`);
+            console.log(`| ${page} | ${Math.round(report.categories.performance.score * 100)} | ${report.audits['largest-contentful-paint'].displayValue} | ${report.audits['total-blocking-time'].displayValue} |`);
+          }
+          console.log('\nSingle lab runs; homepage includes the first-visit curtain. These reports do not replace release correctness checks.');
+          JS
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: always()
+        with:
+          name: public-mobile-lighthouse
+          path: lighthouse-reports/
+          retention-days: 14

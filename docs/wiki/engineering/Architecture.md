@@ -43,10 +43,10 @@ Internet ──► nginx (TLS, www canonical, /_next/static from the shared stat
 
 ## Request handling
 
-- **Pages**: server components under `app/(public)`, `app/(founder)`, `app/(admin)` and `app/(auth)`. Public pages use ISR or `revalidate`; for example the categories page revalidates every 6 hours.
+- **Pages**: server components under `app/(public)`, `app/(founder)`, `app/(admin)` and `app/(auth)`. Public HTML is request-rendered for sessions, vote state and CSP nonces. Public signal aggregates are cached by PostgreSQL snapshot; see [Loading performance](Performance.md).
 - **Mutations**: server actions in `app/actions/*.actions.ts`.
 - **Uploads and auth**: route handlers under `app/api/`.
-- **Access control**: `app/proxy.ts` redirects unauthenticated users away from `/dashboard` and `/startup/*`, and non-admins away from `/admin/*`. Server actions check permissions again; see [Security](Security.md).
+- **Access control**: layouts and server actions enforce identity and permissions. Root `proxy.ts` supplies the request CSP nonce and `no-store` HTML policy; see [Security](Security.md).
 
 ## Jobs
 

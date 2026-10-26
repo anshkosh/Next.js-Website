@@ -2,6 +2,7 @@
 import { afterEach, beforeEach, expect, it, vi } from "vitest";
 const mock = vi.hoisted(() => ({ snapshot: vi.fn(), rows: vi.fn(), transaction: vi.fn() }));
 vi.mock("@/lib/db", () => ({ db: { $transaction: mock.transaction } }));
+vi.mock("@/lib/public-signals", () => ({ publicSignals: async (tx: { $queryRaw: () => Promise<unknown> }) => tx.$queryRaw() }));
 import { getLeaderboard, leaderboardPageNumber } from "../lib/leaderboard";
 const row = (id: string, votes: number, featured = true) => ({
   id, slug: id, name: id, tagline: "Test fixture", logoUrl: null,
@@ -50,6 +51,13 @@ it("uses aggregate counts, not stale counters, and returns no private vote recor
 it("uses the same score and global rank for curated homepage entries", async () => {
   mock.snapshot.mockResolvedValue([row("not-featured", 20, false), row("featured", 8), row("tied-featured", 8)]);
   expect((await getLeaderboard(1, undefined, true)).entries.map(entry => [entry.id, entry.rank])).toEqual([["featured", 2], ["tied-featured", 2]]);
+});
+it("loads only the five profiles requested by the homepage without changing global ranks", async () => {
+  mock.snapshot.mockResolvedValue(Array.from({ length: 25 }, (_, index) => row(`startup-${index}`, 25 - index)));
+  const result = await getLeaderboard(1, undefined, false, 5);
+  expect(result.entries.map(entry => entry.rank)).toEqual([1, 2, 3, 4, 5]);
+  expect(mock.rows.mock.calls[0][0].where.id.in).toHaveLength(5);
+  expect(result.totalCount).toBe(25);
 });
 it("clamps pages and handles an empty directory", async () => {
   mock.snapshot.mockResolvedValue([row("only", 1)]);

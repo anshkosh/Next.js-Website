@@ -1,10 +1,9 @@
 import { publicStartupWhere } from "@/lib/startup-visibility";
 import { db } from "@/lib/db";
-import { notFound, permanentRedirect } from "next/navigation";
+import { notFound, permanentRedirect, redirect } from "next/navigation";
 import Image from "next/image";
 import UpvoteButton from "@/components/upvote/UpvoteButton";
 import Link from "next/link";
-import { cookies } from "next/headers";
 import FoundersSection from "@/components/startup/FoundersSection";
 import MediaGallery from "@/components/startup/MediaGallery";
 import KeyFeaturesSection from "@/components/startup/KeyFeaturesSection";
@@ -22,6 +21,9 @@ import BetaTesterSignup from "@/components/startup/BetaTesterSignup";
 import { viewerSession } from "@/lib/viewer-session";
 import { getActivitySignals } from "@/lib/leaderboard";
 import { fetchOwnPendingComments, getCommentAvailability } from "@/app/actions/comment.actions";
+import { publicStartup } from "@/lib/public-startup";
+import { pageNumber } from "@/lib/pagination";
+import { PUBLIC_UPDATES_PAGE_SIZE, updatesPageHref } from "@/lib/public-updates";
 
 // Visitor-specific cookies must be read at request time, including for new slugs.
 export const dynamic = "force-dynamic";
@@ -93,14 +95,12 @@ export async function generateStaticParams() {
 
 export async function generateMetadata(props: {
   params: Promise<{ slug: string }>;
+  searchParams?: Promise<{ updatesPage?: string }>;
 }) {
   const params = await props.params;
   if (!process.env.DATABASE_URL) notFound();
 
-  const startup = await db.startup.findUnique({
-    where: { slug: params.slug, ...publicStartupWhere },
-    include: { category: true },
-  });
+  const startup = await publicStartup(params.slug, pageNumber((await props.searchParams)?.updatesPage));
 
   if (!startup) {
     // A reused slug may also have a historical redirect. A hidden current
@@ -145,38 +145,14 @@ export async function generateMetadata(props: {
 
 export default async function StartupDetailPage(props: {
   params: Promise<{ slug: string }>;
-  searchParams: Promise<{ journalPage?: string }>;
+  searchParams: Promise<{ journalPage?: string; updatesPage?: string }>;
 }) {
   const params = await props.params;
   if (!process.env.DATABASE_URL) notFound();
 
-  const cookieStore = await cookies();
-  const cookieId = cookieStore.get("anshkosh_vid")?.value;
-
-  const startup = await db.startup.findUnique({
-    where: { slug: params.slug, ...publicStartupWhere },
-    include: {
-      category: true,
-      upvotes: cookieId
-        ? {
-            where: { cookieId },
-          }
-        : false,
-          downvotes: cookieId
-        ? {
-            where: { cookieId },
-          }
-        : false,
-      founders: {
-        orderBy: { sortOrder: "asc" }
-      },
-      updates: {
-        where: { status: "APPROVED" },
-        orderBy: { createdAt: "desc" },
-      },
-      betaTesterProgram: { select: { id: true, enabled: true, description: true, reward: true } },
-    },
-  });
+  const searchParams = await props.searchParams;
+  const updatesPage = pageNumber(searchParams.updatesPage);
+  const startup = await publicStartup(params.slug, updatesPage);
 
   if (!startup) {
     if (await db.startup.findUnique({ where: { slug: params.slug }, select: { id: true } })) notFound();
@@ -194,11 +170,12 @@ export default async function StartupDetailPage(props: {
     notFound();
   }
 
-  const publicJournalPage = journalPage((await props.searchParams).journalPage);
-  const publicEntries = await publicFounderEntries(startup.id, startup.founderId, publicJournalPage);
+  const publicJournalPage = journalPage(searchParams.journalPage);
+  const updatePages = Math.max(1, Math.ceil(startup._count.updates / PUBLIC_UPDATES_PAGE_SIZE));
+  if (updatesPage > updatePages) redirect(updatesPageHref(startup.slug, updatePages, publicJournalPage));
 
   // Fetch initial approved comments for the discussion section (server-side for SEO)
-  const [initialComments, totalApprovedCount, session, initialPendingComments, initialAvailability, activitySignals] = await Promise.all([
+  const [initialComments, totalApprovedCount, session, initialPendingComments, initialAvailability, activitySignals, publicEntries] = await Promise.all([
     db.comment.findMany({
       where: { startupId: startup.id, status: "APPROVED" },
       orderBy: { createdAt: "desc" },
@@ -220,6 +197,7 @@ export default async function StartupDetailPage(props: {
     fetchOwnPendingComments(startup.id),
     getCommentAvailability(),
     getActivitySignals([startup.id]),
+    publicFounderEntries(startup.id, startup.founderId, publicJournalPage),
   ]);
 
   // Determine if there is a next cursor for the comments
@@ -241,7 +219,7 @@ export default async function StartupDetailPage(props: {
   const tabs = [
     { id: "section-overview", label: "Overview" },
     { id: "section-proposition", label: "Core Proposition" },
-    { id: "section-updates", label: "Updates", count: startup.updates.length },
+    { id: "section-updates", label: "Updates", count: startup._count.updates },
     { id: "section-founder-journal", label: "Founder Journal" },
     ...(startup.betaTesterProgram?.enabled ? [{ id: "section-beta-testers", label: "Beta testers" }] : []),
     { id: "section-questions", label: "Questions", count: totalApprovedCount },
@@ -378,7 +356,7 @@ export default async function StartupDetailPage(props: {
 
         {/* ── Updates Section ── */}
         <div id="section-updates" className="scroll-mt-32">
-          <UpdatesSection updates={updates} />
+          <UpdatesSection updates={updates} totalCount={startup._count.updates} page={updatesPage} slug={startup.slug} journalPage={publicJournalPage} />
         </div>
 
         <div id="section-founder-journal" className="scroll-mt-32">

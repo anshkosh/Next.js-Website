@@ -3,7 +3,8 @@ import { renderToStaticMarkup } from "react-dom/server";
 import SearchPage from "../app/(public)/search/page";
 import { startupSearchWhere } from "../lib/startup-search";
 const queries = vi.hoisted(() => ({ startups: vi.fn(), articles: vi.fn(), categories: vi.fn(), signals: vi.fn() }));
-vi.mock("@/lib/db", () => ({ db: { $queryRaw: queries.signals, startup: { findMany: queries.startups }, journalPost: { findMany: queries.articles }, category: { findMany: queries.categories } } }));
+vi.mock("@/lib/db", () => ({ db: { $transaction: async (callback: (tx: object) => unknown) => callback({ $queryRaw: queries.signals }), startup: { findMany: queries.startups }, journalPost: { findMany: queries.articles }, category: { findMany: queries.categories } } }));
+vi.mock("@/lib/public-signals", () => ({ publicSignals: async (tx: { $queryRaw: () => Promise<unknown> }) => tx.$queryRaw() }));
 afterEach(() => { vi.unstubAllEnvs(); vi.clearAllMocks(); });
 it("matches published audience text as well as descriptions and cities", () => {
   const where = startupSearchWhere("  Kerala  ");

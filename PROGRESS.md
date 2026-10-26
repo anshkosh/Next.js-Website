@@ -1,5 +1,28 @@
 # Progress
 
+## 26 October 2026 — loading-speed fixes (prepared)
+
+- Branch `codex/loading-speed` starts from deployed main `c29766ce` in a separate
+  managed worktree. Existing maintenance-checkout changes are preserved.
+- Added public-only Redis signal caching keyed by the current PostgreSQL snapshot
+  and bounded by scheduled changes; request deduplication and five-row homepage
+  selection reduce repeated reads. Visitor state and nonce-bearing HTML remain
+  private, and scoring/eligibility rules and existing activity are unchanged.
+- Added public-list skeletons, streamed home rankings, deferred mascot code,
+  high-priority quality-75 hero delivery, three-at-a-time server-rendered update
+  paging, shared metadata/profile reads and a short public category-label cache.
+- Removed the redundant uuid types stub and added post-release/manual Lighthouse
+  reports. A manual HTTP/2 helper is prepared with lock/backup/validation/rollback;
+  no live server, DNS, bot, account or pool configuration was changed.
+- Local production build, lint/typecheck, dependency policy, 797 unit tests and
+  12 deployment-helper tests passed at the first checkpoint. Two optional tests
+  remain skipped. Added category-cache tests and final verification are pending.
+- Local Docker remains unavailable after startup was requested. The preview
+  launch was blocked by automatic approval review (reason: blocked by policy).
+  Real PostgreSQL and full browser checks will run in the required isolated CI.
+- The documented maintenance SSH login was rejected during the audit. HTTP/2
+  activation and CDN setup are not claimed complete. No merge/deployment yet.
+
 ## 24 October 2026 — moderation controls (in progress)
 
 - Add searchable, paginated comment controls for pending, published and hidden/rejected comments; staff can restore or hide comments and see the latest AI review reasons.

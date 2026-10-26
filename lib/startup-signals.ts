@@ -69,6 +69,24 @@ export function signalSnapshotQuery(now = new Date()) {
   `;
 }
 
+// All time boundaries used by signalSnapshotQuery, including unusual future
+// timestamps. Return UTC timestamptz so cache expiry is independent of DB timezone.
+export function signalNextChangeQuery(now = new Date()) {
+  return Prisma.sql`
+    SELECT MIN(boundary) AT TIME ZONE 'UTC' AS "nextChange" FROM (
+      SELECT MIN("featuredUntil") AS boundary FROM "FeaturedStartup" WHERE "featuredUntil" > (${now}::timestamptz AT TIME ZONE 'UTC')
+      UNION ALL
+      SELECT MIN("createdAt") FROM "StartupUpdate" WHERE status = 'APPROVED' AND "createdAt" > (${now}::timestamptz AT TIME ZONE 'UTC')
+      UNION ALL
+      SELECT MIN("publishedAt") FROM "FounderJournalEntry" WHERE visibility = 'PUBLIC' AND "approvedAt" IS NOT NULL AND "publishedAt" > (${now}::timestamptz AT TIME ZONE 'UTC')
+      UNION ALL
+      SELECT MIN("createdAt") FROM "Comment" WHERE status = 'APPROVED' AND "createdAt" > (${now}::timestamptz AT TIME ZONE 'UTC')
+      UNION ALL
+      SELECT MIN("repliedAt") FROM "Comment" WHERE status = 'APPROVED' AND "repliedAt" > (${now}::timestamptz AT TIME ZONE 'UTC')
+    ) scheduled
+  `;
+}
+
 export function rankSignals(rows: SignalSnapshot[]) {
   const ranked = rows.map(row => ({
     id: row.id, name: row.name, featured: row.featured,

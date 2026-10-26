@@ -1,8 +1,9 @@
 # Leaderboard signals
 
-The homepage featured list and `/leaderboard` share `lib/leaderboard.ts` and
-`lib/startup-signals.ts`. Featured membership remains curated, but ordering and
-displayed ranks are global. Only LIVE startups are eligible; no demo entries are added.
+The homepage top five and `/leaderboard` share `lib/leaderboard.ts` and
+`lib/startup-signals.ts`. Discover's featured membership remains curated. Only
+LIVE startups whose owner has founder mode enabled are eligible; no demo entries
+are added.
 
 All-time score = net votes + founder publishing points + community participation
 points + founder discussion points:
@@ -24,7 +25,7 @@ Private/pending/rejected/future journal material cannot influence the score.
 Removed or rejected comments/replies and deleted updates lose their contribution.
 
 The database returns aggregate counts only, never commenter emails. Read counts,
-assign competition ranks (1,2,2,4) and slice pages in a RepeatableRead transaction.
+assign dense ranks (1,2,2,3) and slice pages in a RepeatableRead transaction.
 Ties are ordered by name then ID. Only the current page's profile fields and visitor
 vote flags are loaded. The aggregate pass is O(number of live startups); revisit
 database-side windowed pagination if the directory grows substantially.
@@ -34,7 +35,10 @@ compatibility. `leaderboardScore` is separate and is never written to this colum
 Directory voting controls explicitly say “Net votes”; leaderboard controls include
 activity points and each row exposes a component breakdown. Score-changing
 server actions invalidate the homepage and leaderboard. Scheduled publication is
-included on the next dynamic request; neither list is cross-request cached.
+included on the next dynamic request. Public aggregate rows use a short Redis
+cache keyed by the exact PostgreSQL snapshot, with expiry at scheduled changes.
+Profiles and visitor vote flags remain request-specific. See [Loading
+performance](Performance.md) for cache boundaries, failure behavior and tests.
 
 Tests cover caps, ordering, snapshot eligibility, privacy, pagination, tied ranks,
 featured consistency, and optimistic voting with an activity bonus.

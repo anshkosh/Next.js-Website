@@ -15,8 +15,9 @@ export default function HeroArtwork() {
             width={1672}
             height={941}
             sizes="(max-width: 639px) 610px, (max-width: 767px) 712px, (max-width: 819px) 820px, (max-width: 919px) 100vw, 920px"
-            quality={85}
-            preload
+            quality={75}
+            loading="eager"
+            fetchPriority="high"
           />
         </div>
       </div>
