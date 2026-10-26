@@ -59,7 +59,9 @@ def main():
     import fcntl  # Linux server only; config transformation tests also run on Windows.
     if os.geteuid() != 0 or CONFIG.is_symlink() or CONFIG.resolve() != CONFIG or not CONFIG.is_file():
         raise SystemExit("Run as root against the existing regular Anshkosh config")
-    build = subprocess.run(["/usr/sbin/nginx", "-V"], capture_output=True, text=True, check=True)
+    # AlmaLinux 8 ships Python 3.6; capture_output/text were added in 3.7.
+    build = subprocess.run(["/usr/sbin/nginx", "-V"], stdout=subprocess.PIPE,
+                           stderr=subprocess.PIPE, universal_newlines=True, check=True)
     if "--with-http_v2_module" not in build.stderr + build.stdout:
         raise SystemExit("Installed nginx lacks HTTP/2 support; no changes made")
     with LOCK.open("a+") as lock:
@@ -73,7 +75,7 @@ def main():
         BACKUPS.mkdir(mode=0o700, exist_ok=True)
         if BACKUPS.is_symlink() or BACKUPS.resolve() != BACKUPS:
             raise SystemExit("Unexpected backup path")
-        stamp = datetime.datetime.utcnow().strftime("%Y%m%dT%H%M%S%f")
+        stamp = datetime.datetime.now(datetime.timezone.utc).strftime("%Y%m%dT%H%M%S%f")
         backup = BACKUPS / ("nginx-http2-" + stamp + ".conf")
         shutil.copy2(str(CONFIG), str(backup))
         os.chmod(str(backup), 0o600)

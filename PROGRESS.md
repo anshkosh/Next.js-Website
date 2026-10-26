@@ -32,6 +32,28 @@
   follow-ups. The prepared HTTP/2 helper has 12 passing deployment-helper tests
   across the helper suite, but has not been applied to the server.
 
+### Follow-up verification and HTTP/2 activation
+
+- The repository is public. A fresh run `40279263644` started both required jobs
+  successfully; code checks and all PostgreSQL checks, including the new cache
+  concurrency/scheduling regression, passed. Its full browser suite is running.
+  The earlier account-billing rejection is no longer blocking job startup.
+- The operations guide identifies the maintenance key as administrator access,
+  not deploy access. That documented account works. Read-only live inventory
+  confirmed the expected indexes, Prisma default pool settings, 100 maximum
+  PostgreSQL connections and nine idle plus one diagnostic active connection.
+- Enabled HTTP/2 under the deployment lock after a config backup and successful
+  `nginx -t`; backup `nginx-http2-20261026T062550519644.conf`. The helper first
+  stopped before changes on Python 3.6; the corrected helper and 14 Python tests
+  now cover legacy-runtime activation and rollback. No TLS cipher/protocol
+  policy, route, upload limit, application release or worker was changed.
+- External ALPN and all 31 Chrome requests verified `h2`; public pages/health
+  passed and release stayed `c29766ce`. Fresh mobile home: 90/100, LCP 3.2 s,
+  blocking 80 ms, no run warnings. Earlier home: 78/100, LCP 4.7 s. These are
+  single lab observations, not a causal or real-user performance guarantee.
+- App changes still need completed passing checks and owner-approved merge.
+  CDN/DNS changes and additional capacity remain outside this code release.
+
 ## 24 October 2026 — moderation controls (in progress)
 
 - Add searchable, paginated comment controls for pending, published and hidden/rejected comments; staff can restore or hide comments and see the latest AI review reasons.

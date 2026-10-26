@@ -92,9 +92,24 @@ HTTP/2 already configured, inspect ALPN/runtime configuration rather than making
 unrelated TLS changes. Verify from outside with a client offering `h2`, then
 check health, release identity and pages.
 
-The audit's maintenance SSH login was rejected. HTTP/2 is not claimed enabled,
-and no live server config, database pool limit or DNS was changed by preparing
-these fixes. A front-site CDN requires separate DNS/account configuration;
+The first SSH attempt used the deploy account. The operations guide identifies
+the maintenance key with the administrator account; that documented access was
+subsequently verified. On 26 October at approximately 11:55 IST, the reviewed
+helper enabled HTTP/2 on the existing nginx listeners after a successful config
+test. Backup: `/var/lib/anshkosh-routing/nginx-http2-20261026T062550519644.conf`.
+The first helper invocation stopped before changing configuration because the
+server has Python 3.6; the corrected helper and rollback tests support that version.
+External TLS ALPN and all 31 Lighthouse network requests then used `h2`; home,
+Discover, leaderboard, health and release identity passed. The application release
+remained `c29766ce`. A fresh first-visit mobile homepage run scored 90/100 with
+3.2-second LCP versus the earlier 78/100 and 4.7 seconds. These are individual lab
+runs, not a statistically controlled estimate or a field-performance claim.
+
+Read-only database inventory confirmed indexes on startups, updates, comments,
+founder journals, votes and beta requests. Pool settings use Prisma defaults;
+PostgreSQL allows 100 connections and the spot check counted nine idle plus this
+one active diagnostic connection. There is no active PgBouncer service. No pool
+limit, database index or DNS configuration was changed. A front-site CDN requires separate DNS/account configuration;
 cache personalized HTML only after an explicit security-aware design. A load
 balancer or separate database pooler is not required by these code changes.
 Prisma's existing pool, compression and immutable static/image caches remain.

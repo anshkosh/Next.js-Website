@@ -8,9 +8,10 @@
   add public-list skeletons and paginate startup updates three at a time.
 - Defer Kosh's animation library, prioritize/compress the hero, cache category
   labels briefly and remove the redundant uuid types stub.
-- Add Lighthouse reports and a prepared manual HTTP/2 helper. Live nginx/CDN/pool
-  configuration is unchanged; activation still requires the normal release path
-  and authorized server access. See `docs/wiki/engineering/Performance.md`.
+- Add Lighthouse reports and a manual HTTP/2 helper. HTTP/2 was enabled and
+  independently verified on 26 October while application release `c29766ce`
+  stayed live; CDN/DNS/pool settings are unchanged. Application changes still
+  require the normal reviewed release path. See `docs/wiki/engineering/Performance.md`.
 
 ## Unreleased — moderation controls
 
