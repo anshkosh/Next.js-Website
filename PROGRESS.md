@@ -1,5 +1,21 @@
 # Progress
 
+## 26 October 2026 — release 404 guard correction
+
+- Owner approved merge/deployment of PR #64, merged as `e27abe61`. Main's code,
+  database and browser gates passed and the candidate built/started successfully.
+- The pre-switch SEO gate caught `/journal/seo-check-nonexistent-article`
+  returning HTTP 200: the new ancestor `journal/loading.tsx` flushed headers
+  before `notFound()`. The candidate was stopped; public traffic stayed on
+  healthy `c29766ce` and the earlier HTTP/2 server improvement remains active.
+- Remove only the journal ancestor loading boundary. Keep the other skeletons
+  and preserve the strict production 404 check. Extend the first isolated browser
+  journey with actual missing article/startup/category/root HTTP responses for
+  ordinary and crawler user agents, requiring 404 and noindex before publication.
+- Follow-up branch `codex/loading-speed-404` starts from merged main. Existing
+  owner authorization covers this release repair and subsequent normal deployment
+  after all checks pass; no new migration, account/content or scoring changes.
+
 ## 26 October 2026 — loading-speed fixes (prepared)
 
 - Branch `codex/loading-speed` starts from deployed main `c29766ce` in a separate

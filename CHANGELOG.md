@@ -2,6 +2,11 @@
 
 ## Unreleased — loading performance
 
+- Preserve real HTTP 404 responses for missing journal articles by removing the
+  inherited journal loading boundary; add HTTP status regression coverage for
+  missing public detail routes. The first candidate was safely stopped before
+  traffic switched when the existing production SEO check caught this issue.
+
 - Reuse public signal aggregates by database snapshot while preserving immediate
   committed visibility/vote changes, scheduled eligibility and private viewer state.
 - Stream home rankings, fetch only five homepage profiles, share metadata reads,

@@ -44,8 +44,12 @@ policy. Browser category labels can lag an admin edit by up to one minute.
 ## Rendering and payloads
 
 - Homepage rankings stream behind a skeleton while the static hero can render.
-- Discover, search, categories, journal and leaderboard have skeleton fallbacks.
+- Discover, search, categories and leaderboard have skeleton fallbacks.
   They expose one loading status and respect reduced-motion preferences.
+  Journal deliberately has no ancestor loading boundary: article existence must
+  be checked before streaming starts so missing/unpublished posts return HTTP
+  404. Browser CI checks real status codes for regular and crawler requests;
+  the production SEO gate retains the same strict 404 checks.
 - The hero is fetched eagerly with high priority and WebP quality 75. Other
   below-fold images keep their existing lazy loading.
 - Kosh's sprite/animation library loads on demand for an error or empty state;

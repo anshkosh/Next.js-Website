@@ -126,7 +126,7 @@ test.beforeEach(async ({ page }) => {
 test.describe.configure({ mode: "serial", retries: 0 });
 test.setTimeout(180000);
 
-test("legacy campaigns redirect verified replacements and keep missing demos as 404s", async ({ request }) => {
+test("legacy redirects and missing public details preserve real HTTP status codes", async ({ request }) => {
   const response = await request.get("/campaigns/cane-theory?utm_source=legacy", { maxRedirects: 0 });
   expect(response.status()).toBe(308);
   const destination = new URL(response.headers().location, "http://127.0.0.1:3100");
@@ -134,6 +134,15 @@ test("legacy campaigns redirect verified replacements and keep missing demos as 
   expect(destination.search).toBe("?utm_source=legacy");
   for (const slug of ["looplane", "glasswing-robotics", "unknown-legacy-campaign"]) {
     expect((await request.get(`/campaigns/${slug}`, { maxRedirects: 0 })).status()).toBe(404);
+  }
+  // An ancestor loading.tsx can flush a 200 response before notFound() runs.
+  // Exercise HTTP responses, not only the metadata function's thrown signal.
+  for (const path of ["/journal/seo-check-nonexistent-article", "/startups/seo-check-nonexistent-startup", "/category/seo-check-nonexistent-category", "/seo-check-nonexistent-page"]) {
+    for (const userAgent of ["Mozilla/5.0", "Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)"]) {
+      const missing = await request.get(path, { headers: { "user-agent": userAgent } });
+      expect(missing.status(), `${path} must return a real 404 before streaming`).toBe(404);
+      expect(await missing.text()).toContain("noindex");
+    }
   }
 });
 
