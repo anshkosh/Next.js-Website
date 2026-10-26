@@ -14,14 +14,23 @@
 - Removed the redundant uuid types stub and added post-release/manual Lighthouse
   reports. A manual HTTP/2 helper is prepared with lock/backup/validation/rollback;
   no live server, DNS, bot, account or pool configuration was changed.
-- Local production build, lint/typecheck, dependency policy, 797 unit tests and
-  12 deployment-helper tests passed at the first checkpoint. Two optional tests
-  remain skipped. Added category-cache tests and final verification are pending.
+- Local production build, lint/typecheck, dependency policy, 797 full-suite tests
+  and 12 deployment-helper tests passed. Subsequent focused category-cache and
+  cache-recovery tests also pass; two existing optional tests remain skipped.
+- At 1080px the hero's local WebP encoding fell from 84,178 to 53,090 bytes (37%)
+  using quality 75. This is a byte-size comparison, not a measured live LCP gain.
 - Local Docker remains unavailable after startup was requested. The preview
   launch was blocked by automatic approval review (reason: blocked by policy).
   Real PostgreSQL and full browser checks will run in the required isolated CI.
+- Draft PR #64 contains source commit `ce37be07`. Required workflow `40278940058`
+  did not start either code or browser job: both GitHub annotations report failed
+  account payments or a spending-limit block. No CI test failure or pass is claimed.
+  Restore Actions access, rerun all required checks and resolve any findings before
+  approving merge/deployment. Release remains `c29766ce`; no deploy was attempted.
 - The documented maintenance SSH login was rejected during the audit. HTTP/2
-  activation and CDN setup are not claimed complete. No merge/deployment yet.
+  activation, front-site CDN setup and live pool/index verification remain external
+  follow-ups. The prepared HTTP/2 helper has 12 passing deployment-helper tests
+  across the helper suite, but has not been applied to the server.
 
 ## 24 October 2026 — moderation controls (in progress)
 
