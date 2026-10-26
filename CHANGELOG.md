@@ -1,5 +1,18 @@
 # Website changelog
 
+## Unreleased — loading performance
+
+- Reuse public signal aggregates by database snapshot while preserving immediate
+  committed visibility/vote changes, scheduled eligibility and private viewer state.
+- Stream home rankings, fetch only five homepage profiles, share metadata reads,
+  add public-list skeletons and paginate startup updates three at a time.
+- Defer Kosh's animation library, prioritize/compress the hero, cache category
+  labels briefly and remove the redundant uuid types stub.
+- Add Lighthouse reports and a manual HTTP/2 helper. HTTP/2 was enabled and
+  independently verified on 26 October while application release `c29766ce`
+  stayed live; CDN/DNS/pool settings are unchanged. Application changes still
+  require the normal reviewed release path. See `docs/wiki/engineering/Performance.md`.
+
 ## Unreleased — moderation controls
 
 - Expand comment review with status filters, search, pagination, restore and hide controls.

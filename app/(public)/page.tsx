@@ -1,4 +1,6 @@
 import { seoMetadata } from "@/lib/seo";
+import { Suspense } from "react";
+import { RankingRowsLoading } from "@/components/layout/PublicListLoading";
 
 import LandingHero from "@/components/landing/LandingHero";
 import LandingMission from "@/components/landing/LandingMission";
@@ -20,7 +22,9 @@ export default async function HomePage() {
     <div className="w-full">
       <LandingHero />
       <LandingFounderStory />
-      <TopRankedStartups />
+      <Suspense fallback={<RankingRowsLoading />}>
+        <TopRankedStartups />
+      </Suspense>
       <LandingParticipation />
       <LandingMission />
       <LandingFAQTeaser />

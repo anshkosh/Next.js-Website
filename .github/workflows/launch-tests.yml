@@ -65,6 +65,10 @@ jobs:
         run: npx tsx scripts/test-moderation-postgres.ts
         env:
           MODERATION_TEST_DATABASE_URL: ${{ env.DATABASE_URL }}
+      - name: Verify public signal cache correctness against PostgreSQL
+        run: npx tsx scripts/test-public-signals-cache-postgres.ts
+        env:
+          PERFORMANCE_TEST_DATABASE_URL: ${{ env.DATABASE_URL }}
       # Sanitize-only upload mode validates and rewrites PDFs with qpdf (lib/uploads/qpdf.ts); it fails closed without it.
       - run: sudo apt-get update -qq && sudo apt-get install -y -qq qpdf && qpdf --version
       - run: npx playwright install --with-deps chromium

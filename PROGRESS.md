@@ -1,5 +1,59 @@
 # Progress
 
+## 26 October 2026 — loading-speed fixes (prepared)
+
+- Branch `codex/loading-speed` starts from deployed main `c29766ce` in a separate
+  managed worktree. Existing maintenance-checkout changes are preserved.
+- Added public-only Redis signal caching keyed by the current PostgreSQL snapshot
+  and bounded by scheduled changes; request deduplication and five-row homepage
+  selection reduce repeated reads. Visitor state and nonce-bearing HTML remain
+  private, and scoring/eligibility rules and existing activity are unchanged.
+- Added public-list skeletons, streamed home rankings, deferred mascot code,
+  high-priority quality-75 hero delivery, three-at-a-time server-rendered update
+  paging, shared metadata/profile reads and a short public category-label cache.
+- Removed the redundant uuid types stub and added post-release/manual Lighthouse
+  reports. A manual HTTP/2 helper is prepared with lock/backup/validation/rollback;
+  no live server, DNS, bot, account or pool configuration was changed.
+- Local production build, lint/typecheck, dependency policy, 797 full-suite tests
+  and 12 deployment-helper tests passed. Subsequent focused category-cache and
+  cache-recovery tests also pass; two existing optional tests remain skipped.
+- At 1080px the hero's local WebP encoding fell from 84,178 to 53,090 bytes (37%)
+  using quality 75. This is a byte-size comparison, not a measured live LCP gain.
+- Local Docker remains unavailable after startup was requested. The preview
+  launch was blocked by automatic approval review (reason: blocked by policy).
+  Real PostgreSQL and full browser checks will run in the required isolated CI.
+- Draft PR #64 contains source commit `ce37be07`. Required workflow `40278940058`
+  did not start either code or browser job: both GitHub annotations report failed
+  account payments or a spending-limit block. No CI test failure or pass is claimed.
+  Restore Actions access, rerun all required checks and resolve any findings before
+  approving merge/deployment. Release remains `c29766ce`; no deploy was attempted.
+- The documented maintenance SSH login was rejected during the audit. HTTP/2
+  activation, front-site CDN setup and live pool/index verification remain external
+  follow-ups. The prepared HTTP/2 helper has 12 passing deployment-helper tests
+  across the helper suite, but has not been applied to the server.
+
+### Follow-up verification and HTTP/2 activation
+
+- The repository is public. A fresh run `40279263644` started both required jobs
+  successfully; code checks and all PostgreSQL checks, including the new cache
+  concurrency/scheduling regression, passed. Its full browser suite is running.
+  The earlier account-billing rejection is no longer blocking job startup.
+- The operations guide identifies the maintenance key as administrator access,
+  not deploy access. That documented account works. Read-only live inventory
+  confirmed the expected indexes, Prisma default pool settings, 100 maximum
+  PostgreSQL connections and nine idle plus one diagnostic active connection.
+- Enabled HTTP/2 under the deployment lock after a config backup and successful
+  `nginx -t`; backup `nginx-http2-20261026T062550519644.conf`. The helper first
+  stopped before changes on Python 3.6; the corrected helper and 14 Python tests
+  now cover legacy-runtime activation and rollback. No TLS cipher/protocol
+  policy, route, upload limit, application release or worker was changed.
+- External ALPN and all 31 Chrome requests verified `h2`; public pages/health
+  passed and release stayed `c29766ce`. Fresh mobile home: 90/100, LCP 3.2 s,
+  blocking 80 ms, no run warnings. Earlier home: 78/100, LCP 4.7 s. These are
+  single lab observations, not a causal or real-user performance guarantee.
+- App changes still need completed passing checks and owner-approved merge.
+  CDN/DNS changes and additional capacity remain outside this code release.
+
 ## 24 October 2026 — moderation controls (in progress)
 
 - Add searchable, paginated comment controls for pending, published and hidden/rejected comments; staff can restore or hide comments and see the latest AI review reasons.

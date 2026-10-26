@@ -1,1 +1,1 @@
-export { default } from "@/components/layout/PageLoading";
+export { default } from "@/components/layout/PublicListLoading";

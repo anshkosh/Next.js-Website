@@ -1,8 +1,7 @@
-"use client";
-
-import { useState } from "react";
+import Link from "next/link";
 import Image from "next/image";
-import { ChevronDown, Newspaper } from "lucide-react";
+import { Newspaper } from "lucide-react";
+import { PUBLIC_UPDATES_PAGE_SIZE, updatesPageHref } from "@/lib/public-updates";
 
 type Update = {
   id: string;
@@ -33,11 +32,12 @@ function formatDate(dateStr: string) {
   });
 }
 
-export default function UpdatesSection({ updates }: { updates: Update[] }) {
-  const [showAll, setShowAll] = useState(false);
-
-  const total = updates.length;
-  const visibleUpdates = showAll ? updates : updates.slice(0, 3);
+export default function UpdatesSection({ updates, totalCount, page, slug, journalPage }: {
+  updates: Update[]; totalCount: number; page: number; slug: string; journalPage: number;
+}) {
+  const total = totalCount;
+  const offset = (page - 1) * PUBLIC_UPDATES_PAGE_SIZE;
+  const totalPages = Math.max(1, Math.ceil(total / PUBLIC_UPDATES_PAGE_SIZE));
 
   return (
     <div className="bg-white p-8 rounded-2xl border border-gray-100 shadow-sm">
@@ -66,8 +66,8 @@ export default function UpdatesSection({ updates }: { updates: Update[] }) {
         <div className="absolute left-[19px] top-0 bottom-0 w-0.5 bg-gray-100" />
 
         <div className="space-y-0">
-          {visibleUpdates.map((update) => {
-            const updateNumber = total - (updates.indexOf(update));
+          {updates.map((update, index) => {
+            const updateNumber = total - offset - index;
 
             return (
               <div key={update.id} className="relative pl-12 pb-8 last:pb-0 group">
@@ -112,17 +112,12 @@ export default function UpdatesSection({ updates }: { updates: Update[] }) {
         </div>
       </div>}
 
-      {/* Show More */}
-      {total > 3 && !showAll && (
-        <div className="mt-6 text-center">
-          <button
-            onClick={() => setShowAll(true)}
-            className="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-semibold text-coral-600 bg-coral-50 hover:bg-coral-100 rounded-xl transition-colors"
-          >
-            Show {total - 3} More Update{total - 3 !== 1 ? "s" : ""}
-            <ChevronDown className="w-4 h-4" />
-          </button>
-        </div>
+      {totalPages > 1 && (
+        <nav aria-label="Founder update pages" className="mt-6 flex flex-wrap items-center justify-center gap-4 text-sm">
+          {page > 1 && <Link prefetch={false} href={updatesPageHref(slug, page - 1, journalPage)} className="inline-flex min-h-11 items-center rounded-xl bg-coral-50 px-4 font-semibold text-coral-700 hover:bg-coral-100">Newer updates</Link>}
+          <span className="text-gray-600">Page {page} of {totalPages}</span>
+          {page < totalPages && <Link prefetch={false} href={updatesPageHref(slug, page + 1, journalPage)} className="inline-flex min-h-11 items-center rounded-xl bg-coral-50 px-4 font-semibold text-coral-700 hover:bg-coral-100">Older updates</Link>}
+        </nav>
       )}
     </div>
   );
