@@ -38,8 +38,8 @@ async function isolatedContext(browser: Browser, options: Parameters<Browser["ne
 }
 
 async function reveal(page: Page) {
-  const peek = page.getByRole("button", { name: "Sneak peek", exact: true });
-  if (await peek.isVisible()) { await peek.click(); await expect(peek).toBeHidden({ timeout: 15000 }); }
+  const enterButton = page.getByRole("button", { name: "Browse Anshkosh", exact: true });
+  if (await enterButton.isVisible()) { await enterButton.click(); await expect(enterButton).toBeHidden({ timeout: 15000 }); }
   const cookieNotice = page.getByRole("button", { name: "Dismiss cookie and browser storage notice", exact: true });
   if (await cookieNotice.isVisible()) await cookieNotice.click();
 }
