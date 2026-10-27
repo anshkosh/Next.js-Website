@@ -9,6 +9,7 @@ vi.mock("@/lib/db", () => {
 vi.mock("next/headers", () => ({ headers: async () => new Headers() }));
 vi.mock("next/cache", () => ({ revalidatePath: mock.cache }));
 vi.mock("@/lib/logger", () => ({ logger: { error: vi.fn() } }));
+vi.mock("@/lib/comment-notifications", () => ({ storeApprovedCommentEmail: vi.fn().mockResolvedValue(null) }));
 vi.mock("@/lib/utils/rate-limit", () => ({ checkRateLimit: vi.fn() }));
 vi.mock("@/lib/utils/turnstile", () => ({ verifyTurnstileToken: vi.fn() }));
 import { approveComment, rejectComment, replyToComment, deleteReply } from "../app/actions/comment.actions";

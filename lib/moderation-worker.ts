@@ -50,8 +50,12 @@ export async function processModeration() {
         const saved = await tx.contentModeration.updateMany({ where: lease, data: { status: verdict.safe ? "SAFE" : "FLAGGED", reasons: verdict.reasons, checkedAt: new Date(), leaseToken: null } });
         if (!saved.count) return null;
         const fresh = await moderationSource(tx, job);
+        if (!fresh || contentHash(fresh.content) !== job.contentHash) {
+          await tx.contentModeration.update({ where: { id: job.id }, data: { status: "STALE" } });
+          return null;
+        }
         const applied = verdict.safe ? await applyModeration(tx, job, true) : null;
-        if (!fresh || contentHash(fresh.content) !== job.contentHash || verdict.safe && !applied) {
+        if (verdict.safe && !applied) {
           await tx.contentModeration.update({ where: { id: job.id }, data: { status: "STALE" } });
           return null;
         }
