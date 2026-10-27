@@ -1,13 +1,13 @@
 # Anshkosh
 
-> Anshkosh helps people discover Indian startups before launch, follow founder progress, and offer feedback.
+> Anshkosh helps people explore Indian startup profiles, follow founder progress, offer feedback, and use free founder tools.
 
 ## Key pages
 
 - [Home](https://www.anshkosh.com/): Startup discovery, founder profiles, progress, and free tools.
 - [About Anshkosh](https://www.anshkosh.com/about): What Anshkosh is, who it is for and how its name is written.
-- [Discover startups](https://www.anshkosh.com/discover): Browse startup profiles and evidence as the pilot opens.
-- [Startup leaderboard](https://www.anshkosh.com/leaderboard): Published startups ranked by all-time signals, calculated as upvotes minus downvotes. Equal net totals share a rank. Votes reflect community opinion, not verified traction.
+- [Discover startups](https://www.anshkosh.com/discover): Browse published startup profiles, review founder-shared evidence, and follow progress.
+- [Startup leaderboard](https://www.anshkosh.com/leaderboard): Published startups ranked by net votes plus capped points for public founder progress, approved comments, and founder replies. Equal scores share a rank. Signals show participation, not verified traction.
 - [Categories](https://www.anshkosh.com/categories): Explore startups by industry category.
 - [Journal](https://www.anshkosh.com/journal): Founder stories, startup insights, and validation guidance.
 - [FAQ](https://www.anshkosh.com/faq): Questions about listings, free tools, feedback, and the pilot.

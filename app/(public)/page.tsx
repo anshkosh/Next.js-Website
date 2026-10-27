@@ -12,7 +12,7 @@ import LandingCTA from "@/components/landing/LandingCTA";
 import LandingFeaturedOn from "@/components/landing/LandingFeaturedOn";
 
 export const metadata = seoMetadata({
-  title: "Anshkosh | Discover Indian Startups Before Launch",
+  title: "Anshkosh | Discover Indian Startups and Follow Founder Progress",
   description: "Discover what Indian founders are building, explore their startup stories and progress, and take your next step with nine free founder tools.",
   path: "/",
 });

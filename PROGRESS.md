@@ -1,5 +1,11 @@
 # Progress
 
+## 27 October 2026 — pilot website copy review (prepared)
+
+- Compared the live home, Discover and leaderboard pages with the current application copy and published pilot behavior. The homepage still called a working pilot "under construction"; repeated "before launch" messaging did not fit already-operating businesses; leaderboard copy described a mixed activity score as community interest.
+- Updated the site's positioning to cover Indian startups at different stages, clarified the capped ranking components and their limits, and corrected stale fallback, metadata, footer, product documentation, and `llms.txt` descriptions.
+- Source changes are based on current main `9b86f124` and remain local. Lint, typecheck, dependency policy, deployment-helper tests (3/3), curtain regressions (5/5), and whitespace checks passed. The full unit suite ran 802 tests: 797 passed, 2 skipped, and 3 failed in unchanged migration-policy assertions (`__tests__/deployment-policy.test.ts`, for beta-tester and AI-moderation migration approvals). The isolated browser/database workflow is still required. No public copy, bot, account, ranking treatment, VPS setting, or production release was changed.
+
 ## 26 October 2026 — release 404 guard correction
 
 - Owner approved merge/deployment of PR #64, merged as `e27abe61`. Main's code,

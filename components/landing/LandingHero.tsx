@@ -7,8 +7,8 @@ export default function LandingHero() {
     <section className="relative isolate w-full overflow-hidden bg-[#F7F1E7] text-gray-900">
       <div className="relative z-10 mx-auto max-w-4xl px-4 pt-6 text-center">
         <h1 className="font-heading text-[2.5rem] font-bold leading-[1.05] tracking-tight sm:text-5xl lg:text-[3.5rem]">
-          Discover Indian startups
-          <span className="block text-coral-500">before launch.</span>
+          Explore Indian startups
+          <span className="block text-coral-500">follow founder progress.</span>
         </h1>
         <p className="mx-auto mt-4 max-w-2xl text-base leading-relaxed text-gray-600 sm:text-lg">
           Explore what founders are building, understand the problems they’re solving,

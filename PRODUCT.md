@@ -14,9 +14,9 @@ Reviewers and administrators operate the existing moderation and publishing work
 
 ## Product Purpose
 
-Help people discover Indian startups before launch and understand the idea, team, problem, evidence, and progress behind them. Give founders a public home for their work and practical free tools to move an early idea forward.
+Help people explore Indian startups at different stages and understand the idea, team, problem, evidence, and progress behind them. Give founders a public home for their work and practical free tools to move an early idea forward.
 
-The owner confirmed this current pilot scope on 8 October 2026. The homepage promise is “Discover Indian startups before launch.”
+The owner confirmed this current pilot scope on 8 October 2026. The homepage promise is “Explore Indian startups. Follow founder progress.”
 
 ## Positioning
 
@@ -27,7 +27,7 @@ Do not invent superiority claims, guaranteed validation, fundraising outcomes, o
 ## Operating Context
 
 - The public experience includes the homepage, discovery and category browsing, an all-time startup leaderboard, search, startup profiles, Journal, FAQ, Contact, and policy pages.
-- The leaderboard includes only published startup profiles, ranked by their all-time signals: net votes (upvotes minus downvotes) plus capped activity points for public founder progress, approved community participation and founder replies. Equal signal totals share a rank. Startup cards, profiles and the leaderboard show the same signal total, labelled as votes plus activity. A visitor has one active vote per startup and can switch or remove it. Public founder-name search matches published founding teams. It offers profile links, voting and pagination; category and time filters are outside the owner-requested scope.
+- The leaderboard includes only published startup profiles, ranked by their all-time signals: net votes (upvotes minus downvotes) plus capped activity points for public founder progress, approved comments and founder replies. Equal signal totals share a rank. Startup cards, profiles and the leaderboard show the same signal total, labelled as votes plus activity. A visitor has one active vote per startup and can switch or remove it. Public founder-name search matches published founding teams. It offers profile links, voting and pagination; category and time filters are outside the owner-requested scope.
 - Members and backers can register an account and turn founder mode off. Founder mode starts on by default and can be changed during registration or with the dashboard switch. Switching it off hides every owned startup and its linked founder stories publicly, including direct startup links, while preserving saved work, moderation status and permissions. Switching it back on restores previous public visibility.
 - Profile settings supports a photo, bio, location, website, startup-review/vote-milestone email preferences, verified email changes, password changes and other-device sign-out. Profile details do not overwrite published startup team information; optional email settings do not disable security or recovery messages.
 - Founders create an account to submit a startup profile. Profiles are reviewed before publication; founders can manage profiles and updates through the existing account workflows.

@@ -1,6 +1,6 @@
 # Anshkosh
 
-**A public validation platform for Indian startups.** Founders publish evidence, risks and structured public signals before launch; backers discover startups and follow the teams turning early demand into measurable traction.
+**A public home for Indian startup profiles and founder progress.** Founders share evidence, risks and updates; visitors discover startups, offer feedback, and use free founder tools. Anshkosh is an early-access pilot, and its public signals do not verify demand or traction.
 
 Live at **https://www.anshkosh.com**, currently an **early-access pilot**: visitors can give feedback, join waitlists and express interest, but no payments, pledges, orders or investments are open.
 

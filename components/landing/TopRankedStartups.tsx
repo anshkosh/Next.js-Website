@@ -28,7 +28,7 @@ export default async function TopRankedStartups() {
               Top startups, ranked.
             </h2>
             <p className="mt-3 max-w-xl text-sm leading-relaxed text-gray-600">
-              The five highest-ranked published startups, based on net votes, public founder progress, approved community participation, and founder replies.
+              The five highest-ranked published startups, based on net votes and capped points for founder progress, approved comments, and founder replies.
             </p>
           </div>
           <Link href="/leaderboard" className="group inline-flex items-center gap-1.5 text-sm font-semibold text-coral-600 transition-colors hover:text-coral-700">

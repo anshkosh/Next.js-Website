@@ -3,7 +3,7 @@ import { ArrowRight } from "lucide-react";
 import { seoMetadata } from "@/lib/seo";
 
 export const metadata = seoMetadata({
-  title: "About Anshkosh — A home for startups before launch",
+  title: "About Anshkosh — Indian startup stories and founder progress",
   description: "Discover why Anshkosh exists: a public home for Indian startup ideas, founder progress and useful feedback, with free tools for the next step.",
   path: "/about",
 });
@@ -12,13 +12,13 @@ export default function AboutPage() {
   return (
     <section aria-labelledby="about-title" className="page-intro-spacing bg-white min-h-screen">
       <div className="max-w-3xl mx-auto px-4 sm:px-6">
-        <h1 id="about-title" className="page-title mb-4">A home for the work before the launch.</h1>
+        <h1 id="about-title" className="page-title mb-4">A home for Indian startup stories.</h1>
         <p className="text-lg leading-relaxed text-gray-600 mb-8">
-          Anshkosh helps people discover Indian startups before launch and understand the idea, the team, and the progress behind them.
+          Anshkosh helps people explore Indian startups, understand the idea and team, and follow the progress founders choose to share.
         </p>
         <div className="space-y-10 text-gray-600 leading-relaxed text-base">
           <section aria-labelledby="about-purpose">
-            <h2 id="about-purpose" className="text-2xl font-bold text-gray-900 mb-3 font-heading">A startup begins long before its launch day</h2>
+            <h2 id="about-purpose" className="text-2xl font-bold text-gray-900 mb-3 font-heading">Every startup has a story worth understanding</h2>
             <p>
               It begins with a problem worth solving. Then come the conversations, rough prototypes, small experiments, and decisions about what to build next. That early work helps explain why an idea matters and how it is taking shape.
             </p>
