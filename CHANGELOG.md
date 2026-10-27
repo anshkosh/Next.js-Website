@@ -3,7 +3,7 @@
 ## Unreleased — pilot positioning and leaderboard clarity
 
 - Replace "under construction" and "before launch" claims with accurate early-access pilot language for startups at different stages.
-- Describe the leaderboard as net votes plus capped points for founder progress, approved comments, and founder replies; state that these are participation signals, not verified demand or traction.
+- Describe the leaderboard as net votes plus capped points for founder progress, approved community participants, and participants with founder replies; state that these are participation signals, not verified demand or traction. Clarify exact point maxima, dense tie ranks, and the total Discover count.
 - Correct the directory's no-database fallback and align page metadata, footer, About copy, product docs, and `llms.txt` with the live pilot.
 
 ## Unreleased — loading performance

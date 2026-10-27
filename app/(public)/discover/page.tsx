@@ -113,6 +113,7 @@ export default async function DiscoverPage(props: {
   ]);
 
   const totalPages = Math.ceil(totalCount / pageSize);
+  const totalPublishedCount = totalCount + (showFeatured ? featuredIds.length : 0);
 
   const formattedStartups = await withActivitySignals(startups.map(publicStartupCard));
 
@@ -146,7 +147,9 @@ export default async function DiscoverPage(props: {
                 {query || (categorySlug && categorySlug !== "all") ? "Matching startups" : featuredIds.length > 0 ? "More startups" : "All startups"}
               </h2>
               <p className="mt-1 text-sm text-gray-600 tabular-nums">
-                {totalCount.toLocaleString("en-IN")} {totalCount === 1 ? "startup" : "startups"}
+                {showFeatured
+                  ? `${totalCount.toLocaleString("en-IN")} more · ${totalPublishedCount.toLocaleString("en-IN")} published in total`
+                  : `${totalCount.toLocaleString("en-IN")} ${totalCount === 1 ? "startup" : "startups"}`}
               </p>
             </div>
             <nav aria-label="Sort startups" className="flex flex-wrap items-center gap-1 text-sm">

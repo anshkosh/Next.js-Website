@@ -404,3 +404,9 @@
 - PR #46 was merged and deployed with owner approval as `9c9f068`; release
   identity, health and workers were verified. No live account reset/retirement,
   bot execution or activity treatment changes were performed.
+
+## 27 October 2026 — follow-up content fixes from live review
+
+- Verified Claude’s read-only findings against the current app code and live page output. The leaderboard main value already shows total signals (e.g. 12 = 7 net votes + 5 activity), so the claim that it ranks on a different headline number is not supported; preserve the existing layout.
+- Clarified the actual scoring maxima: founder publishing up to 20 points (10 days), approved participants up to 40 points (20 people), and replied participants up to 30 points (10 people). Explained dense tie ranks, changed “discussions/comments” wording to participants with replies, clarified future offers are not current preorders, and made Discover’s “more” count include the total published directory.
+- Updated FAQ, leaderboard, homepage ranking description, Discover count, and the matching product/SEO notes. Changes remain in draft PR #66; no release or public interaction was made. No tests were run for this copy-only follow-up.

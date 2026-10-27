@@ -21,15 +21,15 @@ export const faqData = [
   },
   {
     question: "What can a founder validate?",
-    answer: "A founder can test problem relevance, solution clarity, audience fit, behavioural intent, preorder interest, and practical delivery assumptions.",
+    answer: "A founder can test problem relevance, solution clarity, audience fit, interest in a future offer, and practical delivery assumptions.",
   },
   {
     question: "How are startup signals calculated?",
-    answer: "Leaderboard signals combine all-time net votes (upvotes minus downvotes), 2 points per founder publishing day (up to 10 UTC days), 2 per approved community participant (up to 20), and 3 per participant with a founder reply (up to 10). Publishing days combine startup updates and approved, published public founder journal entries. Participants are grouped by email, or commenter name for legacy imported comments without email. Repeated comments and reply edits do not add points; owner comments, private, pending, rejected, and future journal entries are excluded. Equal scores share a global rank. Directory vote controls show net votes separately. Comment emails and legacy names are not verified identities. These signals reflect participation, not verified traction, investment, or product-market fit. See the leaderboard for each startup’s breakdown.",
+    answer: "Leaderboard signals combine net votes (upvotes minus downvotes) with activity points: 2 points per founder publishing day, up to 10 UTC days (20 points); 2 per approved community participant, up to 20 participants (40 points); and 3 per participant with a founder reply, up to 10 participants (30 points). Publishing days combine startup updates and approved, published public founder journal entries. Participants are grouped by email, or commenter name for legacy imported comments without email. Repeated comments and reply edits do not add points; owner comments, private, pending, rejected, and future journal entries are excluded. Tied startups share a rank, and the next rank follows without gaps. Directory vote controls show net votes separately. Comment emails and legacy names are not verified identities. These signals reflect participation, not verified traction, investment, or product-market fit. See the leaderboard for each startup’s breakdown.",
   },
   {
     question: "What counts as evidence in a validation test?",
-    answer: "Evidence from a founder’s test may include genuine feedback, survey responses, pilot requests, service enquiries, preorder intent, or other defined actions. This evidence is separate from the site’s net voting score and is not automatically a customer, order, payment, revenue result, or promise.",
+    answer: "Evidence from a founder’s test may include genuine feedback, survey responses, pilot requests, service enquiries, interest in a future offer, or other defined actions. This evidence is separate from the site’s net voting score and is not automatically a customer, order, payment, revenue result, or promise.",
   },
   {
     question: "Can I place a preorder now?",
@@ -48,7 +48,7 @@ export const faqData = [
     answer: "Founders must not buy or fabricate votes, or selectively misrepresent test results. Voting cookies, request-derived hashes and rate limits help reduce abuse but do not prove that each vote comes from a unique person. Comments are reviewed before publication. Content that violates the platform’s standards may be rejected or removed.",
   },
   {
-    question: "What would a preorder include?",
+    question: "If preorders open in the future, what would they include?",
     answer: "A preorder would be an advance order for a stated product, service, or experience, with clear pricing, delivery expectations, and terms. Payments and preorders are not open during the pilot. A profile, vote, or interest list does not create an order or entitlement.",
   },
   {

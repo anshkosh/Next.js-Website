@@ -9,7 +9,7 @@ import { seoMetadata } from "@/lib/seo";
 export const dynamic = "force-dynamic";
 export const metadata = seoMetadata({
   title: "Startup Leaderboard — Anshkosh",
-  description: "Explore published Indian startups ranked by net votes and capped points for founder progress, approved comments, and founder replies. Rankings are not verified demand.",
+  description: "Explore published Indian startups ranked by net votes and capped points for founder progress, approved community participants, and participants with founder replies. Rankings are not verified demand.",
   path: "/leaderboard",
 });
 
@@ -25,7 +25,7 @@ export default async function LeaderboardPage({ searchParams }: {
       <section className="page-intro-spacing border-b border-gray-100 bg-white">
         <div className="mx-auto max-w-5xl px-4 text-center sm:px-6">
           <h1 className="page-title">Startup <span className="text-coral-500">leaderboard</span></h1>
-          <p className="mx-auto mt-4 max-w-2xl text-lg leading-relaxed text-gray-600">Rankings combine net votes with capped points for public founder progress, approved comments, and founder replies. They show participation on Anshkosh, not verified demand or traction.</p>
+          <p className="mx-auto mt-4 max-w-2xl text-lg leading-relaxed text-gray-600">Rankings combine net votes with capped points for public founder progress, approved community participants, and participants with founder replies. They show participation on Anshkosh, not verified demand or traction.</p>
           <Link href="/discover" className="mt-4 inline-flex min-h-11 items-center gap-2 font-semibold text-coral-700 underline underline-offset-4">Browse all startups <ArrowRight aria-hidden="true" className="h-4 w-4" /></Link>
         </div>
       </section>
@@ -36,7 +36,7 @@ export default async function LeaderboardPage({ searchParams }: {
             <LeaderboardList entries={entries} />
             <details className="mt-4 text-sm leading-relaxed text-gray-600">
               <summary className="cursor-pointer font-semibold underline underline-offset-4">How signals and ranks work</summary>
-              <p className="mt-2">All-time signals = upvotes − downvotes + 2 points per founder publishing day (up to 10 days) + 2 per community participant (up to 20) + 3 per participant with a founder reply (up to 10). Equal scores share a global rank.</p>
+              <p className="mt-2">All-time signals combine net votes with activity points: 2 points per founder publishing day, up to 10 UTC days (20 points); 2 per approved community participant, up to 20 participants (40 points); and 3 per participant with a founder reply, up to 10 participants (30 points). Tied startups share a rank, and the next rank follows without gaps.</p>
               <p className="mt-2">Publishing days combine startup updates and approved, published public founder journal entries, counted once per UTC day. Only approved, non-empty comments count; participants are deduplicated by email per startup, excluding its owner’s email. Legacy imported comments without an email are grouped by commenter name, excluding the owner’s name. Repeat comments and reply edits do not earn extra points. Private, pending, rejected, and future journal entries do not count. Removing eligible activity removes its points.</p>
               <p className="mt-2">Email addresses are not shown. Comment emails are not verified identities, and votes are anonymous: these signals reflect participation, not unique verified backers, investment, or verified traction. Other directory vote controls show net votes separately.</p>
             </details>

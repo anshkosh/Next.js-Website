@@ -7,7 +7,7 @@ A public home for Indian startup profiles, founder progress and community feedba
 Principles that run through the product and its copy:
 - **Evidence over claims.** Founders should explain their methods, measurements and limitations. Publication review does not independently verify every claim.
 - **Progress, not press releases.** Founders post public updates, including what did not work.
-- **Honest limits.** Community votes reflect opinion, not verified demand, revenue or product-market fit. Leaderboard signals combine all-time net votes with capped points for public founder progress, approved comments, and founder replies; they measure participation, not verified traction.
+- **Honest limits.** Community votes reflect opinion, not verified demand, revenue or product-market fit. Leaderboard signals combine all-time net votes with capped points for public founder progress, approved community participants, and participants with founder replies; they measure participation, not verified traction.
 
 ## Pilot rules (current)
 
@@ -34,7 +34,7 @@ Roles are enforced with Better Auth's admin plugin; see [Security](../engineerin
 
 - **Home**: startup discovery, founder stories and progress, listing benefits and an FAQ teaser.
 - **Discover, Categories, Search**: published startups with category filtering and search, including public founder names.
-- **Leaderboard**: all-time net signals; startups with equal scores share a rank.
+- **Leaderboard**: all-time signals; tied startups share a rank, and ranks are dense (the next rank follows without gaps).
 - **Startup profile** (`/startups/[slug]`): the proposition (problem, solution, audience, prototype status, traction evidence), gallery, pitch-deck download, updates and discussion.
 - **Launch Support** (`/launch-support/*`): a free founder toolkit with a validation planner, MVP planner, pitch builder, runway calculator, launch card, checklist, tracker and directory list. Drafts stay in the visitor's browser.
 - **Journal** (`/journal`): articles on regional ecosystems, founder playbooks and startup models, written in the admin panel. Reading times are calculated from the current body.
