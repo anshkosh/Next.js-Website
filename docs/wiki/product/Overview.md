@@ -7,7 +7,7 @@ A public home for Indian startup profiles, founder progress and community feedba
 Principles that run through the product and its copy:
 - **Evidence over claims.** Founders should explain their methods, measurements and limitations. Publication review does not independently verify every claim.
 - **Progress, not press releases.** Founders post public updates, including what did not work.
-- **Honest limits.** Community votes reflect opinion, not verified demand, revenue or product-market fit. Signals are all-time upvotes minus downvotes.
+- **Honest limits.** Community votes reflect opinion, not verified demand, revenue or product-market fit. Leaderboard signals combine all-time net votes with capped points for public founder progress, approved community participation, and founder replies; they measure participation, not verified traction.
 
 ## Pilot rules (current)
 
@@ -42,4 +42,4 @@ Roles are enforced with Better Auth's admin plugin; see [Security](../engineerin
 
 ## Pilot banner and entry curtain
 
-The "under construction" banner and one-time "Sneak peek" entry curtain (`components/site/`) appear only on the homepage. Internal pages open directly. The homepage preview remains intentional during the pilot.
+The early-access status banner and one-time entry curtain (`components/site/`) appear only on the homepage. They explain what visitors can do in the pilot and that payments and preorders are not open. Internal pages open directly.

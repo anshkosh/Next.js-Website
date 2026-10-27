@@ -9,7 +9,7 @@ import { seoMetadata } from "@/lib/seo";
 export const dynamic = "force-dynamic";
 export const metadata = seoMetadata({
   title: "Startup Leaderboard — Anshkosh",
-  description: "Explore published Indian startups ranked by all-time community signals. Read their profiles, follow founder progress, and upvote the ideas that interest you.",
+  description: "Explore published Indian startups ranked by net votes, founder progress, approved community participation, and founder replies. Rankings show activity, not verified demand.",
   path: "/leaderboard",
 });
 
@@ -25,7 +25,7 @@ export default async function LeaderboardPage({ searchParams }: {
       <section className="page-intro-spacing border-b border-gray-100 bg-white">
         <div className="mx-auto max-w-5xl px-4 text-center sm:px-6">
           <h1 className="page-title">Startup <span className="text-coral-500">leaderboard</span></h1>
-          <p className="mx-auto mt-4 max-w-2xl text-lg leading-relaxed text-gray-600">Discover the Indian startups earning community interest. Signals combine net votes, founder progress, approved feedback, and founder–community discussions.</p>
+          <p className="mx-auto mt-4 max-w-2xl text-lg leading-relaxed text-gray-600">Rankings combine net votes with capped points for public founder progress, approved community participation, and founder replies. They show activity on Anshkosh, not verified demand or traction.</p>
           <Link href="/discover" className="mt-4 inline-flex min-h-11 items-center gap-2 font-semibold text-coral-700 underline underline-offset-4">Browse all startups <ArrowRight aria-hidden="true" className="h-4 w-4" /></Link>
         </div>
       </section>

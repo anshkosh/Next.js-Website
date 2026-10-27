@@ -15,8 +15,8 @@ export function UnderConstructionBanner({ authenticated = false }: { authenticat
       <div className="mx-auto flex max-w-7xl items-center justify-center gap-2 text-center text-sm leading-6">
         <span aria-hidden="true" className="text-base">🚧</span>
         <p>
-          <strong className="font-semibold">Anshkosh is under construction.</strong>{" "}
-          We’re building the best way to discover India’s next startups.
+          <strong className="font-semibold">Anshkosh is in early access.</strong>{" "}
+          Explore Indian startup profiles and free founder tools while we refine the experience.
         </p>
       </div>
     </aside>

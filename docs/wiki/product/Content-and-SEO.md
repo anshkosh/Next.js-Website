@@ -14,7 +14,7 @@ Use `seoMetadata()` from `lib/seo.ts` on every new public page so it gets a titl
 - Organization and WebSite JSON-LD come from `lib/seo.ts`.
 - Startup JSON-LD describes the business as an `Organization`, with `Person` founders from its published team records. It does not expose the account owner's private identity or treat every business as software.
 - Shared product descriptions cover discovery, founder progress, feedback and free tools. Search has its own canonical/social metadata while remaining excluded from indexing.
-- `/leaderboard` is included in the sitemap and `public/llms.txt`, with signals defined as all-time upvotes minus downvotes.
+- `/leaderboard` is included in the sitemap and `public/llms.txt`. Its all-time signals combine net votes with capped points for public founder progress, approved community participation, and founder replies; they measure participation, not verified traction.
 - Startups get dynamic Open Graph images from `app/api/og/[slug]`.
 - `scripts/verify-seo.mjs` checks a built site's SEO, and the deploy pipeline checks SEO on each candidate release before switching traffic to it.
 
