@@ -18,7 +18,7 @@ export default function AboutPage() {
         </p>
         <div className="space-y-10 text-gray-600 leading-relaxed text-base">
           <section aria-labelledby="about-purpose">
-            <h2 id="about-purpose" className="text-2xl font-bold text-gray-900 mb-3 font-heading">Every startup has a story worth understanding</h2>
+            <h2 id="about-purpose" className="text-2xl font-bold text-gray-900 mb-3 font-heading">What you’ll find on each profile</h2>
             <p>
               It begins with a problem worth solving. Then come the conversations, rough prototypes, small experiments, and decisions about what to build next. That early work helps explain why an idea matters and how it is taking shape.
             </p>

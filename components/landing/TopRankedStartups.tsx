@@ -25,10 +25,10 @@ export default async function TopRankedStartups() {
               <span>Explore the builders</span>
             </div>
             <h2 id="home-startups-title" className="font-heading text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
-              Top startups, ranked.
+              Startup profiles, ranked by participation.
             </h2>
             <p className="mt-3 max-w-xl text-sm leading-relaxed text-gray-600">
-              The five highest-ranked published startups, based on net votes and capped points for founder publishing activity, approved community participants, and participants with founder replies.
+              Browse published profiles ranked by net votes and capped activity points. These signals show participation, not verified traction.
             </p>
           </div>
           <Link href="/leaderboard" className="group inline-flex items-center gap-1.5 text-sm font-semibold text-coral-600 transition-colors hover:text-coral-700">
@@ -37,7 +37,7 @@ export default async function TopRankedStartups() {
           </Link>
         </div>
 
-        <LeaderboardList entries={topStartups} title="Top five by signals" />
+        <LeaderboardList entries={topStartups} title="Top-ranked profiles by participation" />
       </div>
     </section>
   );
