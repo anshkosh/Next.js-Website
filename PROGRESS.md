@@ -422,3 +422,8 @@
 - Inspected the linked directory pages from the live homepage. Product Hunt and Crunchbase still say crowdfunding is coming soon; TechBase still frames Anshkosh as pre-launch and describes future crowdfunding; LaunchFree explicitly says the site is under construction. The Free Startup Listing link points to its directory homepage, with no Anshkosh profile visible. AppRater has a public Anshkosh profile that describes the current early-access discovery product.
 - Updated `lib/featured-listings.ts` and `components/landing/LandingFeaturedOn.tsx`: keep AppRater as a plain “Directory profile,” explain that the listing is independent and not an endorsement, and remove stale/unverified links and the duplicated moving marquee.
 - No external listing edits. No tests or deployment. PR #66 remains draft; `git diff --check` is the source formatting check.
+
+## 27 October 2026 — align existing assertions with approved copy changes
+
+- The automatic PR #66 CI run for `b1257d3e` reported failures because existing assertions still required the removed discussion label, the earlier backlink wording, and the six-card animated directory strip. The new directory behavior is intentional and supported by current public-page checks.
+- Updated those existing assertions to describe the current copy and single independent AppRater profile. No new tests were added, and no tests were run locally. The in-progress browser job was started against the prior head and its result remains separate from the next revision.

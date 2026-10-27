@@ -3,10 +3,10 @@ import { FEATURED_LISTINGS } from "@/lib/featured-listings";
 
 export default function LandingFeaturedOn() {
   return (
-    <section aria-labelledby="featured-on-title" className="border-t border-gray-200 bg-white py-12 md:py-16">
+    <section aria-labelledby="directory-profile-title" className="border-t border-gray-200 bg-white py-12 md:py-16">
       <div className="mx-auto max-w-6xl px-4 sm:px-6">
         <div className="mb-7 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <h2 id="featured-on-title" className="font-sans text-sm font-bold uppercase tracking-[0.16em] text-gray-900">
+          <h2 id="directory-profile-title" className="font-sans text-sm font-bold uppercase tracking-[0.16em] text-gray-900">
             Directory profile
           </h2>
           <p className="max-w-sm text-sm text-gray-600 sm:text-right">
