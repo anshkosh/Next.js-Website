@@ -17,8 +17,8 @@ export default function LandingCTA() {
             Bring your next step <span className="block text-coral-500">to Anshkosh.</span>
           </h2>
           <p className="mt-5 max-w-lg text-base leading-relaxed text-gray-600 sm:text-lg">
-            Find a startup that interests you. Share the one you’re building.
-            Or start with a free tool and make your idea a little clearer today.
+            Discover a startup, submit the one you’re building,
+            or start with a free founder tool.
           </p>
           <div className="mt-8 flex flex-col gap-3 sm:flex-row">
             <Link href="/discover" className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-coral-600 px-6 py-3 font-semibold text-white hover:bg-coral-700">
@@ -27,6 +27,7 @@ export default function LandingCTA() {
             <Link href="/startup/new" className="inline-flex min-h-12 items-center justify-center rounded-xl border border-gray-300 bg-white px-6 py-3 font-semibold text-gray-900 hover:border-coral-500 hover:text-coral-700">
               List your startup
             </Link>
+            <Link href="/launch-support" className="inline-flex min-h-12 items-center justify-center rounded-xl border border-gray-300 bg-white px-6 py-3 font-semibold text-gray-900 hover:border-coral-500 hover:text-coral-700">Explore free tools</Link>
           </div>
         </div>
       </div>

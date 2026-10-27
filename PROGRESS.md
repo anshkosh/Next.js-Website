@@ -410,3 +410,9 @@
 - Verified Claude’s read-only findings against the current app code and live page output. The leaderboard main value already shows total signals (e.g. 12 = 7 net votes + 5 activity), so the claim that it ranks on a different headline number is not supported; preserve the existing layout.
 - Clarified the actual scoring maxima: founder publishing up to 20 points (10 days), approved participants up to 40 points (20 people), and replied participants up to 30 points (10 people). Explained dense tie ranks, changed “discussions/comments” wording to participants with replies, clarified future offers are not current preorders, and made Discover’s “more” count include the total published directory.
 - Updated FAQ, leaderboard, homepage ranking description, Discover count, and the matching product/SEO notes. Changes remain in draft PR #66; no release or public interaction was made. No tests were run for this copy-only follow-up.
+
+## 27 October 2026 — clear next-step paths and support status
+
+- Added a direct “Explore free tools” action to the homepage closing CTA, which previously mentioned a free tool but linked only to Discover and startup submission.
+- Reworked the Launch Support planned-services block to distinguish future permission-based directory-submission help from the catalogue and tracker available today; removed the repeated SEO/backlink pitch while retaining a clear no-guarantee statement.
+- The preorder FAQ now describes votes and messages as opinions, not commitments. These changes are local in the PR #66 worktree and have not been tested; no public release occurred.

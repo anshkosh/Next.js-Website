@@ -33,7 +33,7 @@ export const faqData = [
   },
   {
     question: "Can I place a preorder now?",
-    answer: "No. You can explore startup profiles, offer feedback, and express interest. Payments and preorders are not open during the pilot. An expression of interest is not an order.",
+    answer: "No. During the pilot, you can explore startup profiles, vote, and give feedback. Payments and preorders are not open. A vote or message shares your opinion; it is not an order or commitment.",
   },
   {
     question: "Is public validation the same as investing?",
