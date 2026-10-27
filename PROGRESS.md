@@ -416,3 +416,9 @@
 - Added a direct “Explore free tools” action to the homepage closing CTA, which previously mentioned a free tool but linked only to Discover and startup submission.
 - Reworked the Launch Support planned-services block to distinguish future permission-based directory-submission help from the catalogue and tracker available today; removed the repeated SEO/backlink pitch while retaining a clear no-guarantee statement.
 - The preorder FAQ now describes votes and messages as opinions, not commitments. These changes are local in the PR #66 worktree and have not been tested; no public release occurred.
+
+## 27 October 2026 — third-party listing strip review
+
+- Inspected the linked directory pages from the live homepage. Product Hunt and Crunchbase still say crowdfunding is coming soon; TechBase still frames Anshkosh as pre-launch and describes future crowdfunding; LaunchFree explicitly says the site is under construction. The Free Startup Listing link points to its directory homepage, with no Anshkosh profile visible. AppRater has a public Anshkosh profile that describes the current early-access discovery product.
+- Updated `lib/featured-listings.ts` and `components/landing/LandingFeaturedOn.tsx`: keep AppRater as a plain “Directory profile,” explain that the listing is independent and not an endorsement, and remove stale/unverified links and the duplicated moving marquee.
+- No external listing edits. No tests or deployment. PR #66 remains draft; `git diff --check` is the source formatting check.
