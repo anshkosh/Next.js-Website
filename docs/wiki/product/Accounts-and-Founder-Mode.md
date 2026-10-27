@@ -35,6 +35,13 @@ Anyone can change their own mode later using the dashboard switch, which saves
 immediately. Founder mode is managed on the dashboard only; settings has no
 duplicate toggle, explanation or Undo offer.
 
+When an unauthenticated visitor starts at `/startup/new`, the local return path
+continues through login, registration, and email verification. The registration
+form preselects founder mode only for that startup-submission intent and explains
+the selection; the founder can turn it off before submitting. Other registration
+paths keep the unchecked default. Return paths are validated with
+`safeReturnPath()` so they cannot redirect off-site or create an auth loop.
+
 With founder mode off, the dashboard offers discovery, stories and feedback rather
 than startup management. Starting a submission asks the member to enable founder
 mode. Turning founder mode off also hides every owned startup publicly:

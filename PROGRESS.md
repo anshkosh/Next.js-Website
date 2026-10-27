@@ -1,5 +1,12 @@
 # Progress
 
+## 27 October 2026 — founder signup continuity (prepared)
+
+- Grok's signed-out founder-path report found `/startup/new` redirects to login, but “Register here” drops the validated `next` destination; the register form also leaves founder mode off and signup lacks a callback URL. Independent signed-out GETs confirmed the 307, `/register` link, and unchecked founder-mode input.
+- Prepared a scoped fix that carries safe local paths through email registration/verification, selects founder mode only when the visitor explicitly starts from `/startup/new`, and explains that choice. Other registration paths stay off by default. No existing account, public profile, or auth setting was changed.
+- Based on current main `9b86f124` in a separate worktree. Lint, typecheck, and dependency policy passed; focused signup regressions passed (9/9). Full unit suite: 797 passed, 2 skipped, 3 existing failures in `deployment-policy.test.ts` for reviewed migration approvals. Browser regression is included for isolated CI. No account, public profile, bot, or production state was changed.
+- Draft PR #68 is being prepared for review. No merge or deployment was attempted.
+
 ## 26 October 2026 — release 404 guard correction
 
 - Owner approved merge/deployment of PR #64, merged as `e27abe61`. Main's code,

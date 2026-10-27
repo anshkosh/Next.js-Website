@@ -3,7 +3,7 @@
 import { Suspense, useState } from "react";
 import { authClient } from "@/lib/auth-client";
 import { useRouter, useSearchParams } from "next/navigation";
-import { safeReturnPath } from "@/lib/login-return";
+import { registerHref, safeReturnPath } from "@/lib/login-return";
 import Link from "next/link";
 import { Loader2, Mail } from "lucide-react";
 import AuthHomeIcon from "@/components/auth/AuthHomeIcon";
@@ -14,7 +14,9 @@ export default function LoginPage() {
 }
 function LoginForm() {
   const router = useRouter();
-  const next = safeReturnPath(useSearchParams().get("next"));
+  const searchParams = useSearchParams();
+  const rawNext = searchParams.get("next");
+  const next = safeReturnPath(rawNext);
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
   const [error, setError] = useState("");
@@ -163,7 +165,7 @@ function LoginForm() {
           
           <div className="mt-8 text-center text-sm">
             <span className="text-gray-500">Don&apos;t have an account? </span>
-            <Link href="/register" className="font-medium text-coral-600 hover:text-coral-500">
+            <Link href={registerHref(rawNext)} className="font-medium text-coral-600 hover:text-coral-500">
               Register here
             </Link>
           </div>

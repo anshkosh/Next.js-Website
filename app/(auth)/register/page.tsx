@@ -2,17 +2,26 @@
 
 import { useHydrated } from "@/components/useHydrated";
 
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import { authClient } from "@/lib/auth-client";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { Loader2, Mail, User, CheckCircle2 } from "lucide-react";
 import AuthHomeIcon from "@/components/auth/AuthHomeIcon";
 import PasswordField from "@/components/auth/PasswordField";
+import { isStartupSubmissionPath, loginHref, safeReturnPath } from "@/lib/login-return";
 
 export default function RegisterPage() {
+  return <Suspense fallback={<p role="status" className="p-8">Loading registration…</p>}><RegisterForm /></Suspense>;
+}
+
+function RegisterForm() {
   const hydrated = useHydrated();
+  const rawNext = useSearchParams().get("next");
+  const next = safeReturnPath(rawNext);
+  const founderIntent = isStartupSubmissionPath(next);
   const [name, setName] = useState("");
-  const [founderMode, setFounderMode] = useState(false);
+  const [founderMode, setFounderMode] = useState(founderIntent);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -47,6 +56,7 @@ export default function RegisterPage() {
         email,
         password,
         founderMode,
+        callbackURL: next,
       });
 
       if (error) {
@@ -78,7 +88,7 @@ export default function RegisterPage() {
               verify your email to continue.
             </p>
             <Link
-              href="/login"
+              href={rawNext ? loginHref(next) : "/login"}
               className="w-full flex justify-center py-2.5 px-4 border border-transparent rounded-lg shadow-sm text-sm font-semibold text-white bg-gray-900 hover:bg-gray-800 transition-colors"
             >
               Return to login
@@ -202,7 +212,7 @@ export default function RegisterPage() {
 
             <div className="rounded-xl bg-gray-50 p-4">
               <label className="flex cursor-pointer items-start gap-3"><input name="founderMode" type="checkbox" checked={founderMode} onChange={e => setFounderMode(e.target.checked)} aria-describedby="register-mode-help" className="mt-1 h-5 w-5 accent-coral-600" /><span className="text-sm font-semibold text-gray-900">Enable founder mode</span></label>
-              <p id="register-mode-help" className="mt-2 text-sm leading-relaxed text-gray-600">Submitting a startup? Turn this on. You can change it on your dashboard or in Profile settings anytime.</p>
+              <p id="register-mode-help" className="mt-2 text-sm leading-relaxed text-gray-600">{founderIntent ? "You’re creating a startup profile, so founder mode is selected. You can turn it off later from your dashboard." : "Submitting a startup? Turn this on. You can change it on your dashboard anytime."}</p>
             </div>
             <div className="flex items-start">
               <div className="flex items-center h-5">

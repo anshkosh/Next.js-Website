@@ -231,6 +231,18 @@ test("390px cookie notice leaves auth controls reachable and mobile search opens
   await page.goto("/signup"); await expect(page).toHaveURL(/\/register$/);
 });
 
+test("founder signup keeps the startup submission destination", async ({ page }) => {
+  await page.goto("/startup/new");
+  await expect(page).toHaveURL(/\/login\?next=%2Fstartup%2Fnew$/);
+  await page.getByRole("link", { name: "Register here" }).click();
+  await expect(page).toHaveURL(/\/register\?next=%2Fstartup%2Fnew$/);
+  await expect(page.locator('input[name="founderMode"]')).toBeChecked();
+  await expect(page.locator("#register-mode-help")).toContainText("founder mode is selected");
+
+  await page.goto("/register");
+  await expect(page.locator('input[name="founderMode"]')).not.toBeChecked();
+});
+
 // Verify privacy controls before the longer shared startup journey.
 test("private data export and confirmed deletion isolate owners, roll back failures and revoke all sessions", async ({ page, browser }) => {
   test.setTimeout(300000);

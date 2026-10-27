@@ -1,5 +1,11 @@
 # Website changelog
 
+## Unreleased — founder signup continuity
+
+- Preserve the validated startup-submission destination from login through registration and email verification.
+- Preselect founder mode only for the explicit `/startup/new` path, explain the choice, and keep the default off for other registrations.
+- Add focused return-path and signed-out browser regressions; align account and product documentation with the behavior.
+
 ## Unreleased — loading performance
 
 - Preserve real HTTP 404 responses for missing journal articles by removing the
