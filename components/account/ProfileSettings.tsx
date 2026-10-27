@@ -10,7 +10,7 @@ import { accountSavedTime, accountToday } from "@/lib/account-dates";
 
 type Profile = {
   name: string; image: string | null; bio: string; location: string; websiteUrl: string;
-  notifyStartupReviews: boolean; notifyVoteMilestones: boolean;
+  notifyStartupReviews: boolean; notifyVoteMilestones: boolean; notifyCommentActivity?: boolean;
   dateOfBirth: string;
 };
 const inputClass = "mt-2 min-h-11 w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-gray-900 focus:outline-coral-600";
@@ -18,7 +18,7 @@ const inputClass = "mt-2 min-h-11 w-full rounded-lg border border-gray-300 bg-wh
 export default function ProfileSettings({ user }: { user: Profile }) {
   const hydrated = useHydrated();
   const router = useRouter();
-  const [profile, setProfile] = useState({ name: user.name, image: user.image || "", bio: user.bio, location: user.location, websiteUrl: user.websiteUrl, dateOfBirth: user.dateOfBirth, notifyStartupReviews: user.notifyStartupReviews, notifyVoteMilestones: user.notifyVoteMilestones });
+  const [profile, setProfile] = useState({ name: user.name, image: user.image || "", bio: user.bio, location: user.location, websiteUrl: user.websiteUrl, dateOfBirth: user.dateOfBirth, notifyStartupReviews: user.notifyStartupReviews, notifyVoteMilestones: user.notifyVoteMilestones, notifyCommentActivity: user.notifyCommentActivity ?? true });
   const [busy, setBusy] = useState(false);
   const [uploadBusy, setUploadBusy] = useState(false);
   const [savedAt, setSavedAt] = useState("");
@@ -57,6 +57,7 @@ export default function ProfileSettings({ user }: { user: Profile }) {
       <legend className="pr-3 text-xl font-semibold text-gray-900">Email notifications</legend>
       <label className="flex min-h-11 cursor-pointer items-start gap-3"><input type="checkbox" checked={profile.notifyStartupReviews} onChange={e => field("notifyStartupReviews", e.target.checked)} className="mt-1 h-5 w-5 shrink-0 accent-coral-600" /><span><span className="block font-semibold text-gray-800">Startup review updates</span><span className="mt-1 block text-sm text-gray-600">Emails when your startup or profile changes are approved or need attention.</span></span></label>
       <label className="flex min-h-11 cursor-pointer items-start gap-3"><input type="checkbox" checked={profile.notifyVoteMilestones} onChange={e => field("notifyVoteMilestones", e.target.checked)} className="mt-1 h-5 w-5 shrink-0 accent-coral-600" /><span><span className="block font-semibold text-gray-800">Vote milestones</span><span className="mt-1 block text-sm text-gray-600">Emails when your startup reaches a voting milestone.</span></span></label>
+      <label className="flex min-h-11 cursor-pointer items-start gap-3"><input type="checkbox" checked={profile.notifyCommentActivity} onChange={e => field("notifyCommentActivity", e.target.checked)} className="mt-1 h-5 w-5 shrink-0 accent-coral-600" /><span><span className="block font-semibold text-gray-800">Approved comment alerts</span><span className="mt-1 block text-sm text-gray-600">Emails when a visitor’s comment on your startup is approved and published.</span></span></label>
       <p className="text-sm leading-relaxed text-gray-600">Security, verification and account-recovery emails are always sent. Newsletter consent is managed separately through the newsletter’s unsubscribe link.</p>
     </fieldset>
     {error && <p role="alert" className="text-sm text-red-700">{error}</p>}

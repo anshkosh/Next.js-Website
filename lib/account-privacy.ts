@@ -82,6 +82,7 @@ export async function exportAccountData(actor: PrivacyActor, code: string, clien
       image: user.image, bio: user.bio, location: user.location, websiteUrl: user.websiteUrl,
       dateOfBirth: user.dateOfBirth, founderMode: user.founderMode,
       notifyStartupReviews: user.notifyStartupReviews, notifyVoteMilestones: user.notifyVoteMilestones,
+      notifyCommentActivity: user.notifyCommentActivity,
       createdAt: user.createdAt, updatedAt: user.updatedAt,
     };
     const linkedSignIns = await tx.account.findMany({ where: { userId: user.id }, select: { providerId: true, createdAt: true } });

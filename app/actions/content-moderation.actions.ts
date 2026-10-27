@@ -5,6 +5,7 @@ import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { applyModeration, moderationSource } from "@/lib/moderation-source";
 import { revalidateSavedPath } from "@/lib/cache-after-save";
+import { deliverNotification } from "@/lib/notification-outbox";
 
 export async function reviewContent(id: string, hash: string, approve: boolean) {
   const session = await auth.api.getSession({ headers: await headers() });
@@ -25,10 +26,11 @@ export async function reviewContent(id: string, hash: string, approve: boolean) 
         await tx.contentModeration.update({ where: { id }, data: { status: "STALE" } });
         return { error: "This submission changed or its startup is no longer public. Refresh before reviewing it." };
       }
-      return { slug: source.slug };
+      return { slug: source.slug, notificationId: "notificationId" in source ? source.notificationId : null };
     });
-    if (result.error) return { error: result.error };
+    if ("error" in result) return { error: result.error };
+    const notificationDelivered = result.notificationId ? await deliverNotification(result.notificationId) : true;
     for (const path of ["/admin/content-review", "/admin/comments", "/dashboard", "/", "/leaderboard", `/startups/${result.slug}`]) revalidateSavedPath(path);
-    return { success: true };
+    return { success: true, ...(result.notificationId && !notificationDelivered ? { notificationPending: true } : {}) };
   } catch { return { error: "The review could not be saved. Refresh and try again." }; }
 }

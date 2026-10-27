@@ -24,6 +24,7 @@ model User {
   dateOfBirth   String    @default("")
   notifyStartupReviews Boolean @default(true)
   notifyVoteMilestones Boolean @default(true)
+  notifyCommentActivity Boolean @default(true)
   banned        Boolean   @default(false)
   banReason     String?
   banExpires    DateTime?

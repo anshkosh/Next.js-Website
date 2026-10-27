@@ -4,10 +4,13 @@ import { randomUUID } from "node:crypto";
 import { headers } from "next/headers";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
+import { deliverNotification } from "@/lib/notification-outbox";
+import { storeApprovedCommentEmail } from "@/lib/comment-notifications";
 import { commenterEmailHash, moderationExpiry, parseModerationDuration } from "@/lib/commenter-restrictions";
 import { revalidateSavedPath } from "@/lib/cache-after-save";
 
 const staffRoles = ["admin", "reviewer"];
+type CommentModerationResult = { error: string } | { success: true; notificationPending?: boolean };
 
 async function getModerator() {
   const session = await auth.api.getSession({ headers: await headers() });
@@ -179,7 +182,7 @@ export async function revokeModerationAccountBan(banId: string) {
   }
 }
 
-export async function setCommentModerationStatus(commentId: string, expectedStatus: string, nextStatus: string, note = "") {
+export async function setCommentModerationStatus(commentId: string, expectedStatus: string, nextStatus: string, note = ""): Promise<CommentModerationResult> {
   const moderator = await getModerator();
   if (!moderator) return { error: "Moderator access required." };
   if (!validId(commentId) || !["PENDING", "APPROVED", "REJECTED"].includes(expectedStatus) || !["APPROVED", "REJECTED"].includes(nextStatus) || expectedStatus === nextStatus) return { error: "Invalid comment review." };
@@ -192,11 +195,13 @@ export async function setCommentModerationStatus(commentId: string, expectedStat
       const changed = await tx.comment.updateMany({ where: { id: commentId, status: expectedStatus as "PENDING" | "APPROVED" | "REJECTED" }, data: { status: nextStatus as "APPROVED" | "REJECTED", reviewedBy: moderator.id, reviewedAt, reviewNote: note.trim() || null } });
       if (!changed.count) return { error: "This comment changed in another review. Refresh before deciding." };
       await tx.contentModeration.updateMany({ where: { kind: "COMMENT", targetId: commentId }, data: { status: nextStatus, leaseToken: null, reviewedBy: moderator.id, reviewedAt } });
-      return { success: true as const, slug: comment.startup.slug };
+      const notification = nextStatus === "APPROVED" ? await storeApprovedCommentEmail(tx, commentId) : null;
+      return { success: true as const, slug: comment.startup.slug, notificationId: notification?.id ?? null };
     });
-    if (result.error) return result;
+    if ("error" in result && typeof result.error === "string") return { error: result.error };
+    const notificationDelivered = result.notificationId ? await deliverNotification(result.notificationId) : true;
     refreshModeration(result.slug);
-    return { success: true };
+    return { success: true, ...(result.notificationId && !notificationDelivered ? { notificationPending: true } : {}) };
   } catch {
     return { error: "The comment decision could not be saved. Refresh and try again." };
   }

@@ -7,8 +7,9 @@ import NewSubmissionEmail from "@/components/email/new_submission";
 import ContactInquiryEmail from "@/components/email/contact_inquiry";
 import * as React from "react";
 import NewsletterConfirmationEmail from "@/components/email/newsletter_confirmation";
+import FounderCommentApprovedEmail from "@/components/email/founder_comment_approved";
 
-export type TemplateName = "welcome" | "startup_approved" | "startup_rejected" | "upvote_milestone" | "new_submission" | "contact_inquiry" | "newsletter_confirmation";
+export type TemplateName = "welcome" | "startup_approved" | "startup_rejected" | "upvote_milestone" | "new_submission" | "contact_inquiry" | "newsletter_confirmation" | "founder_comment_approved";
 
 export async function renderEmailTemplate(template: TemplateName, data: Record<string, unknown>): Promise<string> {
   switch (template) {
@@ -29,6 +30,13 @@ export async function renderEmailTemplate(template: TemplateName, data: Record<s
         senderName: String(data.senderName ?? ""), senderEmail: String(data.senderEmail ?? ""),
         subject: String(data.subject ?? ""), message: String(data.message ?? ""), submittedAt: String(data.submittedAt ?? ""),
       }));
+    case "founder_comment_approved":
+      return render(React.createElement(FounderCommentApprovedEmail, {
+        startupName: String(data.startupName ?? "Your startup"),
+        authorName: String(data.authorName ?? "A visitor"),
+        commentBody: String(data.commentBody ?? ""),
+        startupId: String(data.startupId ?? ""),
+      }));
     default:
       throw new Error(`Unknown email template: ${template}`);
   }
@@ -43,6 +51,7 @@ export function getSubject(template: TemplateName, data: Record<string, unknown>
     case "upvote_milestone": return `🎉 ${data.startupName} hit ${data.milestone} upvotes!`;
     case "new_submission": return `New startup for review: ${data.startupName}`;
     case "contact_inquiry": return `[Contact] ${data.subject} — from ${data.senderName}`;
+    case "founder_comment_approved": return `A comment on ${data.startupName} is now public`;
     default: return "Message from anshkosh";
   }
 }

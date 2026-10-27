@@ -26,5 +26,6 @@ export const profileSettingsSchema = z
     dateOfBirth: dateOfBirthSchema.optional(),
     notifyStartupReviews: z.boolean(),
     notifyVoteMilestones: z.boolean(),
+    notifyCommentActivity: z.boolean().optional(),
   })
   .strict();
