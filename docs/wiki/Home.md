@@ -1,6 +1,6 @@
 # Anshkosh wiki
 
-Anshkosh (www.anshkosh.com) is a public home for Indian startup profiles, founder progress and community feedback, in an early-access pilot. Visitors explore startups at different stages, and founders share evidence, risks and progress. No payments, pledges or orders are open during the pilot.
+Anshkosh (www.anshkosh.com) is a public home for Indian startup profiles and discussions, in an early-access pilot. Visitors explore startups at different stages; founders describe their idea, product, and evidence, and visitors can leave questions or feedback. No payments, pledges or orders are open during the pilot.
 
 This wiki lives in the repository so it is reviewed with the code it describes. Edit it in a pull request like any other change, and update the relevant page in the same PR when you change the behaviour it documents.
 

@@ -127,7 +127,7 @@ export default function LaunchSupportPage() {
               We are exploring a permission-based service to help founders prepare submissions to relevant startup directories. It is planned, not available yet; each directory decides whether to accept a listing or include a link.
             </p>
             <p className="mt-4 leading-relaxed text-gray-600">
-              You can use the free Directory catalogue and tracker today to check fit, record submissions, and follow up yourself.
+              You can use the free Directory catalogue and tracker today to check fit, record submissions in this browser, and follow up yourself. Tracker entries do not sync across devices or accounts and are cleared when you sign out; download the CSV first if you want to keep a copy.
             </p>
             <p className="mt-4 leading-relaxed text-gray-600">
               We do not promise directory acceptance, backlinks, indexing, search rankings, traffic, or funding.

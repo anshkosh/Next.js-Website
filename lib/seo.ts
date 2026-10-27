@@ -12,7 +12,7 @@ export function resolveSiteUrl(configuredUrl = "https://www.anshkosh.com") {
 
 export const SITE_URL = resolveSiteUrl(process.env.NEXT_PUBLIC_BASE_URL || undefined);
 export const DEFAULT_SOCIAL_IMAGE = "/images/hero-pomegranate-v2.webp";
-export const PILOT_DESCRIPTION = "Explore Indian startup profiles, follow founder progress, share useful feedback, and use free founder tools.";
+export const PILOT_DESCRIPTION = "Explore Indian startup profiles, share feedback in public discussions, and use free founder tools.";
 
 export function absoluteUrl(path = "/") {
   const url = new URL(path, `${SITE_URL}/`);

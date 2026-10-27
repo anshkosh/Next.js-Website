@@ -2,12 +2,12 @@
 
 ## What Anshkosh is
 
-A public home for Indian startup profiles, founder progress and community feedback. Visitors explore startups at different stages; founders explain their idea, team and evidence and use free Launch Support tools. The home-page promise is "Explore Indian startups. Follow founder progress."
+A public home for Indian startup profiles and community discussions. Visitors explore startups at different stages, review the ideas and evidence founders share, and use free Launch Support tools. The home-page promise is "Explore Indian startups. See what founders are building."
 
 Principles that run through the product and its copy:
 - **Evidence over claims.** Founders should explain their methods, measurements and limitations. Publication review does not independently verify every claim.
 - **Progress, not press releases.** Founders post public updates, including what did not work.
-- **Honest limits.** Community votes reflect opinion, not verified demand, revenue or product-market fit. Leaderboard signals combine all-time net votes with capped points for public founder progress, approved community participants, and participants with founder replies; they measure participation, not verified traction.
+- **Honest limits.** Community votes reflect opinion, not verified demand, revenue or product-market fit. Leaderboard signals combine all-time net votes with capped points for founder publishing activity, approved community participants, and participants with founder replies; they measure participation, not verified traction.
 
 ## Pilot rules (current)
 

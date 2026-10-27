@@ -23,7 +23,7 @@ const SORTS = [
 
 export const metadata = seoMetadata({
   title: "Discover Startups — Anshkosh",
-  description: "Browse and discover Indian startups on Anshkosh. Search by category, explore evidence, and follow founder progress.",
+  description: "Browse Indian startup profiles by category, review the evidence founders share, and join public discussions.",
   path: "/discover",
 });
 
@@ -51,7 +51,7 @@ export default async function DiscoverPage(props: {
         <section className="page-intro-spacing bg-white border-b border-gray-100">
           <div className="container mx-auto px-4 text-center max-w-5xl">
             <h1 className="page-title mb-4">Discover <span className="text-coral-500">Startups</span></h1>
-            <p className="text-lg leading-relaxed text-gray-600 max-w-2xl mx-auto">Explore Indian startup profiles, review the evidence founders share, and follow their progress.</p>
+            <p className="text-lg leading-relaxed text-gray-600 max-w-2xl mx-auto">Explore startup profiles, review what founders share about their idea and product, and join public discussions.</p>
             <Link href="/categories" className="mt-6 inline-flex min-h-11 items-center rounded-full border border-gray-200 px-5 py-2 text-sm font-medium text-gray-700 transition-colors hover:border-coral-500 hover:text-coral-600 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-coral-500">
               Browse categories
             </Link>

@@ -54,7 +54,7 @@ export default function Footer() {
               </span>
             </Link>
             <p className="max-w-xs text-sm leading-relaxed text-gray-600">
-              Explore Indian startups and follow founder progress.
+              Explore Indian startups. See what founders are building.
             </p>
           </div>
 

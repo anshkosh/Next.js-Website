@@ -110,7 +110,7 @@ function HomeCurtain() {
         <p className="curtain-kicker">Anshkosh · early access pilot</p>
         <h2 id="curtain-title">Explore the Anshkosh pilot.</h2>
         <p id="curtain-description">
-          Browse startup profiles, follow founder progress, and use free Launch Support tools. Profiles are reviewed before publication.
+          Explore startup profiles, read what founders choose to share, and use free Launch Support tools. Profiles are reviewed before publication.
         </p>
         <button ref={enterButtonRef} type="button" onClick={enterSite} aria-disabled={opening} className="curtain-entry-button">
           Browse Anshkosh

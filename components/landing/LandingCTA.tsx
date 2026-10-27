@@ -17,8 +17,8 @@ export default function LandingCTA() {
             Bring your next step <span className="block text-coral-500">to Anshkosh.</span>
           </h2>
           <p className="mt-5 max-w-lg text-base leading-relaxed text-gray-600 sm:text-lg">
-            Discover a startup, submit the one you’re building,
-            or start with a free founder tool.
+            Explore startup profiles, submit yours for review (free account required),
+            or use a free founder tool (no account needed).
           </p>
           <div className="mt-8 flex flex-col gap-3 sm:flex-row">
             <Link href="/discover" className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-coral-600 px-6 py-3 font-semibold text-white hover:bg-coral-700">

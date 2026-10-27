@@ -1,6 +1,6 @@
 # Anshkosh
 
-**A public home for Indian startup profiles and founder progress.** Founders share evidence, risks and updates; visitors discover startups, offer feedback, and use free founder tools. Anshkosh is an early-access pilot, and its public signals do not verify demand or traction.
+**A public home for Indian startup profiles and discussions.** Founders describe their idea, product, and evidence; visitors explore profiles, share feedback, and use free founder tools. Anshkosh is an early-access pilot, and its public signals do not verify demand or traction.
 
 Live at **https://www.anshkosh.com**, currently an **early-access pilot**: visitors can give feedback, join waitlists and express interest, but no payments, pledges, orders or investments are open.
 
