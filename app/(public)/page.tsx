@@ -1,4 +1,4 @@
-import { seoMetadata } from "@/lib/seo";
+import { PILOT_DESCRIPTION, seoMetadata } from "@/lib/seo";
 import { Suspense } from "react";
 import { RankingRowsLoading } from "@/components/layout/PublicListLoading";
 
@@ -13,7 +13,7 @@ import LandingFeaturedOn from "@/components/landing/LandingFeaturedOn";
 
 export const metadata = seoMetadata({
   title: "Anshkosh | Explore Indian Startups and What Founders Are Building",
-  description: "Discover what Indian founders are building, explore their startup stories and progress, and take your next step with nine free founder tools.",
+  description: PILOT_DESCRIPTION,
   path: "/",
 });
 
