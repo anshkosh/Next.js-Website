@@ -427,3 +427,7 @@
 
 - The automatic PR #66 CI run for `b1257d3e` reported failures because existing assertions still required the removed discussion label, the earlier backlink wording, and the six-card animated directory strip. The new directory behavior is intentional and supported by current public-page checks.
 - Updated those existing assertions to describe the current copy and single independent AppRater profile. No new tests were added, and no tests were run locally. The in-progress browser job was started against the prior head and its result remains separate from the next revision.
+
+## Browser CI follow-up — 27 October 2026, 19:54 IST
+
+The automatic CI unit-test job passed on `81106d98`, but the browser job failed in `e2e/launch.spec.ts:516` because it still expected `Founder–community discussions: 1 · 3 points`. Playwright passed 9 tests and stopped after this first failure, leaving 9 unrun. The assertion is now updated to the current public label, `Participants with founder replies: 1 · 3 points`. No tests were run locally; the pushed revision will get a fresh automatic CI run. The deployment job was skipped for the pull-request event.

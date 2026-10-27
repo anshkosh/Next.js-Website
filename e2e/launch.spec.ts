@@ -513,7 +513,7 @@ test("leaderboard and featured rows combine activity without leaking private or 
     await row().getByText("Signal breakdown", { exact: false }).click();
     await expect(row().getByText("Founder publishing days: 1 · 2 points", { exact: true })).toBeVisible();
     await expect(row().getByText("Community participants: 1 · 2 points", { exact: true })).toBeVisible();
-    await expect(row().getByText("Founder–community discussions: 1 · 3 points", { exact: true })).toBeVisible();
+    await expect(row().getByText("Participants with founder replies: 1 · 3 points", { exact: true })).toBeVisible();
     const rank = await row().getByRole("link").innerText();
     expect(await page.content()).not.toContain(commenter);
     expect(await page.content()).not.toContain("PRIVATE-SIGNAL-FIXTURE");
