@@ -13,8 +13,8 @@ Use `seoMetadata()` from `lib/seo.ts` on every new public page so it gets a titl
 - The auth pages also set `robots: noindex` in `app/(auth)/layout.tsx`.
 - Organization and WebSite JSON-LD come from `lib/seo.ts`.
 - Startup JSON-LD describes the business as an `Organization`, with `Person` founders from its published team records. It does not expose the account owner's private identity or treat every business as software.
-- Shared product descriptions cover discovery, founder progress, feedback and free tools. Search has its own canonical/social metadata while remaining excluded from indexing.
-- `/leaderboard` is included in the sitemap and `public/llms.txt`, with signals defined as all-time upvotes minus downvotes.
+- Shared product descriptions cover startup profiles, public discussions and free tools. Search has its own canonical/social metadata while remaining excluded from indexing.
+- `/leaderboard` is included in the sitemap and `public/llms.txt`. Its all-time signals combine net votes with capped points for founder publishing activity, approved community participants, and participants with founder replies; they measure participation, not verified traction.
 - Startups get dynamic Open Graph images from `app/api/og/[slug]`.
 - `scripts/verify-seo.mjs` checks a built site's SEO, and the deploy pipeline checks SEO on each candidate release before switching traffic to it.
 
@@ -60,7 +60,7 @@ Discover paginates matching LIVE startups in batches of 24, filling complete row
 in both its two-column tablet and three-column desktop grids. Only the final page
 may have an incomplete row. Search and category filters persist between pages.
 
-Anshkosh is listed on Product Hunt, TechBaseDirectory and Crunchbase; the home page shows their badges. Directory submissions and backlink outreach are in progress. Keep what the site says ("planned") in line with what actually exists.
+Older references to Product Hunt, TechBaseDirectory, Crunchbase and LaunchFree are not verified current listings and their copy may be stale. The homepage currently links only to the independently maintained AppRater profile. Do not present directory mentions as endorsements or current listings without a fresh public-page check.
 
 ## Copy rules
 

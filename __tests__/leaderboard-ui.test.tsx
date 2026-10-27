@@ -21,7 +21,7 @@ it("keeps ranks, named vote controls and profile links accessible in populated r
   expect(host.querySelector('button[aria-label="Remove upvote for Test startup, 12 upvotes"]')?.getAttribute("aria-pressed")).toBe("true");
   expect(host.textContent).toContain("1 founder update");
   expect(host.querySelector('[role="status"]')?.textContent).toContain("19 signals");
-  expect(host.querySelector("details")?.textContent).toContain("Founder–community discussions: 1 · 3 points");
+  expect(host.querySelector("details")?.textContent).toContain("Participants with founder replies: 1 · 3 points");
   expect(host.querySelector("details")?.textContent).toContain("Total signals: 19");
   expect(host.textContent).toContain("12 votes + 7 activity");
 });

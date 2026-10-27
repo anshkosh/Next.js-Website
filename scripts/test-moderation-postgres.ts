@@ -9,6 +9,8 @@ async function main() {
   process.env.MODERATION_CF_API_TOKEN = "isolated-fixture-never-a-real-token";
   const { db } = await import("../lib/db");
   const { processModeration, reserveModerationRequest } = await import("../lib/moderation-worker");
+  const { emailQueue, notificationQueue, syncQueue } = await import("../lib/jobs/queues");
+  const { connection } = await import("../lib/jobs/connection");
   const { queueModeration } = await import("../lib/moderation-store");
   const { commentContent, replyContent, journalContent } = await import("../lib/moderation-policy");
   const { createStartupUpdate, editStartupUpdate } = await import("../lib/startup-update-store");
@@ -143,6 +145,8 @@ async function main() {
       await db.moderationBudget.deleteMany({ where: { day: { in: [budgetDay, futureDay] } } });
     }
     if (category) await db.category.delete({ where: { id: category } });
+    await Promise.all([emailQueue.close(), notificationQueue.close(), syncQueue.close()]);
+    await connection.quit();
     await db.$disconnect();
   }
 }

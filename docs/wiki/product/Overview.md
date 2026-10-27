@@ -2,12 +2,12 @@
 
 ## What Anshkosh is
 
-A public home for Indian startup profiles, founder progress and community feedback. Visitors discover startups before launch; founders explain their idea, team and evidence and use free Launch Support tools. The home-page promise is "Discover Indian startups before launch."
+A public home for Indian startup profiles and community discussions. Visitors explore startups at different stages, review the ideas and evidence founders share, and use free Launch Support tools. The home-page promise is "Explore Indian startups. See what founders are building."
 
 Principles that run through the product and its copy:
 - **Evidence over claims.** Founders should explain their methods, measurements and limitations. Publication review does not independently verify every claim.
 - **Progress, not press releases.** Founders post public updates, including what did not work.
-- **Honest limits.** Community votes reflect opinion, not verified demand, revenue or product-market fit. Signals are all-time upvotes minus downvotes.
+- **Honest limits.** Community votes reflect opinion, not verified demand, revenue or product-market fit. Leaderboard signals combine all-time net votes with capped points for founder publishing activity, approved community participants, and participants with founder replies; they measure participation, not verified traction.
 
 ## Pilot rules (current)
 
@@ -34,7 +34,7 @@ Roles are enforced with Better Auth's admin plugin; see [Security](../engineerin
 
 - **Home**: startup discovery, founder stories and progress, listing benefits and an FAQ teaser.
 - **Discover, Categories, Search**: published startups with category filtering and search, including public founder names.
-- **Leaderboard**: all-time net signals; startups with equal scores share a rank.
+- **Leaderboard**: all-time signals; tied startups share a rank, and ranks are dense (the next rank follows without gaps).
 - **Startup profile** (`/startups/[slug]`): the proposition (problem, solution, audience, prototype status, traction evidence), gallery, pitch-deck download, updates and discussion.
 - **Launch Support** (`/launch-support/*`): a free founder toolkit with a validation planner, MVP planner, pitch builder, runway calculator, launch card, checklist, tracker and directory list. Drafts stay in the visitor's browser.
 - **Journal** (`/journal`): articles on regional ecosystems, founder playbooks and startup models, written in the admin panel. Reading times are calculated from the current body.
@@ -42,4 +42,4 @@ Roles are enforced with Better Auth's admin plugin; see [Security](../engineerin
 
 ## Pilot banner and entry curtain
 
-The "under construction" banner and one-time "Sneak peek" entry curtain (`components/site/`) appear only on the homepage. Internal pages open directly. The homepage preview remains intentional during the pilot.
+The early-access status banner and one-time entry curtain (`components/site/`) appear only on the homepage. They explain what visitors can do in the pilot and that payments and preorders are not open. Internal pages open directly.

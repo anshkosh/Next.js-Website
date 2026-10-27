@@ -75,7 +75,7 @@ it("enters immediately with reduced motion and restores access and focus", async
   }
 });
 
-it("opens with Sneak peek, has no skip button, and unlocks only after the reveal", async () => {
+it("opens with Browse Anshkosh, has no skip button, and unlocks only after the reveal", async () => {
   vi.stubGlobal("IS_REACT_ACT_ENVIRONMENT", true);
   const container = document.createElement("div");
   const content = document.createElement("div");
@@ -90,7 +90,7 @@ it("opens with Sneak peek, has no skip button, and unlocks only after the reveal
     await act(async () => root.render(<PreEntryCurtain />));
     expect(content.inert).toBe(true);
     const enter = container.querySelector("button")!;
-    expect(enter.textContent).toBe("Sneak peek");
+    expect(enter.textContent).toBe("Browse Anshkosh");
     await act(async () => enter.click());
     expect(container.querySelector(".curtain-stage--opening")).not.toBeNull();
     expect(container.textContent).not.toContain("Skip animation");

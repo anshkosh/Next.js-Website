@@ -22,7 +22,7 @@ export default async function SettingsPage() {
   if (!session?.user) redirect(loginHref((await headers()).get("x-anshkosh-path")));
   const user = await db.user.findUnique({
     where: { id: session.user.id },
-    select: { name: true, email: true, emailVerified: true, role: true, image: true, bio: true, location: true, websiteUrl: true, dateOfBirth: true, notifyStartupReviews: true, notifyVoteMilestones: true },
+    select: { name: true, email: true, emailVerified: true, role: true, image: true, bio: true, location: true, websiteUrl: true, dateOfBirth: true, notifyStartupReviews: true, notifyVoteMilestones: true, notifyCommentActivity: true },
   });
   if (!user) redirect(loginHref((await headers()).get("x-anshkosh-path")));
   const hasPassword = await db.account.count({ where: { userId: session.user.id, providerId: "credential" } });

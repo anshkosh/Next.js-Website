@@ -2,6 +2,7 @@ import { randomUUID } from "node:crypto";
 import { db } from "./db";
 import { checkContent, contentHash } from "./moderation-policy";
 import { applyModeration, moderationSource } from "./moderation-source";
+import { deliverNotification } from "./notification-outbox";
 
 export function moderationConfig() {
   const accountId = process.env.MODERATION_CF_ACCOUNT_ID;
@@ -44,15 +45,23 @@ export async function processModeration() {
         await db.contentModeration.updateMany({ where: lease, data: { status: "UNAVAILABLE", leaseToken: null, attempts: { decrement: 1 }, nextAttemptAt: tomorrow(now), reasons: ["Daily moderation allowance reached; awaiting human review or the next UTC day."] } }); break;
       }
       const verdict = await checkContent(source.content, config.token, config.accountId);
-      await db.$transaction(async tx => {
+      const result = await db.$transaction(async tx => {
         await tx.$queryRaw`SELECT id FROM "Startup" WHERE id = ${source.startupId} FOR UPDATE`;
         const saved = await tx.contentModeration.updateMany({ where: lease, data: { status: verdict.safe ? "SAFE" : "FLAGGED", reasons: verdict.reasons, checkedAt: new Date(), leaseToken: null } });
-        if (!saved.count) return;
+        if (!saved.count) return null;
         const fresh = await moderationSource(tx, job);
-        if (!fresh || contentHash(fresh.content) !== job.contentHash || verdict.safe && !await applyModeration(tx, job, true)) {
+        if (!fresh || contentHash(fresh.content) !== job.contentHash) {
           await tx.contentModeration.update({ where: { id: job.id }, data: { status: "STALE" } });
+          return null;
         }
+        const applied = verdict.safe ? await applyModeration(tx, job, true) : null;
+        if (verdict.safe && !applied) {
+          await tx.contentModeration.update({ where: { id: job.id }, data: { status: "STALE" } });
+          return null;
+        }
+        return applied && "notificationId" in applied && typeof applied.notificationId === "string" ? applied.notificationId : null;
       });
+      if (result) await deliverNotification(result);
       checked++;
     } catch (error) {
       const quota = error instanceof Error && error.message === "quota";

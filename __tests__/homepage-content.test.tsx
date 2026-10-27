@@ -83,7 +83,7 @@ describe("homepage public content", () => {
     const html = renderToStaticMarkup(await TopRankedStartups());
 
     expect(queries.leaderboard).toHaveBeenCalledWith(1, "visitor", false, 5);
-    expect(html).toContain("Top five by signals");
+    expect(html).toContain("Top-ranked profiles by participation");
     expect(html).toContain('href="/startups/startup-5"');
     expect(html).not.toContain('href="/startups/startup-6"');
   });

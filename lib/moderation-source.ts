@@ -1,6 +1,7 @@
 import type { ContentModeration, Prisma } from "@prisma/client";
 import { commentContent, replyContent, updateContent, journalContent, contentHash, type ModerationContent } from "./moderation-policy";
 import { publicStartupWhere } from "./startup-visibility";
+import { storeApprovedCommentEmail } from "./comment-notifications";
 
 type Source = { content: ModerationContent; slug: string; startupId: string; mediaUrl?: string | null };
 const eligibleStartup = { ...publicStartupWhere, founder: { founderMode: true, emailVerified: true, banned: false } } satisfies Prisma.StartupWhereInput;
@@ -36,6 +37,10 @@ export async function applyModeration(tx: Prisma.TransactionClient, job: Pick<Co
     if (!includePublished && row.status !== "PENDING") return null;
     if (contentHash(commentContent(row)) !== job.contentHash) return null;
     count = (await tx.comment.updateMany({ where: { id: row.id, status: row.status, authorName: row.authorName, body: row.body, startup }, data: { status: approve ? "APPROVED" : "REJECTED" } })).count;
+    if (count && approve) {
+      const notification = await storeApprovedCommentEmail(tx, row.id);
+      if (notification) return { ...source, notificationId: notification.id };
+    }
   } else if (job.kind === "UPDATE") {
     const row = await tx.startupUpdate.findUniqueOrThrow({ where: { id: job.targetId } });
     if (!includePublished && row.status !== "PENDING") return null;

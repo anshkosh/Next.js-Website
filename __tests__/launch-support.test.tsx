@@ -36,8 +36,7 @@ describe("free early-access launch support", () => {
   it("keeps future outreach separate from available services and avoids ranking promises", () => {
     const html = renderToStaticMarkup(<LaunchSupportPage />);
     expect(html).toContain("Planned — not available yet");
-    expect(html).toContain("backlink packages are not currently offered");
-    expect(html).toContain("We do not guarantee backlinks");
+    expect(html).toContain("We do not promise directory acceptance, backlinks, indexing, search rankings, traffic, or funding.");
     expect(html).toContain("Startup approval, votes, and validation evidence cannot be bought.");
   });
 

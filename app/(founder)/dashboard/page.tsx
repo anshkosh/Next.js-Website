@@ -65,7 +65,7 @@ export default async function DashboardPage() {
       <div className="flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">
         <div className="min-w-0">
           <h1 className="break-words font-heading text-3xl font-bold text-gray-900">Welcome, {profile?.name || session.user.name}</h1>
-          <p className="mt-3 max-w-xl text-base leading-relaxed text-gray-600">Discover what people are building, ask useful questions and follow their progress. You don’t need a startup to take part.</p>
+          <p className="mt-3 max-w-xl text-base leading-relaxed text-gray-600">Explore startup profiles, ask questions, and take part in public discussions. You don’t need a startup to join in.</p>
         </div>
         <DashboardModeControl enabled={false} compact />
       </div>
