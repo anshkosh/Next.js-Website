@@ -33,8 +33,10 @@ function CommentModerationRow({ comment }: { comment: AdminComment }) {
   function review(nextStatus: "APPROVED" | "REJECTED") {
     startTransition(async () => {
       const result = await setCommentModerationStatus(comment.id, comment.status, nextStatus, decisionNote);
-      setMessage(result.error ?? (nextStatus === "APPROVED" ? "Comment published." : "Comment hidden."));
-      if (!result.error) router.refresh();
+      const hasError = "error" in result;
+      const notificationPending = !hasError && "notificationPending" in result && result.notificationPending;
+      setMessage(hasError ? result.error : (nextStatus === "APPROVED" ? (notificationPending ? "Comment published. The founder email is queued for retry." : "Comment published.") : "Comment hidden."));
+      if (!hasError) router.refresh();
     });
   }
 

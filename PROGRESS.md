@@ -1,11 +1,17 @@
 # Progress
 
+## 27 October 2026 — pilot website copy review (prepared)
+
+- Compared the live home, Discover and leaderboard pages with the current application copy and published pilot behavior. The homepage still called a working pilot "under construction"; repeated "before launch" messaging did not fit already-operating businesses; leaderboard copy described a mixed activity score as community interest.
+- Updated the site's positioning to cover Indian startups at different stages, clarified the capped ranking components and their limits, and corrected stale fallback, metadata, footer, product documentation, and `llms.txt` descriptions.
+- Source changes are based on current main `9b86f124` and are in open draft PR #66; no public release occurred. A prior local full-suite run ran 802 tests: 797 passed, 2 skipped, and 3 failed in unchanged migration-policy assertions (`__tests__/deployment-policy.test.ts`, for beta-tester and AI-moderation migration approvals). The current copy follow-up has not been run locally. GitHub Actions run `40517873155` on prior head `b605fc7a` passed test and browser jobs; deploy was skipped. That run does not cover this follow-up. No bot, account, ranking treatment, or VPS setting was changed.
+
 ## 27 October 2026 — founder signup continuity (prepared)
 
 - Grok's signed-out founder-path report found `/startup/new` redirects to login, but “Register here” drops the validated `next` destination; the register form also leaves founder mode off and signup lacks a callback URL. Independent signed-out GETs confirmed the 307, `/register` link, and unchecked founder-mode input.
 - Prepared a scoped fix that carries safe local paths through email registration/verification, selects founder mode only when the visitor explicitly starts from `/startup/new`, and explains that choice. Other registration paths stay off by default. No existing account, public profile, or auth setting was changed.
 - Based on current main `9b86f124` in a separate worktree. Lint, typecheck, and dependency policy passed; focused signup regressions passed (9/9). Full unit suite: 797 passed, 2 skipped, 3 existing failures in `deployment-policy.test.ts` for reviewed migration approvals. Browser regression is included for isolated CI. No account, public profile, bot, or production state was changed.
-- Draft PR #68 is being prepared for review. No merge or deployment was attempted.
+- PR #68 remains a draft; no production merge or deployment has occurred. The current-main refresh is prepared as a separate branch update, with CI expected to rerun after push.
 
 ## 26 October 2026 — release 404 guard correction
 
@@ -405,3 +411,30 @@
 - PR #46 was merged and deployed with owner approval as `9c9f068`; release
   identity, health and workers were verified. No live account reset/retirement,
   bot execution or activity treatment changes were performed.
+
+## 27 October 2026 — follow-up content fixes from live review
+
+- Verified Claude’s read-only findings against the current app code and live page output. The leaderboard main value already shows total signals (e.g. 12 = 7 net votes + 5 activity), so the claim that it ranks on a different headline number is not supported; preserve the existing layout.
+- Clarified the actual scoring maxima: founder publishing up to 20 points (10 days), approved participants up to 40 points (20 people), and replied participants up to 30 points (10 people). Explained dense tie ranks, changed “discussions/comments” wording to participants with replies, clarified future offers are not current preorders, and made Discover’s “more” count include the total published directory.
+- Updated FAQ, leaderboard, homepage ranking description, Discover count, and the matching product/SEO notes. Changes remain in draft PR #66; no release or public interaction was made. No tests were run for this copy-only follow-up.
+
+## 27 October 2026 — clear next-step paths and support status
+
+- Added a direct “Explore free tools” action to the homepage closing CTA, which previously mentioned a free tool but linked only to Discover and startup submission.
+- Reworked the Launch Support planned-services block to distinguish future permission-based directory-submission help from the catalogue and tracker available today; removed the repeated SEO/backlink pitch while retaining a clear no-guarantee statement.
+- The preorder FAQ now describes votes and messages as opinions, not commitments. These changes are local in the PR #66 worktree and have not been tested; no public release occurred.
+
+## 27 October 2026 — third-party listing strip review
+
+- Inspected the linked directory pages from the live homepage. Product Hunt and Crunchbase still say crowdfunding is coming soon; TechBase still frames Anshkosh as pre-launch and describes future crowdfunding; LaunchFree explicitly says the site is under construction. The Free Startup Listing link points to its directory homepage, with no Anshkosh profile visible. AppRater has a public Anshkosh profile that describes the current early-access discovery product.
+- Updated `lib/featured-listings.ts` and `components/landing/LandingFeaturedOn.tsx`: keep AppRater as a plain “Directory profile,” explain that the listing is independent and not an endorsement, and remove stale/unverified links and the duplicated moving marquee.
+- No external listing edits. No tests or deployment. PR #66 remains draft; `git diff --check` is the source formatting check.
+
+## 27 October 2026 — align existing assertions with approved copy changes
+
+- The automatic PR #66 CI run for `b1257d3e` reported failures because existing assertions still required the removed discussion label, the earlier backlink wording, and the six-card animated directory strip. The new directory behavior is intentional and supported by current public-page checks.
+- Updated those existing assertions to describe the current copy and single independent AppRater profile. No new tests were added, and no tests were run locally. The in-progress browser job was started against the prior head and its result remains separate from the next revision.
+
+## Browser CI follow-up — 27 October 2026, 19:54 IST
+
+The automatic CI unit-test job passed on `81106d98`, but the browser job failed in `e2e/launch.spec.ts:516` because it still expected `Founder–community discussions: 1 · 3 points`. Playwright passed 9 tests and stopped after this first failure, leaving 9 unrun. The assertion is now updated to the current public label, `Participants with founder replies: 1 · 3 points`. No tests were run locally; the pushed revision will get a fresh automatic CI run. The deployment job was skipped for the pull-request event.

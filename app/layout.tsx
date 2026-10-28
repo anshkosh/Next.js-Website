@@ -23,13 +23,13 @@ const oswald = Oswald({
 });
 
 export const metadata: Metadata = {
-  title: "Anshkosh | Discover Indian Startups Before Launch",
+  title: "Anshkosh | Explore Indian Startups and What Founders Are Building",
   description: PILOT_DESCRIPTION,
   metadataBase: new URL(BASE_URL),
   alternates: { canonical: "/" },
   robots: { index: true, follow: true },
   openGraph: {
-    title: "Anshkosh | Discover Indian Startups Before Launch",
+    title: "Anshkosh | Explore Indian Startups and What Founders Are Building",
     description: PILOT_DESCRIPTION,
     type: "website",
     url: BASE_URL,
@@ -40,7 +40,7 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     images: [absoluteUrl(DEFAULT_SOCIAL_IMAGE)],
-    title: "Anshkosh | Discover Indian Startups Before Launch",
+    title: "Anshkosh | Explore Indian Startups and What Founders Are Building",
     description: PILOT_DESCRIPTION,
   },
 };

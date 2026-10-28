@@ -1,0 +1,2 @@
+ALTER TABLE "User"
+ADD COLUMN "notifyCommentActivity" BOOLEAN NOT NULL DEFAULT true;

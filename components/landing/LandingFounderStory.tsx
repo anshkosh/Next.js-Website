@@ -4,7 +4,7 @@ import { ArrowRight } from "lucide-react";
 const steps = [
   { title: "Tell your story", description: "Introduce your team, the problem you’re solving, and who you’re building for." },
   { title: "Share what you’ve learned", description: "Show what you’ve tested, what changed, and the questions you’re still working through." },
-  { title: "Invite people into the journey", description: "Submit your profile for review, then share updates and ask for useful feedback." },
+  { title: "Invite people into the journey", description: "Submit your profile for review, share updates, and invite questions. Approved comments appear in your founder dashboard after moderation." },
 ];
 
 export default function LandingFounderStory() {

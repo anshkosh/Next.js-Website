@@ -16,4 +16,5 @@ export const accountProfileFields = {
   dateOfBirth: { type: "string", required: false, defaultValue: "", input: true, validator: { input: dateOfBirthSchema } },
   notifyStartupReviews: { type: "boolean", required: false, defaultValue: true, input: true, validator: { input: z.boolean() } },
   notifyVoteMilestones: { type: "boolean", required: false, defaultValue: true, input: true, validator: { input: z.boolean() } },
+  notifyCommentActivity: { type: "boolean", required: false, defaultValue: true, input: true, validator: { input: z.boolean() } },
 } as const;

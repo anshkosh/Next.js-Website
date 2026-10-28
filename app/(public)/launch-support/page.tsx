@@ -122,22 +122,15 @@ export default function LaunchSupportPage() {
         <div className="grid gap-10 lg:grid-cols-2">
           <div>
             <p className="mb-3 text-sm font-semibold text-gray-600">Planned — not available yet</p>
-            <h2 id="outreach-heading" className="font-heading text-3xl font-bold">Startup directory listings &amp; credible SEO backlinks.</h2>
+            <h2 id="outreach-heading" className="font-heading text-3xl font-bold">Directory submission support.</h2>
             <p className="mt-4 leading-relaxed text-gray-600">
-              We plan to explore submissions to relevant, credible startup
-              directories with your permission. Automated submissions and
-              backlink packages are not currently offered. Each directory makes
-              its own acceptance and linking decisions.
+              We are exploring a permission-based service to help founders prepare submissions to relevant startup directories. It is planned, not available yet; each directory decides whether to accept a listing or include a link.
             </p>
             <p className="mt-4 leading-relaxed text-gray-600">
-              Credible SEO backlinks would come from relevant listings that
-              genuinely help people discover your startup — never bulk or
-              misleading link schemes.
+              You can use the free Directory catalogue and tracker today to check fit, record submissions in this browser, and follow up yourself. Tracker entries do not sync across devices or accounts and are cleared when you sign out; download the CSV first if you want to keep a copy.
             </p>
             <p className="mt-4 leading-relaxed text-gray-600">
-              The goal is useful discovery and accurate brand citations, not
-              bulk link spam. We do not guarantee backlinks, indexing, search
-              rankings, traffic, or funding.
+              We do not promise directory acceptance, backlinks, indexing, search rankings, traffic, or funding.
             </p>
           </div>
           <aside aria-labelledby="standards-heading" className="rounded-2xl border border-coral-200 bg-coral-50 p-6 sm:p-8">

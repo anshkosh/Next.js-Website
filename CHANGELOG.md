@@ -6,6 +6,17 @@
 - Preselect founder mode only for the explicit `/startup/new` path, explain the choice, and keep the default off for other registrations.
 - Add focused return-path and signed-out browser regressions; align account and product documentation with the behavior.
 
+## Unreleased — pilot positioning and leaderboard clarity
+
+- Replace "under construction" and "before launch" claims with accurate early-access pilot language for startups at different stages.
+- Describe the leaderboard as net votes plus capped points for founder publishing days, approved community participants, and participants with founder replies; state that these are participation signals, not verified demand or traction. Clarify exact point maxima, dense tie ranks, and the total Discover count; add a direct free-tools CTA and clarify planned directory-support status.
+- Correct the directory's no-database fallback and align page metadata, footer, About copy, product docs, and `llms.txt` with the live pilot.
+
+## Unreleased — approved comment notifications
+
+- Queue a retryable founder email when a visitor comment is approved and published; keep pending and rejected comments out of email.
+- Add an on-by-default, opt-out approved-comment alert preference and include only the public commenter name and approved text in the message.
+
 ## Unreleased — loading performance
 
 - Preserve real HTTP 404 responses for missing journal articles by removing the

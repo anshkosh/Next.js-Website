@@ -7,7 +7,7 @@ export default function SignalBreakdown({ startup }: { startup: LeaderboardEntry
       <li>Net votes: {startup.signalCount} ({startup.upvoteCount} up − {startup.downvoteCount} down)</li>
       <li>Founder publishing days: {startup.founderDays} · {2 * Math.min(startup.founderDays, 10)} points</li>
       <li>Community participants: {startup.backers} · {2 * Math.min(startup.backers, 20)} points</li>
-      <li>Founder–community discussions: {startup.discussions} · {3 * Math.min(startup.discussions, 10)} points</li>
+      <li>Participants with founder replies: {startup.discussions} · {3 * Math.min(startup.discussions, 10)} points</li>
       <li className="font-semibold text-gray-900">Total signals: {startup.leaderboardScore}</li>
     </ul>
   </details>;

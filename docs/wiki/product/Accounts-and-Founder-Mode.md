@@ -58,12 +58,17 @@ its existing permission checks. Founder mode grants no moderation or account
 administration rights. Backer accounts do not enable investments/payments.
 
 Profile settings accept a strict allowlist (`name`, `image`, `bio`, `location`,
-`websiteUrl`, optional `dateOfBirth`, `notifyStartupReviews`, `notifyVoteMilestones`) for the signed-in,
+`websiteUrl`, optional `dateOfBirth`, `notifyStartupReviews`, `notifyVoteMilestones`,
+`notifyCommentActivity`) for the signed-in,
 non-banned account. The dashboard action accepts only boolean `founderMode`.
 Better Auth updates the current user. Existing admin/reviewer roles are independent
 of this preference. No account ID, verification status or permission role is
 accepted by either form. New profile fields and preference defaults use an additive
 migration; existing account identities, moderation states and saved content remain.
+Approved-comment alerts are on by default and can be turned off in Profile settings.
+They are queued only after moderation publishes an outside visitor’s comment; the
+founder receives the public display name and approved comment text, but not the
+commenter’s email. A retryable outbox preserves the email job if delivery is delayed.
 
 ## Account navigation and mode controls
 

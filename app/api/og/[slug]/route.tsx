@@ -6,13 +6,18 @@ import { ogLogo } from '@/lib/og-logo';
 
 export const dynamic = "force-dynamic";
 
+// OG cards are identical for every visitor to a public slug. Let the CDN
+// reuse successful renders briefly while keeping browser caches revalidating.
+const publicOgCacheControl = "public, max-age=0, s-maxage=300, must-revalidate";
+const missingOgCacheControl = "public, max-age=0, s-maxage=30, must-revalidate";
+
 export async function GET(req: NextRequest, props: { params: Promise<{ slug: string }> }) {
   const params = await props.params;
   const startup = await db.startup.findUnique({
     where: { slug: params.slug, ...publicStartupWhere },
     select: { name: true, tagline: true, logoUrl: true, category: { select: { name: true, iconName: true } } },
   });
-  if (!startup) return new Response('Not Found', { status: 404, headers: { "Cache-Control": "private, no-store" } });
+  if (!startup) return new Response('Not Found', { status: 404, headers: { "Cache-Control": missingOgCacheControl } });
   const logo = await ogLogo(startup.logoUrl);
 
   return new ImageResponse(
@@ -74,6 +79,6 @@ export async function GET(req: NextRequest, props: { params: Promise<{ slug: str
         </div>
       </div>
     ),
-    { width: 1200, height: 630, headers: { "Cache-Control": "private, no-store" } }
+    { width: 1200, height: 630, headers: { "Cache-Control": publicOgCacheControl } }
   );
 }

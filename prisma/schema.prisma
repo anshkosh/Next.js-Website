@@ -24,6 +24,7 @@ model User {
   dateOfBirth   String    @default("")
   notifyStartupReviews Boolean @default(true)
   notifyVoteMilestones Boolean @default(true)
+  notifyCommentActivity Boolean @default(true)
   banned        Boolean   @default(false)
   banReason     String?
   banExpires    DateTime?
@@ -45,6 +46,7 @@ model Session {
   userAgent String?
   userId    String
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  impersonatedBy String?
 }
 
 model Account {

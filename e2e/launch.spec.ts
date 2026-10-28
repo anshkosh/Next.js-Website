@@ -38,8 +38,8 @@ async function isolatedContext(browser: Browser, options: Parameters<Browser["ne
 }
 
 async function reveal(page: Page) {
-  const peek = page.getByRole("button", { name: "Sneak peek", exact: true });
-  if (await peek.isVisible()) { await peek.click(); await expect(peek).toBeHidden({ timeout: 15000 }); }
+  const enterButton = page.getByRole("button", { name: "Browse Anshkosh", exact: true });
+  if (await enterButton.isVisible()) { await enterButton.click(); await expect(enterButton).toBeHidden({ timeout: 15000 }); }
   const cookieNotice = page.getByRole("button", { name: "Dismiss cookie and browser storage notice", exact: true });
   if (await cookieNotice.isVisible()) await cookieNotice.click();
 }
@@ -49,7 +49,7 @@ async function enter(page: Page, url: string) {
   });
   await page.goto(url);
   if (new URL(page.url()).pathname !== "/") {
-    await expect(page.getByRole("dialog", { name: "Anshkosh is under construction." })).toHaveCount(0);
+    await expect(page.getByRole("dialog", { name: "Explore the Anshkosh pilot." })).toHaveCount(0);
     await expect(page.getByRole("complementary", { name: "Site status" })).toHaveCount(0);
   }
   await reveal(page);
@@ -525,7 +525,7 @@ test("leaderboard and featured rows combine activity without leaking private or 
     await row().getByText("Signal breakdown", { exact: false }).click();
     await expect(row().getByText("Founder publishing days: 1 · 2 points", { exact: true })).toBeVisible();
     await expect(row().getByText("Community participants: 1 · 2 points", { exact: true })).toBeVisible();
-    await expect(row().getByText("Founder–community discussions: 1 · 3 points", { exact: true })).toBeVisible();
+    await expect(row().getByText("Participants with founder replies: 1 · 3 points", { exact: true })).toBeVisible();
     const rank = await row().getByRole("link").innerText();
     expect(await page.content()).not.toContain(commenter);
     expect(await page.content()).not.toContain("PRIVATE-SIGNAL-FIXTURE");
@@ -564,12 +564,12 @@ test("concurrent vote switches and reconciliation preserve one vote and correct 
 
 test("homepage retains the preview while navigation opens internal pages directly", async ({ page }) => {
   await page.goto("/");
-  await expect(page.getByRole("dialog", { name: "Anshkosh is under construction." })).toBeVisible();
+  await expect(page.getByRole("dialog", { name: "Explore the Anshkosh pilot." })).toBeVisible();
   await expect(page.getByRole("complementary", { name: "Site status" })).toHaveCount(1);
   await reveal(page);
   await page.getByRole("navigation", { name: "Primary navigation" }).getByRole("link", { name: "Discover", exact: true }).click();
   await expect(page).toHaveURL(/\/discover$/);
-  await expect(page.getByRole("dialog", { name: "Anshkosh is under construction." })).toHaveCount(0);
+  await expect(page.getByRole("dialog", { name: "Explore the Anshkosh pilot." })).toHaveCount(0);
   await expect(page.getByRole("complementary", { name: "Site status" })).toHaveCount(0);
   expect(await page.evaluate(() => !document.getElementById("site-content")?.inert && document.body.style.overflow !== "hidden")).toBe(true);
 });
@@ -645,7 +645,7 @@ test("an unhydrated login submits credentials in a POST body", async ({ browser 
 test("signed-in comments prefill identity and remain privately visible while pending", async ({ page, browser }) => {
   await login(page, adminEmail, password, true);
   await page.goto("/");
-  await expect(page.getByRole("dialog", { name: "Anshkosh is under construction." })).toHaveCount(0);
+    await expect(page.getByRole("dialog", { name: "Explore the Anshkosh pilot." })).toHaveCount(0);
   await page.getByRole("navigation", { name: "Primary navigation" }).getByRole("button", { name: "Account menu for Test Reviewer", exact: true }).click();
   await expect(page.getByRole("menuitem", { name: "Dashboard", exact: true })).toHaveAttribute("href", "/dashboard");
   await page.getByRole("menuitem", { name: "Dashboard", exact: true }).click();
