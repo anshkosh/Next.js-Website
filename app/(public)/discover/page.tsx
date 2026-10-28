@@ -133,6 +133,7 @@ export default async function DiscoverPage(props: {
             Browse categories
           </Link>
           <Link href="/leaderboard" className="ml-3 mt-6 inline-flex min-h-11 items-center rounded-full border border-gray-200 px-5 py-2 text-sm font-medium text-gray-700 transition-colors hover:border-coral-500 hover:text-coral-600">View leaderboard</Link>
+          <Link href="/startup/new" className="ml-3 mt-6 inline-flex min-h-11 items-center rounded-full border border-gray-300 bg-white px-5 py-2 text-sm font-semibold text-gray-900 transition-colors hover:border-coral-500 hover:text-coral-700">List your startup</Link>
         </div>
       </section>
 
