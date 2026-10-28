@@ -33,8 +33,8 @@ for (const path of publicPaths) {
     assert.ok(answers.every(answer => answer.textContent.trim()), "FAQ answers are not empty");
     assert.deepEqual([...document.querySelectorAll('h2 [data-slot="accordion-trigger"]')].map(trigger => trigger.textContent.trim()), faq.mainEntity.map(question => question.name), "FAQ heading hierarchy matches every published question");
   }
-  assert.equal(document.querySelectorAll(".curtain-stage").length, path === "/" ? 1 : 0, `${path}: homepage-only preview curtain`);
-  assert.equal(document.querySelectorAll('aside[aria-label="Site status"]').length, path === "/" ? 1 : 0, `${path}: homepage-only construction banner`);
+  assert.equal(document.querySelectorAll(".curtain-stage").length, 0, `${path}: no entry curtain`);
+  assert.equal(document.querySelectorAll('aside[aria-label="Site status"]').length, 0, `${path}: no construction banner`);
   console.log(`PASS ${path}: status, canonical, metadata, H1, social image`);
 }
 
