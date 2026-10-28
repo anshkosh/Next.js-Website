@@ -2,7 +2,7 @@ import { publicStartupWhere } from "@/lib/startup-visibility";
 import { cookies } from "next/headers";
 import Link from "next/link";
 import { ArrowRight, Sparkles } from "lucide-react";
-import FeaturedStartupsCarousel from "@/components/landing/FeaturedStartupsCarousel";
+import StartupCard from "@/components/startup/StartupCard";
 import { db } from "@/lib/db";
 import { publicStartupCard, publicStartupCardSelect } from "@/lib/public-startup-card";
 import { withActivitySignals } from "@/lib/leaderboard";
@@ -25,7 +25,7 @@ export default async function FeaturedStartups({ cookieId }: { cookieId?: string
   if (startups.length === 0) return null;
 
   return (
-    <section aria-labelledby="discover-featured-title" className="border-b border-gray-100 bg-white py-12 md:py-16">
+    <section aria-labelledby="discover-featured-title" className="border-b border-gray-100 bg-white py-8 md:py-10">
       <div className="container mx-auto max-w-7xl px-4">
         <div className="mb-8 flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
           <div>
@@ -45,7 +45,11 @@ export default async function FeaturedStartups({ cookieId }: { cookieId?: string
           </Link>
         </div>
 
-        <FeaturedStartupsCarousel startups={startups} />
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+          {startups.map((startup) => (
+            <StartupCard key={startup.id} startup={startup} />
+          ))}
+        </div>
       </div>
     </section>
   );
