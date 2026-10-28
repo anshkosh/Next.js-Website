@@ -8,6 +8,7 @@ import RootLayout from "../app/layout";
 
 vi.mock("next/navigation", () => ({ useRouter: () => ({ push: vi.fn() }), usePathname: () => "/faq" }));
 vi.mock("next/font/google", () => ({ Inter: () => ({ variable: "inter" }), Oswald: () => ({ variable: "oswald" }) }));
+vi.mock("next/server", () => ({ connection: async () => undefined }));
 
 let root: Root, host: HTMLDivElement;
 beforeEach(() => {

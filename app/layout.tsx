@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Inter, Oswald } from "next/font/google";
+import { connection } from "next/server";
 import "./globals.css";
 import { SiteEnhancements } from "@/components/site/SiteEnhancements";
 import { DEFAULT_SOCIAL_IMAGE, SITE_URL, absoluteUrl, PILOT_DESCRIPTION } from "@/lib/seo";
@@ -40,11 +41,14 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  // Resolve the request before query-dependent auth forms render, so native
+  // forms are not streamed into hidden segments that need JavaScript to reveal.
+  await connection();
   return (
     <html
       lang="en"
