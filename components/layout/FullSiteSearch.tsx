@@ -2,14 +2,17 @@
 
 import { Search, X } from "lucide-react";
 import { FormEvent, useId, useRef, useState } from "react";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 
 export default function FullSiteSearch({ align = "right" }: { align?: "left" | "right" }) {
   const router = useRouter();
+  const pathname = usePathname();
   const searchId = useId();
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
   const toggle = useRef<HTMLButtonElement>(null);
+
+  if (pathname === "/") return null;
 
   const submit = (event: FormEvent) => {
     event.preventDefault();

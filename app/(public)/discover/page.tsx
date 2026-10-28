@@ -12,6 +12,7 @@ import { seoMetadata } from "@/lib/seo";
 import ErrorState, { recoveryLinkClass, secondaryRecoveryLinkClass } from "@/components/site/ErrorState";
 import FeaturedStartups from "@/components/landing/FeaturedStartups";
 import { pageNumber, pageHref, searchText } from "@/lib/pagination";
+import PublicPageIntro from "@/components/layout/PublicPageIntro";
 
 export const dynamic = "force-dynamic";
 
@@ -48,16 +49,12 @@ export default async function DiscoverPage(props: {
   if (!process.env.DATABASE_URL) {
     return (
       <div className="w-full">
-        <section className="page-intro-spacing bg-white border-b border-gray-100">
-          <div className="container mx-auto px-4 text-center max-w-5xl">
-            <h1 className="page-title mb-4">Discover <span className="text-coral-500">Startups</span></h1>
-            <p className="text-lg leading-relaxed text-gray-600 max-w-2xl mx-auto">Explore startup profiles, review what founders share about their idea and product, and join public discussions.</p>
-            <Link href="/categories" className="mt-6 inline-flex min-h-11 items-center rounded-full border border-gray-200 px-5 py-2 text-sm font-medium text-gray-700 transition-colors hover:border-coral-500 hover:text-coral-600 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-coral-500">
+        <PublicPageIntro title={<>Discover <span className="text-coral-500">Startups</span></>} description="Explore startup profiles, review what founders share about their idea and product, and join public discussions.">
+            <Link href="/categories" className="inline-flex min-h-11 items-center rounded-xl border border-gray-200 px-5 py-2 text-sm font-medium text-gray-700 transition-colors hover:border-coral-500 hover:text-coral-600 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-coral-500">
               Browse categories
             </Link>
-            <Link href="/leaderboard" className="ml-3 mt-6 inline-flex min-h-11 items-center rounded-full border border-gray-200 px-5 py-2 text-sm font-medium text-gray-700 transition-colors hover:border-coral-500 hover:text-coral-600">View leaderboard</Link>
-          </div>
-        </section>
+            <Link href="/leaderboard" className="inline-flex min-h-11 items-center rounded-xl border border-gray-200 px-5 py-2 text-sm font-medium text-gray-700 transition-colors hover:border-coral-500 hover:text-coral-600">View leaderboard</Link>
+        </PublicPageIntro>
         <section className="container mx-auto px-4 py-12 max-w-3xl">
           <div className="rounded-2xl border border-coral-100 bg-coral-50 p-8 text-center">
             <h2 className="text-xl font-bold text-gray-900 mb-2">The directory is unavailable right now</h2>
@@ -119,17 +116,7 @@ export default async function DiscoverPage(props: {
 
   return (
     <div className="w-full">
-      {/* Hero Section */}
-      <section className="border-b border-gray-100 bg-white py-8 md:py-10">
-        <div className="container mx-auto max-w-7xl px-4 text-center">
-          <h1 className="page-title mb-4">
-            Discover <span className="text-coral-500">Startups</span>
-          </h1>
-          <p className="mx-auto max-w-2xl text-base leading-relaxed text-gray-600 sm:text-lg">
-            Explore what Indian founders are building, across industries and stages.
-          </p>
-        </div>
-      </section>
+      <PublicPageIntro title={<>Discover <span className="text-coral-500">Startups</span></>} description="Explore startup profiles, review what founders share about their idea and product, and join public discussions." />
 
       {showFeatured && page === 1 && <FeaturedStartups cookieId={cookieId} />}
 

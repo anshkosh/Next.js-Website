@@ -12,8 +12,8 @@ it("keeps the original CTA artwork optimized and points the revised copy to disc
   expect(image.getAttribute("srcset")).toContain("640w");
   expect(image.getAttribute("sizes")).toBe("100vw");
   expect(image.getAttribute("loading")).toBe("lazy");
-  expect(container.querySelector("h2")?.textContent).toContain("Bring your next step");
-  expect(container.querySelector("h2")?.textContent).toContain("to Anshkosh.");
+  expect(container.querySelector("h2")?.textContent).toContain("Take your next step");
+  expect(container.querySelector("h2")?.textContent).toContain("with Anshkosh.");
   expect(container.querySelector('a[href="/startup/new"]')?.textContent).toBe("List your startup");
   expect(container.querySelector('a[href="/discover"]')?.textContent?.trim()).toBe("Discover startups");
 });

@@ -22,7 +22,7 @@ describe("free early-access launch support", () => {
     const document = new DOMParser().parseFromString(renderToStaticMarkup(<LaunchSupportPage />), "text/html");
     expect(document.querySelectorAll("h1")).toHaveLength(1);
     expect(document.querySelector("h1")?.textContent).toContain("Anshkosh");
-    expect(document.body.textContent).toContain("Free during early access");
+    expect(document.body.textContent).toContain("A free founder toolkit");
     expect(document.body.textContent).toContain("No payment details. No automatic paid subscription.");
     expect(document.querySelector('a[href="/startup/new"]')).not.toBeNull();
     expect(document.querySelector('a[href="/contact?subject=Free%20launch%20support"]')).not.toBeNull();

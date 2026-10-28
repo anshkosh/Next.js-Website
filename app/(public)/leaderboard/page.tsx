@@ -5,6 +5,7 @@ import LeaderboardList from "@/components/startup/LeaderboardList";
 import ErrorState, { recoveryLinkClass, secondaryRecoveryLinkClass } from "@/components/site/ErrorState";
 import { getLeaderboard, leaderboardPageNumber, LEADERBOARD_PAGE_SIZE } from "@/lib/leaderboard";
 import { seoMetadata } from "@/lib/seo";
+import PublicPageIntro from "@/components/layout/PublicPageIntro";
 
 export const dynamic = "force-dynamic";
 export const metadata = seoMetadata({
@@ -22,13 +23,9 @@ export default async function LeaderboardPage({ searchParams }: {
 
   return (
     <div>
-      <section className="border-b border-gray-100 bg-white py-6 sm:py-8">
-        <div className="mx-auto max-w-5xl px-4 text-center sm:px-6">
-          <h1 className="page-title">Startup <span className="text-coral-500">leaderboard</span></h1>
-          <p className="mx-auto mt-2 max-w-5xl text-base leading-relaxed text-gray-600">Ranked by net votes and founder/community activity. Signals show participation, not verified traction.</p>
-          <Link href="/discover" className="mt-2 inline-flex min-h-10 items-center gap-2 font-semibold text-coral-700 underline underline-offset-4">Browse all startups <ArrowRight aria-hidden="true" className="h-4 w-4" /></Link>
-        </div>
-      </section>
+      <PublicPageIntro title={<>Startup <span className="text-coral-500">leaderboard</span></>} description="Ranked by net votes and founder/community activity. Signals show participation, not verified traction.">
+        <Link href="/discover" className="inline-flex min-h-10 items-center gap-2 font-semibold text-coral-700 underline underline-offset-4">Browse all startups <ArrowRight aria-hidden="true" className="h-4 w-4" /></Link>
+      </PublicPageIntro>
       <section aria-label="Startup rankings" className="mx-auto max-w-6xl px-4 py-6 sm:px-6 sm:py-8">
         {entries.length ? (
           <>

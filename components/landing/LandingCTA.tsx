@@ -12,13 +12,12 @@ export default function LandingCTA() {
       </div>
       <div className="mx-auto max-w-6xl px-4 sm:px-6">
         <div className="max-w-xl">
-          <p className="mb-4 text-xs font-semibold uppercase tracking-[0.16em] text-coral-700">There’s a place for your next step</p>
+          <p className="mb-4 text-xs font-semibold uppercase tracking-[0.16em] text-coral-700">For founders ready to build</p>
           <h2 id="next-step-title" className="font-heading text-4xl font-bold leading-tight tracking-tight text-gray-900 sm:text-5xl">
-            Bring your next step <span className="block text-coral-500">to Anshkosh.</span>
+            Take your next step <span className="block text-coral-500">with Anshkosh.</span>
           </h2>
           <p className="mt-5 max-w-lg text-base leading-relaxed text-gray-600 sm:text-lg">
-            Explore startup profiles, submit yours for review (free account required),
-            or use a free founder tool (no account needed).
+            Share your startup, explore what others are building, or use free tools to move your idea forward.
           </p>
           <div className="mt-8 flex flex-col gap-3 sm:flex-row">
             <Link href="/discover" className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-coral-600 px-6 py-3 font-semibold text-white hover:bg-coral-700">

@@ -1,12 +1,14 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { Menu, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import FullSiteSearch from "./FullSiteSearch";
 import NavigationLinks from "./NavigationLinks";
 
 export default function MobileNav({ authenticated }: { authenticated: boolean }) {
+  const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const [shown, setShown] = useState(false);
   const container = useRef<HTMLDivElement>(null);
@@ -59,9 +61,9 @@ export default function MobileNav({ authenticated }: { authenticated: boolean })
               {authenticated ? "Dashboard" : "Login"}
             </Link>
             {authenticated && <><Link href="/settings" onClick={() => setOpen(false)} className="flex min-h-11 items-center px-3 font-medium text-gray-700">Profile settings</Link><Link href="/logout" prefetch={false} onClick={() => setOpen(false)} className="flex min-h-11 items-center px-3 font-medium text-red-700">Logout</Link></>}
-            <div className="mt-3 flex items-center justify-between border-t border-gray-200 pt-3 dark:border-gray-700">
+            {pathname !== "/" && <div className="mt-3 flex items-center justify-between border-t border-gray-200 pt-3 dark:border-gray-700">
               <FullSiteSearch align="left" />
-            </div>
+            </div>}
           </div>
         </nav>
       )}

@@ -50,5 +50,10 @@
 }
 
 @media (min-width: 1024px) {
-  .frame { width: 920px; min-width: 0; transform: translateX(-50%) scaleY(0.9); }
+  .artwork { height: 36vw; }
+  .frame { width: 100%; min-width: 0; transform: translateX(-50%); }
+  .window {
+    -webkit-mask-image: linear-gradient(transparent, #000 45%, #000 96%, transparent);
+    mask-image: linear-gradient(transparent, #000 45%, #000 96%, transparent);
+  }
 }
