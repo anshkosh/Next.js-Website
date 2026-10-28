@@ -60,7 +60,15 @@ Discover paginates matching LIVE startups in batches of 24, filling complete row
 in both its two-column tablet and three-column desktop grids. Only the final page
 may have an incomplete row. Search and category filters persist between pages.
 
-Older references to Product Hunt, TechBaseDirectory, Crunchbase and LaunchFree are not verified current listings and their copy may be stale. The homepage currently links only to the independently maintained AppRater profile. Do not present directory mentions as endorsements or current listings without a fresh public-page check.
+The owner-approved homepage strip links to the Product Hunt product page, AppRater public profile and Crunchbase company profile. It scrolls horizontally, with its duplicate track hidden from assistive technology and keyboard navigation. These are profile links, not partnerships or editorial endorsements. Some external descriptions contain older product plans; deployment does not update those external profiles. TechBaseDirectory, LaunchFree and the generic Free Startup Listing homepage remain excluded.
+
+## Public page presentation
+
+The homepage hero reads “Back the next thing. Before it launches.” and invites founders to share their work and early believers to offer feedback. Its primary action is startup submission. The desktop artwork spans the full hero width while retaining the original aspect ratio; smaller screens retain their existing crop.
+
+Discover, Leaderboard, Launch Support, Journal, FAQ and Contact share `PublicPageIntro` for centred titles, matching type sizes, and consistent top and description spacing. Decorative section-label pills are removed. Navigation switches between desktop and mobile at 1024px; both header and footer branding use the same maximum width and horizontal padding.
+
+The welcome curtain, early-access status banner and top scroll-progress strip are removed. Homepage header and mobile-menu search are hidden; other routes retain search. The homepage FAQ begins with “What is Anshkosh?”.
 
 ## Copy rules
 

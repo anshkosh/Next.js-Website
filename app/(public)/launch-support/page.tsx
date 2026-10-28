@@ -2,6 +2,7 @@ import Link from "next/link";
 import { ArrowRight, Check, FileText, MessageSquare, Users } from "lucide-react";
 import { seoMetadata } from "@/lib/seo";
 import { FOUNDER_TOOLS } from "@/lib/founder-toolkit";
+import PublicPageIntro from "@/components/layout/PublicPageIntro";
 
 export const metadata = seoMetadata({
   title: "Launch Support & Free Founder Toolkit — Anshkosh",
@@ -45,29 +46,19 @@ const steps = [
 export default function LaunchSupportPage() {
   return (
     <div className="bg-white text-gray-900">
-      <section className="border-b border-gray-200">
-        <div className="mx-auto max-w-6xl px-4 pb-6 pt-16 sm:px-6 md:pt-24">
-          <p className="mb-5 text-sm font-semibold uppercase tracking-wider text-coral-700">
-            Launch Support · Free during early access
-          </p>
-          <h1 className="max-w-3xl font-heading text-4xl font-bold leading-[1.1] tracking-tight text-balance sm:text-5xl md:text-6xl">
-            Your next step, with Anshkosh.
-          </h1>
-          <p className="mt-6 max-w-2xl text-lg leading-relaxed text-gray-600">
-            Test your idea. Decide what to build. Make your launch materials.
-            A free founder toolkit to help you move from a rough idea to a clear next step.
-          </p>
-          <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+      <PublicPageIntro title="Your next step, with Anshkosh." description="Test your idea. Decide what to build. Make your launch materials. A free founder toolkit to help you move from a rough idea to a clear next step.">
+          <div className="flex flex-col items-center gap-3">
+            <div className="flex flex-col gap-3 sm:flex-row">
             <Link href="#tools-heading" className="inline-flex items-center justify-center gap-2 rounded-xl bg-coral-600 px-6 py-3 font-semibold text-white transition-colors hover:bg-coral-700">
               Explore the free tools <ArrowRight aria-hidden="true" className="h-4 w-4" />
             </Link>
             <Link href="/startup/new" className="inline-flex items-center justify-center rounded-xl border border-gray-300 px-6 py-3 font-semibold transition-colors hover:border-coral-600 hover:text-coral-700">
               List your startup for free
             </Link>
+            </div>
+            <p className="text-sm text-gray-600">No payment details. No automatic paid subscription.</p>
           </div>
-          <p className="mt-4 text-sm text-gray-600">No payment details. No automatic paid subscription.</p>
-        </div>
-      </section>
+      </PublicPageIntro>
 
       <section aria-labelledby="tools-heading" className="mx-auto max-w-6xl px-4 pb-14 pt-6 sm:px-6 md:pb-20">
         <p className="mb-3 text-sm font-semibold text-coral-700">Free founder tools · Available now</p>

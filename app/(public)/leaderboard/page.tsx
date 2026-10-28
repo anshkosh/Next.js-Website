@@ -5,6 +5,7 @@ import LeaderboardList from "@/components/startup/LeaderboardList";
 import ErrorState, { recoveryLinkClass, secondaryRecoveryLinkClass } from "@/components/site/ErrorState";
 import { getLeaderboard, leaderboardPageNumber, LEADERBOARD_PAGE_SIZE } from "@/lib/leaderboard";
 import { seoMetadata } from "@/lib/seo";
+import PublicPageIntro from "@/components/layout/PublicPageIntro";
 
 export const dynamic = "force-dynamic";
 export const metadata = seoMetadata({
@@ -22,14 +23,10 @@ export default async function LeaderboardPage({ searchParams }: {
 
   return (
     <div>
-      <section className="page-intro-spacing border-b border-gray-100 bg-white">
-        <div className="mx-auto max-w-5xl px-4 text-center sm:px-6">
-          <h1 className="page-title">Startup <span className="text-coral-500">leaderboard</span></h1>
-          <p className="mx-auto mt-4 max-w-2xl text-lg leading-relaxed text-gray-600">Rankings combine net votes with capped points for founder publishing activity, approved community participants, and participants with founder replies. They show participation on Anshkosh, not verified demand or traction.</p>
-          <Link href="/discover" className="mt-4 inline-flex min-h-11 items-center gap-2 font-semibold text-coral-700 underline underline-offset-4">Browse all startups <ArrowRight aria-hidden="true" className="h-4 w-4" /></Link>
-        </div>
-      </section>
-      <section aria-label="Startup rankings" className="mx-auto max-w-6xl px-4 py-10 sm:px-6 md:py-12">
+      <PublicPageIntro title={<>Startup <span className="text-coral-500">leaderboard</span></>} description="Ranked by net votes and founder/community activity. Signals show participation, not verified traction.">
+        <Link href="/discover" className="inline-flex min-h-10 items-center gap-2 font-semibold text-coral-700 underline underline-offset-4">Browse all startups <ArrowRight aria-hidden="true" className="h-4 w-4" /></Link>
+      </PublicPageIntro>
+      <section aria-label="Startup rankings" className="mx-auto max-w-6xl px-4 py-6 sm:px-6 sm:py-8">
         {entries.length ? (
           <>
             <p className="mb-4 text-sm text-gray-600">Showing {(page - 1) * LEADERBOARD_PAGE_SIZE + 1}–{Math.min(page * LEADERBOARD_PAGE_SIZE, totalCount)} of {totalCount.toLocaleString("en-IN")} published {totalCount === 1 ? "startup" : "startups"}</p>

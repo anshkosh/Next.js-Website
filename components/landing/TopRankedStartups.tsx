@@ -1,6 +1,6 @@
 import { cookies } from "next/headers";
 import Link from "next/link";
-import { ArrowRight, Sparkles } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import LeaderboardList from "@/components/startup/LeaderboardList";
 import { getLeaderboard } from "@/lib/leaderboard";
 
@@ -20,10 +20,6 @@ export default async function TopRankedStartups() {
       <div className="mx-auto max-w-6xl px-4 sm:px-6">
         <div className="mb-8 flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
           <div>
-            <div className="mb-2 inline-flex items-center gap-2 rounded-full border border-coral-200 bg-coral-50 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-coral-600">
-              <Sparkles aria-hidden="true" className="h-3.5 w-3.5" />
-              <span>Explore the builders</span>
-            </div>
             <h2 id="home-startups-title" className="font-heading text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
               Startup profiles, ranked by participation.
             </h2>

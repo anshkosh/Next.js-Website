@@ -1,7 +1,7 @@
 "use client";
 
 import { ArrowUp, MessageCircle, X } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import { preferredScrollBehavior } from "@/lib/scroll-behavior";
 
@@ -13,7 +13,6 @@ export function SiteEnhancements() {
   const pathname = usePathname();
   const isFounderWorkspace = pathname === "/dashboard" || pathname?.startsWith("/dashboard/");
   const [showTop, setShowTop] = useState(false);
-  const progressBar = useRef<HTMLDivElement>(null);
   const [cookiesVisible, setCookiesVisible] = useState(false);
   const [cookiesOpen, setCookiesOpen] = useState(false);
 
@@ -29,12 +28,10 @@ export function SiteEnhancements() {
     document.documentElement.classList.remove("dark");
     try { window.localStorage.removeItem("anshkosh-theme"); } catch { /* Storage may be unavailable. */ }
 
-    // One write per frame, straight to the bar's transform, instead of a re-render per scroll event.
+    // Throttle the back-to-top visibility update to one per animation frame.
     let frame = 0;
     const paintScroll = () => {
       frame = 0;
-      const max = document.documentElement.scrollHeight - window.innerHeight;
-      progressBar.current?.style.setProperty("transform", `scaleX(${max > 0 ? Math.min(1, window.scrollY / max) : 0})`);
       setShowTop(window.scrollY > 500);
     };
     const updateScroll = () => { if (!frame) frame = requestAnimationFrame(paintScroll); };
@@ -91,11 +88,6 @@ export function SiteEnhancements() {
 
   return (
     <>
-      <div className="pointer-events-none fixed inset-x-0 top-0 z-[80] h-1" aria-hidden="true">
-        {/* The style prop never changes, so React leaves the scroll-driven transform alone. */}
-        <div ref={progressBar} className="h-full origin-left bg-coral-500" style={{ transform: "scaleX(0)" }} />
-      </div>
-
       {!isFounderWorkspace && !cookiesVisible && pathname !== "/contact" && <div className="fixed bottom-5 right-5 z-40 hidden flex-col gap-3 md:flex print:hidden">
         <a href="/contact" aria-label="Contact Anshkosh" className="group flex min-h-11 min-w-11 items-center justify-center gap-2 rounded-full bg-coral-600 px-4 py-3 text-sm font-semibold text-white shadow-soft transition-colors hover:bg-coral-700">
           <MessageCircle size={18} aria-hidden="true" />

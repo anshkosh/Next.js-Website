@@ -37,8 +37,8 @@ describe("homepage public content", () => {
       orderBy: { sortOrder: "asc" },
     }));
     expect(html).toContain('href="/startups/public-startup"');
-    expect(html).toContain('aria-labelledby="discover-featured-title"');
-    expect(html).toContain("Selected for Discover");
+    expect(html).toContain('aria-labelledby="featured-startups-title"');
+    expect(html).toContain("Featured startups.");
     expect(html).toContain('aria-label="Remove upvote for Public startup, 12 upvotes"');
     expect(html).toContain('aria-pressed="true"');
     expect(html).toContain("SaaS");

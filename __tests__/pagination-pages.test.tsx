@@ -37,7 +37,7 @@ it("fills Discover rows and paginates every matching startup exactly once", asyn
     const tree = await DiscoverPage({ searchParams: Promise.resolve({
       page: String(page), q: "startup", category: "technology",
     }) });
-    const content = tree.props.children[2];
+    const content = tree.props.children.find((child: ReactElement<{ "aria-labelledby"?: string }> | false) => child && child.props["aria-labelledby"] === "discover-grid-title");
     const cards: ReactElement<{ startup: { id: string } }>[] = content.props.children[1].props.children;
     const ids = cards.map(card => card.props.startup.id);
     expect(ids).toHaveLength(page < 3 ? 24 : 1);

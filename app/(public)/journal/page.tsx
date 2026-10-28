@@ -4,6 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import JournalCard from "@/components/landing/JournalCard";
 import { BookOpen } from "lucide-react";
+import PublicPageIntro from "@/components/layout/PublicPageIntro";
 import { calculateReadingTime } from "@/lib/journal-reading-time.mjs";
 import ErrorState, { recoveryLinkClass, secondaryRecoveryLinkClass } from "@/components/site/ErrorState";
 
@@ -27,13 +28,7 @@ export default async function JournalPage(props: {
   if (!process.env.DATABASE_URL) {
     return (
       <div className="min-h-screen bg-gray-50/50">
-        <section className="page-intro-spacing bg-white border-b border-gray-200">
-          <div className="container mx-auto px-4 max-w-6xl text-center">
-            <div className="inline-flex items-center gap-2 bg-coral-50 text-coral-600 text-sm font-semibold px-4 py-1.5 rounded-full mb-4"><BookOpen size={15} /> Anshkosh Journal</div>
-            <h1 className="page-title mb-4">Stories, insights & ideas</h1>
-            <p className="text-lg text-gray-500 max-w-2xl mx-auto">The Journal is being prepared for the pilot. Check back soon for founder stories and startup insights.</p>
-          </div>
-        </section>
+        <PublicPageIntro title="Stories, insights & ideas" description="The Journal is being prepared for the pilot. Check back soon for founder stories and startup insights." />
         <div className="container mx-auto px-4 max-w-3xl py-12 text-center"><Link href="/contact" className="text-coral-600 font-semibold hover:text-coral-700">Suggest a story or topic →</Link></div>
       </div>
     );
@@ -93,20 +88,7 @@ export default async function JournalPage(props: {
 
   return (
     <div className="min-h-screen bg-gray-50/50">
-      {/* Header */}
-      <section className="page-intro-spacing bg-white border-b border-gray-200">
-        <div className="container mx-auto px-4 max-w-6xl text-center">
-          <div className="inline-flex items-center gap-2 bg-coral-50 text-coral-600 text-sm font-semibold px-4 py-1.5 rounded-full mb-4">
-            <BookOpen size={15} /> Anshkosh Journal
-          </div>
-          <h1 className="page-title mb-4">
-            Stories, insights & ideas
-          </h1>
-          <p className="text-lg text-gray-500 max-w-2xl mx-auto">
-            Founder stories, industry trends, and practical startup insights from the Anshkosh team.
-          </p>
-        </div>
-      </section>
+      <PublicPageIntro title="Stories, insights & ideas" description="Founder stories, industry trends, and practical startup insights from the Anshkosh team." />
 
       {/* Category Filter Tabs */}
       {categories.length > 0 && (

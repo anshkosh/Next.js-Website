@@ -1,6 +1,7 @@
 import { seoMetadata } from "@/lib/seo";
 import FAQContent from "./FAQContent";
 import { faqData } from "@/lib/faqs";
+import PublicPageIntro from "@/components/layout/PublicPageIntro";
 
 export const metadata = seoMetadata({
   title: "FAQ — Anshkosh",
@@ -20,17 +21,12 @@ export default function FAQPage() {
           acceptedAnswer: { "@type": "Answer", text: answer },
         })),
       }) }} />
-      <section className="page-intro-spacing bg-white min-h-screen">
-      <div className="max-w-3xl mx-auto px-4">
-        <h1 className="page-title">
-          FAQs
-        </h1>
-        <p className="text-lg leading-relaxed text-gray-600 mt-4 mb-10">
-          Answers about startup listings, free tools, and the early-access pilot.
-        </p>
-        <FAQContent />
+      <div className="min-h-screen bg-white">
+        <PublicPageIntro title="FAQs" description="Answers about startup listings, free tools, and the early-access pilot." />
+        <div className="mx-auto max-w-3xl px-4 py-8">
+          <FAQContent />
+        </div>
       </div>
-      </section>
     </>
   );
 }

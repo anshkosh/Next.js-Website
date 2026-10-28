@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import TurnstileWidget from "@/components/startup/TurnstileWidget";
 import { CONTACT_RESPONSE_TARGET } from "@/lib/contact-copy";
+import PublicPageIntro from "@/components/layout/PublicPageIntro";
 import { submitContactForm } from "@/app/actions/contact.actions";
 import {
   CONTACT_SUBJECTS,
@@ -261,20 +262,9 @@ export default function ContactContent({ initialSubject = "" }: { initialSubject
   const isSubmitDisabled = isPending || !form.token || !form.subject;
 
   return (
-    <div className="page-intro-spacing min-h-screen bg-gray-50/50 px-4">
-      <div className="max-w-5xl mx-auto">
-        {/* Page heading */}
-        <div className="mb-10 text-center">
-          <span className="inline-block mb-3 px-3 py-1 rounded-full bg-coral-50 border border-coral-100 text-coral-600 text-xs font-semibold uppercase tracking-widest">
-            Get in touch
-          </span>
-          <h1 className="page-title">
-            Contact Us
-          </h1>
-          <p className="mx-auto mt-4 max-w-2xl text-lg leading-relaxed text-gray-600">
-            Questions, ideas, or feedback — we&apos;d love to hear from you.
-          </p>
-        </div>
+    <div className="min-h-screen bg-gray-50/50">
+      <PublicPageIntro title="Contact Us" description="Questions, ideas, or feedback — we’d love to hear from you." />
+      <div className="mx-auto max-w-5xl px-4 py-8">
 
         {/* Card */}
         <motion.div

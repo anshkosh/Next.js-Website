@@ -438,3 +438,10 @@
 ## Browser CI follow-up — 27 October 2026, 19:54 IST
 
 The automatic CI unit-test job passed on `81106d98`, but the browser job failed in `e2e/launch.spec.ts:516` because it still expected `Founder–community discussions: 1 · 3 points`. Playwright passed 9 tests and stopped after this first failure, leaving 9 unrun. The assertion is now updated to the current public label, `Participants with founder replies: 1 · 3 points`. No tests were run locally; the pushed revision will get a fresh automatic CI run. The deployment job was skipped for the pull-request event.
+## 28 October 2026 — owner-reviewed public layout release
+
+- Homepage: owner-approved “Back the next thing. Before it launches.” hero and supporting copy, primary listing action, featured startup carousel, restored external profile strip, first FAQ question, and revised closing CTA. Desktop artwork now spans the hero width without changing its proportions.
+- Removed the welcome curtain, early-access banner, top progress strip, homepage search and decorative heading pills. Shared page introductions align Discover, Leaderboard, Launch Support, Journal, FAQ and Contact. Header/footer branding aligns; navigation consistently changes at 1024px.
+- Preserved functional filters, ranking logic, founder submission/auth return paths and moderation. No dependency, schema, bot or founder-data changes.
+- Local checks: lint/type checks, dependency policy and 14 deployment-helper tests pass. Initial unit run had 789 passing, two skipped, and six failures; corrected obsolete layout/copy assertions and restored local LF migration bytes for exact-hash checks. The four affected files then pass all 34 tests. No migration content change is included. Desktop/mobile browser checks cover heading alignment, navigation, homepage search removal and full-width artwork; the existing two artwork tests pass.
+- Owner requested deployment. GitHub PR checks, main deployment and public release verification remain required before reporting this release live.

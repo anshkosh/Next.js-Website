@@ -564,10 +564,12 @@ test("concurrent vote switches and reconciliation preserve one vote and correct 
   expect(await recordVote(fixture.id, -1, identity)).toMatchObject({ success: false });
 });
 
-test("homepage retains the preview while navigation opens internal pages directly", async ({ page }) => {
+test("homepage opens directly and navigation remains usable without entry overlays", async ({ page }) => {
   await page.goto("/");
-  await expect(page.getByRole("dialog", { name: "Explore the Anshkosh pilot." })).toBeVisible();
-  await expect(page.getByRole("complementary", { name: "Site status" })).toHaveCount(1);
+  await expect(page.getByRole("heading", { level: 1, name: "Back the next thing. Before it launches." })).toBeVisible();
+  await expect(page.getByRole("dialog", { name: "Explore the Anshkosh pilot." })).toHaveCount(0);
+  await expect(page.getByRole("complementary", { name: "Site status" })).toHaveCount(0);
+  await expect(page.getByRole("button", { name: "Search the site", exact: true })).toHaveCount(0);
   await reveal(page);
   await page.getByRole("navigation", { name: "Primary navigation" }).getByRole("link", { name: "Discover", exact: true }).click();
   await expect(page).toHaveURL(/\/discover$/);
