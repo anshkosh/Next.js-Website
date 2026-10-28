@@ -10,7 +10,7 @@ import ValidationPlanner from "../components/launch/ValidationPlanner";
 import MvpScopeCutter from "../components/launch/MvpScopeCutter";
 import LaunchChecklist from "../components/launch/LaunchChecklist";
 import { buildPitch, EMPTY_FOUNDER, readFounder, interviewQuestions } from "../lib/founder-toolkit";
-import { safeReturnPath, loginHref } from "../lib/login-return";
+import { safeReturnPath, loginHref, registerHref, isStartupSubmissionPath } from "../lib/login-return";
 import { characterCount } from "../lib/characters";
 import { replyToCommentSchema } from "../lib/validators/comment.schema";
 
@@ -99,6 +99,11 @@ it("returns only to local application paths without auth loops or open redirects
   for (const value of ["https://evil.test", "//evil.test", "/\\evil.test", "/%2fevil.test", "/login", "/api/auth/sign-out", "/../logout", "/settings\r\nLocation:evil"]) expect(safeReturnPath(value)).toBe("/dashboard");
   expect(safeReturnPath("/settings?tab=security#password")).toBe("/settings?tab=security#password");
   expect(loginHref("/settings")).toBe("/login?next=%2Fsettings");
+  expect(registerHref("/startup/new?draft=draft-1")).toBe("/register?next=%2Fstartup%2Fnew%3Fdraft%3Ddraft-1");
+  expect(registerHref("https://evil.test")).toBe("/register");
+  expect(registerHref(null)).toBe("/register");
+  expect(isStartupSubmissionPath("/startup/new?draft=draft-1")).toBe(true);
+  expect(isStartupSubmissionPath("/dashboard")).toBe(false);
   expect(safeReturnPath(null)).toBe("/dashboard");
 });
 

@@ -10,3 +10,17 @@ export function safeReturnPath(value: string | null | undefined, fallback = "/da
 export function loginHref(path: string | null | undefined) {
   return `/login?next=${encodeURIComponent(safeReturnPath(path))}`;
 }
+
+export function registerHref(path: string | null | undefined) {
+  if (!path) return "/register";
+  const next = safeReturnPath(path, "");
+  return next ? `/register?next=${encodeURIComponent(next)}` : "/register";
+}
+
+export function isStartupSubmissionPath(path: string) {
+  try {
+    return new URL(path, "https://anshkosh.local").pathname === "/startup/new";
+  } catch {
+    return false;
+  }
+}

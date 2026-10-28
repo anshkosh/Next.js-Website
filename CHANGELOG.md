@@ -1,5 +1,11 @@
 # Website changelog
 
+## Unreleased — founder signup continuity
+
+- Preserve the validated startup-submission destination from login through registration and email verification.
+- Preselect founder mode only for the explicit `/startup/new` path, explain the choice, and keep the default off for other registrations.
+- Add focused return-path and signed-out browser regressions; align account and product documentation with the behavior.
+
 ## Unreleased — pilot positioning and leaderboard clarity
 
 - Replace "under construction" and "before launch" claims with accurate early-access pilot language for startups at different stages.
