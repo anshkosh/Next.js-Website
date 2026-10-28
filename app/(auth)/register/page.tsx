@@ -261,7 +261,7 @@ function RegisterForm() {
           <div className="mt-8 text-center text-sm">
             <span className="text-gray-500">Already have an account? </span>
             <Link
-              href="/login"
+              href={rawNext ? loginHref(next) : "/login"}
               className="font-medium text-gray-900 hover:text-gray-700"
             >
               Log in

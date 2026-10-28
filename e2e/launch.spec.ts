@@ -238,6 +238,8 @@ test("founder signup keeps the startup submission destination", async ({ page })
   await expect(page).toHaveURL(/\/register\?next=%2Fstartup%2Fnew$/);
   await expect(page.locator('input[name="founderMode"]')).toBeChecked();
   await expect(page.locator("#register-mode-help")).toContainText("founder mode is selected");
+  await page.getByRole("link", { name: "Log in", exact: true }).click();
+  await expect(page).toHaveURL(/\/login\?next=%2Fstartup%2Fnew$/);
 
   await enter(page, "/register");
   await expect(page.locator('input[name="founderMode"]')).not.toBeChecked();
