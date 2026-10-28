@@ -1,5 +1,5 @@
 {
-  "reviewedAt": "2026-10-18",
+  "reviewedAt": "2026-10-28",
   "exceptions": [
     {
       "package": "braces",
@@ -7,13 +7,6 @@
       "versions": ["3.0.3"],
       "expires": "2026-11-18",
       "reason": "No upstream patch exists. Reachable through build/lint/component CLI glob tooling, not application request handlers. Do not feed untrusted remote glob patterns to these tools; builds run in bounded CI. Track upstream replacement/patch separately."
-    },
-    {
-      "package": "deepmerge-ts",
-      "advisory": "GHSA-ggr8-5vv4-36mx",
-      "versions": ["7.1.5"],
-      "expires": "2026-11-18",
-      "reason": "Prisma 6 CLI configuration dependency; the fix requires major v8 and npm recommends a Prisma 7 migration. Config is trusted repository code, not cyclic user-supplied object graphs. Keep Prisma CLI out of application imports and plan the major migration separately."
     },
     {
       "package": "postcss-selector-parser",

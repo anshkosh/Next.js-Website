@@ -14,6 +14,8 @@ const eslintConfig = defineConfig([
     "next-env.d.ts",
     // Installed design tooling ships third-party scripts, not application code.
     ".github/skills/**",
+    // Vendored, security-patched third-party package; lint application code separately.
+    "vendor/deepmerge/**",
     // Local-only agent scratch files, sample preview and generated test builds.
     ".codex-*/**",
     ".next-e2e/**",
