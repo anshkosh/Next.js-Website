@@ -189,11 +189,12 @@ export async function setCommentModerationStatus(commentId: string, expectedStat
   if (typeof note !== "string" || note.trim().length > 500 || (nextStatus === "REJECTED" && note.trim().length < 5)) return { error: "Add a review reason of at least 5 characters when hiding or rejecting a comment." };
   try {
     const result = await db.$transaction(async tx => {
-      const comment = await tx.comment.findUnique({ where: { id: commentId }, select: { id: true, status: true, startup: { select: { slug: true } } } });
-      if (!comment || comment.status !== expectedStatus) return { error: "This comment changed in another review. Refresh before deciding." };
+      const comment = await tx.comment.findUnique({ where: { id: commentId }, select: { id: true, status: true, deletedAt: true, startup: { select: { slug: true } } } });
+      if (!comment || comment.deletedAt || comment.status !== expectedStatus) return { error: "This comment changed in another review. Refresh before deciding." };
       const reviewedAt = new Date();
-      const changed = await tx.comment.updateMany({ where: { id: commentId, status: expectedStatus as "PENDING" | "APPROVED" | "REJECTED" }, data: { status: nextStatus as "APPROVED" | "REJECTED", reviewedBy: moderator.id, reviewedAt, reviewNote: note.trim() || null } });
+      const changed = await tx.comment.updateMany({ where: { id: commentId, status: expectedStatus as "PENDING" | "APPROVED" | "REJECTED", deletedAt: null }, data: { status: nextStatus as "APPROVED" | "REJECTED", reviewedBy: moderator.id, reviewedAt, reviewNote: note.trim() || null } });
       if (!changed.count) return { error: "This comment changed in another review. Refresh before deciding." };
+      await tx.commentStaffEvent.create({ data: { commentId, action: nextStatus === "APPROVED" ? "APPROVE" : "HIDE", actorId: moderator.id, reason: note.trim() || null } });
       await tx.contentModeration.updateMany({ where: { kind: "COMMENT", targetId: commentId }, data: { status: nextStatus, leaseToken: null, reviewedBy: moderator.id, reviewedAt } });
       const notification = nextStatus === "APPROVED" ? await storeApprovedCommentEmail(tx, commentId) : null;
       return { success: true as const, slug: comment.startup.slug, notificationId: notification?.id ?? null };
@@ -207,24 +208,97 @@ export async function setCommentModerationStatus(commentId: string, expectedStat
   }
 }
 
-export async function deletePendingComment(commentId: string) {
+export async function editCommentAsStaff(commentId: string, authorName: string, body: string) {
+  const moderator = await getModerator();
+  if (!moderator) return { error: "Moderator access required." };
+  if (!validId(commentId) || typeof authorName !== "string" || authorName.trim().length < 2 || authorName.trim().length > 80 || typeof body !== "string" || body.trim().length < 5 || body.trim().length > 2000) return { error: "Enter a name and comment within the allowed length." };
+  try {
+    const result = await db.$transaction(async tx => {
+      await tx.$queryRaw`SELECT id FROM "Comment" WHERE id = ${commentId} FOR UPDATE`;
+      const current = await tx.comment.findUnique({ where: { id: commentId }, select: { authorName: true, body: true, status: true, deletedAt: true, startup: { select: { slug: true } } } });
+      if (!current || current.deletedAt) return { error: "This comment is unavailable." };
+      if (current.authorName === authorName.trim() && current.body === body.trim()) return { slug: current.startup.slug, changed: false };
+      await tx.commentRevision.create({ data: { commentId, authorName: current.authorName, body: current.body, editorId: moderator.id } });
+      await tx.comment.update({ where: { id: commentId }, data: { authorName: authorName.trim(), body: body.trim(), status: "PENDING", reviewedAt: null, reviewedBy: null, reviewNote: null } });
+      await tx.commentStaffEvent.create({ data: { commentId, action: "EDIT", actorId: moderator.id } });
+      const updated = await tx.comment.findUniqueOrThrow({ where: { id: commentId }, select: { id: true, authorName: true, body: true } });
+      const { commentContent } = await import("@/lib/moderation-policy");
+      const { queueModeration } = await import("@/lib/moderation-store");
+      await queueModeration(tx, "COMMENT", updated.id, commentContent(updated));
+      return { slug: current.startup.slug, changed: true };
+    });
+    if (result.error) return { error: result.error };
+    refreshModeration(result.slug);
+    return { success: true as const, message: result.changed ? "Edited comment sent to review." : "No changes to save." };
+  } catch {
+    return { error: "The comment could not be edited. Refresh and try again." };
+  }
+}
+
+export async function deleteCommentAsStaff(commentId: string, reason: string) {
+  const moderator = await getModerator();
+  if (!moderator) return { error: "Moderator access required." };
+  if (!validId(commentId) || !validReason(reason)) return { error: "Enter a deletion reason of 5–500 characters." };
+  try {
+    const result = await db.$transaction(async tx => {
+      await tx.$queryRaw`SELECT id FROM "Comment" WHERE id = ${commentId} FOR UPDATE`;
+      const current = await tx.comment.findUnique({ where: { id: commentId }, select: { status: true, deletedAt: true, startup: { select: { slug: true } } } });
+      if (!current || current.deletedAt) return { error: "This comment is already deleted or unavailable." };
+      const now = new Date();
+      await tx.comment.update({ where: { id: commentId }, data: { deletedAt: now, deletedBy: moderator.id, deletionReason: reason.trim(), deletedFromStatus: current.status, status: "REJECTED", reviewedAt: now, reviewedBy: moderator.id, reviewNote: reason.trim() } });
+      await tx.commentStaffEvent.create({ data: { commentId, action: "DELETE", actorId: moderator.id, reason: reason.trim() } });
+      await tx.contentModeration.updateMany({ where: { kind: "COMMENT", targetId: commentId }, data: { status: "REJECTED", leaseToken: null, reviewedBy: moderator.id, reviewedAt: now } });
+      return { slug: current.startup.slug };
+    });
+    if (result.error) return { error: result.error };
+    refreshModeration(result.slug);
+    return { success: true as const };
+  } catch {
+    return { error: "The comment could not be removed. Refresh and try again." };
+  }
+}
+
+export async function restoreDeletedComment(commentId: string) {
   const moderator = await getModerator();
   if (!moderator || moderator.role !== "admin") return { error: "Admin access required." };
   if (!validId(commentId)) return { error: "Invalid comment." };
   try {
     const result = await db.$transaction(async tx => {
       await tx.$queryRaw`SELECT id FROM "Comment" WHERE id = ${commentId} FOR UPDATE`;
-      const comment = await tx.comment.findUnique({ where: { id: commentId }, select: { status: true, startup: { select: { slug: true } } } });
-      if (!comment || comment.status !== "PENDING") return { error: "Only comments awaiting review can be deleted. Refresh the queue." };
-      await tx.commenterBlock.updateMany({ where: { sourceCommentId: commentId }, data: { sourceCommentId: null } });
-      await tx.moderationAccountBan.updateMany({ where: { sourceCommentId: commentId }, data: { sourceCommentId: null } });
-      await tx.comment.delete({ where: { id: commentId } });
-      return { slug: comment.startup.slug };
+      const current = await tx.comment.findUnique({ where: { id: commentId }, select: { deletedAt: true, deletedFromStatus: true, startup: { select: { slug: true } } } });
+      if (!current?.deletedAt || !current.deletedFromStatus) return { error: "This comment is not available to restore." };
+      const now = new Date();
+      await tx.comment.update({ where: { id: commentId }, data: { deletedAt: null, deletedBy: null, deletionReason: null, deletedFromStatus: null, status: current.deletedFromStatus, reviewedAt: current.deletedFromStatus === "APPROVED" ? now : null, reviewedBy: current.deletedFromStatus === "APPROVED" ? moderator.id : null, reviewNote: null } });
+      await tx.commentStaffEvent.create({ data: { commentId, action: "RESTORE", actorId: moderator.id } });
+      return { slug: current.startup.slug };
     });
-    if ("error" in result) return result;
+    if (result.error) return { error: result.error };
     refreshModeration(result.slug);
     return { success: true as const };
   } catch {
-    return { error: "The pending comment could not be deleted. Refresh the queue and try again." };
+    return { error: "The comment could not be restored. Refresh and try again." };
+  }
+}
+
+export async function purgeDeletedComment(commentId: string, reason: string) {
+  const moderator = await getModerator();
+  if (!moderator || moderator.role !== "admin") return { error: "Admin access required." };
+  if (!validId(commentId) || !validReason(reason)) return { error: "Enter a purge reason of 5–500 characters." };
+  try {
+    const result = await db.$transaction(async tx => {
+      await tx.$queryRaw`SELECT id FROM "Comment" WHERE id = ${commentId} FOR UPDATE`;
+      const current = await tx.comment.findUnique({ where: { id: commentId }, select: { deletedAt: true, startup: { select: { slug: true } } } });
+      if (!current?.deletedAt) return { error: "Only a deleted comment can be permanently purged." };
+      await tx.commentPurgeAudit.create({ data: { commentId, actorId: moderator.id, reason: reason.trim() } });
+      await tx.commenterBlock.updateMany({ where: { sourceCommentId: commentId }, data: { sourceCommentId: null } });
+      await tx.moderationAccountBan.updateMany({ where: { sourceCommentId: commentId }, data: { sourceCommentId: null } });
+      await tx.comment.delete({ where: { id: commentId } });
+      return { slug: current.startup.slug };
+    });
+    if (result.error) return { error: result.error };
+    refreshModeration(result.slug);
+    return { success: true as const };
+  } catch {
+    return { error: "The comment could not be permanently purged." };
   }
 }

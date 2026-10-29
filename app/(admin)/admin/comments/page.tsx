@@ -11,6 +11,7 @@ const statuses = [
   { value: "PENDING", label: "Needs review" },
   { value: "APPROVED", label: "Published" },
   { value: "REJECTED", label: "Hidden or rejected" },
+  { value: "DELETED", label: "Deleted" },
 ] as const;
 
 export default async function CommentsPage({ searchParams }: { searchParams: Promise<{ status?: string; q?: string; page?: string }> }) {
@@ -24,7 +25,7 @@ export default async function CommentsPage({ searchParams }: { searchParams: Pro
   const page = Number.isSafeInteger(parsedPage) ? Math.max(1, Math.min(parsedPage, 10_000)) : 1;
   const pageSize = 25;
   const where = {
-    status,
+    ...(status === "DELETED" ? { deletedAt: { not: null } } : { status, deletedAt: null }),
     ...(query ? { OR: [
       { id: { contains: query, mode: "insensitive" as const } },
       { authorName: { contains: query, mode: "insensitive" as const } },
@@ -43,11 +44,19 @@ export default async function CommentsPage({ searchParams }: { searchParams: Pro
       moderations: { select: { status: true, reasons: true, reviewedAt: true, reviewedBy: true }, take: 1 },
       revisions: { select: { authorName: true, body: true, editorId: true, createdAt: true }, orderBy: { createdAt: "desc" }, take: 20 },
       replyRevisions: { select: { reply: true, repliedBy: true, editorId: true, createdAt: true }, orderBy: { createdAt: "desc" }, take: 20 },
+      staffEvents: { select: { action: true, actorId: true, reason: true, createdAt: true }, orderBy: { createdAt: "desc" }, take: 50 },
     },
   });
   const linkedUserIds = [...new Set(rows.map(comment => comment.authorUserId).filter((id): id is string => Boolean(id)))];
   const linkedUsers = linkedUserIds.length ? await db.user.findMany({ where: { id: { in: linkedUserIds } }, select: { id: true, role: true } }) : [];
   const linkedRoleById = new Map(linkedUsers.map(user => [user.id, user.role]));
+  const staffIds = [...new Set(rows.flatMap(comment => [
+    ...comment.staffEvents.map(event => event.actorId),
+    ...comment.revisions.map(revision => revision.editorId),
+    ...comment.replyRevisions.map(revision => revision.editorId),
+  ]).filter((id): id is string => Boolean(id)))];
+  const staffUsers = staffIds.length ? await db.user.findMany({ where: { id: { in: staffIds } }, select: { id: true, name: true } }) : [];
+  const staffNameById = new Map(staffUsers.map(user => [user.id, user.name ?? "Staff member"]));
   const comments = rows.slice(0, pageSize).map(comment => ({
     id: comment.id,
     authorName: comment.authorName,
@@ -66,8 +75,11 @@ export default async function CommentsPage({ searchParams }: { searchParams: Pro
       reviewedBy: comment.moderations[0].reviewedBy,
     } : null,
     reviewNote: comment.reviewNote,
-    revisions: comment.revisions.map(item => ({ ...item, createdAt: item.createdAt.toISOString() })),
-    replyRevisions: comment.replyRevisions.map(item => ({ ...item, createdAt: item.createdAt.toISOString() })),
+    deletedAt: comment.deletedAt?.toISOString() ?? null,
+    deletionReason: comment.deletionReason,
+    staffEvents: comment.staffEvents.map(item => ({ ...item, actorName: item.actorId ? staffNameById.get(item.actorId) ?? "Former staff" : "System", createdAt: item.createdAt.toISOString() })),
+    revisions: comment.revisions.map(item => ({ ...item, editorName: item.editorId ? staffNameById.get(item.editorId) ?? "Former staff" : "Author", createdAt: item.createdAt.toISOString() })),
+    replyRevisions: comment.replyRevisions.map(item => ({ ...item, editorName: item.editorId ? staffNameById.get(item.editorId) ?? "Former staff" : "Founder", createdAt: item.createdAt.toISOString() })),
     startup: comment.startup,
   }));
   const hasNext = rows.length > pageSize;
@@ -75,7 +87,7 @@ export default async function CommentsPage({ searchParams }: { searchParams: Pro
   return <div className="mx-auto max-w-5xl space-y-6">
     <header className="space-y-2">
       <h1 className="font-heading text-3xl font-bold">Comment controls</h1>
-      <p className="text-sm text-gray-600">Review, publish, hide, restore or restrict a commenter. Product criticism stays publishable; account bans are limited to verified ordinary users linked to their comment.</p>
+      <p className="text-sm text-gray-600">Edit comments into review, publish or hide them with a reason, and remove them from public view with a recoverable staff record. Admins can restore removed comments. Product criticism stays publishable.</p>
     </header>
 
     <nav aria-label="Comment status" className="flex flex-wrap gap-2">
@@ -94,7 +106,7 @@ export default async function CommentsPage({ searchParams }: { searchParams: Pro
     </form>
 
     <p className="text-sm text-gray-600">Showing {comments.length} {status.toLowerCase()} comments · Page {page}</p>
-    <CommentModerationList comments={comments} canDeletePending={session.user.role === "admin"} />
+    <CommentModerationList comments={comments} canRestore={session.user.role === "admin"} />
     <nav aria-label="Comment pages" className="flex justify-between">
       {page > 1 ? <Link className="min-h-11 inline-flex items-center underline" href={`/admin/comments?status=${status}&page=${page - 1}${query ? `&q=${encodeURIComponent(query)}` : ""}`}>Previous page</Link> : <span />}
       {hasNext && <Link className="min-h-11 inline-flex items-center underline" href={`/admin/comments?status=${status}&page=${page + 1}${query ? `&q=${encodeURIComponent(query)}` : ""}`}>Next page</Link>}

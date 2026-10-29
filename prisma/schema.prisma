@@ -409,6 +409,14 @@ enum CommentStatus {
   REJECTED // hidden
 }
 
+enum CommentStaffAction {
+  EDIT
+  APPROVE
+  HIDE
+  DELETE
+  RESTORE
+}
+
 model Comment {
   id        String  @id @default(cuid())
   startupId String
@@ -424,6 +432,10 @@ model Comment {
   reviewedAt  DateTime?
   reviewedBy  String?
   reviewNote  String?       @db.VarChar(500)
+  deletedAt   DateTime?
+  deletedBy   String?
+  deletionReason String?    @db.VarChar(500)
+  deletedFromStatus CommentStatus?
 
   // Founder reply (one level deep, posted from authenticated dashboard)
   reply     String?   @db.VarChar(2000)
@@ -438,12 +450,14 @@ model Comment {
   moderations ContentModeration[]
   revisions   CommentRevision[]
   replyRevisions FounderReplyRevision[]
+  staffEvents CommentStaffEvent[]
   // Kept only to match the already-deployed legacy table. The app no longer issues or accepts comment-management links.
   managementTokens CommentManagementToken[]
 
   @@index([startupId, createdAt(sort: Desc)])
   @@index([status])
   @@index([authorUserId, createdAt(sort: Desc)])
+  @@index([deletedAt, createdAt(sort: Desc)])
 }
 
 // Immutable snapshots are retained only while their source message exists.
@@ -467,6 +481,29 @@ model CommentRevision {
   authorName String
   body      String   @db.VarChar(2000)
   editorId  String?
+  createdAt DateTime @default(now())
+
+  @@index([commentId, createdAt(sort: Desc)])
+}
+
+model CommentStaffEvent {
+  id        String   @id @default(cuid())
+  commentId String
+  comment   Comment  @relation(fields: [commentId], references: [id], onDelete: Cascade)
+  action    CommentStaffAction
+  actorId   String?
+  reason    String?  @db.VarChar(500)
+  createdAt DateTime @default(now())
+
+  @@index([commentId, createdAt(sort: Desc)])
+}
+
+// Body-free audit record retained after an administrator permanently purges a comment.
+model CommentPurgeAudit {
+  id        String   @id @default(cuid())
+  commentId String
+  actorId   String?
+  reason    String   @db.VarChar(500)
   createdAt DateTime @default(now())
 
   @@index([commentId, createdAt(sort: Desc)])
