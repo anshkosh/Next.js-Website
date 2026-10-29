@@ -74,10 +74,11 @@ it("bounds beta request reads, counts the full backlog and hides pending email a
   expect(manager.props.requests[0].email).toBeNull(); expect(manager.props.requests[1].email).toBe("visible@example.test");
 });
 
-it("sorts Discover by the chosen option and keeps featured startups out of the unfiltered grid", async () => {
+it("sorts Discover by the chosen option and keeps featured startups in the unfiltered directory", async () => {
   mock.featured.mockResolvedValue([{ startupId: "featured-one" }]);
   await DiscoverPage({ searchParams: Promise.resolve({ sort: "newest" }) });
-  expect(mock.startups.mock.calls[0][0]).toMatchObject({ orderBy: [{ createdAt: "desc" }], where: { id: { notIn: ["featured-one"] } } });
+  expect(mock.startups.mock.calls[0][0]).toMatchObject({ orderBy: [{ createdAt: "desc" }] });
+  expect(mock.startups.mock.calls[0][0].where.id).toBeUndefined();
   await DiscoverPage({ searchParams: Promise.resolve({ q: "startup", sort: "unknown" }) });
   expect(mock.startups.mock.calls[1][0].orderBy).toEqual([{ signalCount: "desc" }, { createdAt: "desc" }]);
   expect(mock.startups.mock.calls[1][0].where.id).toBeUndefined();

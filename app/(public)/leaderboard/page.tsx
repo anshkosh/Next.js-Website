@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { cookies } from "next/headers";
-import { ArrowRight } from "lucide-react";
 import LeaderboardList from "@/components/startup/LeaderboardList";
 import ErrorState, { recoveryLinkClass, secondaryRecoveryLinkClass } from "@/components/site/ErrorState";
 import { getLeaderboard, leaderboardPageNumber, LEADERBOARD_PAGE_SIZE } from "@/lib/leaderboard";
@@ -23,10 +22,8 @@ export default async function LeaderboardPage({ searchParams }: {
 
   return (
     <div>
-      <PublicPageIntro title={<>Startup <span className="text-coral-500">leaderboard</span></>} description="Ranked by net votes and founder/community activity. Signals show participation, not verified traction.">
-        <Link href="/discover" className="inline-flex min-h-10 items-center gap-2 font-semibold text-coral-700 underline underline-offset-4">Browse all startups <ArrowRight aria-hidden="true" className="h-4 w-4" /></Link>
-      </PublicPageIntro>
-      <section aria-label="Startup rankings" className="mx-auto max-w-6xl px-4 py-6 sm:px-6 sm:py-8">
+      <PublicPageIntro compact title={<>Startup <span className="text-coral-500">leaderboard</span></>} description="Ranked by net votes and founder/community activity. Signals show participation, not verified traction." />
+      <section aria-label="Startup rankings" className="mx-auto max-w-6xl px-4 pb-6 pt-2 sm:px-6 sm:pb-8 sm:pt-3">
         {entries.length ? (
           <>
             <p className="mb-4 text-sm text-gray-600">Showing {(page - 1) * LEADERBOARD_PAGE_SIZE + 1}–{Math.min(page * LEADERBOARD_PAGE_SIZE, totalCount)} of {totalCount.toLocaleString("en-IN")} published {totalCount === 1 ? "startup" : "startups"}</p>

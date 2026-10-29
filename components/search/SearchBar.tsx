@@ -211,7 +211,7 @@ export default function SearchBar({ categories = [] }: SearchBarProps) {
                   name="q"
                   type="text"
                   autoComplete="off"
-                  className="block min-h-12 min-w-0 w-full bg-transparent py-3 pl-11 pr-10 text-gray-900 outline-none placeholder:text-gray-500"
+                  className="block min-h-12 min-w-0 w-full bg-transparent py-3 pl-11 pr-10 text-gray-900 outline-none placeholder:text-gray-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-400"
                   placeholder="Search startups…"
                   value={text}
                   onChange={(event) => setText(event.target.value)}
