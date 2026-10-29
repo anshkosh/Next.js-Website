@@ -52,10 +52,11 @@ same warning on screen. The filter does not silently rewrite the author's words.
 - `/admin/comments`: filter the queue by pending, published or hidden/rejected;
   search commenter, private email, comment text and startup; restore a hidden
   comment or hide a published one. Product criticism remains eligible to publish.
-- Comment owners can request a one-use, 30-minute management link from their
-  comment or pending-comment receipt. The link goes only to the email stored with
-  that submission. Editing a comment sends the new version back to moderation;
-  deleting it removes the comment and its retained revisions.
+- Comment owners edit or delete from the comment's in-place actions while signed
+  in with a verified account linked to the comment. Older guest comments can be
+  managed after sign-in only when the verified account email matches the email
+  on the comment. Editing sends the new version back to moderation; deletion
+  removes the comment and its retained revisions. There is no email-link route.
 - Founders can edit/delete their startup updates and replies. Comment, update and
   reply edits keep immutable previous text while the source exists; history starts
   with this release and has no backfill. Staff can inspect

@@ -438,6 +438,7 @@ model Comment {
   moderations ContentModeration[]
   revisions   CommentRevision[]
   replyRevisions FounderReplyRevision[]
+  // Kept only to match the already-deployed legacy table. The app no longer issues or accepts comment-management links.
   managementTokens CommentManagementToken[]
 
   @@index([startupId, createdAt(sort: Desc)])
@@ -483,6 +484,8 @@ model FounderReplyRevision {
   @@index([commentId, createdAt(sort: Desc)])
 }
 
+// Legacy table: retained without a migration that would remove production data.
+// There are no active routes or server actions that use these tokens.
 model CommentManagementToken {
   id        String   @id @default(cuid())
   commentId String

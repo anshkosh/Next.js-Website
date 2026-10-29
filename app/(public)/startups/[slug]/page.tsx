@@ -188,6 +188,9 @@ export default async function StartupDetailPage(props: {
         repliedAt: true,
         repliedBy: true,
         createdAt: true,
+        updatedAt: true,
+        authorEmail: true,
+        authorUserId: true,
       },
     }),
     db.comment.count({
@@ -378,10 +381,15 @@ export default async function StartupDetailPage(props: {
         <div id="section-questions" className="scroll-mt-32">
           <DiscussionSection
             startupId={startup.id}
-            startupSlug={startup.slug}
             isOwner={session?.user.id === startup.founderId}
             initialComments={initialComments.map((c) => ({
-              ...c,
+              id: c.id,
+              authorName: c.authorName,
+              body: c.body,
+              updatedAt: c.updatedAt.toISOString(),
+              canManage: Boolean(session?.user.emailVerified && !session.user.banned && (c.authorUserId === session.user.id || (!c.authorUserId && c.authorEmail.trim().toLowerCase() === session.user.email.trim().toLowerCase()))),
+              reply: c.reply,
+              repliedBy: c.repliedBy,
               repliedAt: c.repliedAt?.toISOString() ?? null,
               createdAt: c.createdAt.toISOString(),
             }))}

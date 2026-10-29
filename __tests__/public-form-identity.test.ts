@@ -26,7 +26,7 @@ const calls = [
   () => submitContactForm({ name: "<b>Tester</b>", email: "tester@example.test", subject: "General", message: "A useful test message that exceeds twenty characters.", turnstileToken: "valid" }),
   () => submitBetaTesterRequest({ startupId, name: "Tester", email: "tester@example.test", message: "Interested", consent: true, adultConfirmed: true, turnstileToken: "valid" }),
 ];
-beforeEach(() => { vi.clearAllMocks(); mock.send.mockResolvedValue(undefined); mock.comment.mockResolvedValue({ id: "cmvddwy1h0001zgy2oi9d66n4", authorName: "Tester", body: "Useful feedback", createdAt: new Date() }); });
+beforeEach(() => { vi.clearAllMocks(); mock.send.mockResolvedValue(undefined); mock.comment.mockResolvedValue({ id: "cmvddwy1h0001zgy2oi9d66n4", authorName: "Tester", body: "Useful feedback", createdAt: new Date(), updatedAt: new Date() }); });
 it.each(calls)("rotating user-agent and client-prepended forwarded addresses cannot reset a public form budget", async action => {
   let attempts = 0; mock.rate.mockImplementation(async () => ++attempts <= 3);
   for (let index = 0; index < 5; index++) {
