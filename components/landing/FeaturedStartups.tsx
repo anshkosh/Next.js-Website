@@ -7,7 +7,7 @@ import { db } from "@/lib/db";
 import { publicStartupCard, publicStartupCardSelect } from "@/lib/public-startup-card";
 import { withActivitySignals } from "@/lib/leaderboard";
 
-export default async function FeaturedStartups({ cookieId }: { cookieId?: string } = {}) {
+export default async function FeaturedStartups({ cookieId, compactTop = false }: { cookieId?: string; compactTop?: boolean } = {}) {
   if (!process.env.DATABASE_URL) return null;
 
   const visitorCookieId = cookieId ?? (await cookies()).get("anshkosh_vid")?.value;
@@ -25,7 +25,7 @@ export default async function FeaturedStartups({ cookieId }: { cookieId?: string
   if (startups.length === 0) return null;
 
   return (
-    <section aria-labelledby="featured-startups-title" className="border-b border-gray-100 bg-white py-8 md:py-10">
+    <section aria-labelledby="featured-startups-title" className={`border-b border-gray-100 bg-white pb-8 md:pb-10 ${compactTop ? "pt-3 md:pt-4" : "pt-8 md:pt-10"}`}>
       <div className="container mx-auto max-w-7xl px-4">
         <div className="mb-8 flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
           <div>

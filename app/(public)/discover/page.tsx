@@ -49,7 +49,7 @@ export default async function DiscoverPage(props: {
   if (!process.env.DATABASE_URL) {
     return (
       <div className="w-full">
-        <PublicPageIntro title={<>Discover <span className="text-coral-500">Startups</span></>} description="Explore startup profiles, review what founders share about their idea and product, and join public discussions.">
+        <PublicPageIntro compact title={<>Discover <span className="text-coral-500">Startups</span></>} description="Explore startup profiles, review what founders share about their idea and product, and join public discussions.">
             <Link href="/categories" className="inline-flex min-h-11 items-center rounded-xl border border-gray-200 px-5 py-2 text-sm font-medium text-gray-700 transition-colors hover:border-coral-500 hover:text-coral-600 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-coral-500">
               Browse categories
             </Link>
@@ -82,17 +82,9 @@ export default async function DiscoverPage(props: {
     where.AND = startupSearchWhere(query);
   }
 
-  // Unfiltered browsing shows featured startups in their own carousel, so keep
-  // them out of the grid on every page instead of showing them twice.
+  // Unfiltered browsing also highlights featured startups above the directory.
+  // Keep every public startup in the directory so the complete list is visible.
   const showFeatured = !categorySlug && !query;
-  const now = new Date();
-  const featuredIds = showFeatured
-    ? (await db.featuredStartup.findMany({
-        where: { startup: publicStartupWhere, OR: [{ featuredUntil: null }, { featuredUntil: { gt: now } }] },
-        select: { startupId: true },
-      })).map(row => row.startupId)
-    : [];
-  if (featuredIds.length > 0) where.id = { notIn: featuredIds };
 
   const [startups, totalCount, categories] = await Promise.all([
     db.startup.findMany({
@@ -110,15 +102,13 @@ export default async function DiscoverPage(props: {
   ]);
 
   const totalPages = Math.ceil(totalCount / pageSize);
-  const totalPublishedCount = totalCount + (showFeatured ? featuredIds.length : 0);
-
   const formattedStartups = await withActivitySignals(startups.map(publicStartupCard));
 
   return (
     <div className="w-full">
-      <PublicPageIntro title={<>Discover <span className="text-coral-500">Startups</span></>} description="Explore startup profiles, review what founders share about their idea and product, and join public discussions." />
+      <PublicPageIntro compact title={<>Discover <span className="text-coral-500">Startups</span></>} description="Explore startup profiles, review what founders share about their idea and product, and join public discussions." />
 
-      {showFeatured && page === 1 && <FeaturedStartups cookieId={cookieId} />}
+      {showFeatured && page === 1 && <FeaturedStartups cookieId={cookieId} compactTop />}
 
       <section aria-label="Directory controls" className="container mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-3 px-4 py-5">
         <SearchBar categories={categories} />
@@ -137,11 +127,11 @@ export default async function DiscoverPage(props: {
           <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
             <div>
               <h2 id="discover-grid-title" className="font-heading text-2xl font-bold text-gray-900">
-                {query || (categorySlug && categorySlug !== "all") ? "Matching startups" : featuredIds.length > 0 ? "More startups" : "All startups"}
+                {query || (categorySlug && categorySlug !== "all") ? "Matching startups" : "All startups"}
               </h2>
               <p className="mt-1 text-sm text-gray-600 tabular-nums">
                 {showFeatured
-                  ? `${totalCount.toLocaleString("en-IN")} more · ${totalPublishedCount.toLocaleString("en-IN")} published in total`
+                  ? `${totalCount.toLocaleString("en-IN")} published in total`
                   : `${totalCount.toLocaleString("en-IN")} ${totalCount === 1 ? "startup" : "startups"}`}
               </p>
             </div>
