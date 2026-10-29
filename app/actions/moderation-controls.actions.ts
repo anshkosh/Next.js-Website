@@ -292,6 +292,7 @@ export async function purgeDeletedComment(commentId: string, reason: string) {
       await tx.commentPurgeAudit.create({ data: { commentId, actorId: moderator.id, reason: reason.trim() } });
       await tx.commenterBlock.updateMany({ where: { sourceCommentId: commentId }, data: { sourceCommentId: null } });
       await tx.moderationAccountBan.updateMany({ where: { sourceCommentId: commentId }, data: { sourceCommentId: null } });
+      await tx.commentStaffEvent.deleteMany({ where: { commentId } });
       await tx.comment.delete({ where: { id: commentId } });
       return { slug: current.startup.slug };
     });

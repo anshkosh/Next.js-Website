@@ -88,6 +88,7 @@ export async function deleteOwnComment(commentId: string) {
       if (!isCommentOwner(comment, session.user)) return { error: "You can only delete your own comment." };
       await tx.commenterBlock.updateMany({ where: { sourceCommentId: commentId }, data: { sourceCommentId: null } });
       await tx.moderationAccountBan.updateMany({ where: { sourceCommentId: commentId }, data: { sourceCommentId: null } });
+      await tx.commentStaffEvent.deleteMany({ where: { commentId } });
       await tx.comment.delete({ where: { id: commentId } });
       return { slug: comment.startup.slug };
     });
