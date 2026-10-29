@@ -8,7 +8,7 @@ import { submitComment, fetchApprovedComments, getCommentAvailability } from "@/
 import type { PublicComment, PendingComment } from "@/app/actions/comment.actions";
 import { characterCount, limitCharacters } from "@/lib/characters";
 import { commentLanguageReasons, COMMENT_LANGUAGE_WARNING } from "@/lib/comment-language";
-import RequestCommentManagement from "@/components/startup/RequestCommentManagement";
+import CommentActions from "@/components/startup/CommentActions";
 
 type CommentAvailability = Awaited<ReturnType<typeof getCommentAvailability>>;
 type CommentViewer = { name: string; email: string };
@@ -49,7 +49,12 @@ function getInitials(name: string): string {
 
 // ─── Sub-components ──────────────────────────────────────────────────────────
 
-function CommentCard({ comment, replyHref }: { comment: PublicComment; replyHref?: string }) {
+function CommentCard({ comment, replyHref, onEdited, onDeleted }: {
+  comment: PublicComment;
+  replyHref?: string;
+  onEdited: (comment: PendingComment) => void;
+  onDeleted: (commentId: string) => void;
+}) {
   return (
     <div className="group">
       {/* Main comment */}
@@ -73,7 +78,7 @@ function CommentCard({ comment, replyHref }: { comment: PublicComment; replyHref
         <p className="text-gray-700 text-sm leading-relaxed whitespace-pre-wrap pl-12">
           {comment.body}
         </p>
-        <RequestCommentManagement commentId={comment.id} />
+        {comment.canManage && <div className="mt-3 pl-12"><CommentActions comment={comment} onEdited={onEdited} onDeleted={onDeleted} /></div>}
       </div>
 
       {/* Founder reply — nested, one level */}
@@ -221,9 +226,11 @@ function CommentForm({ startupId, viewer, availability, setAvailability, onSubmi
               value={form.email}
               onChange={handleChange}
               required
+              readOnly={Boolean(viewer)}
               maxLength={254}
-              className="w-full px-4 py-2.5 rounded-xl border border-gray-200 bg-gray-50 text-sm text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-coral-400 focus:border-transparent transition-[border-color,box-shadow]"
+              className="w-full px-4 py-2.5 rounded-xl border border-gray-200 bg-gray-50 text-sm text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-coral-400 focus:border-transparent transition-[border-color,box-shadow] read-only:cursor-not-allowed read-only:bg-gray-100"
             />
+            <p className="mt-1 text-xs text-gray-500">To edit or delete later, sign in with a verified Anshkosh account using this email.</p>
           </div>
         </div>
 
@@ -306,7 +313,6 @@ function CommentForm({ startupId, viewer, availability, setAvailability, onSubmi
 
 interface DiscussionSectionProps {
   startupId: string;
-  startupSlug: string;
   initialComments: PublicComment[];
   initialNextCursor: string | null;
   totalApprovedCount: number;
@@ -327,6 +333,7 @@ export default function DiscussionSection({
   initialPendingComments,
 }: DiscussionSectionProps) {
   const [comments, setComments] = useState<PublicComment[]>(initialComments);
+  const [approvedCount, setApprovedCount] = useState(totalApprovedCount);
   const [nextCursor, setNextCursor] = useState<string | null>(initialNextCursor);
   const [isLoadingMore, startLoadMore] = useTransition();
   const [submitted, setSubmitted] = useState<string | null>(null); // commenter name after success
@@ -361,9 +368,9 @@ export default function DiscussionSection({
         </div>
         <div>
           <h2 className="text-2xl font-bold text-gray-900 font-heading">Discussion</h2>
-          {totalApprovedCount > 0 && (
+          {approvedCount > 0 && (
             <p className="text-sm text-gray-500">
-              {totalApprovedCount} comment{totalApprovedCount !== 1 ? "s" : ""}
+              {approvedCount} comment{approvedCount !== 1 ? "s" : ""}
             </p>
           )}
         </div>
@@ -372,11 +379,11 @@ export default function DiscussionSection({
       <div className="p-4 sm:p-8 space-y-6">
         {pendingComments.length > 0 && <section aria-label="Your pending comments" className="space-y-3">
           <h3 className="font-semibold text-gray-900">Your pending comments</h3>
-          <p className="text-xs text-gray-600">Visible only in the browser you used to submit them. They will appear publicly after review.</p>
+          <p className="text-xs text-gray-600">These comments stay private until they pass review. Sign in with the verified email you used to post to edit or delete them.</p>
           {pendingComments.map(comment => <div key={comment.id} className="rounded-xl border border-amber-200 bg-amber-50 p-4">
             <p className="text-sm font-semibold text-amber-900">{comment.authorName} · Awaiting review</p>
             <p className="mt-2 whitespace-pre-wrap break-words text-sm text-gray-700">{comment.body}</p>
-            <RequestCommentManagement commentId={comment.id} />
+            {comment.canManage && <div className="mt-3"><CommentActions comment={comment} onEdited={updated => setPendingComments(previous => [updated, ...previous.filter(item => item.id !== updated.id)])} onDeleted={id => setPendingComments(previous => previous.filter(item => item.id !== id))} /></div>}
           </div>)}
         </section>}
         {/* Comments feed */}
@@ -389,7 +396,11 @@ export default function DiscussionSection({
         ) : (
           <div className="space-y-4">
             {comments.map((comment) => (
-              <CommentCard key={comment.id} comment={comment} replyHref={isOwner ? `/startup/${startupId}/discussion#comment-${comment.id}` : undefined} />
+              <CommentCard key={comment.id} comment={comment} onEdited={updated => {
+                setComments(previous => previous.filter(item => item.id !== updated.id));
+                setApprovedCount(count => Math.max(0, count - 1));
+                setPendingComments(previous => [updated, ...previous.filter(item => item.id !== updated.id)]);
+              }} onDeleted={id => { setComments(previous => previous.filter(item => item.id !== id)); setApprovedCount(count => Math.max(0, count - 1)); }} replyHref={isOwner ? `/startup/${startupId}/discussion#comment-${comment.id}` : undefined} />
             ))}
           </div>
         )}

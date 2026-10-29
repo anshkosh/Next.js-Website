@@ -26,6 +26,7 @@ export default async function CommentsPage({ searchParams }: { searchParams: Pro
   const where = {
     status,
     ...(query ? { OR: [
+      { id: { contains: query, mode: "insensitive" as const } },
       { authorName: { contains: query, mode: "insensitive" as const } },
       { authorEmail: { contains: query, mode: "insensitive" as const } },
       { body: { contains: query, mode: "insensitive" as const } },
