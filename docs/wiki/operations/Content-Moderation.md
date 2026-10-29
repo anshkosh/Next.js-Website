@@ -52,6 +52,19 @@ same warning on screen. The filter does not silently rewrite the author's words.
 - `/admin/comments`: filter the queue by pending, published or hidden/rejected;
   search commenter, private email, comment text and startup; restore a hidden
   comment or hide a published one. Product criticism remains eligible to publish.
+- Comment owners can request a one-use, 30-minute management link from their
+  comment or pending-comment receipt. The link goes only to the email stored with
+  that submission. Editing a comment sends the new version back to moderation;
+  deleting it removes the comment and its retained revisions.
+- Founders can edit/delete their startup updates and replies. Comment, update and
+  reply edits keep immutable previous text while the source exists; history starts
+  with this release and has no backfill. Staff can inspect
+  comment/reply history in the comment queue and update/reply history in content
+  review. History is not shown publicly and is removed when its source is deleted.
+- Admins can permanently delete comments that are still pending review. Reviewers
+  can reject or hide comments but cannot permanently delete them. Deleting a
+  pending comment removes its moderation job and text history; any separate active
+  restriction remains in force with its source-comment link cleared.
 - `/admin/bans`: review and reverse account bans and comment-only email blocks.
   A reviewer can ban an ordinary account only when a comment was linked at
   submission to that account's verified email. The action records a reason and

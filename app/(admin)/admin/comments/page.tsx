@@ -40,6 +40,8 @@ export default async function CommentsPage({ searchParams }: { searchParams: Pro
     include: {
       startup: { select: { id: true, name: true, slug: true } },
       moderations: { select: { status: true, reasons: true, reviewedAt: true, reviewedBy: true }, take: 1 },
+      revisions: { select: { authorName: true, body: true, editorId: true, createdAt: true }, orderBy: { createdAt: "desc" }, take: 20 },
+      replyRevisions: { select: { reply: true, repliedBy: true, editorId: true, createdAt: true }, orderBy: { createdAt: "desc" }, take: 20 },
     },
   });
   const linkedUserIds = [...new Set(rows.map(comment => comment.authorUserId).filter((id): id is string => Boolean(id)))];
@@ -63,6 +65,8 @@ export default async function CommentsPage({ searchParams }: { searchParams: Pro
       reviewedBy: comment.moderations[0].reviewedBy,
     } : null,
     reviewNote: comment.reviewNote,
+    revisions: comment.revisions.map(item => ({ ...item, createdAt: item.createdAt.toISOString() })),
+    replyRevisions: comment.replyRevisions.map(item => ({ ...item, createdAt: item.createdAt.toISOString() })),
     startup: comment.startup,
   }));
   const hasNext = rows.length > pageSize;
@@ -89,7 +93,7 @@ export default async function CommentsPage({ searchParams }: { searchParams: Pro
     </form>
 
     <p className="text-sm text-gray-600">Showing {comments.length} {status.toLowerCase()} comments · Page {page}</p>
-    <CommentModerationList comments={comments} />
+    <CommentModerationList comments={comments} canDeletePending={session.user.role === "admin"} />
     <nav aria-label="Comment pages" className="flex justify-between">
       {page > 1 ? <Link className="min-h-11 inline-flex items-center underline" href={`/admin/comments?status=${status}&page=${page - 1}${query ? `&q=${encodeURIComponent(query)}` : ""}`}>Previous page</Link> : <span />}
       {hasNext && <Link className="min-h-11 inline-flex items-center underline" href={`/admin/comments?status=${status}&page=${page + 1}${query ? `&q=${encodeURIComponent(query)}` : ""}`}>Next page</Link>}

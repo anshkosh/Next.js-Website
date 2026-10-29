@@ -67,13 +67,16 @@ export async function exportAccountData(actor: PrivacyActor, code: string, clien
         UNION ALL SELECT octet_length(to_jsonb(f)::text)::bigint FROM "StartupFounder" f JOIN "Startup" s ON s.id = f."startupId" WHERE s."founderId" = ${user.id}
         UNION ALL SELECT octet_length(to_jsonb(b)::text)::bigint FROM "BetaTesterProgram" b JOIN "Startup" s ON s.id = b."startupId" WHERE s."founderId" = ${user.id}
         UNION ALL SELECT octet_length(to_jsonb(u)::text)::bigint FROM "StartupUpdate" u JOIN "Startup" s ON s.id = u."startupId" WHERE s."founderId" = ${user.id}
+        UNION ALL SELECT octet_length(to_jsonb(h)::text)::bigint FROM "StartupUpdateRevision" h JOIN "StartupUpdate" u ON u.id = h."updateId" JOIN "Startup" s ON s.id = u."startupId" WHERE s."founderId" = ${user.id}
         UNION ALL SELECT octet_length(c.reply)::bigint FROM "Comment" c JOIN "Startup" s ON s.id = c."startupId" WHERE s."founderId" = ${user.id} AND c.reply IS NOT NULL
         UNION ALL SELECT octet_length(c."pendingReply")::bigint FROM "Comment" c JOIN "Startup" s ON s.id = c."startupId" WHERE s."founderId" = ${user.id} AND c."pendingReply" IS NOT NULL
+        UNION ALL SELECT octet_length(to_jsonb(h)::text)::bigint FROM "FounderReplyRevision" h JOIN "Comment" c ON c.id = h."commentId" JOIN "Startup" s ON s.id = c."startupId" WHERE s."founderId" = ${user.id}
         UNION ALL SELECT octet_length(to_jsonb(j)::text)::bigint FROM "FounderJournalEntry" j WHERE j."authorId" = ${user.id}
         UNION ALL SELECT octet_length(to_jsonb(r)::text)::bigint FROM "FounderJournalRevision" r JOIN "FounderJournalEntry" j ON j.id = r."entryId" WHERE j."authorId" = ${user.id}
         UNION ALL SELECT octet_length(to_jsonb(j)::text)::bigint FROM "JournalPost" j WHERE j."authorId" = ${user.id}
         UNION ALL SELECT octet_length(to_jsonb(m)::text)::bigint FROM "MediaUpload" m WHERE m."userId" = ${user.id}
         UNION ALL SELECT octet_length(to_jsonb(c)::text)::bigint FROM "Comment" c WHERE c."authorUserId" = ${user.id}
+        UNION ALL SELECT octet_length(to_jsonb(h)::text)::bigint FROM "CommentRevision" h JOIN "Comment" c ON c.id = h."commentId" WHERE c."authorUserId" = ${user.id}
       ) owned_content`;
     if (!estimated[0] || estimated[0].bytes > BigInt(20 * 1024 * 1024)) throw new AccountPrivacyError("This account needs a larger export. Contact hello@anshkosh.com for assistance.", 413);
     // Explicit projections: never spread auth rows or export applicants/commenters.
@@ -96,10 +99,11 @@ export async function exportAccountData(actor: PrivacyActor, code: string, clien
       revision: { select: { data: true, status: true, createdAt: true, updatedAt: true } },
       betaTesterProgram: { select: { enabled: true, description: true, reward: true } },
     } });
-    const updates = await tx.startupUpdate.findMany({ where: { startup: { founderId: user.id } }, take: 10001, select: { startupId: true, title: true, body: true, imageUrl: true, createdAt: true, updatedAt: true } });
-    const replies = await tx.comment.findMany({ where: { startup: { founderId: user.id }, OR: [{ reply: { not: null } }, { pendingReply: { not: null } }] }, take: 10001, select: { startupId: true, reply: true, repliedAt: true, repliedBy: true, pendingReply: true, pendingRepliedBy: true } });
+    const updates = await tx.startupUpdate.findMany({ where: { startup: { founderId: user.id } }, take: 10001, select: { startupId: true, title: true, body: true, imageUrl: true, createdAt: true, updatedAt: true, revisions: { select: { title: true, body: true, imageUrl: true, createdAt: true } } } });
+    const replies = await tx.comment.findMany({ where: { startup: { founderId: user.id }, OR: [{ reply: { not: null } }, { pendingReply: { not: null } }] }, take: 10001, select: { startupId: true, reply: true, repliedAt: true, repliedBy: true, pendingReply: true, pendingRepliedBy: true, replyRevisions: { select: { reply: true, repliedBy: true, createdAt: true } } } });
     const comments = await tx.comment.findMany({ where: { authorUserId: user.id }, take: 10001, select: {
       id: true, startupId: true, authorName: true, authorEmail: true, body: true, status: true, createdAt: true, updatedAt: true,
+      revisions: { select: { authorName: true, body: true, createdAt: true } },
     } });
     const journal = await tx.founderJournalEntry.findMany({ where: { authorId: user.id }, take: 10001, select: {
       id: true, startupId: true, title: true, body: true, contentJson: true, mediaKeys: true,
@@ -139,6 +143,11 @@ export async function eraseAccount(actor: PrivacyActor, code: string, client: Cl
     const oldEmailHashes = [...new Set(authoredComments.map(comment => commenterEmailHash(comment.authorEmail)).filter((hash): hash is string => Boolean(hash)))];
     if (oldEmailHashes.length) await tx.commenterBlock.deleteMany({ where: { emailHash: { in: oldEmailHashes } } });
     await tx.commenterBlock.deleteMany({ where: { sourceCommentId: { in: authoredComments.map(comment => comment.id) } } });
+    if (authoredComments.length) {
+      const commentIds = authoredComments.map(comment => comment.id);
+      await tx.commentManagementToken.deleteMany({ where: { commentId: { in: commentIds } } });
+      await tx.commentRevision.deleteMany({ where: { commentId: { in: commentIds } } });
+    }
     await tx.comment.updateMany({ where: { authorUserId: user.id }, data: { authorUserId: null } });
     await tx.moderationAccountBan.deleteMany({ where: { targetUserId: user.id } });
     await tx.moderationAccountBan.updateMany({ where: { createdById: user.id }, data: { createdById: null } });

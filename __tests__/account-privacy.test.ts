@@ -4,7 +4,7 @@ import { createHash } from "node:crypto";
 const m = vi.hoisted(() => {
   const many = () => ({ findMany: vi.fn(), deleteMany: vi.fn(), updateMany: vi.fn() });
   return {
-    tx: { $queryRaw: vi.fn(), user: { findUnique: vi.fn(), delete: vi.fn() }, session: { findFirst: vi.fn() }, verification: { findFirst: vi.fn(), create: vi.fn(), deleteMany: vi.fn(), delete: vi.fn() }, account: many(), startup: many(), startupUpdate: many(), comment: many(), commenterBlock: many(), moderationAccountBan: many(), founderJournalEntry: many(), founderJournalRevision: many(), startupRevision: many(), journalPost: many(), mediaUpload: many(), notificationOutbox: many() },
+    tx: { $queryRaw: vi.fn(), user: { findUnique: vi.fn(), delete: vi.fn() }, session: { findFirst: vi.fn() }, verification: { findFirst: vi.fn(), create: vi.fn(), deleteMany: vi.fn(), delete: vi.fn() }, account: many(), startup: many(), startupUpdate: many(), comment: many(), commentManagementToken: many(), commentRevision: many(), commenterBlock: many(), moderationAccountBan: many(), founderJournalEntry: many(), founderJournalRevision: many(), startupRevision: many(), journalPost: many(), mediaUpload: many(), notificationOutbox: many() },
     transaction: vi.fn(),
   };
 });
@@ -98,12 +98,15 @@ it("rejects oversized content before materializing owned rows in the web process
 });
 it("erases only the current member and handles dependent content before the user inside one transaction", async () => {
   m.tx.verification.findFirst.mockResolvedValue(proof("delete"));
+  m.tx.comment.findMany.mockResolvedValue([{ id: "comment", authorEmail: "owner@example.test" }]);
   expect(await eraseAccount(actor, code)).toEqual({ success: true });
   expect(m.tx.user.delete).toHaveBeenCalledWith({ where: { id: "member" } });
   expect(m.tx.startup.deleteMany).toHaveBeenCalledWith({ where: { founderId: "member" } });
   expect(m.tx.founderJournalRevision.deleteMany).toHaveBeenCalledWith({ where: { entry: { authorId: "member" } } });
   expect(m.tx.mediaUpload.updateMany).toHaveBeenCalledWith({ where: { userId: "member" }, data: { erasureRequestedAt: expect.any(Date) } });
   expect(m.tx.mediaUpload.deleteMany).not.toHaveBeenCalled();
+  expect(m.tx.commentManagementToken.deleteMany).toHaveBeenCalledWith({ where: { commentId: { in: ["comment"] } } });
+  expect(m.tx.commentRevision.deleteMany).toHaveBeenCalledWith({ where: { commentId: { in: ["comment"] } } });
   expect(m.tx.startup.deleteMany.mock.invocationCallOrder[0]).toBeLessThan(m.tx.user.delete.mock.invocationCallOrder[0]);
   expect(m.transaction).toHaveBeenCalledOnce();
 });

@@ -397,6 +397,7 @@ model StartupUpdate {
   updatedAt DateTime @updatedAt
 
   moderations ContentModeration[]
+  revisions   StartupUpdateRevision[]
 
   @@index([startupId])
   @@index([createdAt(sort: Desc)])
@@ -435,10 +436,63 @@ model Comment {
   pendingReply String? @db.VarChar(2000)
   pendingRepliedBy String?
   moderations ContentModeration[]
+  revisions   CommentRevision[]
+  replyRevisions FounderReplyRevision[]
+  managementTokens CommentManagementToken[]
 
   @@index([startupId, createdAt(sort: Desc)])
   @@index([status])
   @@index([authorUserId, createdAt(sort: Desc)])
+}
+
+// Immutable snapshots are retained only while their source message exists.
+model StartupUpdateRevision {
+  id        String   @id @default(cuid())
+  updateId  String
+  update    StartupUpdate @relation(fields: [updateId], references: [id], onDelete: Cascade)
+  title     String   @db.VarChar(200)
+  body      String
+  imageUrl  String?
+  editorId  String?
+  createdAt DateTime @default(now())
+
+  @@index([updateId, createdAt(sort: Desc)])
+}
+
+model CommentRevision {
+  id        String   @id @default(cuid())
+  commentId String
+  comment   Comment  @relation(fields: [commentId], references: [id], onDelete: Cascade)
+  authorName String
+  body      String   @db.VarChar(2000)
+  editorId  String?
+  createdAt DateTime @default(now())
+
+  @@index([commentId, createdAt(sort: Desc)])
+}
+
+model FounderReplyRevision {
+  id        String   @id @default(cuid())
+  commentId String
+  comment   Comment  @relation(fields: [commentId], references: [id], onDelete: Cascade)
+  reply     String   @db.VarChar(2000)
+  repliedBy String?
+  editorId  String?
+  createdAt DateTime @default(now())
+
+  @@index([commentId, createdAt(sort: Desc)])
+}
+
+model CommentManagementToken {
+  id        String   @id @default(cuid())
+  commentId String
+  comment   Comment  @relation(fields: [commentId], references: [id], onDelete: Cascade)
+  tokenHash String   @unique @db.VarChar(64)
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime @default(now())
+
+  @@index([commentId, expiresAt])
 }
 
 // Email-based comment restrictions keep a keyed digest rather than a second raw email copy.

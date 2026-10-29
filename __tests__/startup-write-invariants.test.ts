@@ -3,13 +3,14 @@ import { beforeEach, expect, it, vi } from "vitest";
 import type { PrismaClient } from "@prisma/client";
 vi.mock("@/lib/db", () => ({ db: {} }));
 import { createTeamFounder } from "@/lib/startup-team-store";
-import { createStartupUpdate, removeStartupUpdate } from "@/lib/startup-update-store";
+import { createStartupUpdate, editStartupUpdate, removeStartupUpdate } from "@/lib/startup-update-store";
 
 const tx = {
   contentModeration: { upsert: vi.fn() },
   $queryRaw: vi.fn(), startup: { findUnique: vi.fn(), update: vi.fn() },
   startupFounder: { findMany: vi.fn(), create: vi.fn() },
-  startupUpdate: { count: vi.fn(), create: vi.fn(), findUnique: vi.fn(), delete: vi.fn() },
+  startupUpdate: { count: vi.fn(), create: vi.fn(), findUnique: vi.fn(), update: vi.fn(), delete: vi.fn() },
+  startupUpdateRevision: { create: vi.fn() },
 };
 const transaction = vi.fn(async (operation: (tx: object) => unknown) => operation(tx));
 const client = { $transaction: transaction } as unknown as Pick<PrismaClient, "$transaction">;
@@ -20,6 +21,7 @@ beforeEach(() => {
   tx.startupFounder.create.mockResolvedValue({ id: "founder" });
   tx.startupUpdate.create.mockResolvedValue({ id: "update" });
   tx.startupUpdate.findUnique.mockResolvedValue({ startupId: "startup" });
+  tx.startupUpdate.update.mockResolvedValue({ id: "update", title: "Changed", body: "New body", imageUrl: null, status: "PENDING" });
   tx.startupUpdate.count.mockResolvedValue(1);
 });
 it("allocates the missing team position only after the parent lock and ownership check", async () => {
@@ -45,6 +47,13 @@ it("creates an update and recounts from persisted rows in one transaction", asyn
   expect(transaction).toHaveBeenCalledOnce();
   expect(tx.startup.update).toHaveBeenCalledWith({ where: { id: "startup" }, data: { updateCount: 1 } });
   expect(tx.$queryRaw.mock.invocationCallOrder[0]).toBeLessThan(tx.startupUpdate.create.mock.invocationCallOrder[0]);
+});
+it("archives the prior update before resubmitting edits for moderation", async () => {
+  tx.startupUpdate.findUnique.mockResolvedValue({ startupId: "startup", title: "Old title", body: "Old body", imageUrl: "https://image.test/old.png" });
+  await editStartupUpdate("owner", "update", { title: "Changed", body: "New body" }, client);
+  expect(tx.startupUpdateRevision.create).toHaveBeenCalledWith({ data: { updateId: "update", title: "Old title", body: "Old body", imageUrl: "https://image.test/old.png", editorId: "owner" } });
+  expect(tx.startupUpdateRevision.create.mock.invocationCallOrder[0]).toBeLessThan(tx.startupUpdate.update.mock.invocationCallOrder[0]);
+  expect(tx.startupUpdate.update).toHaveBeenCalledWith(expect.objectContaining({ data: expect.objectContaining({ status: "PENDING" }) }));
 });
 it("propagates counter failures through the transaction, not after its commit", async () => {
   tx.startup.update.mockRejectedValue(new Error("counter write failed"));

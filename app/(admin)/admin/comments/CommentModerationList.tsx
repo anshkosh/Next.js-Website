@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
-import { banCommentAccount, blockCommenterFromComment, setCommentModerationStatus } from "@/app/actions/moderation-controls.actions";
+import { banCommentAccount, blockCommenterFromComment, deletePendingComment, setCommentModerationStatus } from "@/app/actions/moderation-controls.actions";
 
 type CommentStatus = "PENDING" | "APPROVED" | "REJECTED";
 interface AdminComment {
@@ -19,10 +19,12 @@ interface AdminComment {
   reviewedBy: string | null;
   review: { status: string; reasons: string[]; reviewedAt: string | null; reviewedBy: string | null } | null;
   reviewNote: string | null;
+  revisions: { authorName: string; body: string; editorId: string | null; createdAt: string }[];
+  replyRevisions: { reply: string; repliedBy: string | null; editorId: string | null; createdAt: string }[];
   startup: { id: string; name: string; slug: string };
 }
 
-function CommentModerationRow({ comment }: { comment: AdminComment }) {
+function CommentModerationRow({ comment, canDeletePending }: { comment: AdminComment; canDeletePending: boolean }) {
   const [busy, startTransition] = useTransition();
   const [reason, setReason] = useState("");
   const [decisionNote, setDecisionNote] = useState("");
@@ -57,6 +59,15 @@ function CommentModerationRow({ comment }: { comment: AdminComment }) {
     });
   }
 
+  function deletePending() {
+    if (!window.confirm("Permanently delete this pending comment and its edit history?")) return;
+    startTransition(async () => {
+      const result = await deletePendingComment(comment.id);
+      setMessage(result.error ?? "Pending comment deleted.");
+      if (!result.error) router.refresh();
+    });
+  }
+
   const statusLabel = comment.status === "PENDING" ? "Needs review" : comment.status === "APPROVED" ? "Published" : "Hidden or rejected";
   const lastReviewAt = comment.reviewedAt ?? comment.review?.reviewedAt ?? null;
   const hasStaffReview = Boolean(comment.reviewedBy ?? comment.review?.reviewedBy);
@@ -75,6 +86,7 @@ function CommentModerationRow({ comment }: { comment: AdminComment }) {
     </header>
 
     <p className="whitespace-pre-wrap break-words rounded-xl border border-gray-100 bg-gray-50 px-4 py-3 text-sm leading-relaxed text-gray-800">{comment.body}</p>
+    {(comment.revisions.length > 0 || comment.replyRevisions.length > 0) && <details className="rounded-xl border bg-gray-50 p-4"><summary className="cursor-pointer font-semibold">Message edit history ({comment.revisions.length + comment.replyRevisions.length})</summary><div className="mt-3 space-y-3">{comment.revisions.map((item, index) => <div key={`comment-${index}`} className="rounded-lg bg-white p-3"><p className="text-xs text-gray-500">Comment version · {new Date(item.createdAt).toLocaleString("en-IN")}</p><p className="mt-1 text-sm font-semibold">{item.authorName}</p><p className="mt-1 whitespace-pre-wrap text-sm">{item.body}</p></div>)}{comment.replyRevisions.map((item, index) => <div key={`reply-${index}`} className="rounded-lg bg-white p-3"><p className="text-xs text-gray-500">Founder reply version · {new Date(item.createdAt).toLocaleString("en-IN")}</p>{item.repliedBy && <p className="mt-1 text-sm font-semibold">{item.repliedBy}</p>}<p className="mt-1 whitespace-pre-wrap text-sm">{item.reply}</p></div>)}</div></details>}
     {comment.review?.reasons.length ? <ul className="list-disc space-y-1 rounded-lg bg-amber-50 p-3 pl-8 text-sm text-amber-950">{comment.review.reasons.map((item, index) => <li key={`${index}-${item}`}>{item}</li>)}</ul> : null}
 
     <div className="space-y-3 border-t pt-4">
@@ -84,6 +96,7 @@ function CommentModerationRow({ comment }: { comment: AdminComment }) {
       <div className="flex flex-wrap gap-3">
         {comment.status !== "APPROVED" && <button type="button" disabled={busy} onClick={() => review("APPROVED")} className="min-h-11 rounded-lg bg-green-700 px-4 py-2 text-sm font-semibold text-white disabled:opacity-50">{comment.status === "REJECTED" ? "Restore and publish" : "Approve and publish"}</button>}
         {comment.status !== "REJECTED" && <button type="button" disabled={busy || decisionNote.trim().length < 5} onClick={() => review("REJECTED")} className="min-h-11 rounded-lg border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-800 disabled:opacity-50">{comment.status === "APPROVED" ? "Hide from public" : "Reject"}</button>}
+        {canDeletePending && comment.status === "PENDING" && <button type="button" disabled={busy} onClick={deletePending} className="min-h-11 rounded-lg border border-red-300 px-4 py-2 text-sm font-semibold text-red-800 disabled:opacity-50">Delete pending comment</button>}
       </div>
     </div>
 
@@ -113,7 +126,7 @@ function CommentModerationRow({ comment }: { comment: AdminComment }) {
   </article>;
 }
 
-export default function CommentModerationList({ comments }: { comments: AdminComment[] }) {
+export default function CommentModerationList({ comments, canDeletePending }: { comments: AdminComment[]; canDeletePending: boolean }) {
   if (!comments.length) return <div className="rounded-xl border border-gray-200 bg-white p-12 text-center"><div className="mb-4 text-5xl">💬</div><h2 className="mb-2 text-xl font-bold">No matching comments</h2><p className="text-gray-600">Try another status or search term.</p></div>;
-  return <div className="space-y-4">{comments.map(comment => <CommentModerationRow key={comment.id} comment={comment} />)}</div>;
+  return <div className="space-y-4">{comments.map(comment => <CommentModerationRow key={comment.id} comment={comment} canDeletePending={canDeletePending} />)}</div>;
 }

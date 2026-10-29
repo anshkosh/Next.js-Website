@@ -1,5 +1,7 @@
 "use server";
 
+import { createHash, randomBytes } from "node:crypto";
+
 import { publicStartupWhere } from "@/lib/startup-visibility";
 
 import { db } from "@/lib/db";
@@ -23,9 +25,121 @@ import {
 import { commenterEmailHash } from "@/lib/commenter-restrictions";
 import { deliverNotification } from "@/lib/notification-outbox";
 import { storeApprovedCommentEmail } from "@/lib/comment-notifications";
+import { sendEmail } from "@/lib/email/adapter";
+import { escapeEmailHtml } from "@/lib/email/escape";
+import { SITE_URL } from "@/lib/seo";
+import { z } from "zod";
 
 const COMMENTS_PAGE_SIZE = 10;
 const COMMENT_LIMIT_MESSAGE = "This network has reached its limit of 3 comments per hour. Please try again later.";
+const commentEditSchema = z.object({
+  authorName: z.string().trim().min(2).max(80),
+  body: z.string().trim().min(5).max(2000),
+});
+const COMMENT_MANAGEMENT_TTL_MS = 30 * 60 * 1000;
+
+function managementTokenHash(token: string) {
+  return createHash("sha256").update(token).digest("hex");
+}
+
+export async function requestCommentManagement(commentId: string) {
+  const generic = { success: true as const, message: "If this is one of your comments, check the email you used to post it for a management link." };
+  if (!commentIdSchema.safeParse(commentId).success) return generic;
+  try {
+    const fingerprint = generateFingerprint(clientIp(await headers()), "comment-manage-v1");
+    if (!await checkRateLimit(`comment-manage:ip:${fingerprint}`, 5, 3600) || !await checkRateLimit(`comment-manage:comment:${commentId}`, 1, 3600)) return generic;
+    const comment = await db.comment.findUnique({ where: { id: commentId }, select: { id: true, authorEmail: true, authorName: true } });
+    if (!comment) return generic;
+    const token = randomBytes(32).toString("base64url");
+    const tokenHash = managementTokenHash(token);
+    const expiresAt = new Date(Date.now() + COMMENT_MANAGEMENT_TTL_MS);
+    await db.$transaction(async tx => {
+      await tx.commentManagementToken.deleteMany({ where: { expiresAt: { lt: new Date() } } });
+      await tx.commentManagementToken.deleteMany({ where: { commentId, usedAt: null } });
+      await tx.commentManagementToken.create({ data: { commentId, tokenHash, expiresAt } });
+    });
+    const url = `${SITE_URL}/comment/manage/${token}`;
+    try { await sendEmail({
+      to: comment.authorEmail,
+      subject: "Manage your Anshkosh comment",
+      html: `<p>Hi ${escapeEmailHtml(comment.authorName)},</p><p>Use this secure link to edit or delete your comment. Edited comments return to moderation before they are shown publicly.</p><p><a href="${escapeEmailHtml(url)}">Manage your comment</a></p><p>This link expires in 30 minutes and works once. If you did not request it, ignore this email.</p>`,
+      text: `Use this secure link to edit or delete your Anshkosh comment: ${url}\nEdited comments return to moderation. This link expires in 30 minutes and works once. If you did not request it, ignore this email.`,
+    }); } catch {
+      await db.commentManagementToken.deleteMany({ where: { tokenHash } });
+      throw new Error("Comment management email unavailable");
+    }
+  } catch {
+    logger.warn("Comment management link request could not be delivered");
+  }
+  return generic;
+}
+
+export async function getCommentForManagement(token: string) {
+  if (typeof token !== "string" || !/^[A-Za-z0-9_-]{40,50}$/.test(token)) return null;
+  const grant = await db.commentManagementToken.findFirst({
+    where: { tokenHash: managementTokenHash(token), usedAt: null, expiresAt: { gt: new Date() } },
+    select: { comment: { select: { id: true, authorName: true, body: true, status: true, startup: { select: { slug: true, name: true } } } } },
+  });
+  return grant?.comment ?? null;
+}
+
+export async function editCommentWithToken(token: string, data: { authorName: string; body: string }) {
+  const parsed = commentEditSchema.safeParse(data);
+  if (!parsed.success || typeof token !== "string" || !/^[A-Za-z0-9_-]{40,50}$/.test(token)) return { error: "This management link is invalid or expired. Request a new one." };
+  try {
+    const tokenHash = managementTokenHash(token);
+    const result = await db.$transaction(async tx => {
+      const grant = await tx.commentManagementToken.findFirst({ where: { tokenHash, usedAt: null, expiresAt: { gt: new Date() } }, select: { id: true, commentId: true } });
+      if (!grant) return { error: "This management link is invalid or expired. Request a new one." };
+      await tx.$queryRaw`SELECT id FROM "Comment" WHERE id = ${grant.commentId} FOR UPDATE`;
+      const comment = await tx.comment.findUnique({ where: { id: grant.commentId }, select: { id: true, authorName: true, authorEmail: true, body: true, status: true, startup: { select: { slug: true } } } });
+      if (!comment) return { error: "This comment is no longer available." };
+      const emailHash = commenterEmailHash(comment.authorEmail);
+      if (emailHash) {
+        const block = await tx.commenterBlock.findUnique({ where: { emailHash }, select: { revokedAt: true, expiresAt: true } });
+        if (block && !block.revokedAt && (!block.expiresAt || block.expiresAt > new Date())) return { error: "This commenter is blocked from submitting edits." };
+      }
+      const consumed = await tx.commentManagementToken.updateMany({ where: { id: grant.id, usedAt: null, expiresAt: { gt: new Date() } }, data: { usedAt: new Date() } });
+      if (!consumed.count) return { error: "This management link is invalid or expired. Request a new one." };
+      await tx.commentRevision.create({ data: { commentId: comment.id, authorName: comment.authorName, body: comment.body } });
+      const updated = await tx.comment.update({ where: { id: comment.id }, data: { authorName: parsed.data.authorName, body: parsed.data.body, status: "PENDING", reviewedAt: null, reviewedBy: null, reviewNote: null } });
+      await queueModeration(tx, "COMMENT", updated.id, commentContent(updated));
+      return { slug: comment.startup.slug };
+    });
+    if (!("slug" in result)) return result;
+    revalidatePath(`/startups/${result.slug}`); revalidatePath("/admin/comments"); revalidatePath("/admin/content-review");
+    return { success: true as const, message: "Your edit was sent for moderation. It will appear publicly after review." };
+  } catch {
+    logger.error("Comment edit failed");
+    return { error: "The comment could not be updated. Request a fresh management link and try again." };
+  }
+}
+
+export async function deleteCommentWithToken(token: string) {
+  if (typeof token !== "string" || !/^[A-Za-z0-9_-]{40,50}$/.test(token)) return { error: "This management link is invalid or expired. Request a new one." };
+  try {
+    const tokenHash = managementTokenHash(token);
+    const result = await db.$transaction(async tx => {
+      const grant = await tx.commentManagementToken.findFirst({ where: { tokenHash, usedAt: null, expiresAt: { gt: new Date() } }, select: { id: true, commentId: true } });
+      if (!grant) return { error: "This management link is invalid or expired. Request a new one." };
+      await tx.$queryRaw`SELECT id FROM "Comment" WHERE id = ${grant.commentId} FOR UPDATE`;
+      const comment = await tx.comment.findUnique({ where: { id: grant.commentId }, select: { startup: { select: { slug: true } } } });
+      if (!comment) return { error: "This comment is no longer available." };
+      const consumed = await tx.commentManagementToken.updateMany({ where: { id: grant.id, usedAt: null, expiresAt: { gt: new Date() } }, data: { usedAt: new Date() } });
+      if (!consumed.count) return { error: "This management link is invalid or expired. Request a new one." };
+      await tx.commenterBlock.updateMany({ where: { sourceCommentId: grant.commentId }, data: { sourceCommentId: null } });
+      await tx.moderationAccountBan.updateMany({ where: { sourceCommentId: grant.commentId }, data: { sourceCommentId: null } });
+      await tx.comment.delete({ where: { id: grant.commentId } });
+      return { slug: comment.startup.slug };
+    });
+    if (!("slug" in result)) return result;
+    revalidatePath(`/startups/${result.slug}`); revalidatePath("/admin/comments"); revalidatePath("/admin/content-review"); revalidatePath("/"); revalidatePath("/leaderboard");
+    return { success: true as const, message: "Your comment has been deleted." };
+  } catch {
+    logger.error("Comment delete failed");
+    return { error: "The comment could not be deleted. Request a fresh management link and try again." };
+  }
+}
 
 export async function getCommentAvailability() {
   const fingerprint = generateFingerprint(clientIp(await headers()), "comment-v2");
@@ -276,6 +390,11 @@ export async function replyToComment(data: {
     }
 
     await db.$transaction(async tx => {
+      await tx.$queryRaw`SELECT id FROM "Comment" WHERE id = ${commentId} FOR UPDATE`;
+      const current = await tx.comment.findUnique({ where: { id: commentId, status: "APPROVED", startup: { founderId: session.user.id, ...publicStartupWhere } }, select: { reply: true, repliedBy: true, pendingReply: true, pendingRepliedBy: true } });
+      if (!current) throw new Error("Comment changed before reply edit");
+      const previousReply = current.pendingReply ?? current.reply;
+      if (previousReply) await tx.founderReplyRevision.create({ data: { commentId, reply: previousReply, repliedBy: current.pendingRepliedBy ?? current.repliedBy, editorId: session.user.id } });
       const saved = await tx.comment.update({
         where: { id: commentId, status: "APPROVED", startup: { founderId: session.user.id, ...publicStartupWhere } },
         data: { pendingReply: reply, pendingRepliedBy: session.user.name ?? "Founder" },
@@ -316,13 +435,20 @@ export async function deleteReply(commentId: string) {
       return { error: "Unauthorized" };
     }
 
-    await db.$transaction(async tx => {
+    const deleted = await db.$transaction(async tx => {
+      await tx.$queryRaw`SELECT id FROM "Comment" WHERE id = ${commentId} FOR UPDATE`;
+      const current = await tx.comment.findUnique({ where: { id: commentId }, select: { reply: true, repliedBy: true, pendingReply: true, pendingRepliedBy: true } });
+      if (!current) return false;
+      if (current.pendingReply) await tx.founderReplyRevision.create({ data: { commentId, reply: current.pendingReply, repliedBy: current.pendingRepliedBy, editorId: session.user.id } });
+      if (current.reply && current.reply !== current.pendingReply) await tx.founderReplyRevision.create({ data: { commentId, reply: current.reply, repliedBy: current.repliedBy, editorId: session.user.id } });
       await tx.comment.update({
         where: { id: commentId },
         data: { reply: null, repliedAt: null, repliedBy: null, pendingReply: null, pendingRepliedBy: null },
       });
       await tx.contentModeration.deleteMany({ where: { kind: "REPLY", targetId: commentId } });
+      return true;
     });
+    if (!deleted) return { error: "Comment not found." };
 
     revalidatePath(`/startups/${comment.startup.slug}`);
     revalidatePath("/");
