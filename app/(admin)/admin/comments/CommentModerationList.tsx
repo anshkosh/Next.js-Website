@@ -70,7 +70,7 @@ function CommentModerationRow({ comment, canRestore }: { comment: AdminComment; 
   function saveEdit() {
     startTransition(async () => {
       const result = await editCommentAsStaff(comment.id, editName, editBody);
-      if ("error" in result) { setMessage(result.error); return; }
+      if ("error" in result) { setMessage(result.error ?? "The comment could not be edited."); return; }
       setMessage(result.message);
       setEditing(false); router.refresh();
     });
