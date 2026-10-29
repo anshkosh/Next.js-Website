@@ -8,6 +8,7 @@ import { submitComment, fetchApprovedComments, getCommentAvailability } from "@/
 import type { PublicComment, PendingComment } from "@/app/actions/comment.actions";
 import { characterCount, limitCharacters } from "@/lib/characters";
 import { commentLanguageReasons, COMMENT_LANGUAGE_WARNING } from "@/lib/comment-language";
+import RequestCommentManagement from "@/components/startup/RequestCommentManagement";
 
 type CommentAvailability = Awaited<ReturnType<typeof getCommentAvailability>>;
 type CommentViewer = { name: string; email: string };
@@ -72,6 +73,7 @@ function CommentCard({ comment, replyHref }: { comment: PublicComment; replyHref
         <p className="text-gray-700 text-sm leading-relaxed whitespace-pre-wrap pl-12">
           {comment.body}
         </p>
+        <RequestCommentManagement commentId={comment.id} />
       </div>
 
       {/* Founder reply — nested, one level */}
@@ -374,6 +376,7 @@ export default function DiscussionSection({
           {pendingComments.map(comment => <div key={comment.id} className="rounded-xl border border-amber-200 bg-amber-50 p-4">
             <p className="text-sm font-semibold text-amber-900">{comment.authorName} · Awaiting review</p>
             <p className="mt-2 whitespace-pre-wrap break-words text-sm text-gray-700">{comment.body}</p>
+            <RequestCommentManagement commentId={comment.id} />
           </div>)}
         </section>}
         {/* Comments feed */}

@@ -206,3 +206,25 @@ export async function setCommentModerationStatus(commentId: string, expectedStat
     return { error: "The comment decision could not be saved. Refresh and try again." };
   }
 }
+
+export async function deletePendingComment(commentId: string) {
+  const moderator = await getModerator();
+  if (!moderator || moderator.role !== "admin") return { error: "Admin access required." };
+  if (!validId(commentId)) return { error: "Invalid comment." };
+  try {
+    const result = await db.$transaction(async tx => {
+      await tx.$queryRaw`SELECT id FROM "Comment" WHERE id = ${commentId} FOR UPDATE`;
+      const comment = await tx.comment.findUnique({ where: { id: commentId }, select: { status: true, startup: { select: { slug: true } } } });
+      if (!comment || comment.status !== "PENDING") return { error: "Only comments awaiting review can be deleted. Refresh the queue." };
+      await tx.commenterBlock.updateMany({ where: { sourceCommentId: commentId }, data: { sourceCommentId: null } });
+      await tx.moderationAccountBan.updateMany({ where: { sourceCommentId: commentId }, data: { sourceCommentId: null } });
+      await tx.comment.delete({ where: { id: commentId } });
+      return { slug: comment.startup.slug };
+    });
+    if ("error" in result) return result;
+    refreshModeration(result.slug);
+    return { success: true as const };
+  } catch {
+    return { error: "The pending comment could not be deleted. Refresh the queue and try again." };
+  }
+}

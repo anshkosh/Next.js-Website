@@ -1,9 +1,9 @@
 // @vitest-environment node
 import { beforeEach, expect, it, vi } from "vitest";
-const mock = vi.hoisted(() => ({ session: vi.fn(), comment: vi.fn(), updateComment: vi.fn(), findComment: vi.fn(), cache: vi.fn() }));
+const mock = vi.hoisted(() => ({ session: vi.fn(), comment: vi.fn(), updateComment: vi.fn(), findComment: vi.fn(), cache: vi.fn(), revision: vi.fn() }));
 vi.mock("@/lib/auth", () => ({ auth: { api: { getSession: mock.session } } }));
 vi.mock("@/lib/db", () => {
-  const tx = { comment: { update: mock.comment, updateMany: mock.updateComment, findUnique: mock.findComment }, contentModeration: { updateMany: vi.fn(), deleteMany: vi.fn(), upsert: vi.fn() } };
+  const tx = { $queryRaw: vi.fn(), comment: { update: mock.comment, updateMany: mock.updateComment, findUnique: mock.findComment }, founderReplyRevision: { create: mock.revision }, contentModeration: { updateMany: vi.fn(), deleteMany: vi.fn(), upsert: vi.fn() } };
   return { db: { ...tx, $transaction: async (fn: (tx: object) => unknown) => fn(tx) } };
 });
 vi.mock("next/headers", () => ({ headers: async () => new Headers() }));

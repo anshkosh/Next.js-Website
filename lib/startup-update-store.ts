@@ -33,10 +33,13 @@ export async function createStartupUpdate(ownerId: string, data: UpdateProfile, 
 
 export async function editStartupUpdate(ownerId: string, id: string, data: { title?: string; body?: string; imageUrl?: string | null }, client: Pick<PrismaClient, "$transaction"> = db) {
   return client.$transaction(async tx => {
-    const existing = await tx.startupUpdate.findUnique({ where: { id }, select: { startupId: true } });
-    if (!existing) throw new StartupUpdateError("Unauthorized");
-    const startup = await ownedStartup(tx, existing.startupId, ownerId);
+    const initial = await tx.startupUpdate.findUnique({ where: { id }, select: { startupId: true } });
+    if (!initial) throw new StartupUpdateError("Unauthorized");
+    const startup = await ownedStartup(tx, initial.startupId, ownerId);
+    const existing = await tx.startupUpdate.findUnique({ where: { id }, select: { startupId: true, title: true, body: true, imageUrl: true } });
+    if (!existing || existing.startupId !== startup.id) throw new StartupUpdateError("Unauthorized");
     if (startup.status !== "LIVE") throw new StartupUpdateError("Updates can only be posted on live startups");
+    await tx.startupUpdateRevision.create({ data: { updateId: id, title: existing.title, body: existing.body, imageUrl: existing.imageUrl, editorId: ownerId } });
     const update = await tx.startupUpdate.update({ where: { id, startup: { founderId: ownerId } }, data: { ...data, status: "PENDING" } });
     await queueModeration(tx, "UPDATE", id, updateContent(update));
     await recount(tx, startup.id);

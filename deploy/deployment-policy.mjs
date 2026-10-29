@@ -5,6 +5,10 @@ import { createHash } from "node:crypto";
 // additive operations from broadening the automatic-deploy allowlist.
 const REVIEWED_MIGRATIONS = new Map([
   [
+    "20261030120000_content_edit_history_and_comment_access",
+    "43f28cdb8c462f6e3f606af37a8ed4ddd9bdbd46d90c174dba2812dc22fb3023",
+  ],
+  [
     "20261023130000_ai_content_moderation",
     "598b2c853ba29c8376d97574161d24b56e195e0a0e639776b5c6410586fd6d8a",
   ],
@@ -16,7 +20,7 @@ const REVIEWED_MIGRATIONS = new Map([
 
 export function assertAdditiveMigration(sql, name = "migration") {
   const reviewedHash = REVIEWED_MIGRATIONS.get(name);
-  if (reviewedHash && createHash("sha256").update(sql).digest("hex") === reviewedHash) return;
+  if (reviewedHash && createHash("sha256").update(sql.replace(/\r\n/g, "\n")).digest("hex") === reviewedHash) return;
 
   const normalized = sql.replace(/'(?:''|[^'])*'|"(?:""|[^"])*"|--[^\n]*|\/\*[\s\S]*?\*\//g, token =>
     token.startsWith("'") ? "'value'" : token.startsWith('"') ? '"identifier"' : " ");

@@ -12,6 +12,7 @@ it("keeps the founder journal release migrations within the automatic deploy gat
     "20261022040000_account_date_of_birth",
     "20261022060000_account_media_erasure",
     "20261023130000_ai_content_moderation",
+    "20261030120000_content_edit_history_and_comment_access",
 
     "20261023120000_update_moderation_visibility",
   ]) {
@@ -36,6 +37,14 @@ it("pins only the reviewed additive moderation migration including cascade forei
   expect(() => assertAdditiveMigration(`${sql}\nDROP TABLE \"Comment\";`, name)).toThrow();
   expect(() => assertAdditiveMigration(sql.replace("ON DELETE CASCADE", "ON DELETE SET NULL"), name)).toThrow();
   expect(() => assertAdditiveMigration(sql, "unreviewed_migration")).toThrow();
+});
+
+it("pins the comment edit-history migration independent of checkout line endings", () => {
+  const name = "20261030120000_content_edit_history_and_comment_access";
+  const sql = readFileSync(`prisma/migrations/${name}/migration.sql`, "utf8");
+  expect(() => assertAdditiveMigration(sql, name)).not.toThrow();
+  expect(() => assertAdditiveMigration(sql.replace(/\n/g, "\r\n"), name)).not.toThrow();
+  expect(() => assertAdditiveMigration(`${sql}\nDROP TABLE \"Comment\";`, name)).toThrow();
 });
 
 it("allows additive tables, indexes, nullable columns and defaulted columns", () => {
