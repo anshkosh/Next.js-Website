@@ -31,7 +31,7 @@ const commentEditSchema = z.object({
   authorName: z.string().trim().min(2).max(80),
   body: z.string().trim().min(5).max(2000),
 });
-function isCommentOwner(comment: { authorEmail: string; authorUserId: string | null }, user: { id: string; email: string; emailVerified: boolean; banned: boolean }) {
+function isCommentOwner(comment: { authorEmail: string; authorUserId: string | null }, user: { id: string; email: string; emailVerified: boolean; banned?: boolean }) {
   if (!user.emailVerified || user.banned) return false;
   const emailMatches = comment.authorEmail.trim().toLowerCase() === user.email.trim().toLowerCase();
   return comment.authorUserId === user.id || (!comment.authorUserId && emailMatches);
@@ -51,7 +51,7 @@ export async function editOwnComment(commentId: string, expectedUpdatedAt: strin
       if (!comment) return { error: "This comment is no longer available." };
       if (!isCommentOwner(comment, session.user)) return { error: "You can only edit your own comment." };
       if (comment.updatedAt.toISOString() !== expectedUpdatedAt) return { error: "This comment changed. Reload it before saving your edit." };
-      if (comment.authorName === parsed.data.authorName && comment.body === parsed.data.body) return { slug: comment.startup.slug, pendingComment: null };
+      if (comment.authorName === parsed.data.authorName && comment.body === parsed.data.body) return { slug: comment.startup.slug, pendingComment: null, message: "No changes to save." };
       const emailHash = commenterEmailHash(comment.authorEmail);
       if (emailHash) {
         const block = await tx.commenterBlock.findUnique({ where: { emailHash }, select: { revokedAt: true, expiresAt: true } });
@@ -67,9 +67,9 @@ export async function editOwnComment(commentId: string, expectedUpdatedAt: strin
       await queueModeration(tx, "COMMENT", updated.id, commentContent(updated));
       return { slug: comment.startup.slug, pendingComment: { ...updated, createdAt: updated.createdAt.toISOString(), updatedAt: updated.updatedAt.toISOString(), canManage: true } };
     });
-    if ("error" in result) return result;
+    if (result.error) return { error: result.error };
     revalidatePath(`/startups/${result.slug}`); revalidatePath("/admin/comments"); revalidatePath("/admin/content-review");
-    return { success: true as const, message: result.pendingComment ? "Your edit is awaiting review." : "No changes to save.", pendingComment: result.pendingComment };
+    return { success: true as const, message: result.message, pendingComment: result.pendingComment };
   } catch (err) {
     logger.error("Owner comment edit failed", err);
     return { error: "The comment could not be updated. Please try again." };
@@ -91,7 +91,7 @@ export async function deleteOwnComment(commentId: string) {
       await tx.comment.delete({ where: { id: commentId } });
       return { slug: comment.startup.slug };
     });
-    if ("error" in result) return result;
+    if (result.error) return { error: result.error };
     revalidatePath(`/startups/${result.slug}`); revalidatePath("/admin/comments"); revalidatePath("/admin/content-review"); revalidatePath("/"); revalidatePath("/leaderboard");
     return { success: true as const };
   } catch (err) {

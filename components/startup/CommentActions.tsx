@@ -30,7 +30,7 @@ export default function CommentActions({
     setMessage("");
     startTransition(async () => {
       const result = await editOwnComment(comment.id, comment.updatedAt, { authorName, body });
-      if ("error" in result) { setError(result.error); return; }
+      if (result.error) { setError(result.error); return; }
       setEditing(false);
       setMessage(result.message);
       if (result.pendingComment) {
@@ -46,7 +46,7 @@ export default function CommentActions({
     setError("");
     startTransition(async () => {
       const result = await deleteOwnComment(comment.id);
-      if ("error" in result) { setError(result.error); return; }
+      if (result.error) { setError(result.error); return; }
       onDeleted?.(comment.id);
     });
   }
