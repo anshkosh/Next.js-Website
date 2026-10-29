@@ -47,8 +47,8 @@ export async function editOwnComment(commentId: string, expectedUpdatedAt: strin
     if (!session?.user.emailVerified || session.user.banned) return { error: "Sign in with the verified account used for this comment." };
     const result = await db.$transaction(async tx => {
       await tx.$queryRaw`SELECT id FROM "Comment" WHERE id = ${commentId} FOR UPDATE`;
-      const comment = await tx.comment.findUnique({ where: { id: commentId }, select: { id: true, authorName: true, authorEmail: true, authorUserId: true, body: true, updatedAt: true, startup: { select: { slug: true } } } });
-      if (!comment) return { error: "This comment is no longer available." };
+      const comment = await tx.comment.findUnique({ where: { id: commentId }, select: { id: true, authorName: true, authorEmail: true, authorUserId: true, body: true, updatedAt: true, deletedAt: true, startup: { select: { slug: true } } } });
+      if (!comment || comment.deletedAt) return { error: "This comment is no longer available." };
       if (!isCommentOwner(comment, session.user)) return { error: "You can only edit your own comment." };
       if (comment.updatedAt.toISOString() !== expectedUpdatedAt) return { error: "This comment changed. Reload it before saving your edit." };
       if (comment.authorName === parsed.data.authorName && comment.body === parsed.data.body) return { slug: comment.startup.slug, pendingComment: null, message: "No changes to save." };
@@ -83,8 +83,8 @@ export async function deleteOwnComment(commentId: string) {
     if (!session?.user.emailVerified || session.user.banned) return { error: "Sign in with the verified account used for this comment." };
     const result = await db.$transaction(async tx => {
       await tx.$queryRaw`SELECT id FROM "Comment" WHERE id = ${commentId} FOR UPDATE`;
-      const comment = await tx.comment.findUnique({ where: { id: commentId }, select: { authorEmail: true, authorUserId: true, startup: { select: { slug: true } } } });
-      if (!comment) return { error: "This comment is no longer available." };
+      const comment = await tx.comment.findUnique({ where: { id: commentId }, select: { authorEmail: true, authorUserId: true, deletedAt: true, startup: { select: { slug: true } } } });
+      if (!comment || comment.deletedAt) return { error: "This comment is no longer available." };
       if (!isCommentOwner(comment, session.user)) return { error: "You can only delete your own comment." };
       await tx.commenterBlock.updateMany({ where: { sourceCommentId: commentId }, data: { sourceCommentId: null } });
       await tx.moderationAccountBan.updateMany({ where: { sourceCommentId: commentId }, data: { sourceCommentId: null } });

@@ -49,23 +49,29 @@ same warning on screen. The filter does not silently rewrite the author's words.
   journal revisions. A human may override the AI assessment.
 - `/admin/comments`: existing manual comment approval remains available, including
   pre-release pending comments that have no AI job.
-- `/admin/comments`: filter the queue by pending, published or hidden/rejected;
+- `/admin/comments`: filter pending, published, hidden/rejected or recoverably deleted comments;
   search commenter, private email, comment text and startup; restore a hidden
   comment or hide a published one. Product criticism remains eligible to publish.
+- Admins and reviewers can edit any non-deleted comment. Staff edits preserve the
+  prior version, record the editor, and return the new version to moderation.
+  Staff deletion hides the comment publicly and retains its revisions, founder
+  reply, deletion reason and staff activity. Admins can restore it; only admins
+  can restore or permanently purge items from the deleted queue. Purge removes
+  the comment and its content history while retaining a body-free audit record
+  with actor, time and reason. Every approve, hide, edit, delete and restore
+  action records the staff member, time and decision reason where given.
 - Comment owners edit or delete from the comment's in-place actions while signed
   in with a verified account linked to the comment. Older guest comments can be
   managed after sign-in only when the verified account email matches the email
-  on the comment. Editing sends the new version back to moderation; deletion
-  removes the comment and its retained revisions. There is no email-link route.
+  on the comment. Editing sends the new version back to moderation; owner deletion
+  remains a permanent delete. There is no email-link route.
 - Founders can edit/delete their startup updates and replies. Comment, update and
   reply edits keep immutable previous text while the source exists; history starts
   with this release and has no backfill. Staff can inspect
   comment/reply history in the comment queue and update/reply history in content
   review. History is not shown publicly and is removed when its source is deleted.
-- Admins can permanently delete comments that are still pending review. Reviewers
-  can reject or hide comments but cannot permanently delete them. Deleting a
-  pending comment removes its moderation job and text history; any separate active
-  restriction remains in force with its source-comment link cleared.
+- Staff deletion through the comment console is recoverable. Owner deletion and
+  account erasure permanently remove comment history through the existing cascade.
 - `/admin/bans`: review and reverse account bans and comment-only email blocks.
   A reviewer can ban an ordinary account only when a comment was linked at
   submission to that account's verified email. The action records a reason and
