@@ -24,7 +24,7 @@ beforeEach(() => {
   mock.readLimit.mockResolvedValue({ allowed: true, available: true, retryAfterSeconds: 1 });
   mock.consume.mockResolvedValue(true); mock.verify.mockResolvedValue(true);
   mock.startup.mockResolvedValue({ id: startupId, slug: "fixture" });
-  mock.create.mockResolvedValue({ id, authorName: input.authorName, body: input.body, createdAt: new Date("2026-10-20T00:00:00Z") });
+  mock.create.mockResolvedValue({ id, authorName: input.authorName, body: input.body, createdAt: new Date("2026-10-20T00:00:00Z"), updatedAt: new Date("2026-10-20T00:00:00Z") });
   mock.findMany.mockResolvedValue([]);
   mock.block.mockResolvedValue(null);
 });
@@ -80,5 +80,5 @@ it("never uses an unverified email address or an unsigned ID to read pending com
   expect(await fetchOwnPendingComments(startupId)).toEqual([]); expect(mock.findMany).not.toHaveBeenCalled();
   mock.getCookie.mockReturnValue({ value: addCommentReceipt(undefined, id, process.env.BETTER_AUTH_SECRET) });
   await fetchOwnPendingComments(startupId);
-  expect(mock.findMany).toHaveBeenCalledWith(expect.objectContaining({ where: { id: { in: [id] }, startupId, status: "PENDING", startup: { status: "LIVE", founder: { founderMode: true } } }, select: { id: true, authorName: true, body: true, createdAt: true } }));
+  expect(mock.findMany).toHaveBeenCalledWith(expect.objectContaining({ where: expect.objectContaining({ startupId, status: "PENDING", startup: { status: "LIVE", founder: { founderMode: true } }, OR: [expect.objectContaining({ id: { in: [id] } })] }), select: expect.objectContaining({ id: true, authorName: true, body: true, createdAt: true, updatedAt: true, authorEmail: true, authorUserId: true }) }));
 });
