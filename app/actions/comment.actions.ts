@@ -31,8 +31,8 @@ const commentEditSchema = z.object({
   authorName: z.string().trim().min(2).max(80),
   body: z.string().trim().min(5).max(2000),
 });
-function isCommentOwner(comment: { authorEmail: string; authorUserId: string | null }, user: { id: string; email: string; emailVerified: boolean; banned?: boolean }) {
-  if (!user.emailVerified || user.banned) return false;
+function isCommentOwner(comment: { authorEmail: string; authorUserId: string | null }, user: { id: string; email: string; emailVerified: boolean }) {
+  if (!user.emailVerified) return false;
   const emailMatches = comment.authorEmail.trim().toLowerCase() === user.email.trim().toLowerCase();
   return comment.authorUserId === user.id || (!comment.authorUserId && emailMatches);
 }

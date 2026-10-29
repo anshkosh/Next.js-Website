@@ -32,7 +32,7 @@ export default function CommentActions({
       const result = await editOwnComment(comment.id, comment.updatedAt, { authorName, body });
       if (result.error) { setError(result.error); return; }
       setEditing(false);
-      setMessage(result.message);
+      setMessage(result.message ?? "Your edit is awaiting review.");
       if (result.pendingComment) {
         setAuthorName(result.pendingComment.authorName);
         setBody(result.pendingComment.body);
