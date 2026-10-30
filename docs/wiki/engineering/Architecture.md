@@ -5,7 +5,7 @@
 | Layer | Choice |
 |---|---|
 | Framework | Next.js 16 (App Router, webpack builds), React 19, TypeScript |
-| Styling | Tailwind CSS v4, shadcn/ui, Base UI, Framer Motion |
+| Styling | Tailwind CSS v4, shadcn/ui, Base UI |
 | Database | PostgreSQL 15 via Prisma 6; full-text search with a `tsvector` column and trigger (`prisma/startup_search_vector_trigger.sql`) |
 | Auth | Better Auth: email/password (verified email required) and Google OAuth, with the admin plugin for roles |
 | Background jobs | BullMQ on Redis (`lib/jobs/`) |
