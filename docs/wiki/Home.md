@@ -47,4 +47,4 @@ This wiki lives in the repository so it is reviewed with the code it describes. 
 
 ## Known gaps
 
-- `logs/error.log` and `logs/combined.log` are tracked in Git. Logs should not be committed.
+- Older Git revisions still contain runtime logs that have now been removed from the current source tree. Removing those historical copies would require coordinated Git history cleanup.

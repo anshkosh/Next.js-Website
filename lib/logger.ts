@@ -6,11 +6,6 @@ export const logger = winston.createLogger({
     winston.format.timestamp(),
     winston.format.json()
   ),
-  transports: [
-    new winston.transports.Console(),
-    ...(process.env.E2E_TEST_MODE === "1" && process.env.NODE_ENV !== "production" ? [] : [
-      new winston.transports.File({ filename: "logs/error.log", level: "error" }),
-      new winston.transports.File({ filename: "logs/combined.log" }),
-    ]),
-  ],
+  // ponytail: PM2 captures stdout/stderr; keep runtime logs out of release files and Git.
+  transports: [new winston.transports.Console()],
 });

@@ -2,7 +2,6 @@
 
 import { useState, useTransition, useCallback } from "react";
 import Link from "next/link";
-import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import {
   Mail,
   MapPin,
@@ -159,11 +158,8 @@ function SuccessState({
   name: string;
   onReset: () => void;
 }) {
-  const reduceMotion = useReducedMotion();
   return (
-    <motion.div
-      initial={reduceMotion ? false : { opacity: 0, scale: 0.95 }}
-      animate={{ opacity: 1, scale: 1 }}
+    <div
       className="flex flex-col items-center justify-center text-center py-16 px-6 gap-5"
     >
       <div className="w-20 h-20 rounded-full bg-green-50 border-2 border-green-200 flex items-center justify-center">
@@ -186,14 +182,13 @@ function SuccessState({
       >
         Send another message
       </button>
-    </motion.div>
+    </div>
   );
 }
 
 // ── Main form ─────────────────────────────────────────────────────────────────
 
 export default function ContactContent({ initialSubject = "" }: { initialSubject?: ContactSubject | "" }) {
-  const reduceMotion = useReducedMotion();
   const [form, setForm] = useState<FormState>({
     name: "",
     email: "",
@@ -261,16 +256,14 @@ export default function ContactContent({ initialSubject = "" }: { initialSubject
 
   const isSubmitDisabled = isPending || !form.token || !form.subject;
 
+  // ponytail: render contact states directly; this page does not need an animation dependency.
   return (
     <div className="min-h-screen bg-gray-50/50">
       <PublicPageIntro title="Contact Us" description="Questions, ideas, or feedback — we’d love to hear from you." />
       <div className="mx-auto max-w-5xl px-4 py-8">
 
         {/* Card */}
-        <motion.div
-          initial={reduceMotion ? false : { opacity: 0, y: 16 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4, ease: "easeOut" }}
+        <div
           className="grid grid-cols-1 overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-soft lg:grid-cols-5"
         >
           {/* Left decorative panel — 2/5 */}
@@ -280,175 +273,162 @@ export default function ContactContent({ initialSubject = "" }: { initialSubject
 
           {/* Right form panel — 3/5 */}
           <div className="order-1 p-6 sm:p-8 lg:order-2 lg:col-span-3">
-            <AnimatePresence mode="wait">
-              {success ? (
-                <SuccessState
-                  key="success"
-                  name={form.name || "there"}
-                  onReset={handleReset}
-                />
-              ) : (
-                <motion.form
-                  key="form"
-                  initial={reduceMotion ? false : { opacity: 0, x: 12 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={reduceMotion ? { opacity: 1 } : { opacity: 0, x: -12 }}
-                  transition={{ duration: 0.25 }}
-                  onSubmit={handleSubmit}
-                  className="space-y-6"
-                  noValidate
-                >
-                  <div>
-                    <h2 className="text-2xl font-heading font-bold text-gray-900 mb-1">
-                      Send us a message
-                    </h2>
-                    <p className="text-sm text-gray-500">
-                      All fields marked{" "}
-                      <span className="text-coral-500">*</span> are required.
-                    </p>
-                  </div>
+            {success ? (
+              <SuccessState
+                name={form.name || "there"}
+                onReset={handleReset}
+              />
+            ) : (
+              <form
+                onSubmit={handleSubmit}
+                className="space-y-6"
+                noValidate
+              >
+                <div>
+                  <h2 className="text-2xl font-heading font-bold text-gray-900 mb-1">
+                    Send us a message
+                  </h2>
+                  <p className="text-sm text-gray-500">
+                    All fields marked{" "}
+                    <span className="text-coral-500">*</span> are required.
+                  </p>
+                </div>
 
-                  {/* Subject chips */}
-                  <div>
-                    <p id="contact-subject-label" className="block text-sm font-medium text-gray-700 mb-2">
-                      Subject <span className="text-coral-500">*</span>
-                    </p>
-                    <SubjectChips
-                      value={form.subject}
-                      onChange={(v) => setField("subject", v)}
-                    />
-                  </div>
+                {/* Subject chips */}
+                <div>
+                  <p id="contact-subject-label" className="block text-sm font-medium text-gray-700 mb-2">
+                    Subject <span className="text-coral-500">*</span>
+                  </p>
+                  <SubjectChips
+                    value={form.subject}
+                    onChange={(v) => setField("subject", v)}
+                  />
+                </div>
 
-                  {/* Name + Email */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                      <label
-                        htmlFor="contact-name"
-                        className="block text-sm font-medium text-gray-700 mb-1.5"
-                      >
-                        Name <span className="text-coral-500">*</span>
-                      </label>
-                      <input
-                        id="contact-name"
-                        name="name"
-                        type="text"
-                        autoComplete="name"
-                        placeholder="Your name"
-                        value={form.name}
-                        onChange={(e) => setField("name", e.target.value)}
-                        maxLength={100}
-                        required
-                        className={inputClass}
-                      />
-                    </div>
-                    <div>
-                      <label
-                        htmlFor="contact-email"
-                        className="block text-sm font-medium text-gray-700 mb-1.5"
-                      >
-                        Email <span className="text-coral-500">*</span>
-                      </label>
-                      <input
-                        id="contact-email"
-                        name="email"
-                        type="email"
-                        autoComplete="email"
-                        placeholder="you@example.com"
-                        value={form.email}
-                        onChange={(e) => setField("email", e.target.value)}
-                        maxLength={254}
-                        required
-                        className={inputClass}
-                      />
-                    </div>
-                  </div>
-
-                  {/* Message */}
+                {/* Name + Email */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <label
-                      htmlFor="contact-message"
+                      htmlFor="contact-name"
                       className="block text-sm font-medium text-gray-700 mb-1.5"
                     >
-                      Message <span className="text-coral-500">*</span>
+                      Name <span className="text-coral-500">*</span>
                     </label>
-                    <textarea
-                      id="contact-message"
-                      name="message"
-                      rows={5}
-                      placeholder="Tell us what's on your mind… (min. 20 characters)"
-                      value={form.message}
-                      onChange={(e) => setField("message", e.target.value)}
-                      maxLength={2000}
+                    <input
+                      id="contact-name"
+                      name="name"
+                      type="text"
+                      autoComplete="name"
+                      placeholder="Your name"
+                      value={form.name}
+                      onChange={(e) => setField("name", e.target.value)}
+                      maxLength={100}
                       required
-                      className={`${inputClass} resize-none`}
+                      className={inputClass}
                     />
-                    <div className="flex justify-end mt-1">
-                      <span
-                        className={`text-xs tabular-nums ${
-                          form.message.length > 1800
-                            ? "text-coral-500"
-                            : "text-gray-500"
-                        }`}
-                      >
-                        {form.message.length}/2000
-                      </span>
-                    </div>
                   </div>
+                  <div>
+                    <label
+                      htmlFor="contact-email"
+                      className="block text-sm font-medium text-gray-700 mb-1.5"
+                    >
+                      Email <span className="text-coral-500">*</span>
+                    </label>
+                    <input
+                      id="contact-email"
+                      name="email"
+                      type="email"
+                      autoComplete="email"
+                      placeholder="you@example.com"
+                      value={form.email}
+                      onChange={(e) => setField("email", e.target.value)}
+                      maxLength={254}
+                      required
+                      className={inputClass}
+                    />
+                  </div>
+                </div>
 
-                  {/* Turnstile */}
-                  <TurnstileWidget
-                    onToken={handleToken}
-                    onExpire={handleExpire}
-                  />
-
-                  <p className="text-xs leading-relaxed text-gray-500">
-                    We use these details to respond to your message and handle support requests. See our{" "}
-                    <Link href="/privacy" className="font-medium text-coral-700 underline underline-offset-2">Privacy Notice</Link>.
-                  </p>
-
-                  {/* Error */}
-                  <AnimatePresence>
-                    {error && (
-                      <motion.div
-                        initial={reduceMotion ? false : { opacity: 0, y: -4 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0 }}
-                        role="alert"
-                        className="flex items-center gap-2 text-sm text-red-600 bg-red-50 border border-red-200 rounded-xl px-4 py-3"
-                      >
-                        <AlertCircle className="w-4 h-4 flex-shrink-0" />
-                        {error}
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-
-                  {/* Submit */}
-                  <button
-                    type="submit"
-                    disabled={isSubmitDisabled}
-                    className="flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-coral-600 px-6 py-3 font-semibold text-white transition-colors hover:bg-coral-700 active:bg-coral-800 disabled:cursor-not-allowed disabled:opacity-50"
+                {/* Message */}
+                <div>
+                  <label
+                    htmlFor="contact-message"
+                    className="block text-sm font-medium text-gray-700 mb-1.5"
                   >
-                    {isPending ? (
-                      <>
-                        <Loader2 className="w-4 h-4 animate-spin" />
-                        Sending…
-                      </>
-                    ) : (
-                      <>
-                        <Send className="w-4 h-4" />
-                        Send Message
-                      </>
-                    )}
-                  </button>
+                    Message <span className="text-coral-500">*</span>
+                  </label>
+                  <textarea
+                    id="contact-message"
+                    name="message"
+                    rows={5}
+                    placeholder="Tell us what's on your mind… (min. 20 characters)"
+                    value={form.message}
+                    onChange={(e) => setField("message", e.target.value)}
+                    maxLength={2000}
+                    required
+                    className={`${inputClass} resize-none`}
+                  />
+                  <div className="flex justify-end mt-1">
+                    <span
+                      className={`text-xs tabular-nums ${
+                        form.message.length > 1800
+                          ? "text-coral-500"
+                          : "text-gray-500"
+                      }`}
+                    >
+                      {form.message.length}/2000
+                    </span>
+                  </div>
+                </div>
 
-                  <p className="text-center text-xs text-gray-500">
-                    Protected by Cloudflare Turnstile · No spam, ever.
-                  </p>
-                </motion.form>
-              )}
-            </AnimatePresence>
+                {/* Turnstile */}
+                <TurnstileWidget
+                  onToken={handleToken}
+                  onExpire={handleExpire}
+                />
+
+                <p className="text-xs leading-relaxed text-gray-500">
+                  We use these details to respond to your message and handle support requests. See our{" "}
+                  <Link href="/privacy" className="font-medium text-coral-700 underline underline-offset-2">Privacy Notice</Link>.
+                </p>
+
+                {/* Error */}
+                {error && (
+                    <div
+                      role="alert"
+                      className="flex items-center gap-2 text-sm text-red-600 bg-red-50 border border-red-200 rounded-xl px-4 py-3"
+                    >
+                      <AlertCircle className="w-4 h-4 flex-shrink-0" />
+                      {error}
+                    </div>
+                  )}
+
+                {/* Submit */}
+                <button
+                  type="submit"
+                  disabled={isSubmitDisabled}
+                  className="flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-coral-600 px-6 py-3 font-semibold text-white transition-colors hover:bg-coral-700 active:bg-coral-800 disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  {isPending ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      Sending…
+                    </>
+                  ) : (
+                    <>
+                      <Send className="w-4 h-4" />
+                      Send Message
+                    </>
+                  )}
+                </button>
+
+                <p className="text-center text-xs text-gray-500">
+                  Protected by Cloudflare Turnstile · No spam, ever.
+                </p>
+              </form>
+            )}
           </div>
-        </motion.div>
+        </div>
       </div>
     </div>
   );
