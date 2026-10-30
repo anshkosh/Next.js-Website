@@ -76,6 +76,18 @@ model Verification {
   updatedAt  DateTime @updatedAt
 }
 
+model AdminPasswordResetAudit {
+  id                String   @id @default(cuid())
+  operatorName      String   @db.VarChar(100)
+  targetUserId      String
+  targetEmail       String
+  reason            String   @db.VarChar(500)
+  approvalReference String
+  createdAt         DateTime @default(now())
+
+  @@index([targetUserId, createdAt(sort: Desc)])
+}
+
 enum StartupStatus {
   DRAFT
   PENDING_REVIEW
