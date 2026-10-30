@@ -14,8 +14,8 @@
 | Bot protection | Cloudflare Turnstile on contact and comment forms |
 | Images | `sharp` re-encoding on upload; Next image optimisation |
 | PDFs | `pdf-lib` checks and rewrites pitch decks |
-| OG images | `@vercel/og` (`app/api/og/[slug]`) |
-| Logging | Winston (`lib/logger.ts`) |
+| OG images | Next.js `next/og` (`app/api/og/[slug]`) |
+| Logging | Winston to stdout/stderr, captured by PM2 (`lib/logger.ts`) |
 | Tests | Vitest, Playwright |
 | Hosting | A self-managed AlmaLinux VPS: nginx → PM2 → Next.js, with local PostgreSQL and Redis. Not Vercel. |
 
