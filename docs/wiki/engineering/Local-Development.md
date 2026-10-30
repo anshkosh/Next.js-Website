@@ -65,8 +65,15 @@ Without `DATABASE_URL`, some public pages (for example `/categories`) render a p
 | `npm run lint` | ESLint |
 | `npm test` | Vitest |
 | `npx playwright test` | End-to-end tests |
-| `npx tsx scripts/set-admin-password.ts --email <email> --password <password>` | Reset an admin password (local or with explicit owner approval in production) |
+| `npx tsx scripts/set-admin-password.ts --email <admin-email>` | Break-glass admin password reset; prompts privately and records an audit entry |
 | `node scripts/verify-seo.mjs` | SEO checks against a running site |
+
+The operator reset is a fallback for an existing, verified, active admin account.
+Run it interactively, enter the operator name, reason and owner-approval
+reference, confirm the target email, then enter the new password twice at the
+hidden prompts. It uses Better Auth's password hasher, revokes all target
+sessions, invalidates pending email reset links and writes a database audit
+record. The password is never accepted as a command-line argument or printed.
 
 ## Windows notes
 
