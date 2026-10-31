@@ -87,8 +87,6 @@ export default function EditStartupForm({ initialData, userId, categories }: { c
     pitchDeckVisibility: metadata.pitchDeckVisibility || (metadata.pitchDeckUrl ? "public" : "private"),
     galleryImages: (initialData.galleryImages || []) as string[],
     features: (metadata.features || []) as { icon: string; title: string; description: string }[],
-    // Founder contact
-    startupPhone: initialData.startupPhone || "",
     // Core Proposition
     problemStatement: initialData.problemStatement || "",
     solutionStatement: initialData.solutionStatement || "",
@@ -127,9 +125,6 @@ export default function EditStartupForm({ initialData, userId, categories }: { c
     };
 
     const manualErrors: Record<string, string[]> = {};
-    if (!formData.startupPhone || formData.startupPhone.length !== 10) {
-      manualErrors.startupPhone = ["Please provide a valid 10-digit phone number"];
-    }
     if (!formData.city) {
       manualErrors.city = ["City is required"];
     }
@@ -217,7 +212,7 @@ export default function EditStartupForm({ initialData, userId, categories }: { c
       className="bg-white p-8 rounded-2xl shadow-sm border border-gray-100 space-y-6"
     >
       <DraftRecoveryNotice draft={draft} />
-      {reviewing && <section aria-labelledby="review-heading" className="space-y-5"><h2 id="review-heading" className="font-heading text-2xl font-bold">Review your changes</h2><p className="text-sm text-gray-600">Check your proposed profile before saving. Your current public profile stays live while changes are reviewed.</p><dl className="space-y-4">{[["Name", formData.name], ["Category", categories.find(item => item.id === formData.categoryId)?.name || formData.categoryId], ["Founder", formData.founderName], ["Contact phone (private)", formData.startupPhone], ["Tagline", formData.tagline], ["Description", formData.description], ["Website", formData.websiteUrl], ["Problem", formData.problemStatement], ["Solution", formData.solutionStatement], ["Audience", formData.targetAudience], ["Stage", formData.prototypeStatus], ["Evidence", formData.tractionEvidence], ["City", formData.city], ["Founded", formData.foundedYear], ["Logo", formData.logoUrl], ["Video", formData.videoUrl], ["Pitch deck", formData.pitchDeckUrl], ["Pitch deck visibility", formData.pitchDeckVisibility], ["X / Twitter", formData.twitterUrl], ["LinkedIn", formData.linkedinUrl], ["Features", formData.features.map(item => `${item.title}: ${item.description}`).join("; ")], ["Gallery", `${formData.galleryImages.length} images`]].map(([label, value]) => <div key={label}><dt className="text-sm font-semibold">{label}</dt><dd className="whitespace-pre-wrap break-words text-sm text-gray-700">{value || "Not provided"}</dd></div>)}</dl><button type="button" onClick={() => setReviewing(false)} className="min-h-11 font-semibold text-coral-700 underline">Back to editing</button></section>}
+      {reviewing && <section aria-labelledby="review-heading" className="space-y-5"><h2 id="review-heading" className="font-heading text-2xl font-bold">Review your changes</h2><p className="text-sm text-gray-600">Check your proposed profile before saving. Your current public profile stays live while changes are reviewed.</p><dl className="space-y-4">{[["Name", formData.name], ["Category", categories.find(item => item.id === formData.categoryId)?.name || formData.categoryId], ["Founder", formData.founderName], ["Tagline", formData.tagline], ["Description", formData.description], ["Website", formData.websiteUrl], ["Problem", formData.problemStatement], ["Solution", formData.solutionStatement], ["Audience", formData.targetAudience], ["Stage", formData.prototypeStatus], ["Evidence", formData.tractionEvidence], ["City", formData.city], ["Founded", formData.foundedYear], ["Logo", formData.logoUrl], ["Video", formData.videoUrl], ["Pitch deck", formData.pitchDeckUrl], ["Pitch deck visibility", formData.pitchDeckVisibility], ["X / Twitter", formData.twitterUrl], ["LinkedIn", formData.linkedinUrl], ["Features", formData.features.map(item => `${item.title}: ${item.description}`).join("; ")], ["Gallery", `${formData.galleryImages.length} images`]].map(([label, value]) => <div key={label}><dt className="text-sm font-semibold">{label}</dt><dd className="whitespace-pre-wrap break-words text-sm text-gray-700">{value || "Not provided"}</dd></div>)}</dl><button type="button" onClick={() => setReviewing(false)} className="min-h-11 font-semibold text-coral-700 underline">Back to editing</button></section>}
       <div hidden={reviewing}>
       {initialData.revisionStatus && <p role="status" className="rounded-lg bg-gray-50 p-3 text-sm">{initialData.revisionStatus === "REJECTED" ? `Changes need attention: ${initialData.revisionNotes || "Please revise and resubmit."}` : "Your proposed changes are awaiting review. The published profile remains live."}</p>}
       {initialData.status === "LIVE" && (
@@ -359,24 +354,6 @@ export default function EditStartupForm({ initialData, userId, categories }: { c
           />
           {errors.linkedinUrl && (
             <p className="text-red-500 text-xs mt-1">{errors.linkedinUrl[0]}</p>
-          )}
-        </div>
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Phone Number <span className="text-red-500">*</span>
-          </label>
-          <input
-            type="tel"
-            name="startupPhone"
-            value={formData.startupPhone}
-            onChange={handleChange}
-            placeholder="e.g. 9876543210"
-            maxLength={10}
-            className={`w-full border rounded-md p-2 ${errors.startupPhone ? "border-red-500 bg-red-50/20" : ""}`}
-          />
-          <p className="text-xs text-gray-500 mt-1">10-digit mobile number</p>
-          {errors.startupPhone && (
-            <p className="text-red-500 text-xs mt-1">{errors.startupPhone[0]}</p>
           )}
         </div>
         <div>

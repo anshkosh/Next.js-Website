@@ -109,15 +109,12 @@ export default function StartupWizard({ userId, initialId, initialStep, initialD
     // For simplicity, we create a partial schema for current step
     let keysToValidate: string[] = [];
     if (step === 1) keysToValidate = ["name", "tagline", "categoryId"];
-    if (step === 2) keysToValidate = ["description", "websiteUrl", "twitterUrl", "linkedinUrl", "startupPhone", "city", "foundedYear", "logoUrl"];
+    if (step === 2) keysToValidate = ["description", "websiteUrl", "twitterUrl", "linkedinUrl", "city", "foundedYear", "logoUrl"];
     if (step === 5) keysToValidate = ["features", "videoUrl", "pitchDeckUrl", "galleryImages"];
     if (step === 3) keysToValidate = ["problemStatement", "solutionStatement", "targetAudience", "prototypeStatus"];
 
     if (step === 2) {
       const manualErrors: Record<string, string[]> = {};
-      if (!formData.startupPhone || formData.startupPhone.length !== 10) {
-        manualErrors.startupPhone = ["Please provide a valid 10-digit phone number"];
-      }
       if (!formData.city) {
         manualErrors.city = ["City is required"];
       }
@@ -476,24 +473,6 @@ export default function StartupWizard({ userId, initialId, initialStep, initialD
                 />
                 {errors.linkedinUrl && (
                   <p className="text-red-500 text-xs mt-1">{errors.linkedinUrl[0]}</p>
-                )}
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Phone Number <span className="text-red-500">*</span>
-                </label>
-                <input
-                  type="tel"
-                  name="startupPhone"
-                  value={formData.startupPhone}
-                  onChange={handleChange}
-                  placeholder="e.g. 9876543210"
-                  maxLength={10}
-                  className={`w-full border rounded-md p-2 ${errors.startupPhone ? "border-red-500 bg-red-50/20" : ""}`}
-                />
-                <p className="text-xs text-gray-500 mt-1">10-digit mobile number</p>
-                {errors.startupPhone && (
-                  <p className="text-red-500 text-xs mt-1">{errors.startupPhone[0]}</p>
                 )}
               </div>
               <div>

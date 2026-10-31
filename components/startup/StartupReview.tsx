@@ -64,10 +64,6 @@ export default function StartupReview({
         ["Website", data.websiteUrl],
         ["City", data.city],
         ["Founded year", data.foundedYear],
-        [
-          "Phone",
-          data.startupPhone ? `••••••${data.startupPhone.slice(-4)}` : "",
-        ],
         ["X / Twitter", data.twitterUrl],
         ["LinkedIn", data.linkedinUrl],
       ],
