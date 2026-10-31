@@ -1,5 +1,23 @@
 # Progress
 
+## 31 October 2026 — startup website URL validation (prepared)
+
+- Reproduced CLARRX's labelled outbound href and 404 using signed-out GETs at
+  09:56 IST. Shared URL syntax validation accepted the label as a custom scheme.
+- Prepared a focused create/edit schema change requiring complete HTTP/HTTPS
+  addresses, trimming surrounding whitespace and preserving partial edits and
+  moderation. No existing profile data is corrected automatically.
+- New regressions reproduce seven pre-fix schema failures. After the fix,
+  29 focused tests pass; full lint and typecheck pass. Full unit suite: 814 pass,
+  two skip, one unchanged Windows CRLF conversion failure in deployment-policy.
+  Browser regression is pending. Dependency gate fails on unreviewed minimatch
+  advisory GHSA-g3hv-75wg-m249 in the unchanged dependency tree; release blocked.
+  No bypass/exception added. Exact evidence,
+  limits and next action: [review record](reviews/2026-10-31-startup-website-validation.md).
+- Isolated branch from main `23100dd8`; not merged/deployed. No production data,
+  account, bot, scheduler or OpenKnowledge changes. Grok #754 proposes current
+  link QA, Claude #753 a source-only two-cover packet; ACKs not yet received.
+
 ## 27 October 2026 — pilot website copy review (prepared)
 
 - Compared the live home, Discover and leaderboard pages with the current application copy and published pilot behavior. The homepage still called a working pilot "under construction"; repeated "before launch" messaging did not fit already-operating businesses; leaderboard copy described a mixed activity score as community interest.

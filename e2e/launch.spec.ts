@@ -356,6 +356,13 @@ test("signup, real verification token, login, photo editing, private deck and st
   await page.locator('[name="city"]').fill("Hyderabad");
   await page.locator('[name="foundedYear"]').selectOption("2026");
   await uploadPhoto(page, "Upload startup logo");
+  const savedWebsite = (await db.startup.findFirstOrThrow({ where: { founder: { email } } })).websiteUrl;
+  await page.locator('[name="websiteUrl"]').fill("Website: https://example.test");
+  await page.getByRole("button", { name: "Next", exact: true }).click();
+  await expect(page.getByText("Enter a complete http or https website address.", { exact: true })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Step 2: Details", exact: true })).toBeVisible();
+  expect((await db.startup.findFirstOrThrow({ where: { founder: { email } } })).websiteUrl).toBe(savedWebsite);
+  await page.locator('[name="websiteUrl"]').fill("https://example.test");
   await page.getByRole("button", { name: "Next", exact: true }).click();
   await page.locator('[name="problemStatement"]').fill("Customers currently struggle to find a consistent, convenient and hygienic fresh beverage experience that they can trust and return to every week.");
   await page.locator('[name="solutionStatement"]').fill("We offer a standardized fresh beverage experience with reliable preparation, clear ingredients and service that can be repeated across multiple pilot locations.");
