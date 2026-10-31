@@ -7,7 +7,10 @@ export const createStartupSchema = z.object({
   name: z.string().min(2).max(100),
   tagline: z.string().min(10).max(120),
   description: z.string().min(50).max(5000),
-  websiteUrl: z.string().url(),
+  // URL syntax alone also accepts custom schemes such as "Website: https://...".
+  websiteUrl: z.string().trim().url().refine(value => /^https?:\/\//i.test(value), {
+    message: "Enter a complete http or https website address.",
+  }),
   categoryId: z.string().cuid(),
   founderName: z.string().min(2).max(100).optional(),
   logoUrl: z.string().min(1, "Logo is required").refine((val) => val.startsWith("http") || val.startsWith("/"), { message: "Please upload a valid logo" }).or(z.literal("")).optional(),

@@ -9,7 +9,7 @@ vi.mock("@/lib/jobs/queues", () => ({ notificationQueue: { add: mock.queue } }))
 vi.mock("@/lib/notification-outbox", () => ({ storeNotification: async () => ({ id: "event" }), deliverNotification: async () => { try { await mock.queue(); return true; } catch { return false; } } }));
 vi.mock("@/lib/logger", () => ({ logger: { error: vi.fn() } }));
 vi.mock("@/app/actions/settings.actions", () => ({ getSettingValue: vi.fn() }));
-import { updateStartup } from "../app/actions/startup.actions";
+import { createStartup, updateStartup } from "../app/actions/startup.actions";
 
 const id = "6b0ef103-2a8d-4232-8cff-68cf9a8a1ea9";
 const owner = "cmu7wfiv7000bzglryqzerzjo";
@@ -27,6 +27,30 @@ beforeEach(() => {
   mock.update.mockResolvedValue({ id, name: "Cane Theory", founder: { name: "Owner" }, category: { name: "FoodTech" } });
 });
 describe("UUID edit action", () => {
+  it("rejects the reported labelled website before looking up or changing a startup", async () => {
+    const result = await updateStartup(form({ websiteUrl: "Website: https://www.clarrx.com" }));
+    expect(result.details?.websiteUrl).toContain("Enter a complete http or https website address.");
+    expect(mock.find).not.toHaveBeenCalled();
+    expect(mock.update).not.toHaveBeenCalled();
+    expect(mock.revision).not.toHaveBeenCalled();
+  });
+  it("rejects the reported labelled website when creating a startup", async () => {
+    mock.session.mockResolvedValue({ user: { id: owner, name: "Owner", emailVerified: true } });
+    const result = await createStartup(form({
+      name: "Example startup", tagline: "A useful startup for a focused audience",
+      categoryId: owner, websiteUrl: "Website: https://www.clarrx.com",
+    }));
+    expect(result.details?.websiteUrl).toContain("Enter a complete http or https website address.");
+    expect(mock.find).not.toHaveBeenCalled();
+    expect(mock.update).not.toHaveBeenCalled();
+    expect(mock.revision).not.toHaveBeenCalled();
+  });
+  it("stages a trimmed web address without changing the live profile", async () => {
+    const result = await updateStartup(form({ websiteUrl: "  https://example.com/path  " }));
+    expect(result.pendingRevision).toBe(true);
+    expect(mock.revision).toHaveBeenCalledWith(expect.objectContaining({ create: expect.objectContaining({ data: expect.objectContaining({ websiteUrl: "https://example.com/path" }) }) }));
+    expect(mock.update).not.toHaveBeenCalled();
+  });
   it("keeps the UUID profile live and stages edits separately; deck removal immediately revokes public access", async () => {
     const result = await updateStartup(form({ name: "Cane Theory", pitchDeckUrl: "", galleryImages: "" }));
     expect(result.error).toBeUndefined();
