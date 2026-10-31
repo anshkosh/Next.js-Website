@@ -28,6 +28,7 @@ install -m 755 -o root -g root "$source_dir/receive.sh" /usr/local/libexec/anshk
 install -m 755 -o root -g root "$source_dir/validate-archive.py" /usr/local/libexec/anshkosh-validate-archive
 install -m 644 -o root -g root "$source_dir/automatic-deploy.mjs" /usr/local/libexec/anshkosh-deploy.mjs
 install -m 644 -o root -g root "$source_dir/deployment-policy.mjs" /usr/local/libexec/deployment-policy.mjs
+install -m 644 -o root -g root "$source_dir/deployment-runtime.mjs" /usr/local/libexec/deployment-runtime.mjs
 install -m 755 -o root -g root "$source_dir/route.py" /usr/local/sbin/anshkosh-route
 "$node" --check /usr/local/libexec/anshkosh-deploy.mjs
 bash -n /usr/local/libexec/anshkosh-receive

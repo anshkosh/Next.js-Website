@@ -20,6 +20,11 @@ const server = http.createServer(async (req, res) => {
     if (req.url === "/send" && req.method === "POST") {
       messages.push(JSON.parse(body.toString())); res.setHeader("Content-Type", "application/json"); res.end(JSON.stringify({ messageId: `test-${messages.length}` })); return;
     }
+    if (req.url === "/turnstile" && req.method === "POST") {
+      const params = new URLSearchParams(body.toString());
+      res.setHeader("Content-Type", "application/json");
+      res.end(JSON.stringify({ success: params.get("secret") === "isolated-turnstile-test-secret" && params.get("response") === "isolated-browser-token" })); return;
+    }
     const objectPath = new URL(req.url, "http://127.0.0.1:3181").pathname;
     if (req.method === "DELETE") { objects.delete(objectPath); res.statusCode = 204; res.end(); return; }
     if (req.method === "PUT") { objects.set(objectPath, { bytes: body, type: req.headers["content-type"] }); res.setHeader("ETag", '"test-etag"'); res.end(); return; }

@@ -1,4 +1,5 @@
 import Redis from "ioredis";
+import { isolatedE2E } from "../isolated-e2e";
 
 const redisHost = process.env.REDIS_HOST || "localhost";
 const redisPort = parseInt(process.env.REDIS_PORT || "6379", 10);
@@ -8,6 +9,6 @@ export const connection = new Redis({
   host: redisHost,
   port: redisPort,
   password: redisPassword,
-  db: process.env.NODE_ENV === "production" ? 0 : 1, // Use db 1 locally to avoid conflicting with other projects
+  db: process.env.NODE_ENV === "production" && !isolatedE2E() ? 0 : 1,
   maxRetriesPerRequest: null,
 });

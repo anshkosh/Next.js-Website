@@ -5,6 +5,7 @@ import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { getTrustedAuthOrigins } from "@/lib/auth-origins";
 import { type NextRequest, NextResponse } from "next/server";
+import { isolatedE2E } from "../isolated-e2e";
 
 export class UploadError extends Error {
   constructor(message: string, public status = 503) { super(message); }
@@ -13,7 +14,7 @@ let limiter: Redis | undefined;
 export async function limitUploads(userId: string) {
   if (!limiter) {
     limiter = new Redis({ host: process.env.REDIS_HOST || "127.0.0.1", port: Number(process.env.REDIS_PORT || 6379),
-      password: process.env.REDIS_PASSWORD || undefined, db: process.env.NODE_ENV === "production" ? 0 : 1,
+      password: process.env.REDIS_PASSWORD || undefined, db: process.env.NODE_ENV === "production" && !isolatedE2E() ? 0 : 1,
       maxRetriesPerRequest: 1, connectTimeout: 2000, commandTimeout: 3000, retryStrategy: () => null });
     limiter.on("error", () => {});
   }

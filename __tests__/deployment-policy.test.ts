@@ -41,7 +41,7 @@ it("pins only the reviewed additive moderation migration including cascade forei
 
 it("pins the comment edit-history migration independent of checkout line endings", () => {
   const name = "20261030120000_content_edit_history_and_comment_access";
-  const sql = readFileSync(`prisma/migrations/${name}/migration.sql`, "utf8");
+  const sql = readFileSync(`prisma/migrations/${name}/migration.sql`, "utf8").replace(/\r\n/g, "\n");
   expect(() => assertAdditiveMigration(sql, name)).not.toThrow();
   expect(() => assertAdditiveMigration(sql.replace(/\n/g, "\r\n"), name)).not.toThrow();
   expect(() => assertAdditiveMigration(`${sql}\nDROP TABLE \"Comment\";`, name)).toThrow();

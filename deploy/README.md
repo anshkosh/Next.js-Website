@@ -57,6 +57,10 @@ explicit recovery, not for a second active deployment pipeline.
   additions belong in automatic deployments; backups are not an automatic undo.
 - Health, commit identity, pages, SEO, 404s, built assets and worker stability are checked.
   Failures before publication keep the old site; post-switch failures restore it.
+- Before building and again before startup, reject any PM2 registration or listener
+  on the candidate port. Web candidates run in fork mode to prevent PM2 cluster
+  workers from sharing a port with another release. Stale processes require review;
+  deployment never removes an unknown listener automatically.
 - Database backups and hashed static assets are retained. Static assets are shared to
   support older browser tabs. Release directories are pruned daily by
   `anshkosh-prune-releases.timer` (03:30 server time, as `deploy`): the live release from
@@ -80,6 +84,9 @@ Failures are reported in GitHub Actions; they must be investigated, not force-pu
 
 Root-owned helpers are deliberately not overwritten by uploaded application code.
 Changes to the deployment helpers require a reviewed server installation.
+The runtime guard is installed alongside the main helper as
+`/usr/local/libexec/deployment-runtime.mjs`; update both files together, retaining
+a root-only copy of the prior helpers for recovery.
 The profile photo editor and PDF pitch-deck upload use existing R2 storage.
 Launch safeguards add two backwards-compatible tables for pending revisions and
 tracked media quotas. New decks default to private; visibility is checked on
@@ -103,3 +110,22 @@ save PM2. Do not automatically restore a database dump over current production d
 
 Dependency-install security advisories are not fixed by this deployment mechanism.
 Dependency updates and potentially destructive migrations need separate review.
+
+## Browser checks
+
+CI builds the application in production mode before Playwright starts it. All 20
+journeys remain covered by three tagged groups (`startup`, `accounts`, `public`),
+each on a separate runner with its own disposable PostgreSQL, Redis and fixture
+services. Startup lifecycle checks retain their original sequence. Timing JSON
+and browser reports are retained for each group, including successful runs.
+
+Production-mode protocol fixtures require both E2E flags, the exact local test
+database and auth origin, loopback Redis, and synthetic mail/storage credentials.
+Regular production deployments cannot select those fixtures with an E2E flag alone.
+
+The provider audit on 31 Oct 2026 found no Vercel or Supabase SDK, endpoint or
+deployment integration in the current release. The unused Vercel starter logo was
+removed. Supabase-prefixed imported record IDs remain supported by the validator;
+they do not connect to Supabase. The archived `/var/www/anshkosh` app contains
+`@vercel/og`; its obsolete PM2 web process was retired after verifying Nginx routes
+to the current release. Archived files are retained for recovery.

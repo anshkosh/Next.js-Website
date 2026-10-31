@@ -22,6 +22,15 @@ const adminEmail = `reviewer-${randomUUID()}@example.test`;
 const originalTagline = "A pilot-ready startup built for real customers";
 const startupName = `Launch Test ${randomUUID().slice(0, 8)}`;
 let categoryId: string, startupId: string, slug: string;
+let clientNumber = 2;
+
+function clientHeaders() {
+  // Each test/device represents a separate visitor behind the trusted proxy.
+  // Use benchmarking addresses; real production IP/rate checks still execute.
+  const index = clientNumber++;
+  const ip = `198.18.${Math.floor(index / 254)}.${index % 254 + 1}`;
+  return { "x-real-ip": ip, "x-forwarded-for": ip };
+}
 
 function fixtureWidget() {
   window.turnstile = {
@@ -32,7 +41,7 @@ function fixtureWidget() {
   };
 }
 async function isolatedContext(browser: Browser, options: Parameters<Browser["newContext"]>[0] = {}) {
-  const context = await browser.newContext(options);
+  const context = await browser.newContext({ ...options, extraHTTPHeaders: { ...clientHeaders(), ...options.extraHTTPHeaders } });
   await context.addInitScript(fixtureWidget);
   return context;
 }
@@ -117,16 +126,18 @@ test.beforeAll(async ({ request }) => {
 test.afterAll(async () => { await db.$disconnect(); });
 
 test.beforeEach(async ({ page }) => {
+  await page.context().setExtraHTTPHeaders(clientHeaders());
   // Captured widget API; no Cloudflare connection or real challenge in tests.
   // The isolated development server has no Turnstile verification secret.
   await page.addInitScript(fixtureWidget);
 });
-// This serial journey shares persisted votes and network limits. Replaying it in
-// the same database can obscure the first failure with leftover fixture state.
+// Startup journeys share persisted state and retain their order. CI filters
+// three tagged groups onto separate runners with disposable databases and Redis.
+// Local runs still execute all twenty journeys in the original order.
 test.describe.configure({ mode: "serial", retries: 0 });
 test.setTimeout(180000);
 
-test("legacy redirects and missing public details preserve real HTTP status codes", async ({ request }) => {
+test("legacy redirects and missing public details preserve real HTTP status codes", { tag: "@public" }, async ({ request }) => {
   const response = await request.get("/campaigns/cane-theory?utm_source=legacy", { maxRedirects: 0 });
   expect(response.status()).toBe(308);
   const destination = new URL(response.headers().location, "http://127.0.0.1:3100");
@@ -146,7 +157,7 @@ test("legacy redirects and missing public details preserve real HTTP status code
   }
 });
 
-test("founder tools isolate two real accounts, clear drafts, and return to protected pages after login", async ({ page }) => {
+test("founder tools isolate two real accounts, clear drafts, and return to protected pages after login", { tag: "@accounts" }, async ({ page }) => {
   test.setTimeout(300000);
   const accounts = [`tool-a-${randomUUID()}@example.test`, `tool-b-${randomUUID()}@example.test`];
   try {
@@ -209,7 +220,7 @@ test("founder tools isolate two real accounts, clear drafts, and return to prote
   }
 });
 
-test("390px cookie notice leaves auth controls reachable and mobile search opens a usable input", async ({ page }) => {
+test("390px cookie notice leaves auth controls reachable and mobile search opens a usable input", { tag: "@public" }, async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   for (const path of ["/login", "/register"]) {
     await page.goto(path);
@@ -231,7 +242,7 @@ test("390px cookie notice leaves auth controls reachable and mobile search opens
   await page.goto("/signup"); await expect(page).toHaveURL(/\/register$/);
 });
 
-test("founder signup keeps the startup submission destination", async ({ page }) => {
+test("founder signup keeps the startup submission destination", { tag: "@accounts" }, async ({ page }) => {
   await enter(page, "/startup/new");
   await expect(page).toHaveURL(/\/login\?next=%2Fstartup%2Fnew$/);
   await page.getByRole("link", { name: "Register here" }).click();
@@ -246,7 +257,7 @@ test("founder signup keeps the startup submission destination", async ({ page })
 });
 
 // Verify privacy controls before the longer shared startup journey.
-test("private data export and confirmed deletion isolate owners, roll back failures and revoke all sessions", async ({ page, browser }) => {
+test("private data export and confirmed deletion isolate owners, roll back failures and revoke all sessions", { tag: "@accounts" }, async ({ page, browser }) => {
   test.setTimeout(300000);
   const ownerEmail = `privacy-${randomUUID()}@example.test`;
   // The first journey uses the HTTP auth endpoint already compiled by beforeAll.
@@ -332,7 +343,7 @@ test("private data export and confirmed deletion isolate owners, roll back failu
   } finally { await otherDevice.close(); await db.startup.delete({ where: { id: control.id } }); }
 });
 
-test("signup, real verification token, login, photo editing, private deck and startup submission", async ({ page }) => {
+test("signup, real verification token, login, photo editing, private deck and startup submission", { tag: "@startup" }, async ({ page }) => {
   await enter(page, "/register");
   await page.getByLabel("Full Name", { exact: true }).fill("Test Founder");
   await page.locator('input[type="email"]').fill(email);
@@ -410,7 +421,7 @@ test("signup, real verification token, login, photo editing, private deck and st
   expect(record.status).toBe("PENDING_REVIEW"); expect(record.prototypeStatus).toBe("Preparing a pilot");
 });
 
-test("admin approves, edits remain unpublished, recovery survives refresh, revision approval publishes changes", async ({ page, browser }) => {
+test("admin approves, edits remain unpublished, recovery survives refresh, revision approval publishes changes", { tag: "@startup" }, async ({ page, browser }) => {
   await login(page, adminEmail, password, true);
   await enter(page, "/admin/moderation");
   await page.getByRole("button", { name: "Approve", exact: true }).click();
@@ -439,7 +450,7 @@ test("admin approves, edits remain unpublished, recovery survives refresh, revis
   await anonymous.close(); await ownerContext.close();
 });
 
-test("pending and rejected startup updates stay hidden in the rollback-compatible public reader", async ({ page }) => {
+test("pending and rejected startup updates stay hidden in the rollback-compatible public reader", { tag: "@startup" }, async ({ page }) => {
   const pendingTitle = `Private pending update ${randomUUID()}`;
   const rejectedTitle = `Private rejected update ${randomUUID()}`;
   const records = await Promise.all([
@@ -457,7 +468,7 @@ test("pending and rejected startup updates stay hidden in the rollback-compatibl
   } finally { await db.startupUpdate.deleteMany({ where: { id: { in: records.map(row => row.id) } } }); }
 });
 
-test("password reset uses a delivered token and mobile forms fit the viewport", async ({ page }) => {
+test("password reset uses a delivered token and mobile forms fit the viewport", { tag: "@startup" }, async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await enter(page, "/forgot-password"); await page.getByLabel("Email address", { exact: true }).fill(email);
   await page.getByRole("button", { name: /Send reset link/i }).click();
@@ -470,7 +481,7 @@ test("password reset uses a delivered token and mobile forms fit the viewport", 
   await page.screenshot({ path: "test-results/startup-edit-mobile.png", fullPage: true });
 });
 
-test("public founder search and bidirectional voting share accurate signals across pages", async ({ page }) => {
+test("public founder search and bidirectional voting share accurate signals across pages", { tag: "@startup" }, async ({ page }) => {
   await enter(page, "/search?q=test%20founder");
   await expect(page.getByRole("heading", { name: startupName, exact: true })).toBeVisible();
   const startupResult = page.getByRole("link").filter({ has: page.getByRole("heading", { name: startupName, exact: true }) });
@@ -509,7 +520,7 @@ test("public founder search and bidirectional voting share accurate signals acro
   await expect(page.getByRole("heading", { name: startupName, exact: true })).toHaveCount(0);
 });
 
-test("leaderboard and featured rows combine activity without leaking private or pending content", async ({ page }) => {
+test("leaderboard and featured rows combine activity without leaking private or pending content", { tag: "@startup" }, async ({ page }) => {
   const owner = await db.user.findUniqueOrThrow({ where: { email } });
   const token = randomUUID();
   const name = `Activity Test ${token.slice(0, 8)}`;
@@ -557,7 +568,7 @@ test("leaderboard and featured rows combine activity without leaking private or 
   }
 });
 
-test("concurrent vote switches and reconciliation preserve one vote and correct counters", async () => {
+test("concurrent vote switches and reconciliation preserve one vote and correct counters", { tag: "@startup" }, async () => {
   const { recordVote, recountVotes } = await import("../lib/vote-store");
   const fixture = await db.startup.create({ data: { name: "Concurrent vote fixture", slug: `concurrent-${randomUUID()}`, tagline: "Isolated voting fixture", description: "For concurrency testing only", websiteUrl: "https://example.test", founderName: "Test Founder", founderId: (await db.user.findUniqueOrThrow({ where: { email } })).id, categoryId, status: "LIVE" } });
   const identity = { cookieId: randomUUID(), fingerprintHash: randomUUID() };
@@ -571,7 +582,7 @@ test("concurrent vote switches and reconciliation preserve one vote and correct 
   expect(await recordVote(fixture.id, -1, identity)).toMatchObject({ success: false });
 });
 
-test("homepage opens directly and navigation remains usable without entry overlays", async ({ page }) => {
+test("homepage opens directly and navigation remains usable without entry overlays", { tag: "@public" }, async ({ page }) => {
   await page.goto("/");
   await expect(page.getByRole("heading", { level: 1, name: "Back the next thing. Before it launches." })).toBeVisible();
   await expect(page.getByRole("dialog", { name: "Explore the Anshkosh pilot." })).toHaveCount(0);
@@ -585,7 +596,7 @@ test("homepage opens directly and navigation remains usable without entry overla
   expect(await page.evaluate(() => !document.getElementById("site-content")?.inert && document.body.style.overflow !== "hidden")).toBe(true);
 });
 
-test("journal titles and bylines remain readable with and without a cover at narrow widths", async ({ page }) => {
+test("journal titles and bylines remain readable with and without a cover at narrow widths", { tag: "@public" }, async ({ page }) => {
   const post = await db.journalPost.create({ data: {
     title: "Why a student community closed with money still in the bank and what founders can learn from its decisions",
     slug: `journal-header-${randomUUID()}`, authorName: "Journal Layout Reviewer",
@@ -637,7 +648,7 @@ test("journal titles and bylines remain readable with and without a cover at nar
   }
 });
 
-test("an unhydrated login submits credentials in a POST body", async ({ browser }) => {
+test("an unhydrated login submits credentials in a POST body", { tag: "@public" }, async ({ browser }) => {
   const context = await isolatedContext(browser, { javaScriptEnabled: false });
   try {
     const page = await context.newPage();
@@ -653,7 +664,7 @@ test("an unhydrated login submits credentials in a POST body", async ({ browser 
   } finally { await context.close(); }
 });
 
-test("signed-in comments prefill identity and remain privately visible while pending", async ({ page, browser }) => {
+test("signed-in comments prefill identity and remain privately visible while pending", { tag: "@startup" }, async ({ page, browser }) => {
   await login(page, adminEmail, password, true);
   await page.goto("/");
     await expect(page.getByRole("dialog", { name: "Explore the Anshkosh pilot." })).toHaveCount(0);
@@ -684,7 +695,7 @@ test("signed-in comments prefill identity and remain privately visible while pen
   } finally { await db.comment.deleteMany({ where: { startupId, body, status: "PENDING" } }); }
 });
 
-test("founder lesson submission, update feedback and direct sign-out work together", async ({ page }) => {
+test("founder lesson submission, update feedback and direct sign-out work together", { tag: "@startup" }, async ({ page }) => {
   await login(page, email, "ChangedTesting123!");
   const title = `Journal regression ${randomUUID()}`;
   const updateTitle = `Update regression ${randomUUID()}`;
@@ -728,7 +739,7 @@ test("founder lesson submission, update feedback and direct sign-out work togeth
 });
 
 
-test("member registration and profile settings work across modes without losing founder data", async ({ page }) => {
+test("member registration and profile settings work across modes without losing founder data", { tag: "@accounts" }, async ({ page }) => {
   const memberEmail = `member-${randomUUID()}@example.test`;
   await enter(page, "/register");
   await expect(page.getByRole("checkbox", { name: "Enable founder mode" })).not.toBeChecked();
@@ -774,7 +785,7 @@ test("member registration and profile settings work across modes without losing 
   await expect(page.getByRole("heading", { name: modeStartup.name, exact: true })).toBeVisible();
 });
 
-test("founder mode hides every owned startup publicly and restores approved visibility without losing data", async ({ page, browser }) => {
+test("founder mode hides every owned startup publicly and restores approved visibility without losing data", { tag: "@accounts" }, async ({ page, browser }) => {
   test.setTimeout(300000);
   const visibilityEmail = `visibility-${randomUUID()}@example.test`;
   const signup = await page.request.post("/api/auth/sign-up/email", {
@@ -876,7 +887,7 @@ test("founder mode hides every owned startup publicly and restores approved visi
   }
 });
 
-test("expanded profile, optional emails and verified sign-in changes persist", async ({ page, browser }) => {
+test("expanded profile, optional emails and verified sign-in changes persist", { tag: "@accounts" }, async ({ page, browser }) => {
   test.setTimeout(300000);
   const originalEmail = `profile-${randomUUID()}@example.test`;
   const changedEmail = `changed-${randomUUID()}@example.test`;

@@ -6,6 +6,7 @@ import { createRequire } from "node:module";
 import { spawnSync } from "node:child_process";
 import { setTimeout as delay } from "node:timers/promises";
 import { assertAdditiveMigration } from "./deployment-policy.mjs";
+import { assertCandidateAvailable } from "./deployment-runtime.mjs";
 
 const shared = "/var/www/anshkosh-shared";
 const [release, commit] = process.argv.slice(2);
@@ -36,24 +37,39 @@ const route = (target) => run("sudo", ["-n", "/usr/local/sbin/anshkosh-route", S
 
 async function health(origin, expectedCommit) {
   const deadline = Date.now() + 60000;
+  let failure = "no response";
   do {
     try {
+      failure = "health request unavailable";
       const response = await fetch(`${origin}/api/cron/health`, { signal: AbortSignal.timeout(5000) });
+      failure = `health HTTP ${response.status}`;
+      if (response.status !== 200) throw new Error();
+      failure = "health response is not valid JSON";
       const data = await response.json();
-      assert.equal(response.status, 200);
-      assert.equal(data.db, "connected");
+      failure = "health database not connected";
+      if (data.db !== "connected") throw new Error();
       if (expectedCommit) {
+        failure = "release request unavailable";
         const version = await fetch(`${origin}/.well-known/release.json`, { signal: AbortSignal.timeout(5000) });
-        assert.equal(version.status, 200);
-        assert.equal((await version.json()).commit, expectedCommit);
+        failure = `release HTTP ${version.status}`;
+        if (version.status !== 200) throw new Error();
+        failure = "release identity mismatch or invalid JSON";
+        if ((await version.json()).commit !== expectedCommit) throw new Error();
       }
       console.log(`PASS health and release identity: ${origin}`);
       return;
-    } catch {
+    } catch (error) {
+      // Only fixed diagnostics and error codes: never provider payloads or env.
+      if (error?.cause?.code) failure = `request failed (${String(error.cause.code).replace(/[^A-Z0-9_]/g, "")})`;
       await delay(2000);
     }
   } while (Date.now() < deadline);
-  throw new Error(`Health/release check failed: ${origin}`);
+  throw new Error(`Health/release check failed: ${origin}; ${failure}`);
+}
+
+async function candidateAvailable() {
+  const processes = JSON.parse(run("pm2", ["jlist"], { stdio: ["ignore", "pipe", "pipe"], encoding: "utf8" }).stdout);
+  await assertCandidateAvailable(processes, port, webName);
 }
 
 async function publicAssets(origin) {
@@ -110,6 +126,7 @@ async function migrateSafely() {
 
 async function main() {
   console.log(`Preparing release ${commit}. Current site remains online.`);
+  await candidateAvailable();
   fs.copyFileSync(`${shared}/.env`, `${release}/.env`);
   fs.chmodSync(`${release}/.env`, 0o600);
   process.env.NODE_ENV = "production";
@@ -129,9 +146,12 @@ async function main() {
   web.name = webName;
   web.cwd = release;
   web.env = { ...web.env, PORT: port, NODE_ENV: "production" };
+  web.exec_mode = "fork";
+  web.instances = 1;
   for (const worker of config.apps.filter(app => workers.includes(app.name))) worker.cwd = release;
   const runtime = `${release}/deploy.runtime.config.json`;
   fs.writeFileSync(runtime, JSON.stringify(config));
+  await candidateAvailable();
   candidateStarted = true;
   pm2("start", runtime, "--only", webName);
   await health(`http://127.0.0.1:${port}`, commit);
