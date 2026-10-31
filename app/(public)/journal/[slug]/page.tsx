@@ -193,6 +193,23 @@ export default async function JournalArticlePage({ params }: Props) {
             dangerouslySetInnerHTML={{ __html: publicJournalHtml(post.contentHtml || "") }}
           />
 
+          {post.slug === "why-theranos-failed" && (
+            <aside className="mb-12 rounded-2xl border border-gray-200 bg-white p-6 shadow-sm md:p-8" aria-labelledby="validation-planner-title">
+              <h2 id="validation-planner-title" className="text-xl font-bold font-heading text-gray-900">
+                Testing a startup idea of your own?
+              </h2>
+              <p className="mt-3 max-w-2xl leading-relaxed text-gray-600">
+                Use Anshkosh’s free Customer Validation Planner to plan a conversation, record evidence from what people do today, and decide what to test next. Your drafts stay on this device and don’t change your public profile.
+              </p>
+              <Link
+                href="/launch-support/validation?utm_source=journal&utm_medium=article&utm_campaign=theranos_validation_cta_oct2026"
+                className="mt-5 inline-flex min-h-11 items-center justify-center rounded-xl bg-coral-600 px-5 py-2.5 font-semibold text-white transition-colors hover:bg-coral-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-coral-600"
+              >
+                Open the free planner
+              </Link>
+            </aside>
+          )}
+
           {/* Tags */}
           {post.tags.length > 0 && (
             <div className="flex flex-wrap items-center gap-2 mb-12 pb-8 border-b border-gray-200">
