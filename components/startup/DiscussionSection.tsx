@@ -237,13 +237,13 @@ function CommentForm({ startupId, viewer, availability, setAvailability, onSubmi
         {/* Body */}
         <div>
           <label htmlFor="comment-body" className="block text-sm font-medium text-gray-700 mb-1.5">
-            Comment <span className="text-red-400">*</span>
+            Your question or feedback <span className="text-red-400">*</span>
           </label>
           <textarea
             id="comment-body"
             name="body"
             rows={4}
-            placeholder="Share your thoughts, questions, or feedback..."
+            placeholder="What would you want to know before trying this? What feels unclear or could be more useful?"
             value={form.body}
             onChange={handleChange}
             required
@@ -291,7 +291,7 @@ function CommentForm({ startupId, viewer, availability, setAvailability, onSubmi
             ) : (
               <>
                 <Send className="w-4 h-4" />
-                Post Comment
+                Post feedback
               </>
             )}
           </button>
@@ -367,7 +367,7 @@ export default function DiscussionSection({
           <MessageSquare className="w-5 h-5 text-coral-500" />
         </div>
         <div>
-          <h2 className="text-2xl font-bold text-gray-900 font-heading">Discussion</h2>
+          <h2 className="text-2xl font-bold text-gray-900 font-heading">Questions &amp; feedback</h2>
           {approvedCount > 0 && (
             <p className="text-sm text-gray-500">
               {approvedCount} comment{approvedCount !== 1 ? "s" : ""}
@@ -390,8 +390,8 @@ export default function DiscussionSection({
         {comments.length === 0 && !submitted && pendingComments.length === 0 ? (
           <div className="text-center py-10 text-gray-500">
             <MessageSquare className="w-10 h-10 mx-auto mb-3 opacity-30" />
-            <p className="font-medium text-gray-500">No comments yet</p>
-            <p className="text-sm mt-1">Be the first to start the discussion!</p>
+            <p className="font-medium text-gray-500">No feedback yet</p>
+            <p className="text-sm mt-1">Be the first to share a specific question, concern, or suggestion that could help the founder improve this idea.</p>
           </div>
         ) : (
           <div className="space-y-4">
