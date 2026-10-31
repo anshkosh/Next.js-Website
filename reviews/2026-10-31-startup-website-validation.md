@@ -5,6 +5,11 @@ Branch: `codex/startup-website-url-validation-20261031`.
 Status: isolated implementation prepared; release blocked by dependency gate;
 not deployed.
 
+Review: [draft PR #82](https://github.com/anshkosh/Next.js-Website/pull/82),
+implementation commit `63dc2d499689094de800da692fc6b5ced8b56e70`.
+Its [required CI run](https://github.com/anshkosh/Next.js-Website/actions/runs/41168938651)
+was in progress at handoff; no browser pass is claimed.
+
 ## Problem and reproduction
 
 Grok's [30 October CLARRX brief](https://docs.google.com/document/d/1jy-P9aYJmS7Ni_ImecA7TvRKhOLxLTCN7u4uC4KAu-o/edit)
@@ -56,12 +61,15 @@ link rendering, contact the founder, or alter social/publishing jobs.
   The gate reported 21 affected package entries and one existing narrowly reviewed
   advisory (`postcss-selector-parser`); this is not a clean dependency audit.
   Package manifests, lockfile and exception policy are unchanged from `origin/main`.
+  The installed lockfile marks all three `minimatch` entries as development-only
+  (versions 3.1.5 and 10.2.6, reached through ESLint and shadcn tooling). This is
+  not evidence of a production exploit or incident; the release policy still fails.
   No dependency upgrade or exception is bundled into this URL fix. Triage the
   dependency finding separately before release; never bypass the gate.
 
 ## Next action and boundaries
 
-Finish checks and open a review PR. Merge/deployment requires Rinu's current
+Finish the required CI checks and triage the dependency gate. Merge/deployment requires Rinu's current
 authorization and passing required checks. Production data correction is a
 separate decision. Grok request #754 proposes a current signed-out outbound-link
 audit; no acceptance or completion is inferred until evidence arrives. Claude

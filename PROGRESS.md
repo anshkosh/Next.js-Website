@@ -17,6 +17,8 @@
 - Isolated branch from main `23100dd8`; not merged/deployed. No production data,
   account, bot, scheduler or OpenKnowledge changes. Grok #754 proposes current
   link QA, Claude #753 a source-only two-cover packet; ACKs not yet received.
+- Review: draft [PR #82](https://github.com/anshkosh/Next.js-Website/pull/82),
+  implementation `63dc2d49`; required CI started and browser outcome is pending.
 
 ## 27 October 2026 — pilot website copy review (prepared)
 
