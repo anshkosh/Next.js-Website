@@ -7,10 +7,13 @@ on:
 permissions:
   contents: read
 jobs:
-  browser:
+  journeys:
     runs-on: ubuntu-24.04
-    # Browser dependencies can take ten minutes on a fresh Ubuntu runner; retain
-    # enough time for all nineteen cold-compiled journeys and failure evidence.
+    # Separate runners give each group its own database, Redis, server and limits.
+    strategy:
+      fail-fast: false
+      matrix:
+        suite: [startup, accounts, public]
     timeout-minutes: 35
     services:
       postgres:
@@ -39,6 +42,7 @@ jobs:
       R2_BUCKET_NAME: uploads
       R2_ACCOUNT_ID: testing
       E2E_TEST_MODE: '1'
+      E2E_PRODUCTION: '1'
       NEXT_PUBLIC_TURNSTILE_SITE_KEY: isolated-browser-fixture
       CLAMAV_PORT: '33101'
     steps:
@@ -72,13 +76,34 @@ jobs:
       # Sanitize-only upload mode validates and rewrites PDFs with qpdf (lib/uploads/qpdf.ts); it fails closed without it.
       - run: sudo apt-get update -qq && sudo apt-get install -y -qq qpdf && qpdf --version
       - run: npx playwright install --with-deps chromium
-      - run: npx playwright test
-      - name: Preserve browser failure evidence
-        if: failure()
+      - name: Build the isolated production app once
+        run: npm run build
+      - name: Run the isolated browser group
+        env:
+          SUITE: ${{ matrix.suite }}
+        run: |
+          if [ "$SUITE" = startup ]; then
+            # Untagged future tests stay covered by the startup group.
+            npx playwright test --grep-invert '@accounts|@public'
+          else
+            npx playwright test --grep "@$SUITE"
+          fi
+      - name: Preserve browser timings and failure evidence
+        if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
-          name: browser-failure-evidence
+          name: browser-evidence-${{ matrix.suite }}
           path: |
             test-results/
             playwright-report/
           retention-days: 3
+  # Preserve the existing required check name while collecting all matrix groups.
+  browser:
+    needs: journeys
+    if: always()
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Require all browser groups to pass
+        env:
+          RESULT: ${{ needs.journeys.result }}
+        run: test "$RESULT" = success

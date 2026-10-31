@@ -25,6 +25,7 @@ module.exports = {
       args: "start --hostname 127.0.0.1",
       env: { PORT: 3000, NODE_ENV: "production" },
       instances: 1,
+      exec_mode: "fork",
       max_memory_restart: "512M",
     },
     {

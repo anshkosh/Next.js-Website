@@ -1,3 +1,5 @@
+import { isolatedE2E } from "../isolated-e2e";
+
 interface SendEmailParams {
   to: string;
   subject: string;
@@ -13,8 +15,8 @@ export async function sendEmail(params: SendEmailParams): Promise<void> {
     throw new Error("BREVO_API_KEY is not configured in environment variables.");
   }
 
-  // Explicit, loopback-only mail capture for isolated E2E tests. Never enabled in production.
-  const testEndpoint = process.env.E2E_TEST_MODE === "1" && process.env.NODE_ENV !== "production"
+  // Loopback-only capture after validating the disposable test environment.
+  const testEndpoint = isolatedE2E()
     ? "http://127.0.0.1:3181/send" : null;
   const response = await fetch(testEndpoint || "https://api.brevo.com/v3/smtp/email", {
     method: "POST",
