@@ -22,6 +22,15 @@ const adminEmail = `reviewer-${randomUUID()}@example.test`;
 const originalTagline = "A pilot-ready startup built for real customers";
 const startupName = `Launch Test ${randomUUID().slice(0, 8)}`;
 let categoryId: string, startupId: string, slug: string;
+let clientNumber = 2;
+
+function clientHeaders() {
+  // Each test/device represents a separate visitor behind the trusted proxy.
+  // Use benchmarking addresses; real production IP/rate checks still execute.
+  const index = clientNumber++;
+  const ip = `198.18.${Math.floor(index / 254)}.${index % 254 + 1}`;
+  return { "x-real-ip": ip, "x-forwarded-for": ip };
+}
 
 function fixtureWidget() {
   window.turnstile = {
@@ -32,7 +41,7 @@ function fixtureWidget() {
   };
 }
 async function isolatedContext(browser: Browser, options: Parameters<Browser["newContext"]>[0] = {}) {
-  const context = await browser.newContext(options);
+  const context = await browser.newContext({ ...options, extraHTTPHeaders: { ...clientHeaders(), ...options.extraHTTPHeaders } });
   await context.addInitScript(fixtureWidget);
   return context;
 }
@@ -117,6 +126,7 @@ test.beforeAll(async ({ request }) => {
 test.afterAll(async () => { await db.$disconnect(); });
 
 test.beforeEach(async ({ page }) => {
+  await page.context().setExtraHTTPHeaders(clientHeaders());
   // Captured widget API; no Cloudflare connection or real challenge in tests.
   // The isolated development server has no Turnstile verification secret.
   await page.addInitScript(fixtureWidget);

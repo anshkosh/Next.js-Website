@@ -14,6 +14,8 @@ export default defineConfig({
   use: {
     actionTimeout: 30000,
     baseURL: "http://127.0.0.1:3100",
+    // Model the trusted loopback proxy for API setup requests as well as pages.
+    extraHTTPHeaders: { "x-real-ip": "198.18.0.1", "x-forwarded-for": "198.18.0.1" },
     trace: "retain-on-failure",
     screenshot: "only-on-failure",
   },
