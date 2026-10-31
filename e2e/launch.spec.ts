@@ -363,7 +363,7 @@ test("signup, real verification token, login, photo editing, private deck and st
   await expect(page.getByRole("heading", { name: "Step 2: Details", exact: true })).toBeVisible({ timeout: 15000 });
   await page.locator('textarea[name="description"]').fill("We are testing a repeatable food business through a local pilot, real customer feedback and a carefully measured operating model.");
   await page.locator('[name="websiteUrl"]').fill("https://example.test");
-  await page.locator('[name="startupPhone"]').fill("8800776082");
+  await expect(page.locator('[name="startupPhone"]')).toHaveCount(0);
   await page.locator('[name="city"]').fill("Hyderabad");
   await page.locator('[name="foundedYear"]').selectOption("2026");
   await uploadPhoto(page, "Upload startup logo");

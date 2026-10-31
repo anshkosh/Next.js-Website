@@ -16,15 +16,6 @@ export const createStartupSchema = z.object({
   logoUrl: z.string().min(1, "Logo is required").refine((val) => val.startsWith("http") || val.startsWith("/"), { message: "Please upload a valid logo" }).or(z.literal("")).optional(),
   videoUrl: z.string().url().optional().or(z.literal("")),
   galleryImages: z.array(z.string()).max(4).optional(),
-  // Founder contact
-  startupPhone: z
-    .string()
-    .regex(
-      /^\d{10}$/,
-      "Enter a valid 10-digit mobile number"
-    )
-    .optional()
-    .or(z.literal("")),
   // Core Proposition
   problemStatement: z
     .string()

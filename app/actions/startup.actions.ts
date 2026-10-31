@@ -49,8 +49,6 @@ export async function createStartup(formData: FormData) {
       logoUrl: formData.get("logoUrl") || undefined,
       videoUrl: formData.get("videoUrl") || undefined,
       galleryImages: formData.getAll("galleryImages").filter(Boolean),
-      // Founder contact
-      startupPhone: formData.get("startupPhone") || undefined,
       // Core Proposition
       problemStatement: formData.get("problemStatement") || undefined,
       solutionStatement: formData.get("solutionStatement") || undefined,
@@ -141,8 +139,6 @@ export async function updateStartup(formData: FormData) {
       galleryImages: formData.has("galleryImages")
         ? formData.getAll("galleryImages").filter(Boolean)
         : undefined,
-      // Founder contact
-      startupPhone: formData.get("startupPhone") || undefined,
       // Core Proposition
       problemStatement: formData.get("problemStatement") || undefined,
       solutionStatement: formData.get("solutionStatement") || undefined,
@@ -337,16 +333,6 @@ export async function submitForReview(id: string) {
 
     if (!existingStartup.logoUrl) {
       return { error: "Please upload a startup logo before submitting." };
-    }
-
-    if (
-      !existingStartup.startupPhone ||
-      existingStartup.startupPhone.length !== 10
-    ) {
-      return {
-        error:
-          "Please provide a valid 10-digit phone number before submitting.",
-      };
     }
 
     const metadata = existingStartup.metadata && typeof existingStartup.metadata === "object" && !Array.isArray(existingStartup.metadata) ? existingStartup.metadata : null;
