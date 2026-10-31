@@ -291,7 +291,7 @@ function CommentForm({ startupId, viewer, availability, setAvailability, onSubmi
             ) : (
               <>
                 <Send className="w-4 h-4" />
-                Post feedback
+                Post Comment
               </>
             )}
           </button>
