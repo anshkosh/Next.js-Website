@@ -11,6 +11,7 @@ export function isolatedE2E(env: NodeJS.ProcessEnv = process.env): boolean {
       auth.href !== "http://127.0.0.1:3100/" ||
       !["127.0.0.1", "localhost"].includes(env.REDIS_HOST || "") ||
       env.BREVO_API_KEY !== "test-only-no-external-delivery" ||
+      env.TURNSTILE_SECRET_KEY !== "isolated-turnstile-test-secret" ||
       env.R2_ACCOUNT_ID !== "testing" || env.R2_ACCESS_KEY_ID !== "testing" || env.R2_SECRET_ACCESS_KEY !== "testing") throw new Error();
     return true;
   } catch {

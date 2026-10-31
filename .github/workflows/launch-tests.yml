@@ -44,6 +44,7 @@ jobs:
       E2E_TEST_MODE: '1'
       E2E_PRODUCTION: '1'
       NEXT_PUBLIC_TURNSTILE_SITE_KEY: isolated-browser-fixture
+      TURNSTILE_SECRET_KEY: isolated-turnstile-test-secret
       CLAMAV_PORT: '33101'
     steps:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803

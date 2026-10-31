@@ -1,3 +1,5 @@
+import { isolatedE2E } from "../isolated-e2e";
+
 /**
  * Verifies a Cloudflare Turnstile token server-side.
  * @see https://developers.cloudflare.com/turnstile/get-started/server-side-validation/
@@ -17,7 +19,7 @@ export async function verifyTurnstileToken(token: string): Promise<boolean> {
 
   try {
     const res = await fetch(
-      "https://challenges.cloudflare.com/turnstile/v0/siteverify",
+      isolatedE2E() ? "http://127.0.0.1:3181/turnstile" : "https://challenges.cloudflare.com/turnstile/v0/siteverify",
       {
         method: "POST",
         headers: { "Content-Type": "application/x-www-form-urlencoded" },
