@@ -1,6 +1,9 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { renderEmailTemplate, type TemplateName } from "@/lib/email/templates";
 import { renderOperationsEmail } from "@/deploy/operations-email.mjs";
+import fs from "node:fs";
+import path from "node:path";
+import sharp from "sharp";
 
 const securityUrl = "https://www.anshkosh.com/reset-password?token=preview-only&callbackURL=%2Fdashboard";
 const data = {
@@ -20,8 +23,11 @@ describe("branded email rendering", () => {
     vi.stubEnv("NEXT_PUBLIC_BASE_URL", "https://www.anshkosh.com");
     const html = await renderEmailTemplate(template, data);
     const document = parse(html);
-    expect(document.querySelector('img[alt="Anshkosh rosette logo"]')?.getAttribute("src")).toBe("https://www.anshkosh.com/logo.png");
-    expect(document.body.textContent).toContain("ANSHKOSH");
+    const brand = document.querySelector('img[alt="Anshkosh"]');
+    expect(brand?.getAttribute("src")).toBe("https://www.anshkosh.com/email-brand.png");
+    expect(brand?.getAttribute("width")).toBe("216");
+    expect(brand?.getAttribute("height")).toBe("48");
+    expect(document.body.textContent).toContain("The Anshkosh team");
     expect(document.querySelectorAll("h1")).toHaveLength(1);
     expect(document.querySelector('a[href="mailto:hello@anshkosh.com"]')).not.toBeNull();
     expect(document.querySelector('a[href="https://www.anshkosh.com/privacy"]')).not.toBeNull();
@@ -68,9 +74,20 @@ describe("branded email rendering", () => {
   it("uses the same logo in operations alerts and escapes log content", () => {
     const message = 'Worker offline\n<img src=x onerror="alert(1)"> & check';
     const document = parse(renderOperationsEmail(message));
-    expect(document.querySelector('img[alt="Anshkosh rosette logo"]')?.getAttribute("src")).toBe("https://www.anshkosh.com/logo.png");
-    expect(document.body.textContent).toContain("ANSHKOSH");
+    expect(document.querySelector('img[alt="Anshkosh"]')?.getAttribute("src")).toBe("https://www.anshkosh.com/email-brand.png");
+    expect(document.body.textContent).toContain("The Anshkosh team");
     expect(document.body.textContent).toContain(message);
     expect(document.querySelector("[onerror]")).toBeNull();
+  });
+
+  it("ships the website wordmark as outlined artwork with an undistorted high-resolution PNG", async () => {
+    const svg = fs.readFileSync(path.resolve("public/email-brand.svg"), "utf8");
+    expect(svg).toContain("Oswald 700 at 24px");
+    expect(svg).not.toContain("<text");
+    const png = await sharp(path.resolve("public/email-brand.png")).metadata();
+    expect(png.format).toBe("png");
+    expect(png.width).toBe(864);
+    expect(png.height).toBe(192);
+    expect(png.hasAlpha).toBe(true);
   });
 });

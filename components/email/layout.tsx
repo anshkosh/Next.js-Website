@@ -1,5 +1,5 @@
 import * as React from "react";
-import { Body, Button, Column, Container, Head, Heading, Html, Img, Link, Preview, Row, Section, Text } from "@react-email/components";
+import { Body, Button, Container, Head, Heading, Html, Img, Link, Preview, Section, Text } from "@react-email/components";
 import { button, getBaseUrl, text } from "./shared";
 
 interface EmailLayoutProps {
@@ -21,19 +21,9 @@ export default function EmailLayout({ preview, category, title, reason, preferen
       <Body style={{ margin: 0, padding: "24px 12px", backgroundColor: "#f4f5f7", fontFamily: "Arial, Helvetica, sans-serif", color: "#111827" }}>
         <Container style={{ width: "100%", maxWidth: "600px", margin: "0 auto" }}>
           <Section style={{ backgroundColor: "#faf8f5", border: "1px solid #e5e7eb", borderTop: "4px solid #e8521e", borderRadius: "12px 12px 0 0", padding: "24px" }}>
-            <Row>
-              <Column width="56" style={{ verticalAlign: "middle" }}>
-                <Link href={baseUrl}>
-                  <Img src="https://www.anshkosh.com/logo.png" alt="Anshkosh rosette logo" width="44" height="44" style={{ display: "block", border: 0 }} />
-                </Link>
-              </Column>
-              <Column style={{ verticalAlign: "middle" }}>
-                <Link href={baseUrl} style={{ fontFamily: "'Arial Narrow', Arial, sans-serif", fontSize: "25px", lineHeight: "30px", fontWeight: 800, letterSpacing: "-1px", textDecoration: "none", color: "#111827" }}>
-                  <span style={{ color: "#111827" }}>ANSH</span><span style={{ color: "#e8521e" }}>KOSH</span>
-                </Link>
-                <Text style={{ color: "#6b7280", fontSize: "11px", lineHeight: "16px", letterSpacing: "1.5px", margin: "2px 0 0" }}>EARLY ACCESS</Text>
-              </Column>
-            </Row>
+            <Link href={baseUrl}>
+              <Img src="https://www.anshkosh.com/email-brand.png" alt="Anshkosh" width="216" height="48" style={{ display: "block", border: 0, maxWidth: "100%", height: "auto" }} />
+            </Link>
           </Section>
           <Section style={{ backgroundColor: "#ffffff", border: "1px solid #e5e7eb", borderTop: 0, borderRadius: "0 0 12px 12px", padding: "28px 24px" }}>
             <Text style={{ color: "#a23510", fontSize: "11px", fontWeight: 700, letterSpacing: "1.5px", lineHeight: "16px", margin: "0 0 8px", textTransform: "uppercase" }}>{category}</Text>

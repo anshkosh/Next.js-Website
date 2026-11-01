@@ -25,12 +25,14 @@ async function main() {
   const output = path.resolve(process.argv[2] || ".artifacts/email-previews");
   await fs.mkdir(output, { recursive: true });
   const pages: { file: string; label: string }[] = [];
+  // Bundle the new brand asset so the gallery works before deployment and offline.
+  await fs.copyFile(path.resolve("public/email-brand.png"), path.join(output, "email-brand.png"));
   for (const [template, label, data] of samples) {
     const file = `${template}.html`;
-    await fs.writeFile(path.join(output, file), await renderEmailTemplate(template, data));
+    await fs.writeFile(path.join(output, file), (await renderEmailTemplate(template, data)).replaceAll("https://www.anshkosh.com/email-brand.png", "./email-brand.png"));
     pages.push({ file, label });
   }
-  await fs.writeFile(path.join(output, "operations.html"), renderOperationsEmail("The email worker is not online.\nCheck the current release and process manager before restarting it."));
+  await fs.writeFile(path.join(output, "operations.html"), renderOperationsEmail("The email worker is not online.\nCheck the current release and process manager before restarting it.").replaceAll("https://www.anshkosh.com/email-brand.png", "./email-brand.png"));
   pages.push({ file: "operations.html", label: "Operations alert" });
   const links = pages.map(({ file, label }) => `<a href="${file}" target="email-preview">${label}</a>`).join("");
   await fs.writeFile(path.join(output, "index.html"), `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Anshkosh email design previews</title><style>body{margin:0;font-family:Arial,Helvetica,sans-serif;color:#111827;background:#f4f5f7}header{padding:20px 24px;border-top:4px solid #e8521e;background:#faf8f5}h1{margin:0;font-size:23px}p{font-size:13px;color:#4b5563}main{display:flex;min-height:calc(100vh - 110px)}nav{width:230px;padding:16px;flex-shrink:0;background:white}a{display:block;color:#374151;text-decoration:none;padding:12px;font-size:14px;border-radius:6px}a:hover,a:focus{background:#fff1ee;color:#a23510}iframe{border:0;width:100%;min-height:900px}a:focus-visible{outline:2px solid #c84112}@media(max-width:700px){main{display:block}nav{width:auto;display:flex;overflow:auto;padding:8px}a{white-space:nowrap}iframe{min-height:1000px}}</style></head><body><header><h1>Anshkosh email design previews</h1><p>14 email types · Preview content only; links use example values.</p></header><main><nav aria-label="Email previews">${links}</nav><iframe name="email-preview" title="Email preview" src="welcome.html"></iframe></main></body></html>`);
