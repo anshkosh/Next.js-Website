@@ -19,7 +19,7 @@ components/
   startup/             Profile, editor, uploads, discussion, Turnstile widget
   launch/              Launch Support toolkit UI
   site/                Pilot banner, entry curtain
-  email/               React Email templates
+  email/               React Email templates and shared branded layout
   ui/                  shadcn/ui primitives
 lib/
   auth.ts, auth-client.ts, auth-permissions.ts, auth-origins.ts
@@ -43,6 +43,8 @@ docs/wiki/             This wiki
 ```
 
 ## Conventions
+
+See [Email templates and branding](Email-Templates.md) for message coverage, local previews and the separate operations-alert installation step.
 
 - Path alias `@/` maps to the repository root.
 - Validate input with Zod schemas in `lib/validators/`, on the server as well as the client.

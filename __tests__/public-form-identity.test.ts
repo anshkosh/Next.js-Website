@@ -15,7 +15,6 @@ vi.mock("@/lib/db", () => { const tx = {
 vi.mock("@/lib/utils/rate-limit", () => ({ checkRateLimit: mock.rate, readRateLimit: async () => ({ allowed: true, available: true, retryAfterSeconds: 1 }) }));
 vi.mock("@/lib/utils/turnstile", () => ({ verifyTurnstileToken: async () => true }));
 vi.mock("@/lib/email/adapter", () => ({ sendEmail: mock.send }));
-vi.mock("@/lib/email/templates", () => ({ renderEmailTemplate: async () => "<p>Test</p>" }));
 vi.mock("@/lib/logger", () => ({ logger: { error: vi.fn(), warn: vi.fn() } }));
 import { submitComment } from "@/app/actions/comment.actions";
 import { submitContactForm } from "@/app/actions/contact.actions";

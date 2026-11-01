@@ -5,6 +5,7 @@ import { z } from "zod";
 import { AccountPrivacyError, deleteAccountSchema, discardUnsentPrivacyCode, eraseAccount, issuePrivacyCode, privacyPurposeSchema } from "@/lib/account-privacy";
 import { limitPrivacyAction, privacyActor } from "@/lib/account-privacy-auth";
 import { sendEmail } from "@/lib/email/adapter";
+import { renderEmailTemplate } from "@/lib/email/templates";
 import { revalidateSavedPath } from "@/lib/cache-after-save";
 
 export async function requestAccountPrivacyCode(input: unknown) {
@@ -20,7 +21,7 @@ export async function requestAccountPrivacyCode(input: unknown) {
       await sendEmail({
         to: issued.email,
         subject: deleting ? "Confirm your Anshkosh account deletion" : "Your Anshkosh data download code",
-        html: `<html lang="en"><body><h1>${deleting ? "Account deletion confirmation" : "Account data download"}</h1><p>You asked to ${action}. Paste this code into Account settings on Anshkosh:</p><p style="font-family:monospace;font-size:24px;overflow-wrap:anywhere">${issued.code}</p><p>This code expires in 15 minutes and can be used once. ${deleting ? "Your account is only deleted after you enter the code, type DELETE and confirm on the website." : "It can only authorize a data download, not account deletion."}</p><p>If you did not request this, ignore this email. Do not share the code.</p></body></html>`,
+        html: await renderEmailTemplate(deleting ? "account_deletion_code" : "account_export_code", { code: issued.code }),
         text: `You asked to ${action}. Paste this code into Account settings on Anshkosh: ${issued.code}\nThe code expires in 15 minutes and can be used once. ${deleting ? "Nothing is deleted until you type DELETE and confirm on the website." : "This code cannot delete your account."}\nIf you did not request this, ignore this email. Do not share the code.`,
       });
     } catch {

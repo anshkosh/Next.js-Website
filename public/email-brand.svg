@@ -1,0 +1,65 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="144" height="32" viewBox="0 0 144 32" role="img" aria-labelledby="brand-title">
+<title id="brand-title">Anshkosh logo and wordmark</title>
+<!-- Website header export: public/logo.svg; Oswald 700 at 24px; tracking -0.6px; 32px mark; 8px gap. Glyphs are outlined, so email clients do not need the font. -->
+<!-- Oswald source: https://www.anshkosh.com/_next/static/media/bd9b9909c3a641ff-s.p.woff2 ; SHA-256 9dde3797547520f762f4ba3a822d417a0872b962bc78753a7ee9f955382b6b85 -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-100.0 -100.0 200.0 200.0"
+     x="0" y="0" width="32" height="32" role="img" aria-label="Rosette mark">
+  <defs>
+    <path id="diamond" d="M 42.000,0 L 70.500,-28.500 L 99.000,0 L 70.500,28.500 Z"/>
+    <path id="petalOrange" d="M 2.000,0 A 42.910,42.910 0 0,1 85.000,0 A 42.910,42.910 0 0,1 2.000,0 Z"/>
+    <path id="petalCream" d="M 1.000,0 A 36.630,36.630 0 0,1 69.000,0 A 36.630,36.630 0 0,1 1.000,0 Z"/>
+  </defs>
+  <g fill="#E8521E">
+    <use href="#petalOrange" transform="rotate(45.0000)"/>
+    <use href="#petalOrange" transform="rotate(135.0000)"/>
+    <use href="#petalOrange" transform="rotate(225.0000)"/>
+    <use href="#petalOrange" transform="rotate(315.0000)"/>
+    <use href="#diamond" transform="rotate(0.0000)"/>
+    <use href="#diamond" transform="rotate(90.0000)"/>
+    <use href="#diamond" transform="rotate(180.0000)"/>
+    <use href="#diamond" transform="rotate(270.0000)"/>
+  </g>
+  <g fill="none" stroke="#000000" stroke-width="2.2"
+     stroke-linejoin="round">
+    <use href="#petalOrange" transform="rotate(45.0000)"/>
+    <use href="#petalOrange" transform="rotate(135.0000)"/>
+    <use href="#petalOrange" transform="rotate(225.0000)"/>
+    <use href="#petalOrange" transform="rotate(315.0000)"/>
+  </g>
+  <g fill="#F6F0E2" stroke="#FFFFFF" stroke-width="4.2"
+     stroke-linejoin="round">
+    <use href="#petalCream" transform="rotate(0.0000)"/>
+    <use href="#petalCream" transform="rotate(45.0000)"/>
+    <use href="#petalCream" transform="rotate(90.0000)"/>
+    <use href="#petalCream" transform="rotate(135.0000)"/>
+    <use href="#petalCream" transform="rotate(180.0000)"/>
+    <use href="#petalCream" transform="rotate(225.0000)"/>
+    <use href="#petalCream" transform="rotate(270.0000)"/>
+    <use href="#petalCream" transform="rotate(315.0000)"/>
+  </g>
+  <g fill="none" stroke="#000000" stroke-width="2.2"
+     stroke-linejoin="round">
+    <use href="#petalCream" transform="rotate(0.0000)"/>
+    <use href="#petalCream" transform="rotate(45.0000)"/>
+    <use href="#petalCream" transform="rotate(90.0000)"/>
+    <use href="#petalCream" transform="rotate(135.0000)"/>
+    <use href="#petalCream" transform="rotate(180.0000)"/>
+    <use href="#petalCream" transform="rotate(225.0000)"/>
+    <use href="#petalCream" transform="rotate(270.0000)"/>
+    <use href="#petalCream" transform="rotate(315.0000)"/>
+  </g>
+  <circle r="28.000" fill="#F6F0E2" stroke="#FFFFFF"
+          stroke-width="4.2"/>
+  <g fill="#E8521E">
+    <circle cx="19.000" cy="0.000" r="5.000"/>
+    <circle cx="0.000" cy="19.000" r="5.000"/>
+    <circle cx="-19.000" cy="0.000" r="5.000"/>
+    <circle cx="-0.000" cy="-19.000" r="5.000"/>
+    <circle r="5.200"/>
+  </g>
+  <circle r="12.500" fill="none" stroke="#E8521E"
+          stroke-width="3.600"/>
+</svg>
+
+<path fill="#111827" transform="translate(40.00000 26.84800) scale(0.02400000 -0.02400000)" d="M21 0 174 810H378L529 0H364L337 171H218L190 0ZM234 278H320L277 594Z"/><path fill="#111827" transform="translate(52.62400 26.84800) scale(0.02400000 -0.02400000)" d="M60 0V810H186L352 420V810H500V0H379L213 420V0Z"/><path fill="#111827" transform="translate(65.48800 26.84800) scale(0.02400000 -0.02400000)" d="M275 -12Q199 -12 148.0 15.0Q97 42 71.0 98.5Q45 155 42 245L195 268Q196 216 204.5 184.0Q213 152 228.5 138.0Q244 124 266 124Q294 124 302.5 143.0Q311 162 311 183Q311 233 287.0 267.5Q263 302 222 337L152 398Q106 437 74.5 486.5Q43 536 43 609Q43 712 104.0 766.5Q165 821 270 821Q335 821 374.5 799.0Q414 777 434.5 741.5Q455 706 462.5 666.5Q470 627 471 591L317 572Q316 608 312.5 634.5Q309 661 298.0 675.5Q287 690 264 690Q239 690 227.5 669.0Q216 648 216 627Q216 582 237.5 553.5Q259 525 294 494L361 435Q414 390 450.5 333.0Q487 276 487 192Q487 135 461.0 88.5Q435 42 387.5 15.0Q340 -12 275 -12Z"/><path fill="#111827" transform="translate(77.22400 26.84800) scale(0.02400000 -0.02400000)" d="M63 0V810H242V482H368V810H547V0H368V354H242V0Z"/><path fill="#E8521E" transform="translate(91.26400 26.84800) scale(0.02400000 -0.02400000)" d="M60 0V810H239V479L375 810H550L400 444L557 0H375L258 358L239 326V0Z"/><path fill="#E8521E" transform="translate(103.72000 26.84800) scale(0.02400000 -0.02400000)" d="M292 -12Q201 -12 148.0 20.0Q95 52 72.0 112.0Q49 172 49 255V556Q49 640 72.0 699.0Q95 758 148.0 789.5Q201 821 292 821Q384 821 437.5 789.5Q491 758 514.0 699.0Q537 640 537 556V255Q537 172 514.0 112.0Q491 52 437.5 20.0Q384 -12 292 -12ZM292 115Q320 115 333.0 129.0Q346 143 350.0 165.0Q354 187 354 210V600Q354 624 350.0 645.5Q346 667 333.0 681.0Q320 695 292 695Q266 695 253.0 681.0Q240 667 236.0 645.5Q232 624 232 600V210Q232 187 235.5 165.0Q239 143 251.5 129.0Q264 115 292 115Z"/><path fill="#E8521E" transform="translate(117.18400 26.84800) scale(0.02400000 -0.02400000)" d="M275 -12Q199 -12 148.0 15.0Q97 42 71.0 98.5Q45 155 42 245L195 268Q196 216 204.5 184.0Q213 152 228.5 138.0Q244 124 266 124Q294 124 302.5 143.0Q311 162 311 183Q311 233 287.0 267.5Q263 302 222 337L152 398Q106 437 74.5 486.5Q43 536 43 609Q43 712 104.0 766.5Q165 821 270 821Q335 821 374.5 799.0Q414 777 434.5 741.5Q455 706 462.5 666.5Q470 627 471 591L317 572Q316 608 312.5 634.5Q309 661 298.0 675.5Q287 690 264 690Q239 690 227.5 669.0Q216 648 216 627Q216 582 237.5 553.5Q259 525 294 494L361 435Q414 390 450.5 333.0Q487 276 487 192Q487 135 461.0 88.5Q435 42 387.5 15.0Q340 -12 275 -12Z"/><path fill="#E8521E" transform="translate(128.92000 26.84800) scale(0.02400000 -0.02400000)" d="M63 0V810H242V482H368V810H547V0H368V354H242V0Z"/>
+</svg>

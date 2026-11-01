@@ -3,7 +3,6 @@ import { prismaAdapter } from "@better-auth/prisma-adapter";
 import { admin } from "better-auth/plugins";
 import { db } from "./db";
 import { getTrustedAuthOrigins } from "./auth-origins";
-import { escapeEmailHtml } from "./email/escape";
 import { accountAdminOptions } from "./auth-roles";
 import { accountProfileFields } from "./account-profile";
 
@@ -18,10 +17,11 @@ export const auth = betterAuth({
       enabled: true,
       sendChangeEmailConfirmation: async ({ user, newEmail, url }) => {
         const { sendEmail } = await import("./email/adapter");
+        const { renderEmailTemplate } = await import("./email/templates");
         await sendEmail({
           to: user.email,
           subject: "Confirm your Anshkosh email change",
-          html: `<p>You asked to change your Anshkosh email to ${escapeEmailHtml(newEmail)}.</p><p><a href="${escapeEmailHtml(url)}">Confirm this request</a>. We will then send a verification link to the new address.</p><p>If you did not request this change, ignore this email.</p>`,
+          html: await renderEmailTemplate("email_change", { userName: user.name, newEmail, url }),
           text: `You asked to change your Anshkosh email to ${newEmail}. Confirm the request: ${url}\nWe will then send a verification link to the new address. If you did not request this, ignore this email.`,
         });
       },
@@ -32,10 +32,11 @@ export const auth = betterAuth({
     requireEmailVerification: true,
     sendResetPassword: async ({ user, url }) => {
       const { sendEmail } = await import("./email/adapter");
+      const { renderEmailTemplate } = await import("./email/templates");
       await sendEmail({
         to: user.email,
         subject: "Reset your Anshkosh password",
-        html: `<p>Hi ${escapeEmailHtml(user.name || "there")},</p><p>Use the link below to choose a new Anshkosh password:</p><p><a href="${escapeEmailHtml(url)}">Reset your password</a></p><p>If you did not request this, you can ignore this email.</p>`,
+        html: await renderEmailTemplate("password_reset", { userName: user.name || "there", url }),
         text: `Hi ${user.name || "there"},\nReset your Anshkosh password: ${url}\nIf you did not request this, ignore this email.`,
       });
     },
