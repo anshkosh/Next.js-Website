@@ -10,6 +10,7 @@ import { createRequire } from "node:module";
 import { spawnSync } from "node:child_process";
 import { once } from "node:events";
 import net from "node:net";
+import { renderOperationsEmail } from "./operations-email.mjs";
 
 const require = createRequire(path.join(process.cwd(), "package.json"));
 const { PrismaClient } = require("@prisma/client");
@@ -42,7 +43,7 @@ async function alert(message) {
     method: "POST", signal: AbortSignal.timeout(15000),
     headers: { "Content-Type": "application/json", "api-key": process.env.BREVO_API_KEY },
     body: JSON.stringify({ sender: { name: "Anshkosh operations", email: process.env.EMAIL_FROM || "noreply@anshkosh.com" }, to: [{ email: recipient }],
-      subject: "Anshkosh operations alert", textContent: message }),
+      subject: "Anshkosh operations alert", textContent: message, htmlContent: renderOperationsEmail(message) }),
   });
   if (!response.ok) throw new Error("Alert delivery failed; check the operations journal.");
   return true;

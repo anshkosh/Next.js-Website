@@ -11,7 +11,6 @@ import { contactSchema } from "@/lib/validators/contact.schema";
 import { sendEmail } from "@/lib/email/adapter";
 import { renderEmailTemplate } from "@/lib/email/templates";
 import { clientIp } from "@/lib/utils/client-ip";
-import { escapeEmailHtml } from "@/lib/email/escape";
 
 // ──────────────────────────────────────────────────────────────────────────────
 // Public — Submit a contact form inquiry
@@ -88,22 +87,7 @@ export async function submitContactForm(formData: {
     );
 
     // 4b. Auto-reply to sender
-    const autoReplyHtml = `
-      <div style="font-family: 'Inter', Arial, sans-serif; max-width: 580px; margin: 0 auto; padding: 32px 24px; background: #fafafa;">
-        <div style="background: #E8521E; border-radius: 12px 12px 0 0; padding: 24px 28px; text-align: center;">
-          <h1 style="color: #fff; margin: 0; font-size: 24px; letter-spacing: 0.05em;">ANSH<span style="color: #FFD6C4;">KOSH</span></h1>
-        </div>
-        <div style="background: #fff; border: 1px solid #e5e7eb; border-top: none; border-radius: 0 0 12px 12px; padding: 28px;">
-          <p style="color: #111827; font-size: 16px; margin: 0 0 12px;">Hi ${escapeEmailHtml(name)},</p>
-          <p style="color: #374151; font-size: 15px; line-height: 1.7; margin: 0 0 16px;">
-            Thanks for reaching out! We've received your message about <strong>${subject}</strong>. ${CONTACT_RESPONSE_TARGET}
-          </p>
-          <p style="color: #6B7280; font-size: 13px; margin: 0;">
-            — The Anshkosh Team
-          </p>
-        </div>
-      </div>
-    `;
+    const autoReplyHtml = await renderEmailTemplate("contact_acknowledgement", { senderName: name, subject });
 
     await sendEmail({
       to: email,

@@ -19,6 +19,7 @@
 /.next-e2e-build/
 /test-results/
 /playwright-report/
+/.artifacts/email-previews/
 /out/
 
 # production

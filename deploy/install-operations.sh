@@ -11,12 +11,12 @@ done
 for anshkosh_target in /usr/local/libexec/anshkosh-operations /usr/local/libexec/anshkosh-ops /etc/systemd/system/anshkosh-ops@.service /etc/systemd/system/anshkosh-check.timer /etc/systemd/system/anshkosh-backup.timer /etc/systemd/system/anshkosh-restore-test.service /etc/systemd/system/anshkosh-restore-test.timer; do
   [[ ! -e "$anshkosh_target" ]] || { echo "Existing $anshkosh_target requires manual comparison; no files overwritten."; exit 1; }
 done
-for anshkosh_module in operations backup-crypto isolated-restore monitor-policy; do
+for anshkosh_module in operations operations-email backup-crypto isolated-restore monitor-policy; do
   "$anshkosh_node" --check "$anshkosh_module.mjs"
 done
 bash -n ops-run.sh
 install -d -m 0755 -o root -g root /usr/local/libexec/anshkosh-operations
-for anshkosh_module in operations backup-crypto isolated-restore monitor-policy; do
+for anshkosh_module in operations operations-email backup-crypto isolated-restore monitor-policy; do
   install -m 0644 -o root -g root "$anshkosh_module.mjs" "/usr/local/libexec/anshkosh-operations/$anshkosh_module.mjs"
 done
 install -m 0755 -o root -g root ops-run.sh /usr/local/libexec/anshkosh-ops

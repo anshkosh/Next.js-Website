@@ -25,7 +25,7 @@ export async function sendEmail(params: SendEmailParams): Promise<void> {
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      sender: { name: "anshkosh", email: fromEmail },
+      sender: { name: "Anshkosh", email: fromEmail },
       to: [{ email: params.to }],
       subject: params.subject,
       htmlContent: params.html,
