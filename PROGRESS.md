@@ -1,5 +1,22 @@
 # Progress
 
+## 1 November 2026 — public release monitoring (prepared)
+
+- Public Discover/health are 200 at 08:55 IST, but release identity is 404.
+  Read-only server inspection finds public routing to legacy checkout/3000 while
+  saved release state still expects immutable b3bd2ef5 on 3012. Recovery is partial;
+  no routing, process or production change was made by this operating session.
+- Prepared an external uptime checker change requiring valid public release JSON
+  in addition to homepage/database checks. An offline baseline reproduced the
+  old false success; one live read-only run of the candidate fails on identity404.
+  27 focused tests, lint, typecheck and dependency policy pass; full unit suite
+  passes with 839 passed/two skipped. One existing reviewed dependency advisory
+  remains unresolved.
+- Evidence and scope: [review record](reviews/2026-11-01-public-release-health.md).
+  Isolated branch from main b3bd2ef5; not merged/installed. No OpenKnowledge writes.
+  Grok #774 ACK/result pending; Claude #776 accepted the packet with 10:30 IST
+  ETA, explicitly correcting that the prior packet had never been written.
+
 ## 31 October 2026 — startup website URL validation (prepared)
 
 - Reproduced CLARRX's labelled outbound href and 404 using signed-out GETs at
