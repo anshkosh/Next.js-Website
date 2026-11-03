@@ -3,7 +3,6 @@ import Link from "next/link";
 import { db } from "@/lib/db";
 import { seoMetadata } from "@/lib/seo";
 import { wallStartupWhere, orderWallTiles } from "@/lib/startup-wall";
-import PublicPageIntro from "@/components/layout/PublicPageIntro";
 export const dynamic = "force-dynamic";
 export const metadata = seoMetadata({ title: "Startup Wall — Anshkosh", description: "Discover startups through their logos and creative. Visit a startup profile to learn more.", path: "/startup-wall" });
 export default async function StartupWallPage() {
@@ -19,10 +18,10 @@ export default async function StartupWallPage() {
   const rows = placements.map(({ startup, sortOrder, featuredUntil }) => ({ ...startup, featuredEntry: { sortOrder, featuredUntil } }));
   const tiles = orderWallTiles(rows, now).filter(row => row.wallImageUrl || row.logoUrl);
   return <div>
-    <PublicPageIntro compact title={<>Startup <span className="text-coral-500">Wall</span></>} description="A space for startup logos and creative. Click an image to meet the startup." />
-    <section aria-label="Startup Wall" className="mx-auto max-w-7xl px-4 pb-12">
-      <div className="mb-5 flex flex-wrap items-center justify-between gap-3 text-sm text-gray-600">
-        <span>Free during the pilot</span><Link href="/dashboard" className="inline-flex min-h-11 items-center font-semibold text-coral-700 underline">Add your startup to the Wall</Link>
+    <h1 className="sr-only">Startup Wall</h1>
+    <section aria-label="Startup Wall" className="mx-auto max-w-7xl px-4 pb-12 pt-8">
+      <div className="mb-5 flex justify-end text-sm">
+        <Link href="/dashboard" className="inline-flex min-h-11 items-center font-semibold text-coral-700 underline">Promote your startup</Link>
       </div>
       {tiles.length ? <div className="grid auto-rows-[minmax(120px,auto)] grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-6">
         {tiles.map((startup, index) => {
