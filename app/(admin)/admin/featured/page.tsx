@@ -1,3 +1,4 @@
+import { wallStartupWhere } from "@/lib/startup-wall";
 import { db } from "@/lib/db";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
@@ -25,6 +26,8 @@ export default async function AdminFeaturedPage() {
           name: true,
           slug: true,
           logoUrl: true,
+          wallImageUrl: true,
+          wallOptIn: true,
           tagline: true,
         },
       },
@@ -34,7 +37,7 @@ export default async function AdminFeaturedPage() {
   });
 
   const liveStartups = await db.startup.findMany({
-    where: { status: "LIVE" },
+    where: wallStartupWhere,
     select: {
       id: true,
       name: true,
@@ -42,17 +45,17 @@ export default async function AdminFeaturedPage() {
       logoUrl: true,
       createdAt: true,
     },
-    orderBy: [{ createdAt: "desc" }, { id: "desc" }],
+    orderBy: [{ publishedAt: "desc" }, { createdAt: "desc" }, { id: "desc" }],
   });
 
   return (
     <div className="p-6 max-w-4xl mx-auto space-y-6">
       <div>
         <h1 className="text-2xl font-extrabold text-gray-900 font-heading">
-          Manage Featured Startups
+          Manage Startup Wall
         </h1>
         <p className="text-sm text-gray-500 mt-1">
-          Add up to 6 live startups to spotlight in the Featured Startups section on Discover.
+          Choose up to 6 Wall placements from live, approved, opted-in startups. Set their order or spotlight the newest eligible startup for 24 hours.
         </p>
       </div>
 

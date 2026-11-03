@@ -10,7 +10,6 @@ import { cookies } from "next/headers";
 import Link from "next/link";
 import { seoMetadata } from "@/lib/seo";
 import ErrorState, { recoveryLinkClass, secondaryRecoveryLinkClass } from "@/components/site/ErrorState";
-import FeaturedStartups from "@/components/landing/FeaturedStartups";
 import { pageNumber, pageHref, searchText } from "@/lib/pagination";
 import PublicPageIntro from "@/components/layout/PublicPageIntro";
 
@@ -82,9 +81,7 @@ export default async function DiscoverPage(props: {
     where.AND = startupSearchWhere(query);
   }
 
-  // Unfiltered browsing also highlights featured startups above the directory.
-  // Keep every public startup in the directory so the complete list is visible.
-  const showFeatured = !categorySlug && !query;
+  const unfiltered = !categorySlug && !query;
 
   const [startups, totalCount, categories] = await Promise.all([
     db.startup.findMany({
@@ -108,8 +105,6 @@ export default async function DiscoverPage(props: {
     <div className="w-full">
       <PublicPageIntro compact title={<>Discover <span className="text-coral-500">Startups</span></>} description="Explore startup profiles, review what founders share about their idea and product, and join public discussions." />
 
-      {showFeatured && page === 1 && <FeaturedStartups cookieId={cookieId} compactTop />}
-
       <section aria-label="Directory controls" className="container mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-3 px-4 py-5">
         <SearchBar categories={categories} />
         <div className="flex flex-wrap items-center gap-2">
@@ -117,6 +112,7 @@ export default async function DiscoverPage(props: {
             Browse categories
           </Link>
           <Link href="/leaderboard" className="inline-flex min-h-11 items-center rounded-xl border border-gray-200 bg-white px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:border-coral-500 hover:text-coral-600">View leaderboard</Link>
+          <Link href="/startup-wall" className="inline-flex min-h-11 items-center rounded-xl border border-gray-200 bg-white px-4 py-2 text-sm font-medium text-gray-700">Startup Wall</Link>
           <Link href="/startup/new" className="inline-flex min-h-11 items-center rounded-xl border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-gray-900 transition-colors hover:border-coral-500 hover:text-coral-700">List your startup</Link>
         </div>
       </section>
@@ -130,7 +126,7 @@ export default async function DiscoverPage(props: {
                 {query || (categorySlug && categorySlug !== "all") ? "Matching startups" : "All startups"}
               </h2>
               <p className="mt-1 text-sm text-gray-600 tabular-nums">
-                {showFeatured
+                {unfiltered
                   ? `${totalCount.toLocaleString("en-IN")} published in total`
                   : `${totalCount.toLocaleString("en-IN")} ${totalCount === 1 ? "startup" : "startups"}`}
               </p>

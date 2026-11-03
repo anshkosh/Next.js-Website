@@ -1,5 +1,13 @@
 # Progress
 
+## 4 November 2026 — Startup Wall (source prepared)
+
+Owner: Codex. Branch: `codex/startup-wall-live`, from origin/main `fdde8bc5`. Implements founder image selection and moderated consent, immediate withdrawal, existing-feature grandfathering, a public image Wall and Admin spotlight rewiring. Discover featured carousel is removed. Source product overview records behavior and the bounded migration. No merge, deployment or production migration has occurred.
+
+Validation: local lint, type checks and production build passed; full Vitest suite passed (863 passed, 2 existing skips). New tests cover Wall projection/link behavior, reviewed media and opt-in staging, immediate withdrawal and pending consent clearing, spotlight expiry, and exact migration backfill bounds. A tagged isolated browser journey was added for default opt-out, status eligibility, tile navigation and expiration. Local Docker daemon is unavailable, so the PostgreSQL/browser journey awaits isolated CI.
+
+
+
 ## 31 October 2026 — startup website URL validation (prepared)
 
 - Reproduced CLARRX's labelled outbound href and 404 using signed-out GETs at

@@ -21,6 +21,8 @@ type FeaturedItem = {
     slug: string;
     logoUrl?: string | null;
     tagline: string;
+    wallImageUrl?: string;
+    wallOptIn?: boolean;
   };
 };
 
@@ -66,7 +68,7 @@ export default function FeaturedManager({
       if (res?.error) {
         setMessage({ type: "error", text: res.error });
       } else {
-        setMessage({ type: "success", text: "Featured startup added successfully!" });
+        setMessage({ type: "success", text: "Wall spotlight added." });
         setSelectedStartupId("");
       }
     });
@@ -79,7 +81,7 @@ export default function FeaturedManager({
       if (res?.error) {
         setMessage({ type: "error", text: res.error });
       } else {
-        setMessage({ type: "success", text: "Featured startup removed." });
+        setMessage({ type: "success", text: "Wall spotlight removed." });
       }
     });
   };
@@ -109,7 +111,7 @@ export default function FeaturedManager({
       if ("error" in res) {
         setMessage({ type: "error", text: res.error });
       } else {
-        setMessage({ type: "success", text: `${res.startupName} is featured on Discover for 24 hours.` });
+        setMessage({ type: "success", text: `${res.startupName} is in the prominent Wall position for 24 hours.` });
         router.refresh();
       }
     });
@@ -121,7 +123,7 @@ export default function FeaturedManager({
       <div className="bg-white p-4 rounded-xl border border-gray-200 flex items-center justify-between shadow-2xs">
         <div className="flex items-center gap-2">
           <Star className="w-5 h-5 text-amber-500 fill-amber-500" />
-          <span className="font-bold text-gray-900 font-heading">Featured Capacity</span>
+          <span className="font-bold text-gray-900 font-heading">Wall spotlight capacity</span>
         </div>
         <span className="text-xs font-bold px-3 py-1 rounded-full bg-coral-50 text-coral-600 border border-coral-200">
           {featuredList.length} / 6 slots used
@@ -147,14 +149,14 @@ export default function FeaturedManager({
               <Zap className="h-5 w-5" aria-hidden="true" />
             </span>
             <div>
-              <h2 id="feature-latest-title" className="font-heading text-base font-bold text-gray-900">Feature the newest startup for 24 hours</h2>
+              <h2 id="feature-latest-title" className="font-heading text-base font-bold text-gray-900">Spotlight the newest eligible startup for 24 hours</h2>
               {latestLiveStartup ? (
                 <p className="mt-1 text-sm text-gray-600">
-                  Newest live listing: <span className="font-semibold text-gray-900">{latestLiveStartup.name}</span>
+                  Newest eligible listing: <span className="font-semibold text-gray-900">{latestLiveStartup.name}</span>
                   {latestFeatured?.featuredUntil && (
                     <span className="mt-1 flex items-center gap-1.5 text-xs text-amber-800">
                       <Clock3 className="h-3.5 w-3.5" aria-hidden="true" />
-                      Current one-day feature ends {formatFeatureEnd(latestFeatured.featuredUntil)} IST.
+                      Current spotlight ends {formatFeatureEnd(latestFeatured.featuredUntil)} IST.
                     </span>
                   )}
                 </p>
@@ -170,23 +172,23 @@ export default function FeaturedManager({
             className="inline-flex min-h-11 shrink-0 items-center justify-center gap-2 rounded-xl bg-coral-600 px-5 py-2.5 text-sm font-semibold text-white shadow-2xs transition-colors hover:bg-coral-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-coral-600 disabled:cursor-not-allowed disabled:opacity-50"
           >
             <Zap className="h-4 w-4" aria-hidden="true" />
-            {isPending ? "Updating feature…" : latestFeatured ? "Restart 24-hour feature" : "Feature for 24 hours"}
+            {isPending ? "Updating Wall…" : latestFeatured ? "Restart 24-hour spotlight" : "Spotlight for 24 hours"}
           </button>
         </div>
         {featuredList.length >= 6 && !latestFeatured && (
-          <p className="mt-4 border-t border-coral-200 pt-3 text-xs text-gray-600">All six slots are in use. Remove a featured startup to make room for the newest listing.</p>
+          <p className="mt-4 border-t border-coral-200 pt-3 text-xs text-gray-600">All six slots are in use. Remove a Wall spotlight to make room for the newest listing.</p>
         )}
       </section>
 
       {/* Featured List */}
       <div className="bg-white rounded-2xl border border-gray-200 shadow-2xs overflow-hidden">
         <div className="p-4 border-b border-gray-100 bg-gray-50/50 font-bold text-gray-900 text-sm font-heading">
-          Ordered Featured List
+          Ordered Wall spotlights
         </div>
 
         {featuredList.length === 0 ? (
           <div className="p-8 text-center text-gray-500 text-sm">
-            No featured startups set. Select a startup below to feature.
+            No Wall spotlights set. Select an eligible startup below.
           </div>
         ) : (
           <div className="divide-y divide-gray-100">
@@ -201,9 +203,9 @@ export default function FeaturedManager({
                   </span>
 
                   <div className="w-8 h-8 relative rounded-md border border-gray-200 bg-gray-50 overflow-hidden shrink-0 flex items-center justify-center font-bold text-gray-500 text-xs">
-                    {item.startup.logoUrl ? (
+                    {(item.startup.wallImageUrl || item.startup.logoUrl) ? (
                       <Image
-                        src={item.startup.logoUrl}
+                        src={item.startup.wallImageUrl || item.startup.logoUrl!}
                         alt={item.startup.name}
                         width={32}
                         height={32}
@@ -216,6 +218,7 @@ export default function FeaturedManager({
 
                   <div>
                     <h4 className="font-bold text-gray-900 text-sm">{item.startup.name}</h4>
+                    {item.startup.wallOptIn === false && <p className="text-xs text-amber-800">Withdrawn from Wall; this reserved spotlight is hidden.</p>}
                     <p className="text-xs text-gray-500 truncate max-w-xs sm:max-w-md">
                       {item.startup.tagline}
                     </p>
@@ -263,7 +266,7 @@ export default function FeaturedManager({
       {/* Add Featured Section */}
       <div className="bg-white rounded-2xl border border-gray-200 shadow-2xs p-6 space-y-4">
         <h3 className="font-bold text-gray-900 text-base font-heading">
-          Add Featured Startup
+          Add Wall spotlight
         </h3>
 
         <div className="flex flex-col sm:flex-row gap-3">
@@ -273,7 +276,7 @@ export default function FeaturedManager({
             disabled={featuredList.length >= 6 || isPending}
             className="flex-1 px-3 py-2 text-sm border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-coral-500/20"
           >
-            <option value="">Select a LIVE startup...</option>
+            <option value="">Select an approved, opted-in startup...</option>
             {dropdownOptions.map((s) => (
               <option key={s.id} value={s.id}>
                 {s.name}

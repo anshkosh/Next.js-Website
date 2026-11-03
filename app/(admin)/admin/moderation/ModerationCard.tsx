@@ -45,6 +45,7 @@ export default function ModerationCard({ startup }: { startup: ModerationStartup
   return (
     <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
       <div className="p-6">
+        {startup.wallOptIn && <section className="mb-4 rounded-lg border p-3"><h3 className="font-semibold">Startup Wall opt-in</h3><p className="text-sm text-gray-600">Approving this profile also approves this Wall image.</p>{(startup.wallImageUrl || startup.logoUrl) && <Image src={startup.wallImageUrl || startup.logoUrl!} alt="Proposed Wall image" width={320} height={320} className="mt-2 max-h-48 object-contain" />}</section>}
         <div className="flex gap-4 items-start">
           {startup.logoUrl ? (
             <div className="w-16 h-16 shrink-0 rounded-lg bg-gray-100 flex overflow-hidden border border-gray-200">

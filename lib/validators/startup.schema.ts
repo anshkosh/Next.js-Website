@@ -16,6 +16,8 @@ export const createStartupSchema = z.object({
   logoUrl: z.string().min(1, "Logo is required").refine((val) => val.startsWith("http") || val.startsWith("/"), { message: "Please upload a valid logo" }).or(z.literal("")).optional(),
   videoUrl: z.string().url().optional().or(z.literal("")),
   galleryImages: z.array(z.string()).max(4).optional(),
+  wallOptIn: z.boolean().optional(),
+  wallImageUrl: z.string().max(2048).refine(value => value === "" || (/^\/api\/uploads\/serve\/(gallery|logos)\/[a-zA-Z0-9-]+\.webp$/.test(value) || z.string().url().safeParse(value).success && value.startsWith("https://")), "Choose an uploaded Wall image").optional(),
   // Core Proposition
   problemStatement: z
     .string()

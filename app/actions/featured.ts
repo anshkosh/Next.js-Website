@@ -16,7 +16,7 @@ async function moderator() {
   return !!session?.user.emailVerified && !session.user.banned && ["admin", "reviewer"].includes(session.user.role ?? "");
 }
 function refreshFeatured() {
-  for (const path of ["/admin/featured", "/discover"]) revalidateSavedPath(path);
+  for (const path of ["/admin/featured", "/startup-wall"]) revalidateSavedPath(path);
 }
 function failure(error: unknown, message: string) {
   if (error instanceof FeaturedStartupError) return { error: error.message };
@@ -30,7 +30,7 @@ export async function addFeaturedStartup(startupId: string, sortOrder?: number):
     await featurePermanentStartup(startupId, sortOrder);
     refreshFeatured();
     return { success: true };
-  } catch (error) { return failure(error, "Failed to add featured startup"); }
+  } catch (error) { return failure(error, "Failed to add Wall startup"); }
 }
 export async function featureLatestStartupForOneDay(): Promise<
   { success: true; startupName: string; featuredUntil: Date } | { error: string }
@@ -40,7 +40,7 @@ export async function featureLatestStartupForOneDay(): Promise<
     const result = await featureLatestLiveStartup();
     refreshFeatured();
     return { success: true, ...result };
-  } catch (error) { return failure(error, "Failed to feature the newest live startup."); }
+  } catch (error) { return failure(error, "Failed to spotlight the newest eligible startup."); }
 }
 export async function removeFeaturedStartup(id: string): Promise<FeaturedResult> {
   if (!await moderator()) return { error: "Unauthorized" };
@@ -48,7 +48,7 @@ export async function removeFeaturedStartup(id: string): Promise<FeaturedResult>
     await removeFeaturedEntry({ id });
     refreshFeatured();
     return { success: true };
-  } catch (error) { return failure(error, "Failed to remove featured startup"); }
+  } catch (error) { return failure(error, "Failed to remove Wall startup"); }
 }
 export async function unfeatureStartupById(startupId: string): Promise<FeaturedResult> {
   if (!await moderator()) return { error: "Unauthorized" };
@@ -56,7 +56,7 @@ export async function unfeatureStartupById(startupId: string): Promise<FeaturedR
     await removeFeaturedEntry({ startupId });
     refreshFeatured();
     return { success: true };
-  } catch (error) { return failure(error, "Failed to remove featured startup"); }
+  } catch (error) { return failure(error, "Failed to remove Wall startup"); }
 }
 export async function setFeaturedStartupSortOrder(id: string, sortOrder: number): Promise<FeaturedResult> {
   if (!await moderator()) return { error: "Unauthorized" };
@@ -64,7 +64,7 @@ export async function setFeaturedStartupSortOrder(id: string, sortOrder: number)
     await setFeaturedEntryOrder(id, sortOrder);
     refreshFeatured();
     return { success: true };
-  } catch (error) { return failure(error, "Failed to update featured order"); }
+  } catch (error) { return failure(error, "Failed to update Wall order"); }
 }
 export async function reorderFeaturedStartups(orderedIds: string[]): Promise<FeaturedResult> {
   if (!await moderator()) return { error: "Unauthorized" };
@@ -72,5 +72,5 @@ export async function reorderFeaturedStartups(orderedIds: string[]): Promise<Fea
     await reorderFeaturedEntries(orderedIds);
     refreshFeatured();
     return { success: true };
-  } catch (error) { return failure(error, "Failed to reorder featured startups"); }
+  } catch (error) { return failure(error, "Failed to reorder Wall spotlights"); }
 }

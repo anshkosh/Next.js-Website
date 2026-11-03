@@ -108,6 +108,8 @@ model Startup {
   videoUrl      String?
   logoUrl       String?
   galleryImages String[]
+  wallOptIn     Boolean       @default(false)
+  wallImageUrl  String        @default("")
   founderName   String
   categoryId    String
   category      Category      @relation(fields: [categoryId], references: [id])

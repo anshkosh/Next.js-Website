@@ -50,8 +50,8 @@ describe("feature newest live startup for one day", () => {
     const result = await featureLatestStartupForOneDay();
 
     expect(mocks.startupFindFirst).toHaveBeenCalledWith(expect.objectContaining({
-      where: { status: "LIVE" },
-      orderBy: [{ createdAt: "desc" }, { id: "desc" }],
+      where: expect.objectContaining({ status: "LIVE", wallOptIn: true, founder: { founderMode: true } }),
+      orderBy: [{ publishedAt: "desc" }, { createdAt: "desc" }, { id: "desc" }],
     }));
     expect(mocks.featuredUpsert).toHaveBeenCalledWith({
       where: { startupId: "latest" },
@@ -76,7 +76,7 @@ describe("feature newest live startup for one day", () => {
     mocks.featuredCount.mockResolvedValue(6);
     const result = await featureLatestStartupForOneDay();
 
-    expect(result).toEqual({ error: "All 6 featured slots are in use. Remove a startup or wait for a temporary feature to expire." });
+    expect(result).toEqual({ error: "All 6 Wall spotlight slots are in use. Remove a spotlight or wait for a temporary placement to expire." });
     expect(mocks.featuredUpsert).not.toHaveBeenCalled();
   });
 
@@ -84,7 +84,7 @@ describe("feature newest live startup for one day", () => {
     mocks.startupFindFirst.mockResolvedValue(null);
     const result = await featureLatestStartupForOneDay();
 
-    expect(result).toEqual({ error: "There are no live startups to feature yet." });
+    expect(result).toEqual({ error: "There are no eligible startups for the Wall yet." });
     expect(mocks.featuredCount).not.toHaveBeenCalled();
   });
 });

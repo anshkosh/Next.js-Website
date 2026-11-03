@@ -1,5 +1,6 @@
 import type { Prisma, PrismaClient } from "@prisma/client";
 import { db } from "@/lib/db";
+import { wallStartupWhere } from "@/lib/startup-wall";
 
 export class FeaturedStartupError extends Error {}
 type Client = Pick<PrismaClient, "$transaction">;
@@ -7,10 +8,10 @@ type Tx = Prisma.TransactionClient;
 const activeWhere = (now: Date) => ({ OR: [{ featuredUntil: null }, { featuredUntil: { gt: now } }] });
 
 function validId(id: string) {
-  if (typeof id !== "string" || !id || id.length > 128) throw new FeaturedStartupError("Invalid featured startup ID.");
+  if (typeof id !== "string" || !id || id.length > 128) throw new FeaturedStartupError("Invalid Wall startup ID.");
 }
 function validOrder(order: number) {
-  if (!Number.isSafeInteger(order) || Math.abs(order) > 10000) throw new FeaturedStartupError("Invalid featured order.");
+  if (!Number.isSafeInteger(order) || Math.abs(order) > 10000) throw new FeaturedStartupError("Invalid Wall order.");
 }
 async function locked<T>(client: Client, operation: (tx: Tx) => Promise<T>) {
   return client.$transaction(async tx => {
@@ -20,15 +21,15 @@ async function locked<T>(client: Client, operation: (tx: Tx) => Promise<T>) {
   });
 }
 async function allocate(tx: Tx, startupId: string, temporary: boolean, explicitOrder?: number) {
-  const startup = await tx.startup.findUnique({ where: { id: startupId, status: "LIVE" }, select: { id: true, name: true } });
-  if (!startup) throw new FeaturedStartupError("Only live startups can be featured.");
+  const startup = await tx.startup.findUnique({ where: { id: startupId, ...wallStartupWhere }, select: { id: true, name: true } });
+  if (!startup) throw new FeaturedStartupError("Only live, approved, opted-in startups with an image can be added to the Wall.");
   const now = new Date();
   const existing = await tx.featuredStartup.findUnique({ where: { startupId } });
   const count = await tx.featuredStartup.count({ where: activeWhere(now) });
   const existingIsActive = existing && (!existing.featuredUntil || existing.featuredUntil > now);
   if (count >= 6 && !existingIsActive) throw new FeaturedStartupError(temporary
-    ? "All 6 featured slots are in use. Remove a startup or wait for a temporary feature to expire."
-    : "Maximum limit of 6 featured startups reached.");
+    ? "All 6 Wall spotlight slots are in use. Remove a spotlight or wait for a temporary placement to expire."
+    : "Maximum limit of 6 Wall spotlights reached.");
   const order = await tx.featuredStartup.aggregate({ where: activeWhere(now), _min: { sortOrder: true }, _max: { sortOrder: true } });
   const sortOrder = explicitOrder ?? (temporary ? (order._min.sortOrder ?? 0) - 1 : (order._max.sortOrder ?? -1) + 1);
   const featuredUntil = temporary ? new Date(now.getTime() + 24 * 60 * 60 * 1000) : null;
@@ -45,8 +46,8 @@ export async function featurePermanentStartup(startupId: string, sortOrder?: num
 }
 export async function featureLatestLiveStartup(client: Client = db) {
   return locked(client, async tx => {
-    const startup = await tx.startup.findFirst({ where: { status: "LIVE" }, orderBy: [{ createdAt: "desc" }, { id: "desc" }], select: { id: true } });
-    if (!startup) throw new FeaturedStartupError("There are no live startups to feature yet.");
+    const startup = await tx.startup.findFirst({ where: wallStartupWhere, orderBy: [{ publishedAt: "desc" }, { createdAt: "desc" }, { id: "desc" }], select: { id: true } });
+    if (!startup) throw new FeaturedStartupError("There are no eligible startups for the Wall yet.");
     const result = await allocate(tx, startup.id, true);
     return { startupName: result.startupName, featuredUntil: result.featuredUntil! };
   });
@@ -60,7 +61,7 @@ export async function setFeaturedEntryOrder(id: string, sortOrder: number, clien
   return locked(client, tx => tx.featuredStartup.update({ where: { id }, data: { sortOrder } }));
 }
 export async function reorderFeaturedEntries(ids: string[], client: Client = db) {
-  if (!Array.isArray(ids) || ids.length > 100 || new Set(ids).size !== ids.length) throw new FeaturedStartupError("Invalid featured order.");
+  if (!Array.isArray(ids) || ids.length > 100 || new Set(ids).size !== ids.length) throw new FeaturedStartupError("Invalid Wall order.");
   ids.forEach(validId);
   return locked(client, async tx => {
     const entries = await tx.featuredStartup.findMany({ where: activeWhere(new Date()), select: { id: true } });

@@ -24,7 +24,7 @@ export default function AdminSidebar({ role, pendingReviewCount, pendingCommentC
   const navItems = [
     { name: "Dashboard", href: "/admin/dashboard", icon: LayoutDashboard, roles: ["admin", "reviewer"] },
     { name: "Startups", href: "/admin/startups", icon: Rocket, roles: ["admin", "reviewer"] },
-    { name: "Featured", href: "/admin/featured", icon: Star, roles: ["admin"] },
+    { name: "Startup Wall", href: "/admin/featured", icon: Star, roles: ["admin"] },
     { name: "Moderation", href: "/admin/moderation", icon: ShieldCheck, roles: ["admin", "reviewer"], badge: pendingReviewCount },
     { name: "Comments", href: "/admin/comments", icon: MessageSquare, roles: ["admin", "reviewer"], badge: pendingCommentCount },
     { name: "Content review", href: "/admin/content-review", icon: ShieldCheck, roles: ["admin", "reviewer"], badge: contentReviewCount },

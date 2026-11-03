@@ -2,6 +2,14 @@ import { expect, it } from "vitest";
 import { readFileSync } from "node:fs";
 import { assertAdditiveMigration } from "../deploy/deployment-policy.mjs";
 
+it("pins the owner-requested existing-feature Wall consent backfill without allowing broader updates", () => {
+  const name = "20261104090000_startup_wall";
+  const sql = readFileSync(`prisma/migrations/${name}/migration.sql`, "utf8");
+  expect(() => assertAdditiveMigration(sql, name)).not.toThrow();
+  expect(() => assertAdditiveMigration(sql.replace('WHERE id IN (SELECT "startupId" FROM "FeaturedStartup")', ''), name)).toThrow();
+  expect(() => assertAdditiveMigration(sql, "unreviewed_wall_migration")).toThrow();
+});
+
 it("keeps the founder journal release migrations within the automatic deploy gate", () => {
   for (const name of [
     "20261016160000_founder_journal",

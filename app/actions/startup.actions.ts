@@ -49,6 +49,8 @@ export async function createStartup(formData: FormData) {
       logoUrl: formData.get("logoUrl") || undefined,
       videoUrl: formData.get("videoUrl") || undefined,
       galleryImages: formData.getAll("galleryImages").filter(Boolean),
+      wallOptIn: formData.has("wallOptIn") ? formData.get("wallOptIn") === "true" : undefined,
+      wallImageUrl: formData.has("wallImageUrl") ? formData.get("wallImageUrl") : undefined,
       // Core Proposition
       problemStatement: formData.get("problemStatement") || undefined,
       solutionStatement: formData.get("solutionStatement") || undefined,
@@ -90,6 +92,10 @@ export async function createStartup(formData: FormData) {
     const { data } = validatedData;
     if (data.metadata?.pitchDeckUrl && !ownsPitchDeck(data.metadata.pitchDeckUrl, session.user.id)) {
       return { error: "Please upload your own PDF pitch deck." };
+    }
+    if (data.wallImageUrl) {
+      const key = data.wallImageUrl.replace("/api/uploads/serve/", "");
+      if (!await db.mediaUpload.findFirst({ where: { key, userId: session.user.id, erasureRequestedAt: null } })) return { error: "Upload your own Wall creative." };
     }
     const slug = await generateUniqueSlug(data.name, async (candidate) => {
       const existing = await db.startup.findUnique({
@@ -139,6 +145,8 @@ export async function updateStartup(formData: FormData) {
       galleryImages: formData.has("galleryImages")
         ? formData.getAll("galleryImages").filter(Boolean)
         : undefined,
+      wallOptIn: formData.has("wallOptIn") ? formData.get("wallOptIn") === "true" : undefined,
+      wallImageUrl: formData.has("wallImageUrl") ? formData.get("wallImageUrl") : undefined,
       // Core Proposition
       problemStatement: formData.get("problemStatement") || undefined,
       solutionStatement: formData.get("solutionStatement") || undefined,
@@ -200,6 +208,12 @@ export async function updateStartup(formData: FormData) {
       return { error: "Cannot edit startup in its current state" };
     }
 
+    if (data.wallImageUrl && data.wallImageUrl !== existingStartup.wallImageUrl &&
+        data.wallImageUrl !== existingStartup.logoUrl && !existingStartup.galleryImages.includes(data.wallImageUrl)) {
+      const key = data.wallImageUrl.replace("/api/uploads/serve/", "");
+      const upload = await db.mediaUpload.findFirst({ where: { key, userId: session.user.id, erasureRequestedAt: null } });
+      if (!upload) return { error: "Choose your own uploaded creative or a profile gallery image." };
+    }
     const { id, ...updateData } = data;
 
     if (existingStartup.status === "LIVE") {
@@ -211,6 +225,8 @@ export async function updateStartup(formData: FormData) {
         return { published, event };
       });
       const notificationDelivered = await deliverNotification(event.id);
+      revalidatePath("/startup-wall");
+      revalidatePath("/admin/featured");
       revalidatePath("/dashboard");
       revalidatePath("/admin/moderation");
       revalidatePath(`/startups/${published.slug}`);
