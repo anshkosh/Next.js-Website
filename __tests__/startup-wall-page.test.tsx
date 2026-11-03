@@ -20,7 +20,7 @@ it("loads only active eligible placements and links each complete image to its s
   }) }));
   expect(html.indexOf('href="/startups/two"')).toBeLessThan(html.indexOf('href="/startups/one"'));
   expect(html).toContain('alt="Two creative"'); expect(html).toContain('alt="One logo"');
-  expect(html).toContain("object-contain"); expect(html).toContain("col-span-2 row-span-2");
+  expect(html).toContain('data-count="2"');
   expect(html).not.toContain("Placeholder"); expect(html).not.toContain("Upvote");
 });
 it("shows an honest empty state without dummy tiles when no placements exist", async () => {
@@ -35,7 +35,7 @@ it("links a signed-in founder directly to their startup Wall controls", async ()
   owned.mockResolvedValue([{ id: "owned", status: "LIVE" }]);
   const html = renderToStaticMarkup(await WallPage());
   expect(html).toContain('href="/startup/owned/edit#startup-wall-settings"');
-  expect(html).toContain("Anshkosh Startup Wall");
+  expect(html).toContain("Anshkosh Startup "); expect(html).toContain('class="page-title"');
   expect(owned).toHaveBeenCalledWith(expect.objectContaining({ where: { founderId: "founder" } }));
 });
 it("hides promotion when the founder's startup is already displayed", async () => {

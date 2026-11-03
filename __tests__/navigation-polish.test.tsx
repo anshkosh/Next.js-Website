@@ -31,6 +31,9 @@ it("marks the containing section on nested routes without matching a similar pre
   route.pathname = "/category/saas";
   await act(async () => root.render(<NavigationLinks />));
   expect(host.querySelector('[aria-current="page"]')?.getAttribute("href")).toBe("/discover");
+  route.pathname = "/startup-wall";
+  await act(async () => root.render(<NavigationLinks />));
+  expect(host.querySelector('[aria-current="page"]')?.getAttribute("href")).toBe("/startup-wall");
   route.pathname = "/leaderboard";
   await act(async () => root.render(<NavigationLinks />));
   expect(host.querySelector('[aria-current="page"]')?.getAttribute("href")).toBe("/leaderboard");

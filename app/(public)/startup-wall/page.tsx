@@ -1,3 +1,5 @@
+import PublicPageIntro from "@/components/layout/PublicPageIntro";
+import styles from "./page.module.css";
 import Image from "next/image";
 import Link from "next/link";
 import { auth } from "@/lib/auth";
@@ -34,16 +36,15 @@ export default async function StartupWallPage() {
     promoteHref = target ? `/startup/${target.id}/edit#startup-wall-settings` : owned.length === 0 ? "/startup/new" : null;
   }
   return <div>
-    <section aria-label="Startup Wall" className="mx-auto max-w-7xl px-4 pb-12 pt-8">
-      <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
-        <h1 className="font-heading text-3xl font-bold text-gray-900 sm:text-4xl">Anshkosh Startup Wall</h1>
+    <PublicPageIntro compact title={<>Anshkosh Startup <span className="text-coral-500">Wall</span></>} />
+    <section aria-label="Startup Wall" className="mx-auto max-w-7xl px-4 pb-12 pt-2">
+      <div className="mb-6 flex justify-end">
         {promoteHref && <Link href={promoteHref} className="inline-flex min-h-11 items-center justify-center rounded-xl bg-coral-600 px-5 py-3 text-sm font-semibold text-white transition-colors hover:bg-coral-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-coral-600">Promote your startup</Link>}
       </div>
-      {tiles.length ? <div className="grid auto-rows-[minmax(120px,auto)] grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-6">
+      {tiles.length ? <div className={styles.grid} data-count={tiles.length}>
         {tiles.map((startup, index) => {
-          const spotlight = index === 0 && startup.featuredEntry?.featuredUntil && startup.featuredEntry.featuredUntil > now;
-          return <Link key={startup.id} href={`/startups/${startup.slug}`} aria-label={`Visit ${startup.name}`} className={`relative flex aspect-square items-center justify-center overflow-hidden rounded-lg border border-gray-100 bg-white p-3 transition-shadow hover:shadow-lg focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-coral-600 ${spotlight ? "col-span-2 row-span-2" : ""}`}>
-            <Image src={startup.wallImageUrl || startup.logoUrl!} alt={`${startup.name} ${startup.wallImageUrl ? "creative" : "logo"}`} width={640} height={640} sizes={spotlight ? "(max-width: 640px) 90vw, 40vw" : "(max-width: 640px) 45vw, (max-width: 1024px) 30vw, 16vw"} className="h-full w-full object-contain" />
+          return <Link key={startup.id} href={`/startups/${startup.slug}`} aria-label={`Visit ${startup.name}`} className={styles.tile}>
+            <Image src={startup.wallImageUrl || startup.logoUrl!} alt={`${startup.name} ${startup.wallImageUrl ? "creative" : "logo"}`} fill sizes={index === 0 || tiles.length < 3 ? "(min-width: 1024px) 50vw, 100vw" : "(min-width: 1024px) 50vw, (min-width: 640px) 50vw, 100vw"} className={startup.wallImageUrl ? styles.creative : styles.logo} />
           </Link>;
         })}
       </div> : <p className="rounded-xl border border-gray-200 bg-gray-50 p-8 text-center text-gray-600">The Wall is ready for its first approved startups.</p>}
