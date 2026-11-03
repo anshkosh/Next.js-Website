@@ -1,5 +1,8 @@
 import Image from "next/image";
 import Link from "next/link";
+import { auth } from "@/lib/auth";
+import { headers } from "next/headers";
+import { loginHref } from "@/lib/login-return";
 import { db } from "@/lib/db";
 import { seoMetadata } from "@/lib/seo";
 import { wallStartupWhere, orderWallTiles } from "@/lib/startup-wall";
@@ -17,11 +20,24 @@ export default async function StartupWallPage() {
   }) : [];
   const rows = placements.map(({ startup, sortOrder, featuredUntil }) => ({ ...startup, featuredEntry: { sortOrder, featuredUntil } }));
   const tiles = orderWallTiles(rows, now).filter(row => row.wallImageUrl || row.logoUrl);
+  const session = process.env.DATABASE_URL ? await auth.api.getSession({ headers: await headers() }) : null;
+  let promoteHref: string | null = loginHref("/startup-wall");
+  if (session?.user.banned) promoteHref = null;
+  else if (session?.user) {
+    const owned = await db.startup.findMany({
+      where: { founderId: session.user.id }, select: { id: true, status: true },
+      orderBy: [{ createdAt: "desc" }, { id: "asc" }],
+    });
+    const visibleIds = new Set(tiles.map(startup => startup.id));
+    const eligible = owned.filter(startup => !visibleIds.has(startup.id));
+    const target = eligible.find(startup => startup.status === "LIVE") ?? eligible.find(startup => ["DRAFT", "REJECTED"].includes(startup.status));
+    promoteHref = target ? `/startup/${target.id}/edit#startup-wall-settings` : owned.length === 0 ? "/startup/new" : null;
+  }
   return <div>
-    <h1 className="sr-only">Startup Wall</h1>
     <section aria-label="Startup Wall" className="mx-auto max-w-7xl px-4 pb-12 pt-8">
-      <div className="mb-5 flex justify-end text-sm">
-        <Link href="/dashboard" className="inline-flex min-h-11 items-center font-semibold text-coral-700 underline">Promote your startup</Link>
+      <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
+        <h1 className="font-heading text-3xl font-bold text-gray-900 sm:text-4xl">Anshkosh Startup Wall</h1>
+        {promoteHref && <Link href={promoteHref} className="inline-flex min-h-11 items-center justify-center rounded-xl bg-coral-600 px-5 py-3 text-sm font-semibold text-white transition-colors hover:bg-coral-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-coral-600">Promote your startup</Link>}
       </div>
       {tiles.length ? <div className="grid auto-rows-[minmax(120px,auto)] grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-6">
         {tiles.map((startup, index) => {
