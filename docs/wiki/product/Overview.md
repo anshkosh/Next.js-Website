@@ -43,3 +43,12 @@ Roles are enforced with Better Auth's admin plugin; see [Security](../engineerin
 ## Pilot banner and entry curtain
 
 The early-access status banner and one-time entry curtain (`components/site/`) appear only on the homepage. They explain what visitors can do in the pilot and that payments and preorders are not open. Internal pages open directly.
+
+
+## Startup Wall (4 November 2026 — source prepared)
+
+`/startup-wall` displays approved logos or creatives linking to public startup profiles. Only LIVE profiles with founder mode enabled, Wall opt-in and an image appear. New startups default to opted out. Founders use the startup editor to choose their logo, select an existing gallery image or upload a new creative. Live-profile opt-ins and creative changes use the profile moderation queue; the current approved creative remains until approval. Withdrawal has a separate immediate action that also clears consent from a pending revision, invalidating stale review pages.
+
+The existing Admin Featured section is relabelled Startup Wall. Its six slots control Wall membership and ordering. Removing a slot removes that startup from the Wall. The 24-hour action selects the newest eligible startup by publication date and puts its image first in a larger tile until expiry, when the temporary placement ends. It never opts a startup in. Existing FeaturedStartup entries are grandfathered into Wall opt-in by the release migration; their existing approved logo is used. The pilot is free. Votes and leaderboard scores are unchanged. Discover retains the full directory and removes the featured carousel.
+
+Internal FeaturedStartup table/action names and `/admin/featured` are preserved for backwards compatibility. Migration `20261104090000_startup_wall` adds defaulted fields and backfills only startups already referenced by FeaturedStartup, as requested by Rinu. Its exact SQL is pinned in the deployment policy for review. No production data was changed during preparation.

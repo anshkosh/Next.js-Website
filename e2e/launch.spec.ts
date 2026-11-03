@@ -137,6 +137,35 @@ test.beforeEach(async ({ page }) => {
 test.describe.configure({ mode: "serial", retries: 0 });
 test.setTimeout(180000);
 
+test("Startup Wall shows only active approved opted-in placements", { tag: "@public" }, async ({ page }) => {
+  const owner = await db.user.findUniqueOrThrow({ where: { email: adminEmail } });
+  const fixtures: { id: string; slug: string }[] = [];
+  try {
+    for (const [index, status] of ["LIVE", "LIVE", "DRAFT", "SUSPENDED"].entries()) {
+      const fixture = await db.startup.create({ data: {
+        founderId: owner.id, founderName: owner.name, categoryId, name: `Wall check ${index}`,
+        slug: `wall-${randomUUID()}`, tagline: "An isolated Startup Wall fixture", description: "Isolated Wall visibility and image navigation fixture.",
+        websiteUrl: "https://example.test", logoUrl: "/logo.svg", galleryImages: [],
+        status: status as "LIVE" | "DRAFT" | "SUSPENDED", ...(index === 1 ? {} : { wallOptIn: true }),
+      } });
+      fixtures.push(fixture);
+      await db.featuredStartup.create({ data: { startupId: fixture.id, sortOrder: -100 + index } });
+    }
+    await enter(page, "/startup-wall");
+    await expect(page.getByRole("link", { name: "Visit Wall check 0", exact: true })).toBeVisible();
+    for (const index of [1, 2, 3]) await expect(page.getByRole("link", { name: `Visit Wall check ${index}`, exact: true })).toHaveCount(0);
+    await page.getByRole("link", { name: "Visit Wall check 0", exact: true }).click();
+    await expect(page).toHaveURL(new RegExp(`/startups/${fixtures[0].slug}$`));
+    await db.featuredStartup.update({ where: { startupId: fixtures[0].id }, data: { featuredUntil: new Date(0) } });
+    await enter(page, "/startup-wall");
+    await expect(page.getByRole("link", { name: "Visit Wall check 0", exact: true })).toHaveCount(0);
+  } finally {
+    const ids = fixtures.map(fixture => fixture.id);
+    await db.featuredStartup.deleteMany({ where: { startupId: { in: ids } } });
+    await db.startup.deleteMany({ where: { id: { in: ids } } });
+  }
+});
+
 test("legacy redirects and missing public details preserve real HTTP status codes", { tag: "@public" }, async ({ request }) => {
   const response = await request.get("/campaigns/cane-theory?utm_source=legacy", { maxRedirects: 0 });
   expect(response.status()).toBe(308);

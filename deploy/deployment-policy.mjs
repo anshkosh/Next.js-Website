@@ -4,6 +4,7 @@ import { createHash } from "node:crypto";
 // Exact SQL reviewed for this release. Pinning the content keeps advanced but
 // additive operations from broadening the automatic-deploy allowlist.
 const REVIEWED_MIGRATIONS = new Map([
+  ["20261104090000_startup_wall", "0ed266c06257752c61891a3497aefa2be522a63830f7e4f0dc03e3767268464f"],
   [
     "20261030120000_content_edit_history_and_comment_access",
     "43f28cdb8c462f6e3f606af37a8ed4ddd9bdbd46d90c174dba2812dc22fb3023",

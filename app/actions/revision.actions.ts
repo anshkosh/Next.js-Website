@@ -37,7 +37,7 @@ export async function reviewRevision(id: string, version: string, decision: "app
       to: startup.founder.email,
       data: { startupName: startup.name, slug: startup.slug, startupId: startup.id, notes },
     }).catch(error => logger.error("Revision review email failed", error));
-    for (const path of ["/admin/moderation", "/dashboard", "/discover", "/", `/startups/${startup.slug}`]) revalidatePath(path);
+    for (const path of ["/admin/moderation", "/startup-wall", "/admin/featured", "/dashboard", "/discover", "/", `/startups/${startup.slug}`]) revalidatePath(path);
     return { success: true };
   } catch (error) {
     logger.error("Revision review failed", error);

@@ -65,7 +65,7 @@ export default async function ModerationPage() {
           if (JSON.stringify(current[key]) === JSON.stringify(value)) return [];
           return [{ label: key, current: typeof current[key] === "string" ? current[key] as string : JSON.stringify(current[key]) || "", proposed: typeof value === "string" ? value : JSON.stringify(value) || "" }];
         });
-        return <RevisionReviewCard key={revision.id} id={revision.id} version={revision.updatedAt.toISOString()} name={revision.startup.name} owner={revision.startup.founder.name} changes={changes} />;
+        return <RevisionReviewCard key={revision.id} id={revision.id} version={revision.updatedAt.toISOString()} name={revision.startup.name} owner={revision.startup.founder.name} changes={changes} wallPreview={(proposed.wallOptIn ?? revision.startup.wallOptIn) ? (proposed.wallImageUrl ?? revision.startup.wallImageUrl) || proposed.logoUrl || revision.startup.logoUrl || undefined : undefined} />;
       })}
     </div>
   );

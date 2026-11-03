@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { X, Plus, AlertCircle, Zap } from "lucide-react";
+import StartupWallControls from "@/components/startup/StartupWallControls";
 import EditableImageUpload from "@/components/startup/EditableImageUpload";
 import GalleryImageEditor from "@/components/startup/GalleryImageEditor";
 import PitchDeckUpload from "@/components/startup/PitchDeckUpload";
@@ -78,6 +79,8 @@ export default function EditStartupForm({ initialData, userId, categories }: { c
     description: initialData.description || "",
     websiteUrl: initialData.websiteUrl || "",
     logoUrl: initialData.logoUrl || "",
+    wallOptIn: initialData.wallOptIn ?? false,
+    wallImageUrl: initialData.wallImageUrl || "",
     twitterUrl: metadata.twitterUrl || "",
     linkedinUrl: metadata.linkedinUrl || "",
     city: metadata.city || "",
@@ -175,6 +178,8 @@ export default function EditStartupForm({ initialData, userId, categories }: { c
       if (key === "galleryImages") {
         if (!(value as string[]).length) data.append("galleryImages", "");
         (value as string[]).forEach((img) => data.append("galleryImages", img));
+      } else if (key === "wallOptIn" || key === "wallImageUrl") {
+        data.append(key, String(value));
       } else if (key === "features") {
         data.append("features", JSON.stringify(value));
       } else if (key === "pitchDeckUrl" || key === "logoUrl") {
@@ -212,7 +217,11 @@ export default function EditStartupForm({ initialData, userId, categories }: { c
       className="bg-white p-8 rounded-2xl shadow-sm border border-gray-100 space-y-6"
     >
       <DraftRecoveryNotice draft={draft} />
-      {reviewing && <section aria-labelledby="review-heading" className="space-y-5"><h2 id="review-heading" className="font-heading text-2xl font-bold">Review your changes</h2><p className="text-sm text-gray-600">Check your proposed profile before saving. Your current public profile stays live while changes are reviewed.</p><dl className="space-y-4">{[["Name", formData.name], ["Category", categories.find(item => item.id === formData.categoryId)?.name || formData.categoryId], ["Founder", formData.founderName], ["Tagline", formData.tagline], ["Description", formData.description], ["Website", formData.websiteUrl], ["Problem", formData.problemStatement], ["Solution", formData.solutionStatement], ["Audience", formData.targetAudience], ["Stage", formData.prototypeStatus], ["Evidence", formData.tractionEvidence], ["City", formData.city], ["Founded", formData.foundedYear], ["Logo", formData.logoUrl], ["Video", formData.videoUrl], ["Pitch deck", formData.pitchDeckUrl], ["Pitch deck visibility", formData.pitchDeckVisibility], ["X / Twitter", formData.twitterUrl], ["LinkedIn", formData.linkedinUrl], ["Features", formData.features.map(item => `${item.title}: ${item.description}`).join("; ")], ["Gallery", `${formData.galleryImages.length} images`]].map(([label, value]) => <div key={label}><dt className="text-sm font-semibold">{label}</dt><dd className="whitespace-pre-wrap break-words text-sm text-gray-700">{value || "Not provided"}</dd></div>)}</dl><button type="button" onClick={() => setReviewing(false)} className="min-h-11 font-semibold text-coral-700 underline">Back to editing</button></section>}
+      <StartupWallControls startupId={initialData.id} optedIn={formData.wallOptIn} imageUrl={formData.wallImageUrl} logoUrl={formData.logoUrl} galleryImages={formData.galleryImages}
+        onChange={(wallOptIn, wallImageUrl) => setFormData(previous => ({ ...previous, wallOptIn, wallImageUrl }))}
+        onBusyChange={busy => setUploadBusy("wall", busy)} />
+      {errors.wallImageUrl && <p role="alert" className="text-red-500 text-sm">{errors.wallImageUrl[0]}</p>}
+      {reviewing && <section aria-labelledby="review-heading" className="space-y-5"><h2 id="review-heading" className="font-heading text-2xl font-bold">Review your changes</h2><p className="text-sm text-gray-600">Check your proposed profile before saving. Your current public profile stays live while changes are reviewed.</p><dl className="space-y-4">{[["Name", formData.name], ["Category", categories.find(item => item.id === formData.categoryId)?.name || formData.categoryId], ["Founder", formData.founderName], ["Tagline", formData.tagline], ["Description", formData.description], ["Website", formData.websiteUrl], ["Problem", formData.problemStatement], ["Solution", formData.solutionStatement], ["Audience", formData.targetAudience], ["Stage", formData.prototypeStatus], ["Evidence", formData.tractionEvidence], ["City", formData.city], ["Founded", formData.foundedYear], ["Logo", formData.logoUrl], ["Startup Wall", formData.wallOptIn ? "Opt in (moderator approval required)" : "Opted out"], ["Wall creative", formData.wallImageUrl || "Use startup logo"], ["Video", formData.videoUrl], ["Pitch deck", formData.pitchDeckUrl], ["Pitch deck visibility", formData.pitchDeckVisibility], ["X / Twitter", formData.twitterUrl], ["LinkedIn", formData.linkedinUrl], ["Features", formData.features.map(item => `${item.title}: ${item.description}`).join("; ")], ["Gallery", `${formData.galleryImages.length} images`]].map(([label, value]) => <div key={label}><dt className="text-sm font-semibold">{label}</dt><dd className="whitespace-pre-wrap break-words text-sm text-gray-700">{value || "Not provided"}</dd></div>)}</dl><button type="button" onClick={() => setReviewing(false)} className="min-h-11 font-semibold text-coral-700 underline">Back to editing</button></section>}
       <div hidden={reviewing}>
       {initialData.revisionStatus && <p role="status" className="rounded-lg bg-gray-50 p-3 text-sm">{initialData.revisionStatus === "REJECTED" ? `Changes need attention: ${initialData.revisionNotes || "Please revise and resubmit."}` : "Your proposed changes are awaiting review. The published profile remains live."}</p>}
       {initialData.status === "LIVE" && (

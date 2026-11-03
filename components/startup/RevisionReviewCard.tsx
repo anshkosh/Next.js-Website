@@ -1,11 +1,12 @@
 "use client";
+import Image from "next/image";
 import { useState } from "react";
 import { reviewRevision } from "@/app/actions/revision.actions";
 import { useRouter } from "next/navigation";
 
 type Change = { label: string; current: string; proposed: string };
-export default function RevisionReviewCard({ id, version, name, owner, changes }: {
-  id: string; version: string; name: string; owner: string; changes: Change[];
+export default function RevisionReviewCard({ id, version, name, owner, changes, wallPreview }: {
+  id: string; version: string; name: string; owner: string; changes: Change[]; wallPreview?: string;
 }) {
   const router = useRouter();
   const [busy, setBusy] = useState(false);
@@ -24,6 +25,7 @@ export default function RevisionReviewCard({ id, version, name, owner, changes }
   return <article className="rounded-xl border border-gray-200 bg-white p-6 space-y-4">
     <div><h2 className="text-xl font-bold font-heading">{name}: profile changes</h2>
       <p className="text-sm text-gray-600">Submitted by {owner}. The existing profile stays live.</p></div>
+    {wallPreview && <div><p className="text-sm font-semibold">Proposed Startup Wall image</p><Image src={wallPreview} alt="Proposed Wall image" width={640} height={640} className="mt-2 max-h-64 w-full object-contain" /></div>}
     <details><summary className="cursor-pointer font-medium text-coral-600">Compare published and proposed content ({changes.length} fields)</summary>
       <div className="mt-4 space-y-4">{changes.map(change => <section key={change.label}>
         <h3 className="font-semibold">{change.label}</h3>
