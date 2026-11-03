@@ -20,6 +20,7 @@ async function main() {
       founderId: owner, categoryId: category, status: "LIVE", name: `Invariant ${index}`, slug: `invariants-${suffix}-${index}`,
       tagline: "Disposable invariant fixture", description: "Not production data", websiteUrl: "https://example.test", founderName: "Fixture", galleryImages: [],
       createdAt: new Date(Date.UTC(2026, 0, 1, 0, index)),
+      wallOptIn: index !== 8, logoUrl: index === 7 ? null : "/logo.svg",
     } }));
     const startupId = startups[0].id;
     for (let index = 0; index < 2; index++) await createTeamFounder(owner, { startupId, name: `Member ${index}` }, client);
@@ -28,6 +29,13 @@ async function main() {
     assert.equal(team.filter(result => result.status === "rejected" && result.reason instanceof TeamFounderError).length, 1);
     assert.equal(await client.startupFounder.count({ where: { startupId } }), 3);
     assert.deepEqual((await client.startupFounder.findMany({ where: { startupId }, orderBy: { sortOrder: "asc" } })).map(member => member.sortOrder), [0, 1, 2]);
+
+    // New profiles default out; neither consent nor an image may be bypassed by Admin.
+    await assert.rejects(featurePermanentStartup(startups[8].id, undefined, client), FeaturedStartupError);
+    await assert.rejects(featurePermanentStartup(startups[7].id, undefined, client), FeaturedStartupError);
+    await client.user.update({ where: { id: owner }, data: { founderMode: false } });
+    await assert.rejects(featurePermanentStartup(startups[0].id, undefined, client), FeaturedStartupError);
+    await client.user.update({ where: { id: owner }, data: { founderMode: true } });
 
     for (const startup of startups.slice(0, 5)) await featurePermanentStartup(startup.id, undefined, client);
     const features = await Promise.allSettled([featurePermanentStartup(startups[5].id, undefined, client), featureLatestLiveStartup(client)]);
