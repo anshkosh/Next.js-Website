@@ -1,9 +1,9 @@
 "use client";
 
-import { useMemo, useState, type CSSProperties } from "react";
+import { useState, type CSSProperties } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowUpRight, Search, X } from "lucide-react";
+import { ArrowUpRight } from "lucide-react";
 import PublicPageIntro from "@/components/layout/PublicPageIntro";
 import styles from "@/app/(public)/startup-wall/page.module.css";
 
@@ -11,7 +11,6 @@ interface WallStartup {
   id: string;
   name: string;
   slug: string;
-  tagline: string;
   category: string;
   logoUrl: string | null;
   wallImageUrl: string;
@@ -21,38 +20,20 @@ interface WallStartup {
 const mosaicSizes = ["wide", "small", "tall", "small", "large", "small", "wide", "small", "tall", "small", "large", "small"] as const;
 
 export default function StartupWallGallery({ items, promoteHref }: { items: WallStartup[]; promoteHref: string | null }) {
-  const [search, setSearch] = useState("");
-  const [category, setCategory] = useState("all");
-  const categories = useMemo(() => [...new Set(items.map(item => item.category))].sort((a, b) => a.localeCompare(b)), [items]);
-  const filtered = useMemo(() => {
-    const term = search.trim().toLocaleLowerCase();
-    return items.filter(item => (category === "all" || item.category === category) &&
-      (!term || `${item.name} ${item.tagline} ${item.category}`.toLocaleLowerCase().includes(term)));
-  }, [category, items, search]);
-
   const logoSize = Math.round(Math.max(96, Math.min(152, 152 * Math.sqrt(14 / Math.max(1, items.length)))));
 
   return <div className={styles.page}>
     <PublicPageIntro compact title={<>Anshkosh Startup <span className="text-coral-500">Wall</span></>} />
-    <div className={styles.wallToolbar}>
-      <p className="text-sm text-gray-600">{items.length} {items.length === 1 ? "startup" : "startups"} on the wall</p>
-      {promoteHref && <Link href={promoteHref} className="inline-flex min-h-11 items-center justify-center rounded-xl bg-coral-600 px-5 py-3 text-sm font-semibold text-white transition-colors hover:bg-coral-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-coral-600">
+    {promoteHref && <div className={styles.wallToolbar}>
+      <Link href={promoteHref} className="inline-flex min-h-11 items-center justify-center rounded-xl bg-coral-600 px-5 py-3 text-sm font-semibold text-white transition-colors hover:bg-coral-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-coral-600">
         Promote your startup
-      </Link>}
-    </div>
+      </Link>
+    </div>}
 
     <section id="mosaic" className={styles.mosaicSection} aria-label="Startup mosaic">
-      {filtered.length ? <div className={styles.mosaic} style={{ "--wall-logo-size": `${logoSize}px` } as CSSProperties}>
-        {filtered.map((startup, index) => <StartupTile key={startup.id} startup={startup} size={startup.spotlight ? "spotlight" : mosaicSizes[index % mosaicSizes.length]} />)}
-      </div> : items.length ? <div className={styles.emptyState}><p>No startups match those filters.</p><button type="button" onClick={() => { setSearch(""); setCategory("all"); }}>Clear filters</button></div> : <div className={styles.emptyState}><p>The wall is ready for its first startup.</p><span>Approved startups will show up here.</span></div>}
-    </section>
-
-    <section id="browse" className={styles.browseBar} aria-label="Find startups">
-      <div><h2 className="text-lg font-semibold text-gray-900">Browse startups</h2><span className="text-sm text-gray-600" aria-live="polite">Showing {filtered.length} of {items.length} startups</span></div>
-      <div className={styles.filters}>
-        <label className={styles.searchBox}><Search aria-hidden="true" size={17} /><span className="sr-only">Search startups</span><input type="search" value={search} onChange={event => setSearch(event.target.value)} placeholder="Search names or ideas" />{search && <button type="button" onClick={() => setSearch("")} aria-label="Clear search"><X size={15} /></button>}</label>
-        <label className={styles.categoryFilter}><span className="sr-only">Filter by category</span><select value={category} onChange={event => setCategory(event.target.value)} aria-label="Filter startups by category"><option value="all">All categories</option>{categories.map(name => <option key={name} value={name}>{name}</option>)}</select></label>
-      </div>
+      {items.length ? <div className={styles.mosaic} style={{ "--wall-logo-size": `${logoSize}px` } as CSSProperties}>
+        {items.map((startup, index) => <StartupTile key={startup.id} startup={startup} size={startup.spotlight ? "spotlight" : mosaicSizes[index % mosaicSizes.length]} />)}
+      </div> : <div className={styles.emptyState}><p>The wall is ready for its first startup.</p><span>Approved startups will show up here.</span></div>}
     </section>
   </div>;
 }

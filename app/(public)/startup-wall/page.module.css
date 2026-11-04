@@ -19,7 +19,7 @@
   display: flex;
   max-width: 1500px;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-end;
   flex-wrap: wrap;
   gap: 12px;
   margin: 0 auto;
@@ -49,18 +49,9 @@
 .tileArrow { position: absolute; top: 6px; right: 6px; display: grid; width: 25px; height: 25px; place-items: center; border-radius: 50%; background: rgb(255 255 255 / 92%); color: #171717; opacity: 0; transition: opacity 140ms ease; }
 .tile:hover .tileArrow, .tile:focus-visible .tileArrow { opacity: 1; }
 .spotlightFlag { position: absolute; top: 7px; left: 7px; padding: 5px 7px; background: #171717; color: #fff; font-size: .58rem; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; }
-.browseBar { display: flex; max-width: 1500px; align-items: center; justify-content: space-between; gap: 18px; margin: 0 auto; padding: 28px 0 0; }
-.filters { display: flex; gap: 8px; }
-.searchBox, .categoryFilter { display: flex; min-height: 40px; align-items: center; gap: 7px; padding: 0 10px; border: 1px solid #d1d5db; border-radius: 8px; background: #fff; color: #4b5563; }
-.searchBox input { width: min(32vw, 260px); min-width: 100px; border: 0; outline: 0; background: transparent; color: #171717; font: inherit; font-size: .8rem; }
-.searchBox input::placeholder { color: #77736b; opacity: 1; }
-.searchBox:focus-within, .categoryFilter:focus-within { outline: 2px solid #a6401d; outline-offset: 1px; }
-.searchBox button { display: grid; width: 24px; height: 24px; place-items: center; border: 0; background: transparent; color: inherit; cursor: pointer; }
-.categoryFilter select { max-width: 180px; border: 0; outline: 0; background: transparent; color: #171717; font: inherit; font-size: .8rem; }
 .emptyState { padding: 48px 20px; border: 2px solid #222; background: #fffdf8; text-align: center; }
 .emptyState p { margin: 0; font-family: var(--font-oswald), sans-serif; font-size: 1.5rem; font-weight: 650; }
 .emptyState span { display: block; margin-top: 5px; color: #625e56; }
-.emptyState button { min-height: 36px; margin-top: 10px; border: 0; background: transparent; color: #8b3214; font: inherit; font-weight: 750; text-decoration: underline; cursor: pointer; }
 @media (max-width: 900px) { .mosaic { grid-template-columns: repeat(8, minmax(0, 1fr)); } }
 @media (max-width: 620px) {
   .page { padding: 0 10px 44px; }
@@ -70,7 +61,5 @@
   .tileLarge, .tileSpotlight { grid-column: span 4; grid-row: span 3; }
   .tileMedia { bottom: 31px; }
   .nameplate { min-height: 31px; gap: 4px; padding: 4px 6px; }.name { font-size: .72rem; }.category { font-size: .5rem; }
-  .browseBar { align-items: stretch; flex-direction: column; gap: 12px; padding-top: 20px; }
-  .filters { display: grid; grid-template-columns: 1fr minmax(120px, .7fr); }.searchBox input { width: 100%; min-width: 0; }.categoryFilter select { max-width: 100%; }
 }
 @media (prefers-reduced-motion: reduce) { .tile, .tileArrow { transition: none; } }

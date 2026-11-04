@@ -12,7 +12,7 @@ export default async function StartupWallPage() {
   const placements = process.env.DATABASE_URL ? await db.featuredStartup.findMany({
     where: { startup: visibleWallStartupWhere, OR: [{ featuredUntil: null }, { featuredUntil: { gt: now } }] },
     select: { sortOrder: true, featuredUntil: true, startup: {
-      select: { id: true, name: true, slug: true, tagline: true, logoUrl: true, wallImageUrl: true, wallOptIn: true, category: { select: { name: true } } },
+      select: { id: true, name: true, slug: true, logoUrl: true, wallImageUrl: true, wallOptIn: true, category: { select: { name: true } } },
     } },
     orderBy: [{ sortOrder: "asc" }, { id: "asc" }],
   }) : [];
