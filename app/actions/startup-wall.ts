@@ -14,7 +14,7 @@ export async function withdrawFromWall(id: string) {
       await tx.$queryRaw`SELECT id FROM "Startup" WHERE id = ${id} FOR UPDATE`;
       const startup = await tx.startup.findUniqueOrThrow({ where: { id } });
       if (startup.founderId !== session.user.id) throw new Error("Unauthorized");
-      await tx.startup.update({ where: { id }, data: { wallOptIn: false } });
+      await tx.startup.update({ where: { id }, data: { wallOptIn: false, wallAdminPlacement: false } });
       const revision = await tx.startupRevision.findUnique({ where: { startupId: id } });
       if (revision) await tx.startupRevision.update({ where: { id: revision.id }, data: {
         data: { ...(revision.data as Prisma.InputJsonObject), wallOptIn: false },

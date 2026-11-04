@@ -7,6 +7,18 @@ export const wallStartupWhere = {
   OR: [{ wallImageUrl: { not: "" } }, { logoUrl: { not: "" } }],
 } satisfies Prisma.StartupWhereInput;
 
+// null = no admin decision; true = admin placement; false = founder withdrawal.
+export const adminWallStartupWhere = {
+  ...publicStartupWhere,
+  wallOptIn: false,
+  logoUrl: { not: "" },
+  OR: [{ wallAdminPlacement: null }, { wallAdminPlacement: true }],
+} satisfies Prisma.StartupWhereInput;
+
+export const visibleWallStartupWhere = {
+  OR: [wallStartupWhere, { ...publicStartupWhere, wallAdminPlacement: true, logoUrl: { not: "" } }],
+} satisfies Prisma.StartupWhereInput;
+
 export function orderWallTiles<T extends { id: string; featuredEntry: { sortOrder: number; featuredUntil: Date | null } | null }>(rows: T[], now = new Date()) {
   const active = (row: T) => !!row.featuredEntry && (!row.featuredEntry.featuredUntil || row.featuredEntry.featuredUntil > now);
   return [...rows].sort((a, b) => Number(active(b)) - Number(active(a)) ||

@@ -5,7 +5,7 @@ import { headers } from "next/headers";
 import { revalidateSavedPath } from "@/lib/cache-after-save";
 import { logger } from "@/lib/logger";
 import {
-  FeaturedStartupError, featurePermanentStartup, featureLatestLiveStartup,
+  FeaturedStartupError, featurePermanentStartup, featureLatestLiveStartup, placePublicStartup,
   removeFeaturedEntry, setFeaturedEntryOrder, reorderFeaturedEntries,
 } from "@/lib/featured-startup-store";
 
@@ -31,6 +31,16 @@ export async function addFeaturedStartup(startupId: string, sortOrder?: number):
     refreshFeatured();
     return { success: true };
   } catch (error) { return failure(error, "Failed to add Wall startup"); }
+}
+
+export async function addAdminWallPlacement(startupId: string): Promise<FeaturedResult> {
+  const session = await auth.api.getSession({ headers: await headers() });
+  if (!session?.user.emailVerified || session.user.banned || session.user.role !== "admin") return { error: "Unauthorized" };
+  try {
+    await placePublicStartup(startupId);
+    refreshFeatured();
+    return { success: true };
+  } catch (error) { return failure(error, "Failed to add the public profile to the Wall"); }
 }
 export async function featureLatestStartupForOneDay(): Promise<
   { success: true; startupName: string; featuredUntil: Date } | { error: string }

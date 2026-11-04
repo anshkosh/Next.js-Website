@@ -1,4 +1,4 @@
-import { wallStartupWhere } from "@/lib/startup-wall";
+import { adminWallStartupWhere, wallStartupWhere } from "@/lib/startup-wall";
 import { db } from "@/lib/db";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
@@ -28,12 +28,13 @@ export default async function AdminFeaturedPage() {
           logoUrl: true,
           wallImageUrl: true,
           wallOptIn: true,
+          wallAdminPlacement: true,
           tagline: true,
         },
       },
     },
     // Temporary entries are placed first; all other entries retain their manual order.
-    orderBy: { sortOrder: "asc" },
+    orderBy: [{ sortOrder: "asc" }, { id: "asc" }],
   });
 
   const liveStartups = await db.startup.findMany({
@@ -47,6 +48,11 @@ export default async function AdminFeaturedPage() {
     },
     orderBy: [{ publishedAt: "desc" }, { createdAt: "desc" }, { id: "desc" }],
   });
+  const publicCandidates = session.user.role === "admin" ? await db.startup.findMany({
+    where: adminWallStartupWhere,
+    select: { id: true, name: true },
+    orderBy: [{ name: "asc" }, { id: "asc" }],
+  }) : [];
 
   return (
     <div className="p-6 max-w-4xl mx-auto space-y-6">
@@ -55,13 +61,13 @@ export default async function AdminFeaturedPage() {
           Manage Startup Wall
         </h1>
         <p className="text-sm text-gray-500 mt-1">
-          Choose up to 6 Wall placements from live, approved, opted-in startups. Set their order or spotlight the newest eligible startup for 24 hours.
+          Manage placements for live startups. Admin placements use the published profile logo. Founders can withdraw either kind of placement.
         </p>
       </div>
 
       <FeaturedManager
         featuredList={featuredEntries}
-        availableStartups={liveStartups}
+        availableStartups={[...liveStartups, ...publicCandidates.map(startup => ({ ...startup, adminPlacement: true }))]}
         latestLiveStartup={liveStartups[0] ?? null}
       />
     </div>

@@ -41,8 +41,9 @@ memory adapter and the actual production access-control role factory, not a mock
 permission comparison. No role type-casts hide missing runtime methods.
 
 Team creation serializes on the parent startup row; every manual, one-day and
-legacy feature-allocation path uses the same global advisory lock and six-slot
-capacity check. Reordering is an atomic exact-list operation. Startup-update
+legacy Wall placement path uses the same global advisory lock to keep ordering
+consistent, including beyond six placements. Reordering validates the full list
+and saves changes atomically. Startup-update
 create/delete and counter recount commit together, while cache refresh failures
 cannot turn a committed save into an error response.
 `scripts/test-recheck-invariants-postgres.ts` verifies concurrent team/feature

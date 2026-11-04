@@ -21,7 +21,7 @@ beforeEach(() => {
 it("withdraws immediately and removes consent from the pending review without dropping unrelated edits", async () => {
   expect(await withdrawFromWall(id)).toEqual({ success: true });
   expect(mocks.lock.mock.invocationCallOrder[0]).toBeLessThan(mocks.lookup.mock.invocationCallOrder[0]);
-  expect(mocks.update).toHaveBeenCalledWith({ where: { id }, data: { wallOptIn: false } });
+  expect(mocks.update).toHaveBeenCalledWith({ where: { id }, data: { wallOptIn: false, wallAdminPlacement: false } });
   expect(mocks.revise).toHaveBeenCalledWith({ where: { id: "pending" }, data: { data: { wallOptIn: false, name: "Pending name" } } });
   expect(mocks.revalidate).toHaveBeenCalledWith("/startup-wall");
 });
@@ -53,5 +53,5 @@ it("keeps opt-ins and replacement creatives pending while publishing a withdrawa
   expect(tx.startup.update).not.toHaveBeenCalled();
   expect(tx.startupRevision.upsert).toHaveBeenCalledWith(expect.objectContaining({ create: expect.objectContaining({ data: expect.objectContaining({ wallOptIn: true, wallImageUrl: "/api/uploads/serve/gallery/test.webp" }) }) }));
   await savePublishedRevision(tx as unknown as Prisma.TransactionClient, current, { wallOptIn: false });
-  expect(tx.startup.update).toHaveBeenCalledWith({ where: { id }, data: { wallOptIn: false } });
+  expect(tx.startup.update).toHaveBeenCalledWith({ where: { id }, data: { wallOptIn: false, wallAdminPlacement: false } });
 });

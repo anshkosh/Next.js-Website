@@ -1,6 +1,6 @@
 import type { Prisma, PrismaClient } from "@prisma/client";
 import { db } from "@/lib/db";
-import { wallStartupWhere } from "@/lib/startup-wall";
+import { adminWallStartupWhere, wallStartupWhere } from "@/lib/startup-wall";
 
 export class FeaturedStartupError extends Error {}
 type Client = Pick<PrismaClient, "$transaction">;
@@ -20,16 +20,18 @@ async function locked<T>(client: Client, operation: (tx: Tx) => Promise<T>) {
     return operation(tx);
   });
 }
-async function allocate(tx: Tx, startupId: string, temporary: boolean, explicitOrder?: number) {
-  const startup = await tx.startup.findUnique({ where: { id: startupId, ...wallStartupWhere }, select: { id: true, name: true } });
-  if (!startup) throw new FeaturedStartupError("Only live, approved, opted-in startups with an image can be added to the Wall.");
+async function allocate(tx: Tx, startupId: string, temporary: boolean, explicitOrder?: number, adminPlacement = false) {
+  const eligibility = adminPlacement ? adminWallStartupWhere : wallStartupWhere;
+  if (adminPlacement) {
+    // Serialize against founder withdrawal, which locks the same profile row.
+    await tx.$queryRaw`SELECT id FROM "Startup" WHERE id = ${startupId} FOR UPDATE`;
+  }
+  const startup = await tx.startup.findUnique({ where: { id: startupId, ...eligibility }, select: { id: true, name: true } });
+  if (!startup) throw new FeaturedStartupError(adminPlacement
+    ? "An admin placement requires a live public profile with a logo and no founder withdrawal."
+    : "Only live, approved, opted-in startups with an image can be added to the Wall.");
+  if (adminPlacement) await tx.startup.update({ where: { id: startupId }, data: { wallAdminPlacement: true } });
   const now = new Date();
-  const existing = await tx.featuredStartup.findUnique({ where: { startupId } });
-  const count = await tx.featuredStartup.count({ where: activeWhere(now) });
-  const existingIsActive = existing && (!existing.featuredUntil || existing.featuredUntil > now);
-  if (count >= 6 && !existingIsActive) throw new FeaturedStartupError(temporary
-    ? "All 6 Wall spotlight slots are in use. Remove a spotlight or wait for a temporary placement to expire."
-    : "Maximum limit of 6 Wall spotlights reached.");
   const order = await tx.featuredStartup.aggregate({ where: activeWhere(now), _min: { sortOrder: true }, _max: { sortOrder: true } });
   const sortOrder = explicitOrder ?? (temporary ? (order._min.sortOrder ?? 0) - 1 : (order._max.sortOrder ?? -1) + 1);
   const featuredUntil = temporary ? new Date(now.getTime() + 24 * 60 * 60 * 1000) : null;
@@ -43,6 +45,10 @@ export async function featurePermanentStartup(startupId: string, sortOrder?: num
   validId(startupId);
   if (sortOrder !== undefined) validOrder(sortOrder);
   return locked(client, tx => allocate(tx, startupId, false, sortOrder));
+}
+export async function placePublicStartup(startupId: string, client: Client = db) {
+  validId(startupId);
+  return locked(client, tx => allocate(tx, startupId, false, undefined, true));
 }
 export async function featureLatestLiveStartup(client: Client = db) {
   return locked(client, async tx => {
@@ -61,11 +67,16 @@ export async function setFeaturedEntryOrder(id: string, sortOrder: number, clien
   return locked(client, tx => tx.featuredStartup.update({ where: { id }, data: { sortOrder } }));
 }
 export async function reorderFeaturedEntries(ids: string[], client: Client = db) {
-  if (!Array.isArray(ids) || ids.length > 100 || new Set(ids).size !== ids.length) throw new FeaturedStartupError("Invalid Wall order.");
+  if (!Array.isArray(ids)) throw new FeaturedStartupError("Invalid Wall order.");
+  const requestedIds = new Set(ids);
+  if (requestedIds.size !== ids.length) throw new FeaturedStartupError("Invalid Wall order.");
   ids.forEach(validId);
   return locked(client, async tx => {
-    const entries = await tx.featuredStartup.findMany({ where: activeWhere(new Date()), select: { id: true } });
-    if (entries.length !== ids.length || entries.some(entry => !ids.includes(entry.id))) throw new FeaturedStartupError("The featured list changed. Refresh and try again.");
-    for (const [sortOrder, id] of ids.entries()) await tx.featuredStartup.update({ where: { id }, data: { sortOrder } });
+    const entries = await tx.featuredStartup.findMany({ where: activeWhere(new Date()), select: { id: true, sortOrder: true } });
+    if (entries.length !== ids.length || entries.some(entry => !requestedIds.has(entry.id))) throw new FeaturedStartupError("The featured list changed. Refresh and try again.");
+    const currentOrder = new Map(entries.map(entry => [entry.id, entry.sortOrder]));
+    for (const [sortOrder, id] of ids.entries()) {
+      if (currentOrder.get(id) !== sortOrder) await tx.featuredStartup.update({ where: { id }, data: { sortOrder } });
+    }
   });
 }

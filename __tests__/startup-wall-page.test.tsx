@@ -7,20 +7,30 @@ vi.mock("@/lib/db", () => ({ db: { featuredStartup: { findMany: query }, startup
 import WallPage from "@/app/(public)/startup-wall/page";
 beforeEach(() => { session.mockResolvedValue(null); owned.mockResolvedValue([]); query.mockResolvedValue([]); });
 afterEach(() => { vi.unstubAllEnvs(); vi.clearAllMocks(); });
-it("loads only active eligible placements and links each complete image to its startup profile", async () => {
+it("renders 100 active eligible placements and links their images to the startup profiles", async () => {
   vi.stubEnv("DATABASE_URL", "test-only");
   query.mockResolvedValue([
-    { sortOrder: 0, featuredUntil: null, startup: { id: "one", name: "One", slug: "one", logoUrl: "/logo.svg", wallImageUrl: "" } },
-    { sortOrder: 1, featuredUntil: new Date(Date.now() + 86400000), startup: { id: "two", name: "Two", slug: "two", logoUrl: "/logo.svg", wallImageUrl: "/api/uploads/serve/gallery/test.webp" } },
+    { sortOrder: 0, featuredUntil: null, startup: { id: "one", name: "One", slug: "one", logoUrl: "/logo.svg", wallOptIn: false, wallImageUrl: "/unused-creative.webp" } },
+    { sortOrder: 1, featuredUntil: new Date(Date.now() + 86400000), startup: { id: "two", name: "Two", slug: "two", logoUrl: "/logo.svg", wallOptIn: true, wallImageUrl: "/api/uploads/serve/gallery/test.webp" } },
+    ...Array.from({ length: 98 }, (_, index) => ({
+      sortOrder: index + 2, featuredUntil: null,
+      startup: { id: `extra-${index}`, name: `Extra ${index}`, slug: `extra-${index}`, logoUrl: "/logo.svg", wallImageUrl: "" },
+    })),
   ]);
   const html = renderToStaticMarkup(await WallPage());
   expect(query).toHaveBeenCalledWith(expect.objectContaining({ where: expect.objectContaining({
-    startup: expect.objectContaining({ status: "LIVE", wallOptIn: true, founder: { founderMode: true } }),
+    startup: { OR: [
+      expect.objectContaining({ status: "LIVE", wallOptIn: true, founder: { founderMode: true } }),
+      expect.objectContaining({ status: "LIVE", wallAdminPlacement: true, founder: { founderMode: true } }),
+    ] },
     OR: [{ featuredUntil: null }, { featuredUntil: { gt: expect.any(Date) } }],
   }) }));
   expect(html.indexOf('href="/startups/two"')).toBeLessThan(html.indexOf('href="/startups/one"'));
+  expect(query.mock.calls[0][0]).not.toHaveProperty("take");
+  expect(html.match(/href="\/startups\//g)).toHaveLength(100);
   expect(html).toContain('alt="Two creative"'); expect(html).toContain('alt="One logo"');
-  expect(html).toContain('data-count="2"');
+  expect(html).not.toContain("unused-creative.webp");
+  expect(html).toContain('data-count="many"');
   expect(html).not.toContain("Placeholder"); expect(html).not.toContain("Upvote");
 });
 it("shows an honest empty state without dummy tiles when no placements exist", async () => {

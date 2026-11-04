@@ -3,7 +3,8 @@ import { randomUUID } from "node:crypto";
 import { Prisma, PrismaClient } from "@prisma/client";
 import { createTeamFounder, TeamFounderError } from "../lib/startup-team-store";
 import { createStartupUpdate, removeStartupUpdate } from "../lib/startup-update-store";
-import { featurePermanentStartup, featureLatestLiveStartup, removeFeaturedEntry, FeaturedStartupError } from "../lib/featured-startup-store";
+import { featurePermanentStartup, featureLatestLiveStartup, placePublicStartup, removeFeaturedEntry, FeaturedStartupError } from "../lib/featured-startup-store";
+import { visibleWallStartupWhere } from "../lib/startup-wall";
 import { invariantTestDatabaseUrl } from "./invariant-test-database";
 
 async function main() {
@@ -39,13 +40,20 @@ async function main() {
 
     for (const startup of startups.slice(0, 5)) await featurePermanentStartup(startup.id, undefined, client);
     const features = await Promise.allSettled([featurePermanentStartup(startups[5].id, undefined, client), featureLatestLiveStartup(client)]);
-    assert.equal(features.filter(result => result.status === "fulfilled").length, 1);
-    assert.equal(features.filter(result => result.status === "rejected" && result.reason instanceof FeaturedStartupError).length, 1);
-    assert.equal(await client.featuredStartup.count(), 6);
-    await featurePermanentStartup(startups[0].id, undefined, client); // renewal at capacity
+    assert.equal(features.filter(result => result.status === "fulfilled").length, 2);
+    assert.equal(await client.featuredStartup.count(), 7);
+    await featurePermanentStartup(startups[0].id, undefined, client);
+    assert.equal(await client.featuredStartup.count(), 7);
     await removeFeaturedEntry({ startupId: startups[0].id }, client);
     await featureLatestLiveStartup(client);
-    assert.ok(await client.featuredStartup.count() <= 6);
+    assert.equal(await client.featuredStartup.count(), 6);
+
+    const adminStartup = startups[8];
+    await placePublicStartup(adminStartup.id, client);
+    assert.equal((await client.startup.findUniqueOrThrow({ where: { id: adminStartup.id, ...visibleWallStartupWhere } })).wallOptIn, false);
+    await client.startup.update({ where: { id: adminStartup.id }, data: { wallAdminPlacement: false } });
+    assert.equal(await client.startup.findUnique({ where: { id: adminStartup.id, ...visibleWallStartupWhere } }), null);
+    await assert.rejects(placePublicStartup(adminStartup.id, client), FeaturedStartupError);
 
     // The failing delegate still uses a real PostgreSQL transaction: successful
     // inserts/deletes before the counter failure must be rolled back by Prisma.
@@ -69,7 +77,7 @@ async function main() {
     assert.equal(saved.update.status, "PENDING");
     await removeStartupUpdate(owner, saved.update.id, client);
     assert.equal((await client.startup.findUniqueOrThrow({ where: { id: startupId } })).updateCount, 0);
-    console.log("Recheck invariants: concurrent team/feature limits and update rollback passed against PostgreSQL");
+    console.log("Recheck invariants: concurrent team and Wall writes plus update rollback passed against PostgreSQL");
   } finally {
     if (owner) { await client.startup.deleteMany({ where: { founderId: owner } }); await client.user.delete({ where: { id: owner } }); }
     if (category) await client.category.delete({ where: { id: category } });

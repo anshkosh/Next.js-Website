@@ -1,5 +1,11 @@
 # Progress
 
+## 4 November 2026 — Startup Wall placement limit
+
+Removed the six startup limit from Wall assignment and display. Manage Startup Wall shows the full assigned list and its count. The public grid continues below six tiles. The approval, founder opt-in, ordering, and spotlight expiry rules still apply.
+
+Added an admin placement option that uses a live startup's public logo. The founder's opt-in remains separate, and withdrawing hides the placement and prevents admins from adding it again. The Wall render test covers 100 placements.
+
 ## 4 November 2026 — Startup Wall (source prepared)
 
 Owner: Codex. Branch: `codex/startup-wall-live`, from origin/main `fdde8bc5`. Implements founder image selection and moderated consent, immediate withdrawal, existing-feature grandfathering, a public image Wall and Admin spotlight rewiring. Discover featured carousel is removed. Source product overview records behavior and the bounded migration. No merge, deployment or production migration has occurred.

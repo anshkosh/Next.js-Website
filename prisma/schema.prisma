@@ -110,6 +110,7 @@ model Startup {
   galleryImages String[]
   wallOptIn     Boolean       @default(false)
   wallImageUrl  String        @default("")
+  wallAdminPlacement Boolean?
   founderName   String
   categoryId    String
   category      Category      @relation(fields: [categoryId], references: [id])

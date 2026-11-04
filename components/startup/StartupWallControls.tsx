@@ -20,7 +20,7 @@ export default function StartupWallControls({ startupId, optedIn, imageUrl, logo
   }
   return <section id="startup-wall-settings" className="scroll-mt-28 space-y-4 rounded-xl border border-gray-200 bg-gray-50 p-5" aria-labelledby="wall-settings-title">
     <h2 id="wall-settings-title" className="font-heading text-2xl font-bold">Startup Wall</h2>
-    <p className="text-sm text-gray-600">Free placement for your logo or creative, linking to your startup page. Opt-ins and image changes need moderator approval. Admins select approved startups for placement.</p>
+    <p className="text-sm text-gray-600">Admins can place your public profile logo on the Wall. You can request a placement or submit a custom image for review, and you can withdraw your startup at any time.</p>
     <label className="flex items-center gap-3 font-medium"><input type="checkbox" checked={optedIn} onChange={e => onChange(e.target.checked, imageUrl)} />Request a place on the Startup Wall</label>
     <button type="button" onClick={() => void withdraw()} disabled={busy} className="min-h-11 text-sm font-semibold text-coral-700 underline disabled:opacity-50">Withdraw from Wall now</button>
     {optedIn && <div className="space-y-3">
