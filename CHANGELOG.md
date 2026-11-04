@@ -2,7 +2,7 @@
 
 ## Unreleased — white email logo header
 
-- Set the logo header band to white in application email templates and the operations alert renderer, with a light color scheme for dark-mode mail clients.
+- Render the full logo header as a white image band in application email templates and the operations alert renderer so dark-mode clients are less likely to recolor it.
 
 ## Unreleased — founder signup continuity
 

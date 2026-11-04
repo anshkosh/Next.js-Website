@@ -20,9 +20,9 @@ export default function EmailLayout({ preview, category, title, reason, preferen
       <Preview>{preview}</Preview>
       <Body style={{ margin: 0, padding: "24px 12px", backgroundColor: "#f4f5f7", fontFamily: "Arial, Helvetica, sans-serif", color: "#111827" }}>
         <Container style={{ width: "100%", maxWidth: "600px", margin: "0 auto" }}>
-          <Section style={{ backgroundColor: "#ffffff", colorScheme: "light", border: "1px solid #e5e7eb", borderTop: "4px solid #e8521e", borderRadius: "12px 12px 0 0", padding: "24px" }}>
-            <Link href={baseUrl}>
-              <Img src="https://www.anshkosh.com/email-brand.png" alt="Anshkosh" width="216" height="48" style={{ display: "block", border: 0, maxWidth: "100%", height: "auto" }} />
+          <Section style={{ backgroundColor: "#ffffff", border: "1px solid #e5e7eb", borderTop: 0, borderRadius: "12px 12px 0 0", padding: 0 }}>
+            <Link href={baseUrl} style={{ display: "block", lineHeight: 0 }}>
+              <Img src="https://www.anshkosh.com/email-header.png" alt="Anshkosh" width="600" height="100" style={{ display: "block", width: "100%", maxWidth: "600px", height: "auto", border: 0, borderRadius: "11px 11px 0 0" }} />
             </Link>
           </Section>
           <Section style={{ backgroundColor: "#ffffff", border: "1px solid #e5e7eb", borderTop: 0, borderRadius: "0 0 12px 12px", padding: "28px 24px" }}>

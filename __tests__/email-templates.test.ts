@@ -24,9 +24,9 @@ describe("branded email rendering", () => {
     const html = await renderEmailTemplate(template, data);
     const document = parse(html);
     const brand = document.querySelector('img[alt="Anshkosh"]');
-    expect(brand?.getAttribute("src")).toBe("https://www.anshkosh.com/email-brand.png");
-    expect(brand?.getAttribute("width")).toBe("216");
-    expect(brand?.getAttribute("height")).toBe("48");
+    expect(brand?.getAttribute("src")).toBe("https://www.anshkosh.com/email-header.png");
+    expect(brand?.getAttribute("width")).toBe("600");
+    expect(brand?.getAttribute("height")).toBe("100");
     expect(document.body.textContent).toContain("The Anshkosh team");
     expect(document.querySelectorAll("h1")).toHaveLength(1);
     expect(document.querySelector('a[href="mailto:hello@anshkosh.com"]')).not.toBeNull();
@@ -74,7 +74,7 @@ describe("branded email rendering", () => {
   it("uses the same logo in operations alerts and escapes log content", () => {
     const message = 'Worker offline\n<img src=x onerror="alert(1)"> & check';
     const document = parse(renderOperationsEmail(message));
-    expect(document.querySelector('img[alt="Anshkosh"]')?.getAttribute("src")).toBe("https://www.anshkosh.com/email-brand.png");
+    expect(document.querySelector('img[alt="Anshkosh"]')?.getAttribute("src")).toBe("https://www.anshkosh.com/email-header.png");
     expect(document.body.textContent).toContain("The Anshkosh team");
     expect(document.body.textContent).toContain(message);
     expect(document.querySelector("[onerror]")).toBeNull();

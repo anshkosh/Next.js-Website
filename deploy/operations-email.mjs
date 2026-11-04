@@ -4,8 +4,8 @@ export function renderOperationsEmail(message) {
   return `<!doctype html><html lang="en" dir="ltr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Anshkosh operations alert</title></head>
 <body style="margin:0;padding:24px 12px;background-color:#f4f5f7;font-family:Arial,Helvetica,sans-serif;color:#111827">
 <div style="display:none;max-height:0;overflow:hidden">Anshkosh server health and service updates.</div>
-<table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width:600px;margin:0 auto"><tr><td bgcolor="#ffffff" style="padding:24px;background-color:#ffffff;color-scheme:light;border:1px solid #e5e7eb;border-top:4px solid #e8521e;border-radius:12px 12px 0 0">
-<a href="https://www.anshkosh.com"><img src="https://www.anshkosh.com/email-brand.png" width="216" height="48" alt="Anshkosh" style="display:block;border:0;max-width:100%;height:auto"></a>
+<table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width:600px;margin:0 auto"><tr><td bgcolor="#ffffff" style="padding:0;background-color:#ffffff;border:1px solid #e5e7eb;border-top:0;border-radius:12px 12px 0 0">
+<a href="https://www.anshkosh.com" style="display:block;line-height:0"><img src="https://www.anshkosh.com/email-header.png" width="600" height="100" alt="Anshkosh" style="display:block;width:100%;max-width:600px;height:auto;border:0;border-radius:11px 11px 0 0"></a>
 </td></tr><tr><td style="padding:28px 24px;background-color:#ffffff;border:1px solid #e5e7eb;border-top:0;border-radius:0 0 12px 12px">
 <p style="color:#a23510;font-size:11px;line-height:16px;font-weight:700;letter-spacing:1.5px;margin:0 0 8px">OPERATIONS</p><h1 style="font-size:27px;line-height:35px;letter-spacing:-0.6px;margin:0 0 20px">Operations alert.</h1>
 <p style="color:#374151;font-size:15px;line-height:25px;white-space:pre-wrap;overflow-wrap:anywhere;margin:0 0 16px">${escaped}</p>
