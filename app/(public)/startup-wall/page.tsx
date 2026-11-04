@@ -7,19 +7,23 @@ import { headers } from "next/headers";
 import { loginHref } from "@/lib/login-return";
 import { db } from "@/lib/db";
 import { seoMetadata } from "@/lib/seo";
-import { wallStartupWhere, orderWallTiles } from "@/lib/startup-wall";
+import { visibleWallStartupWhere, orderWallTiles } from "@/lib/startup-wall";
 export const dynamic = "force-dynamic";
 export const metadata = seoMetadata({ title: "Startup Wall — Anshkosh", description: "Discover startups through their logos and creative. Visit a startup profile to learn more.", path: "/startup-wall" });
 export default async function StartupWallPage() {
   const now = new Date();
   const placements = process.env.DATABASE_URL ? await db.featuredStartup.findMany({
-    where: { startup: wallStartupWhere, OR: [{ featuredUntil: null }, { featuredUntil: { gt: now } }] },
+    where: { startup: visibleWallStartupWhere, OR: [{ featuredUntil: null }, { featuredUntil: { gt: now } }] },
     select: { sortOrder: true, featuredUntil: true, startup: {
-      select: { id: true, name: true, slug: true, logoUrl: true, wallImageUrl: true },
+      select: { id: true, name: true, slug: true, logoUrl: true, wallImageUrl: true, wallOptIn: true },
     } },
     orderBy: [{ sortOrder: "asc" }, { id: "asc" }],
   }) : [];
-  const rows = placements.map(({ startup, sortOrder, featuredUntil }) => ({ ...startup, featuredEntry: { sortOrder, featuredUntil } }));
+  const rows = placements.map(({ startup, sortOrder, featuredUntil }) => ({
+    ...startup,
+    wallImageUrl: startup.wallOptIn ? startup.wallImageUrl : "",
+    featuredEntry: { sortOrder, featuredUntil },
+  }));
   const tiles = orderWallTiles(rows, now).filter(row => row.wallImageUrl || row.logoUrl);
   const session = process.env.DATABASE_URL ? await auth.api.getSession({ headers: await headers() }) : null;
   let promoteHref: string | null = loginHref("/startup-wall");

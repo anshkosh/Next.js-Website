@@ -26,7 +26,10 @@ export async function savePublishedRevision(tx: Prisma.TransactionClient, startu
   });
   // Withdrawal takes effect immediately; the pending revision also carries false.
   if (patch.wallOptIn === false) {
-    await tx.startup.update({ where: { id: startup.id }, data: { wallOptIn: false } });
+    await tx.startup.update({ where: { id: startup.id }, data: {
+      wallOptIn: false,
+      ...(current.wallOptIn ? { wallAdminPlacement: false } : {}),
+    } });
   }
   // A privacy restriction/removal must take effect immediately, not after approval.
   if (patch.metadata?.pitchDeckVisibility === "private" || patch.metadata?.pitchDeckUrl === "") {

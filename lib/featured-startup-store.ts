@@ -1,6 +1,6 @@
 import type { Prisma, PrismaClient } from "@prisma/client";
 import { db } from "@/lib/db";
-import { wallStartupWhere } from "@/lib/startup-wall";
+import { adminWallStartupWhere, wallStartupWhere } from "@/lib/startup-wall";
 
 export class FeaturedStartupError extends Error {}
 type Client = Pick<PrismaClient, "$transaction">;
@@ -20,9 +20,17 @@ async function locked<T>(client: Client, operation: (tx: Tx) => Promise<T>) {
     return operation(tx);
   });
 }
-async function allocate(tx: Tx, startupId: string, temporary: boolean, explicitOrder?: number) {
-  const startup = await tx.startup.findUnique({ where: { id: startupId, ...wallStartupWhere }, select: { id: true, name: true } });
-  if (!startup) throw new FeaturedStartupError("Only live, approved, opted-in startups with an image can be added to the Wall.");
+async function allocate(tx: Tx, startupId: string, temporary: boolean, explicitOrder?: number, adminPlacement = false) {
+  const eligibility = adminPlacement ? adminWallStartupWhere : wallStartupWhere;
+  if (adminPlacement) {
+    // Serialize against founder withdrawal, which locks the same profile row.
+    await tx.$queryRaw`SELECT id FROM "Startup" WHERE id = ${startupId} FOR UPDATE`;
+  }
+  const startup = await tx.startup.findUnique({ where: { id: startupId, ...eligibility }, select: { id: true, name: true } });
+  if (!startup) throw new FeaturedStartupError(adminPlacement
+    ? "An admin placement requires a live public profile with a logo and no founder withdrawal."
+    : "Only live, approved, opted-in startups with an image can be added to the Wall.");
+  if (adminPlacement) await tx.startup.update({ where: { id: startupId }, data: { wallAdminPlacement: true } });
   const now = new Date();
   const order = await tx.featuredStartup.aggregate({ where: activeWhere(now), _min: { sortOrder: true }, _max: { sortOrder: true } });
   const sortOrder = explicitOrder ?? (temporary ? (order._min.sortOrder ?? 0) - 1 : (order._max.sortOrder ?? -1) + 1);
@@ -37,6 +45,10 @@ export async function featurePermanentStartup(startupId: string, sortOrder?: num
   validId(startupId);
   if (sortOrder !== undefined) validOrder(sortOrder);
   return locked(client, tx => allocate(tx, startupId, false, sortOrder));
+}
+export async function placePublicStartup(startupId: string, client: Client = db) {
+  validId(startupId);
+  return locked(client, tx => allocate(tx, startupId, false, undefined, true));
 }
 export async function featureLatestLiveStartup(client: Client = db) {
   return locked(client, async tx => {

@@ -2,10 +2,10 @@
 import { beforeEach, expect, it, vi } from "vitest";
 import type { PrismaClient } from "@prisma/client";
 vi.mock("@/lib/db", () => ({ db: {} }));
-import { featurePermanentStartup, featureLatestLiveStartup, reorderFeaturedEntries } from "@/lib/featured-startup-store";
+import { featurePermanentStartup, featureLatestLiveStartup, placePublicStartup, reorderFeaturedEntries } from "@/lib/featured-startup-store";
 
 const tx = {
-  $queryRaw: vi.fn(), startup: { findUnique: vi.fn(), findFirst: vi.fn() },
+  $queryRaw: vi.fn(), startup: { findUnique: vi.fn(), findFirst: vi.fn(), update: vi.fn() },
   featuredStartup: { aggregate: vi.fn(), upsert: vi.fn(), findMany: vi.fn(), update: vi.fn() },
 };
 const client = { $transaction: async (operation: (tx: object) => unknown) => operation(tx) } as unknown as Pick<PrismaClient, "$transaction">;
@@ -31,6 +31,16 @@ it("does not allocate an unpublished startup", async () => {
   tx.startup.findUnique.mockResolvedValue(null);
   await expect(featurePermanentStartup("draft", undefined, client)).rejects.toThrow("Only live");
   expect(tx.featuredStartup.upsert).not.toHaveBeenCalled();
+});
+it("assigns an admin placement without writing founder consent", async () => {
+  await placePublicStartup("live", client);
+  expect(tx.$queryRaw).toHaveBeenCalledTimes(2);
+  expect(tx.startup.findUnique).toHaveBeenCalledWith(expect.objectContaining({ where: expect.objectContaining({
+    wallOptIn: false, logoUrl: { not: "" },
+    OR: [{ wallAdminPlacement: null }, { wallAdminPlacement: true }],
+  }) }));
+  expect(tx.startup.update).toHaveBeenCalledWith({ where: { id: "live" }, data: { wallAdminPlacement: true } });
+  expect(tx.featuredStartup.upsert).toHaveBeenCalledOnce();
 });
 it("validates IDs, integer orders and duplicate reorder IDs before opening a transaction", async () => {
   await expect(featurePermanentStartup("", 0, client)).rejects.toThrow("Invalid");
