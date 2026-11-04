@@ -1,5 +1,9 @@
 # Website changelog
 
+## Unreleased — Startup Wall redesign
+
+- Replace the sparse bento grid with a dense, colorful, pixel-inspired startup mosaic, responsive search, and category filtering. Show startup names/categories and fall back to a startup monogram if its image fails.
+
 ## Unreleased — white email logo header
 
 - Render the full logo header as a white image band in application email templates and the operations alert renderer so dark-mode clients are less likely to recolor it.
