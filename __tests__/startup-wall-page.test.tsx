@@ -12,6 +12,10 @@ it("loads only active eligible placements and links each complete image to its s
   query.mockResolvedValue([
     { sortOrder: 0, featuredUntil: null, startup: { id: "one", name: "One", slug: "one", logoUrl: "/logo.svg", wallImageUrl: "" } },
     { sortOrder: 1, featuredUntil: new Date(Date.now() + 86400000), startup: { id: "two", name: "Two", slug: "two", logoUrl: "/logo.svg", wallImageUrl: "/api/uploads/serve/gallery/test.webp" } },
+    ...Array.from({ length: 5 }, (_, index) => ({
+      sortOrder: index + 2, featuredUntil: null,
+      startup: { id: `extra-${index}`, name: `Extra ${index}`, slug: `extra-${index}`, logoUrl: "/logo.svg", wallImageUrl: "" },
+    })),
   ]);
   const html = renderToStaticMarkup(await WallPage());
   expect(query).toHaveBeenCalledWith(expect.objectContaining({ where: expect.objectContaining({
@@ -19,8 +23,10 @@ it("loads only active eligible placements and links each complete image to its s
     OR: [{ featuredUntil: null }, { featuredUntil: { gt: expect.any(Date) } }],
   }) }));
   expect(html.indexOf('href="/startups/two"')).toBeLessThan(html.indexOf('href="/startups/one"'));
+  expect(query.mock.calls[0][0]).not.toHaveProperty("take");
+  expect(html.match(/href="\/startups\//g)).toHaveLength(7);
   expect(html).toContain('alt="Two creative"'); expect(html).toContain('alt="One logo"');
-  expect(html).toContain('data-count="2"');
+  expect(html).toContain('data-count="many"');
   expect(html).not.toContain("Placeholder"); expect(html).not.toContain("Upvote");
 });
 it("shows an honest empty state without dummy tiles when no placements exist", async () => {

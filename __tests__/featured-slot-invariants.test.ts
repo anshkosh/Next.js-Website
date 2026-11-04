@@ -2,41 +2,30 @@
 import { beforeEach, expect, it, vi } from "vitest";
 import type { PrismaClient } from "@prisma/client";
 vi.mock("@/lib/db", () => ({ db: {} }));
-import { featurePermanentStartup, featureLatestLiveStartup, reorderFeaturedEntries, FeaturedStartupError } from "@/lib/featured-startup-store";
+import { featurePermanentStartup, featureLatestLiveStartup, reorderFeaturedEntries } from "@/lib/featured-startup-store";
 
 const tx = {
   $queryRaw: vi.fn(), startup: { findUnique: vi.fn(), findFirst: vi.fn() },
-  featuredStartup: { count: vi.fn(), findUnique: vi.fn(), aggregate: vi.fn(), upsert: vi.fn(), findMany: vi.fn(), update: vi.fn() },
+  featuredStartup: { aggregate: vi.fn(), upsert: vi.fn(), findMany: vi.fn(), update: vi.fn() },
 };
 const client = { $transaction: async (operation: (tx: object) => unknown) => operation(tx) } as unknown as Pick<PrismaClient, "$transaction">;
 beforeEach(() => {
   vi.resetAllMocks(); tx.$queryRaw.mockResolvedValue([]);
   tx.startup.findUnique.mockResolvedValue({ id: "live", name: "Live" });
   tx.startup.findFirst.mockResolvedValue({ id: "live" });
-  tx.featuredStartup.findUnique.mockResolvedValue(null);
-  tx.featuredStartup.count.mockResolvedValue(5);
   tx.featuredStartup.aggregate.mockResolvedValue({ _min: { sortOrder: 0 }, _max: { sortOrder: 4 } });
 });
-it("takes the global allocation lock before counting or writing", async () => {
+it("takes the global allocation lock before calculating placement order", async () => {
   await featurePermanentStartup("live", undefined, client);
-  expect(tx.$queryRaw.mock.invocationCallOrder[0]).toBeLessThan(tx.featuredStartup.count.mock.invocationCallOrder[0]);
+  expect(tx.$queryRaw.mock.invocationCallOrder[0]).toBeLessThan(tx.featuredStartup.aggregate.mock.invocationCallOrder[0]);
   expect(tx.$queryRaw.mock.calls[0][0].join("")).toContain("featured-startup-slots");
 });
-it.each([false, true])("rejects an extra active feature at capacity (temporary=%s)", async temporary => {
-  tx.featuredStartup.count.mockResolvedValue(6);
-  await expect(temporary ? featureLatestLiveStartup(client) : featurePermanentStartup("live", 0, client)).rejects.toBeInstanceOf(FeaturedStartupError);
-  expect(tx.featuredStartup.upsert).not.toHaveBeenCalled();
-});
-it("allows renewal of an existing active entry at capacity", async () => {
-  tx.featuredStartup.count.mockResolvedValue(6);
-  tx.featuredStartup.findUnique.mockResolvedValue({ featuredUntil: null });
-  await featurePermanentStartup("live", undefined, client);
-  expect(tx.featuredStartup.upsert).toHaveBeenCalledOnce();
-});
-it("an expired entry cannot bypass the active capacity limit", async () => {
-  tx.featuredStartup.count.mockResolvedValue(6);
-  tx.featuredStartup.findUnique.mockResolvedValue({ featuredUntil: new Date(0) });
-  await expect(featurePermanentStartup("live", undefined, client)).rejects.toBeInstanceOf(FeaturedStartupError);
+it.each([false, true])("allocates an extra placement beyond six entries (temporary=%s)", async temporary => {
+  tx.featuredStartup.aggregate.mockResolvedValue({ _min: { sortOrder: 0 }, _max: { sortOrder: 5 } });
+  await (temporary ? featureLatestLiveStartup(client) : featurePermanentStartup("live", undefined, client));
+  expect(tx.featuredStartup.upsert).toHaveBeenCalledWith(expect.objectContaining({
+    create: expect.objectContaining({ startupId: "live", sortOrder: temporary ? -1 : 6 }),
+  }));
 });
 it("does not allocate an unpublished startup", async () => {
   tx.startup.findUnique.mockResolvedValue(null);
@@ -54,9 +43,9 @@ it("rejects stale or partial reorder submissions before changing any order", asy
   await expect(reorderFeaturedEntries(["a"], client)).rejects.toThrow("Refresh");
   expect(tx.featuredStartup.update).not.toHaveBeenCalled();
 });
-it("reorders every entry within the same locked transaction", async () => {
-  tx.featuredStartup.findMany.mockResolvedValue([{ id: "a" }, { id: "b" }]);
-  await reorderFeaturedEntries(["b", "a"], client);
+it("updates the changed positions in the same locked transaction", async () => {
+  tx.featuredStartup.findMany.mockResolvedValue([{ id: "a", sortOrder: 0 }, { id: "b", sortOrder: 1 }, { id: "c", sortOrder: 2 }]);
+  await reorderFeaturedEntries(["b", "a", "c"], client);
   expect(tx.featuredStartup.update.mock.calls.map(([arg]) => arg)).toEqual([
     { where: { id: "b" }, data: { sortOrder: 0 } }, { where: { id: "a" }, data: { sortOrder: 1 } },
   ]);

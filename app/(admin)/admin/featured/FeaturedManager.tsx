@@ -119,17 +119,6 @@ export default function FeaturedManager({
 
   return (
     <div className="space-y-8">
-      {/* Header Slot Status */}
-      <div className="bg-white p-4 rounded-xl border border-gray-200 flex items-center justify-between shadow-2xs">
-        <div className="flex items-center gap-2">
-          <Star className="w-5 h-5 text-amber-500 fill-amber-500" />
-          <span className="font-bold text-gray-900 font-heading">Wall spotlight capacity</span>
-        </div>
-        <span className="text-xs font-bold px-3 py-1 rounded-full bg-coral-50 text-coral-600 border border-coral-200">
-          {featuredList.length} / 6 slots used
-        </span>
-      </div>
-
       {message && (
         <div
           className={`p-4 rounded-xl text-sm font-semibold border ${
@@ -168,22 +157,23 @@ export default function FeaturedManager({
           <button
             type="button"
             onClick={handleFeatureLatest}
-            disabled={!latestLiveStartup || isPending || (featuredList.length >= 6 && !latestFeatured)}
+            disabled={!latestLiveStartup || isPending}
             className="inline-flex min-h-11 shrink-0 items-center justify-center gap-2 rounded-xl bg-coral-600 px-5 py-2.5 text-sm font-semibold text-white shadow-2xs transition-colors hover:bg-coral-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-coral-600 disabled:cursor-not-allowed disabled:opacity-50"
           >
             <Zap className="h-4 w-4" aria-hidden="true" />
             {isPending ? "Updating Wall…" : latestFeatured ? "Restart 24-hour spotlight" : "Spotlight for 24 hours"}
           </button>
         </div>
-        {featuredList.length >= 6 && !latestFeatured && (
-          <p className="mt-4 border-t border-coral-200 pt-3 text-xs text-gray-600">All six slots are in use. Remove a Wall spotlight to make room for the newest listing.</p>
-        )}
       </section>
 
       {/* Featured List */}
       <div className="bg-white rounded-2xl border border-gray-200 shadow-2xs overflow-hidden">
-        <div className="p-4 border-b border-gray-100 bg-gray-50/50 font-bold text-gray-900 text-sm font-heading">
-          Ordered Wall spotlights
+        <div className="flex items-center justify-between gap-2 border-b border-gray-100 bg-gray-50/50 p-4">
+          <h2 className="flex items-center gap-2 font-heading text-sm font-bold text-gray-900">
+            <Star className="h-5 w-5 fill-amber-500 text-amber-500" aria-hidden="true" />
+            Assigned startups
+          </h2>
+          <span className="text-xs font-semibold text-gray-600">{featuredList.length} assigned</span>
         </div>
 
         {featuredList.length === 0 ? (
@@ -273,7 +263,7 @@ export default function FeaturedManager({
           <select
             value={selectedStartupId}
             onChange={(e) => setSelectedStartupId(e.target.value)}
-            disabled={featuredList.length >= 6 || isPending}
+            disabled={dropdownOptions.length === 0 || isPending}
             className="flex-1 px-3 py-2 text-sm border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-coral-500/20"
           >
             <option value="">Select an approved, opted-in startup...</option>
@@ -286,7 +276,7 @@ export default function FeaturedManager({
 
           <button
             onClick={handleAdd}
-            disabled={!selectedStartupId || featuredList.length >= 6 || isPending}
+            disabled={!selectedStartupId || isPending}
             className="px-5 py-2 bg-coral-600 hover:bg-coral-700 text-white rounded-xl font-bold text-sm transition-colors flex items-center justify-center gap-1.5 shadow-2xs disabled:opacity-50"
           >
             <Plus className="w-4 h-4" />

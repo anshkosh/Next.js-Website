@@ -10,7 +10,7 @@
 .grid[data-count="3"] { grid-template-areas: "a a" "a a" "b c"; }
 .grid[data-count="4"] { grid-template-areas: "a a" "a a" "b b" "c d"; }
 .grid[data-count="5"] { grid-template-areas: "a a" "a a" "b c" "d d" "e e"; }
-.grid[data-count="6"] { grid-template-areas: "a a" "a a" "b b" "c d" "e f"; }
+.grid:is([data-count="6"], [data-count="many"]) { grid-template-areas: "a a" "a a" "b b" "c d" "e f"; }
 
 .tile {
   position: relative;
@@ -29,6 +29,7 @@
 .tile:nth-child(4) { grid-area: d; background: #f0f5f2; }
 .tile:nth-child(5) { grid-area: e; background: #faf1eb; }
 .tile:nth-child(6) { grid-area: f; background: #f2f4f8; }
+.tile:nth-child(n+7):last-child:nth-child(odd) { grid-column: 1 / -1; }
 
 .tile:hover {
   transform: translateY(-3px);
@@ -52,7 +53,7 @@
   .grid[data-count="2"] { grid-template-areas: "a b"; grid-auto-rows: 320px; }
   .grid[data-count="3"] { grid-template-areas: "a b" "a c"; }
   .grid[data-count="5"] { grid-template-areas: "a a" "a a" "b c" "d e"; }
-  .grid[data-count="6"] { grid-template-areas: "a a" "a a" "b c" "d d" "e f"; }
+  .grid:is([data-count="6"], [data-count="many"]) { grid-template-areas: "a a" "a a" "b c" "d d" "e f"; }
 }
 
 @media (min-width: 1024px) {
@@ -65,7 +66,8 @@
   .grid[data-count="3"] { grid-template-areas: "a a b b" "a a c c"; }
   .grid[data-count="4"] { grid-template-areas: "a a b b" "a a c d"; }
   .grid[data-count="5"] { grid-template-areas: "a a b b" "a a c d" "e e e e"; }
-  .grid[data-count="6"] { grid-template-areas: "a a b b" "a a c d" "e e f f"; }
+  .grid:is([data-count="6"], [data-count="many"]) { grid-template-areas: "a a b b" "a a c d" "e e f f"; }
+  .tile:nth-child(n+7) { grid-column: span 2; }
 }
 
 @media (prefers-reduced-motion: reduce) {

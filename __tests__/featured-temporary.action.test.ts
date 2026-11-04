@@ -4,8 +4,6 @@ const mocks = vi.hoisted(() => ({
   getSession: vi.fn(),
   startupFindFirst: vi.fn(),
   startupFindUnique: vi.fn(),
-  featuredFindUnique: vi.fn(),
-  featuredCount: vi.fn(),
   featuredAggregate: vi.fn(),
   featuredUpsert: vi.fn(),
   revalidatePath: vi.fn(),
@@ -20,8 +18,6 @@ vi.mock("@/lib/db", () => ({
       $queryRaw: async () => [],
       startup: { findFirst: mocks.startupFindFirst, findUnique: mocks.startupFindUnique },
       featuredStartup: {
-        findUnique: mocks.featuredFindUnique,
-        count: mocks.featuredCount,
         aggregate: mocks.featuredAggregate,
         upsert: mocks.featuredUpsert,
       },
@@ -38,8 +34,6 @@ describe("feature newest live startup for one day", () => {
     mocks.getSession.mockResolvedValue({ user: { role: "admin", emailVerified: true, banned: false } });
     mocks.startupFindFirst.mockResolvedValue({ id: "latest", name: "Latest startup" });
     mocks.startupFindUnique.mockResolvedValue({ id: "latest", name: "Latest startup" });
-    mocks.featuredFindUnique.mockResolvedValue(null);
-    mocks.featuredCount.mockResolvedValue(2);
     mocks.featuredAggregate.mockResolvedValue({ _min: { sortOrder: 0 } });
     mocks.featuredUpsert.mockResolvedValue({});
   });
@@ -72,19 +66,11 @@ describe("feature newest live startup for one day", () => {
     });
   });
 
-  it("does not exceed six active slots when the latest listing is not already featured", async () => {
-    mocks.featuredCount.mockResolvedValue(6);
-    const result = await featureLatestStartupForOneDay();
-
-    expect(result).toEqual({ error: "All 6 Wall spotlight slots are in use. Remove a spotlight or wait for a temporary placement to expire." });
-    expect(mocks.featuredUpsert).not.toHaveBeenCalled();
-  });
-
   it("does not feature anything when there are no live startups", async () => {
     mocks.startupFindFirst.mockResolvedValue(null);
     const result = await featureLatestStartupForOneDay();
 
     expect(result).toEqual({ error: "There are no eligible startups for the Wall yet." });
-    expect(mocks.featuredCount).not.toHaveBeenCalled();
+    expect(mocks.featuredUpsert).not.toHaveBeenCalled();
   });
 });

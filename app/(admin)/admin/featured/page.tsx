@@ -33,7 +33,7 @@ export default async function AdminFeaturedPage() {
       },
     },
     // Temporary entries are placed first; all other entries retain their manual order.
-    orderBy: { sortOrder: "asc" },
+    orderBy: [{ sortOrder: "asc" }, { id: "asc" }],
   });
 
   const liveStartups = await db.startup.findMany({
@@ -55,7 +55,7 @@ export default async function AdminFeaturedPage() {
           Manage Startup Wall
         </h1>
         <p className="text-sm text-gray-500 mt-1">
-          Choose up to 6 Wall placements from live, approved, opted-in startups. Set their order or spotlight the newest eligible startup for 24 hours.
+          Add live, approved startups that have opted in. Set their order or spotlight the newest eligible startup for 24 hours.
         </p>
       </div>
 

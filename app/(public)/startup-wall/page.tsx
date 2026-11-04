@@ -18,7 +18,6 @@ export default async function StartupWallPage() {
       select: { id: true, name: true, slug: true, logoUrl: true, wallImageUrl: true },
     } },
     orderBy: [{ sortOrder: "asc" }, { id: "asc" }],
-    take: 6,
   }) : [];
   const rows = placements.map(({ startup, sortOrder, featuredUntil }) => ({ ...startup, featuredEntry: { sortOrder, featuredUntil } }));
   const tiles = orderWallTiles(rows, now).filter(row => row.wallImageUrl || row.logoUrl);
@@ -41,7 +40,7 @@ export default async function StartupWallPage() {
       <div className="mb-6 flex justify-end">
         {promoteHref && <Link href={promoteHref} className="inline-flex min-h-11 items-center justify-center rounded-xl bg-coral-600 px-5 py-3 text-sm font-semibold text-white transition-colors hover:bg-coral-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-coral-600">Promote your startup</Link>}
       </div>
-      {tiles.length ? <div className={styles.grid} data-count={tiles.length}>
+      {tiles.length ? <div className={styles.grid} data-count={tiles.length > 6 ? "many" : tiles.length}>
         {tiles.map((startup, index) => {
           return <Link key={startup.id} href={`/startups/${startup.slug}`} aria-label={`Visit ${startup.name}`} className={styles.tile}>
             <Image src={startup.wallImageUrl || startup.logoUrl!} alt={`${startup.name} ${startup.wallImageUrl ? "creative" : "logo"}`} fill sizes={index === 0 || tiles.length < 3 ? "(min-width: 1024px) 50vw, 100vw" : "(min-width: 1024px) 50vw, (min-width: 640px) 50vw, 100vw"} className={startup.wallImageUrl ? styles.creative : styles.logo} />

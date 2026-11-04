@@ -24,12 +24,6 @@ async function allocate(tx: Tx, startupId: string, temporary: boolean, explicitO
   const startup = await tx.startup.findUnique({ where: { id: startupId, ...wallStartupWhere }, select: { id: true, name: true } });
   if (!startup) throw new FeaturedStartupError("Only live, approved, opted-in startups with an image can be added to the Wall.");
   const now = new Date();
-  const existing = await tx.featuredStartup.findUnique({ where: { startupId } });
-  const count = await tx.featuredStartup.count({ where: activeWhere(now) });
-  const existingIsActive = existing && (!existing.featuredUntil || existing.featuredUntil > now);
-  if (count >= 6 && !existingIsActive) throw new FeaturedStartupError(temporary
-    ? "All 6 Wall spotlight slots are in use. Remove a spotlight or wait for a temporary placement to expire."
-    : "Maximum limit of 6 Wall spotlights reached.");
   const order = await tx.featuredStartup.aggregate({ where: activeWhere(now), _min: { sortOrder: true }, _max: { sortOrder: true } });
   const sortOrder = explicitOrder ?? (temporary ? (order._min.sortOrder ?? 0) - 1 : (order._max.sortOrder ?? -1) + 1);
   const featuredUntil = temporary ? new Date(now.getTime() + 24 * 60 * 60 * 1000) : null;
@@ -61,11 +55,16 @@ export async function setFeaturedEntryOrder(id: string, sortOrder: number, clien
   return locked(client, tx => tx.featuredStartup.update({ where: { id }, data: { sortOrder } }));
 }
 export async function reorderFeaturedEntries(ids: string[], client: Client = db) {
-  if (!Array.isArray(ids) || ids.length > 100 || new Set(ids).size !== ids.length) throw new FeaturedStartupError("Invalid Wall order.");
+  if (!Array.isArray(ids)) throw new FeaturedStartupError("Invalid Wall order.");
+  const requestedIds = new Set(ids);
+  if (requestedIds.size !== ids.length) throw new FeaturedStartupError("Invalid Wall order.");
   ids.forEach(validId);
   return locked(client, async tx => {
-    const entries = await tx.featuredStartup.findMany({ where: activeWhere(new Date()), select: { id: true } });
-    if (entries.length !== ids.length || entries.some(entry => !ids.includes(entry.id))) throw new FeaturedStartupError("The featured list changed. Refresh and try again.");
-    for (const [sortOrder, id] of ids.entries()) await tx.featuredStartup.update({ where: { id }, data: { sortOrder } });
+    const entries = await tx.featuredStartup.findMany({ where: activeWhere(new Date()), select: { id: true, sortOrder: true } });
+    if (entries.length !== ids.length || entries.some(entry => !requestedIds.has(entry.id))) throw new FeaturedStartupError("The featured list changed. Refresh and try again.");
+    const currentOrder = new Map(entries.map(entry => [entry.id, entry.sortOrder]));
+    for (const [sortOrder, id] of ids.entries()) {
+      if (currentOrder.get(id) !== sortOrder) await tx.featuredStartup.update({ where: { id }, data: { sortOrder } });
+    }
   });
 }
