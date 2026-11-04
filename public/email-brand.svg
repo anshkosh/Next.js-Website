@@ -1,5 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="144" height="32" viewBox="0 0 144 32" role="img" aria-labelledby="brand-title">
 <title id="brand-title">Anshkosh logo and wordmark</title>
+<rect width="144" height="32" rx="3" fill="#FFFFFF"/>
 <!-- Website header export: public/logo.svg; Oswald 700 at 24px; tracking -0.6px; 32px mark; 8px gap. Glyphs are outlined, so email clients do not need the font. -->
 <!-- Oswald source: https://www.anshkosh.com/_next/static/media/bd9b9909c3a641ff-s.p.woff2 ; SHA-256 9dde3797547520f762f4ba3a822d417a0872b962bc78753a7ee9f955382b6b85 -->
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="-100.0 -100.0 200.0 200.0"
