@@ -43,7 +43,7 @@ function StartupTile({ startup, size }: { startup: WallStartup; size: typeof mos
   const imageUrl = [startup.logoUrl, startup.wallImageUrl].find(url => url && !failedImages.includes(url));
   const initials = startup.name.trim().split(/\s+/).slice(0, 2).map(word => word[0]).join("").toUpperCase();
 
-  return <Link href={`/startups/${startup.slug}`} className={`${styles.tile} ${styles[`tile${size[0].toUpperCase()}${size.slice(1)}`]}`} aria-label={`${startup.name}${startup.category ? `, ${startup.category}` : ""}`}>
+  return <Link href={`/startups/${startup.slug}`} className={`${styles.tile} ${styles[`tile${size[0].toUpperCase()}${size.slice(1)}`]}`} aria-label={`Visit ${startup.name}`}>
     <span className={styles.tileMedia}>
       <span className={styles.logoFrame}>
         {!imageUrl ? <span className={styles.imageFallback}>{initials}</span> : (
