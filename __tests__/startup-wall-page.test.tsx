@@ -28,6 +28,10 @@ it("renders 100 active eligible placements and links their images to the startup
   expect(html.indexOf('href="/startups/two"')).toBeLessThan(html.indexOf('href="/startups/one"'));
   expect(query.mock.calls[0][0]).not.toHaveProperty("take");
   expect(html.match(/href="\/startups\//g)).toHaveLength(100);
+  expect(html.match(/class="[^"]*name/g)).not.toBeNull();
+  expect(html).toContain('class="');
+  expect(html).toContain('>One</span>');
+  expect(html).toContain('>Two</span>');
   expect(html).toContain('alt="Two creative"'); expect(html).toContain('alt="One logo"');
   expect(html).not.toContain("unused-creative.webp");
   expect(html).toContain('data-count="many"');

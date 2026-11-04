@@ -14,13 +14,31 @@
 
 .tile {
   position: relative;
-  display: block;
+  display: flex;
+  flex-direction: column;
   min-width: 0;
   overflow: hidden;
   border: 1px solid #e9e5df;
   border-radius: clamp(18px, 2vw, 28px);
   background: #f7f3ed;
   transition: box-shadow 180ms ease, transform 180ms ease;
+}
+
+.image {
+  position: relative;
+  display: block;
+  flex: 1;
+  min-height: 0;
+}
+
+.name {
+  display: block;
+  padding: 10px 14px;
+  color: #242424;
+  font-size: clamp(0.875rem, 1.2vw, 1.125rem);
+  font-weight: 700;
+  line-height: 1.35;
+  text-align: center;
 }
 
 .tile:nth-child(1) { grid-area: a; }

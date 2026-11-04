@@ -47,7 +47,10 @@ export default async function StartupWallPage() {
       {tiles.length ? <div className={styles.grid} data-count={tiles.length > 6 ? "many" : tiles.length}>
         {tiles.map((startup, index) => {
           return <Link key={startup.id} href={`/startups/${startup.slug}`} aria-label={`Visit ${startup.name}`} className={styles.tile}>
-            <Image src={startup.wallImageUrl || startup.logoUrl!} alt={`${startup.name} ${startup.wallImageUrl ? "creative" : "logo"}`} fill sizes={index === 0 || tiles.length < 3 ? "(min-width: 1024px) 50vw, 100vw" : "(min-width: 1024px) 50vw, (min-width: 640px) 50vw, 100vw"} className={startup.wallImageUrl ? styles.creative : styles.logo} />
+            <span className={styles.image}>
+              <Image src={startup.wallImageUrl || startup.logoUrl!} alt={`${startup.name} ${startup.wallImageUrl ? "creative" : "logo"}`} fill sizes={index === 0 || tiles.length < 3 ? "(min-width: 1024px) 50vw, 100vw" : "(min-width: 1024px) 50vw, (min-width: 640px) 50vw, 100vw"} className={startup.wallImageUrl ? styles.creative : styles.logo} />
+            </span>
+            <span className={styles.name}>{startup.name}</span>
           </Link>;
         })}
       </div> : <p className="rounded-xl border border-gray-200 bg-gray-50 p-8 text-center text-gray-600">The Wall is ready for its first approved startups.</p>}
