@@ -1,5 +1,9 @@
 # Website changelog
 
+## Unreleased — white email logo header
+
+- Set the logo header band to white in application email templates and the operations alert renderer, with a light color scheme for dark-mode mail clients.
+
 ## Unreleased — founder signup continuity
 
 - Preserve the validated startup-submission destination from login through registration and email verification.
