@@ -84,6 +84,7 @@ describe("branded email rendering", () => {
     const svg = fs.readFileSync(path.resolve("public/email-brand.svg"), "utf8");
     expect(svg).toContain("Oswald 700 at 24px");
     expect(svg).not.toContain("<text");
+    expect(svg).toContain('<rect width="144" height="32" rx="3" fill="#FFFFFF"/>');
     const png = await sharp(path.resolve("public/email-brand.png")).metadata();
     expect(png.format).toBe("png");
     expect(png.width).toBe(864);
