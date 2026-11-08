@@ -122,7 +122,11 @@ export default async function AdminStartupsPage(props: {
                     )}
                   </TableCell>
                   <TableCell className="font-medium">
-                    <Link href={`/startups/${startup.slug}`} className="hover:underline">
+                    <Link
+                      href={startup.status === "PENDING_REVIEW" ? `/admin/moderation/${startup.id}` : `/startups/${startup.slug}`}
+                      prefetch={startup.status === "PENDING_REVIEW" ? false : undefined}
+                      className="hover:underline"
+                    >
                       {startup.name}
                     </Link>
                   </TableCell>
@@ -135,9 +139,15 @@ export default async function AdminStartupsPage(props: {
                   <TableCell>{startup.createdAt.toLocaleDateString()}</TableCell>
                   <TableCell className="text-right">
                     <div className="flex justify-end gap-2">
-                      <a href={`/startups/${startup.slug}`} target="_blank" rel="noreferrer" className="p-1.5 text-gray-500 hover:text-gray-900 bg-gray-100 rounded" title="View Public Page">
-                        <ExternalLink size={16} />
-                      </a>
+                      {startup.status === "PENDING_REVIEW" ? (
+                        <Link href={`/admin/moderation/${startup.id}`} prefetch={false} aria-label={`Review full submission for ${startup.name}`} className="rounded-md bg-coral-50 px-2.5 py-1.5 font-medium text-coral-800 hover:bg-coral-100">
+                          Review submission
+                        </Link>
+                      ) : (
+                        <a href={`/startups/${startup.slug}`} target="_blank" rel="noreferrer" className="p-1.5 text-gray-500 hover:text-gray-900 bg-gray-100 rounded" aria-label={`View public page for ${startup.name}`}>
+                          <ExternalLink size={16} aria-hidden="true" />
+                        </a>
+                      )}
                       {isAdmin && startup.status !== "SUSPENDED" && (
                         <form action={async () => {
                           "use server";
