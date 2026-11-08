@@ -452,7 +452,31 @@ test("signup, real verification token, login, photo editing, private deck and st
 
 test("admin approves, edits remain unpublished, recovery survives refresh, revision approval publishes changes", { tag: "@startup" }, async ({ page, browser }) => {
   await login(page, adminEmail, password, true);
+  const anonymous = await isolatedContext(browser);
+  const guestReview = await anonymous.newPage();
+  await guestReview.goto(`/admin/moderation/${startupId}`);
+  await expect(guestReview).toHaveURL(/\/admin\/login$/);
+  await expect(guestReview.getByRole("heading", { name: startupName, exact: true })).toHaveCount(0);
+  await guestReview.close();
+
   await enter(page, "/admin/moderation");
+  await expect(page.locator(`a[href="/admin/moderation/${startupId}"]`)).toHaveText("Review full submission");
+  await enter(page, "/admin/startups");
+  await page.getByRole("link", { name: `Review full submission for ${startupName}` }).click();
+  await expect(page.getByRole("heading", { name: startupName, exact: true })).toBeVisible();
+  await expect(page.getByText("Urban customers and office workers in Hyderabad")).toBeVisible();
+  await expect(page.getByText("A saved feature", { exact: true })).toBeVisible();
+  for (const name of ["Startup logo", "Gallery image 1", "Photo of Test Founder"]) {
+    const image = page.getByRole("img", { name, exact: true });
+    await expect(image).toBeVisible();
+    await image.scrollIntoViewIfNeeded();
+    await expect.poll(() => image.evaluate((element: HTMLImageElement) => element.naturalWidth)).toBeGreaterThan(0);
+  }
+  const deckLink = page.getByRole("link", { name: "Download pitch deck (PDF) · Private" });
+  await expect(deckLink).toBeVisible();
+  const deckPath = (await deckLink.getAttribute("href"))!;
+  expect((await page.request.get(deckPath)).status()).toBe(200);
+  expect((await anonymous.request.get(deckPath)).status()).toBe(404);
   await page.getByRole("button", { name: "Approve", exact: true }).click();
   await expect.poll(async () => (await db.startup.findUniqueOrThrow({ where: { id: startupId } })).status).toBe("LIVE");
   const ownerContext = await isolatedContext(browser); const ownerPage = await ownerContext.newPage();
@@ -468,7 +492,6 @@ test("admin approves, edits remain unpublished, recovery survives refresh, revis
   expect(published.status).toBe("LIVE"); expect(published.tagline).toBe(originalTagline);
   const metadata = published.metadata as { pitchDeckUrl: string };
   expect((await page.request.get(metadata.pitchDeckUrl)).status()).toBe(200); // Reviewer may read private decks.
-  const anonymous = await isolatedContext(browser);
   expect((await anonymous.request.get(`http://127.0.0.1:3100${metadata.pitchDeckUrl}`)).status()).toBe(404);
   const publicPage = await anonymous.newPage(); await enter(publicPage, `/startups/${slug}`);
   await expect(publicPage.getByRole("link", { name: /pitch deck/i })).toHaveCount(0);

@@ -18,7 +18,7 @@ Only `LIVE` startups appear in Discover, categories, search, the sitemap and cat
 
 1. **Apply.** A founder with a verified account creates a startup at `/startup/new`: name, tagline, description, website, category, co-founders, proposition fields and media (logo, gallery, optional PDF pitch deck).
 2. **Submit for review.** The status moves to `PENDING_REVIEW` and a `new_submission` notification job emails the admin team.
-3. **Review.** Reviewers and admins work from `/admin/moderation`. They review the submitted profile and approve or reject with notes (`adminNotes`, `reviewedBy`, `reviewedAt`). Publication is not identity certification or independent verification of every claim. Founders remain responsible for the accuracy of their profile and evidence.
+3. **Review.** Reviewers and admins can open a pending startup’s full submission from the Moderation Queue or the Startups table. The staff review page shows the profile, proposition, team, logo, gallery, demo, pitch deck and Startup Wall submission. Reviewers can approve or reject from the page, and rejections require a reason. Publication is not identity certification or independent verification of every claim. Founders remain responsible for the accuracy of their profile and evidence.
 4. **Outcome email.** `startup_approved` or `startup_rejected` is queued to the founder.
 5. **Live.** `publishedAt` is set and the profile becomes public and indexable.
 6. **Ongoing.** Founders post updates (`StartupUpdate`). Visitors can upvote or downvote; [Voting](../engineering/Voting.md) describes net signals and count reconciliation. Comments go through moderation (`CommentStatus`).

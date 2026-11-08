@@ -1,5 +1,13 @@
 # Progress
 
+## 8 November 2026 — full startup submission review
+
+Staff can open a pending startup’s full submission from Startups or the Moderation
+Queue. The review page includes the complete profile, media, team, private pitch
+deck and Startup Wall image, with approval and rejection controls on the same page.
+An isolated Chromium check covered both entry points, image loading, deck access,
+mobile layout and both decisions. The startup browser journey also covers this path.
+
 ## 4 November 2026 — Startup Wall placement limit
 
 Removed the six startup limit from Wall assignment and display. Manage Startup Wall shows the full assigned list and its count. The public grid continues below six tiles. The approval, founder opt-in, ordering, and spotlight expiry rules still apply.

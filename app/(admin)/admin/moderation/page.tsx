@@ -22,7 +22,6 @@ export default async function ModerationPage() {
           email: true,
         },
       },
-      founders: true,
     },
     orderBy: {
       createdAt: "asc", // Oldest first for queue
