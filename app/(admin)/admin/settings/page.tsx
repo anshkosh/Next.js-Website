@@ -1,17 +1,9 @@
 import { db } from "@/lib/db";
-import { auth } from "@/lib/auth";
-import { headers } from "next/headers";
-import { redirect } from "next/navigation";
 import SettingsEditor from "./SettingsEditor";
+import { requireStaffPage } from "@/lib/staff-session";
 
 export default async function AdminSettingsPage() {
-  const session = await auth.api.getSession({
-    headers: await headers(),
-  });
-
-  if (!session || session.user.role !== "admin") {
-    redirect("/admin/dashboard");
-  }
+  await requireStaffPage({ adminOnly: true });
 
   const dbSettings = await db.appSetting.findMany();
   

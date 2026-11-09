@@ -5,7 +5,7 @@ import type { ReactElement } from "react";
 const mock = vi.hoisted(() => ({ featured: vi.fn(), startups: vi.fn(), count: vi.fn(), categories: vi.fn(), program: vi.fn(), requests: vi.fn() }));
 vi.mock("@/lib/db", () => ({ db: { $transaction: async (callback: (tx: object) => unknown) => callback({ $queryRaw: async () => [] }), featuredStartup: { findMany: mock.featured }, startup: { findMany: mock.startups, count: mock.count, findFirst: async () => ({ id: "startup", name: "Startup", slug: "startup", status: "LIVE" }) }, category: { findMany: mock.categories }, betaTesterProgram: { findUnique: mock.program }, betaTesterRequest: { count: mock.requests } } }));
 vi.mock("@/lib/public-signals", () => ({ publicSignals: async (tx: { $queryRaw: () => Promise<unknown> }) => tx.$queryRaw() }));
-vi.mock("@/lib/auth", () => ({ auth: { api: { getSession: async () => ({ user: { id: "owner", role: "admin", emailVerified: true } }) } } }));
+vi.mock("@/lib/auth", () => ({ auth: { api: { getSession: async () => ({ user: { id: "owner", role: "admin", emailVerified: true, twoFactorEnabled: true }, session: { twoFactorVerified: true } }) } } }));
 vi.mock("next/headers", () => ({ headers: async () => new Headers(), cookies: async () => ({ get: () => undefined }) }));
 vi.mock("@/components/landing/FeaturedStartups", () => ({ default: () => null }));
 vi.mock("@/components/startup/StartupCard", () => ({ default: () => null }));

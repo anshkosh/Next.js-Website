@@ -1,9 +1,7 @@
 import Link from "next/link";
-import { headers } from "next/headers";
-import { redirect } from "next/navigation";
-import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { BanAction } from "./BanActions";
+import { requireStaffPage } from "@/lib/staff-session";
 
 export const dynamic = "force-dynamic";
 
@@ -13,8 +11,7 @@ function maskEmail(email: string) {
 }
 
 export default async function ModerationBansPage() {
-  const session = await auth.api.getSession({ headers: await headers() });
-  if (!session?.user.emailVerified || session.user.banned || !["admin", "reviewer"].includes(session.user.role ?? "")) redirect("/admin/login");
+  await requireStaffPage();
   const now = new Date();
   const [accountBans, blocks] = await Promise.all([
     db.moderationAccountBan.findMany({ where: { revokedAt: null }, orderBy: { createdAt: "desc" }, take: 100 }),

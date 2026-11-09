@@ -1,7 +1,7 @@
 import { test, expect, type Page, type Browser } from "@playwright/test";
 import { PrismaClient, type Prisma } from "@prisma/client";
 import sharp from "sharp";
-import { randomUUID } from "node:crypto";
+import { createHmac, randomUUID } from "node:crypto";
 import { readFile } from "node:fs/promises";
 import { PDFDocument } from "pdf-lib";
 import { founderEntryPath } from "../lib/founder-journal-seo";
@@ -63,11 +63,44 @@ async function enter(page: Page, url: string) {
   }
   await reveal(page);
 }
+// RFC 6238 code from the base32 key shown on the setup page, as Google Authenticator computes it.
+function totp(base32Secret: string, at = Date.now()) {
+  const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567";
+  let bits = "";
+  for (const char of base32Secret.replace(/=+$/, "").toUpperCase()) bits += alphabet.indexOf(char).toString(2).padStart(5, "0");
+  const key = Buffer.from((bits.match(/.{8}/g) ?? []).map(byte => parseInt(byte, 2)));
+  const counter = Buffer.alloc(8);
+  counter.writeBigUInt64BE(BigInt(Math.floor(at / 30000)));
+  const digest = createHmac("sha1", key).update(counter).digest();
+  const offset = digest[digest.length - 1] & 15;
+  return String((digest.readUInt32BE(offset) & 0x7fffffff) % 1_000_000).padStart(6, "0");
+}
+let adminTotpSecret = "";
 async function login(page: Page, account: string, secret = password, admin = false) {
   await enter(page, admin ? "/admin/login" : "/login");
   await page.locator('input[type="email"]').fill(account);
   await page.locator(admin ? '#admin-password' : 'input[name="password"]').fill(secret);
   await page.getByRole("button", { name: admin ? "Authenticate" : /^Sign in$/i }).click();
+  if (admin) {
+    // Admins must use two-factor: enroll through the real setup page once, then answer the code step.
+    await expect(page).toHaveURL(/\/admin\/(setup-2fa|login\/verify|dashboard)/, { timeout: 30000 });
+    if (page.url().includes("/admin/setup-2fa")) {
+      await page.locator("#enable-password").fill(secret);
+      await page.getByRole("button", { name: "Set up authenticator" }).click();
+      await expect(page.getByRole("img", { name: "QR code for your authenticator app" })).toBeVisible({ timeout: 15000 });
+      await page.getByText("Can't scan? Enter this key instead").click();
+      adminTotpSecret = (await page.locator("details code").innerText()).trim();
+      expect(adminTotpSecret).toMatch(/^[A-Z2-7]+$/);
+      await page.locator("#setup-code").fill(totp(adminTotpSecret));
+      await page.getByRole("button", { name: "Turn on two-factor" }).click();
+      await expect(page.getByText("Save these backup codes now.")).toBeVisible({ timeout: 15000 });
+      await page.getByRole("button", { name: "I've saved my codes" }).click();
+    } else if (page.url().includes("/admin/login/verify")) {
+      expect(adminTotpSecret, "admin enrolled in an earlier login").not.toBe("");
+      await page.locator("#two-factor-code").fill(totp(adminTotpSecret));
+      await page.getByRole("button", { name: "Verify" }).click();
+    }
+  }
   await expect(page).toHaveURL(admin ? /\/admin\/dashboard/ : /\/dashboard/, { timeout: 30000 });
 }
 async function emailLink(to: string, match: RegExp) {

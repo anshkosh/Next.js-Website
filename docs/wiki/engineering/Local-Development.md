@@ -66,6 +66,7 @@ Without `DATABASE_URL`, some public pages (for example `/categories`) render a p
 | `npm test` | Vitest |
 | `npx playwright test` | End-to-end tests |
 | `npx tsx scripts/set-admin-password.ts --email <admin-email>` | Break-glass admin password reset; prompts privately and records an audit entry |
+| `npx tsx scripts/reset-two-factor.ts --email <staff-email>` | Break-glass two-factor reset for a staff account; prompts for operator and reason, revokes sessions and records an audit entry |
 | `node scripts/verify-seo.mjs` | SEO checks against a running site |
 
 The operator reset is a fallback for an existing, verified, active admin account.

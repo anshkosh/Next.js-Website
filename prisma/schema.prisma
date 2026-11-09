@@ -28,8 +28,10 @@ model User {
   banned        Boolean   @default(false)
   banReason     String?
   banExpires    DateTime?
+  twoFactorEnabled Boolean? @default(false)
 
   sessions       Session[]
+  twoFactors     TwoFactor[]
   accounts       Account[]
   startups       Startup[]
   journalPosts   JournalPost[]
@@ -47,6 +49,22 @@ model Session {
   userId    String
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   impersonatedBy String?
+  // True only for sessions created by a successful TOTP or backup-code check.
+  twoFactorVerified Boolean @default(false)
+}
+
+model TwoFactor {
+  id                      String    @id @default(cuid())
+  secret                  String
+  backupCodes             String
+  userId                  String
+  user                    User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  verified                Boolean?  @default(true)
+  failedVerificationCount Int?      @default(0)
+  lockedUntil             DateTime?
+
+  @@index([secret])
+  @@index([userId])
 }
 
 model Account {
@@ -84,6 +102,18 @@ model AdminPasswordResetAudit {
   reason            String   @db.VarChar(500)
   approvalReference String
   createdAt         DateTime @default(now())
+
+  @@index([targetUserId, createdAt(sort: Desc)])
+}
+
+model AdminTwoFactorResetAudit {
+  id           String   @id @default(cuid())
+  operatorId   String?
+  operatorName String   @db.VarChar(100)
+  targetUserId String
+  targetEmail  String
+  reason       String   @db.VarChar(500)
+  createdAt    DateTime @default(now())
 
   @@index([targetUserId, createdAt(sort: Desc)])
 }

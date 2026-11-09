@@ -16,7 +16,7 @@ import { approveComment, rejectComment, replyToComment, deleteReply } from "../a
 const id = "cmvddwy1h0000zgy2oi9d66n3";
 beforeEach(() => {
   vi.clearAllMocks();
-  mock.session.mockResolvedValue({ user: { id: "owner", name: "Founder", role: "admin", emailVerified: true } });
+  mock.session.mockResolvedValue({ user: { id: "owner", name: "Founder", role: "admin", emailVerified: true, twoFactorEnabled: true }, session: { twoFactorVerified: true } });
   mock.comment.mockResolvedValue({ startup: { slug: "fixture" } });
   mock.updateComment.mockResolvedValue({ count: 1 });
   mock.findComment.mockResolvedValue({ status: "PENDING", startup: { slug: "fixture", founderId: "owner" } });

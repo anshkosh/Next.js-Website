@@ -2,10 +2,10 @@
 
 import { useState } from "react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { UserPlus, ShieldOff } from "lucide-react";
-import { setAdminRole, removeAdminRole } from "@/app/actions/user.actions";
+import { UserPlus, ShieldOff, KeyRound } from "lucide-react";
+import { setAdminRole, removeAdminRole, resetStaffTwoFactor } from "@/app/actions/user.actions";
 
-export default function AdminManager({ admins, currentUserId }: { admins: { id: string; name: string; email: string; role: string; createdAt: Date }[]; currentUserId: string }) {
+export default function AdminManager({ admins, currentUserId }: { admins: { id: string; name: string; email: string; role: string; twoFactorEnabled: boolean | null; createdAt: Date }[]; currentUserId: string }) {
   const [isAddOpen, setIsAddOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
@@ -40,6 +40,19 @@ export default function AdminManager({ admins, currentUserId }: { admins: { id: 
     }
   };
 
+  const handleResetTwoFactor = async (id: string, email: string) => {
+    const reason = prompt(`Reset two-factor for ${email}? They will be signed out everywhere and must set up their authenticator again.
+
+Reason (recorded in the audit log):`);
+    if (reason === null) return;
+
+    setIsSubmitting(true);
+    setError("");
+    const res = await resetStaffTwoFactor(id, reason);
+    setIsSubmitting(false);
+    if (res.error) setError(res.error);
+  };
+
   return (
     <div>
       <div className="flex justify-between items-center mb-4">
@@ -65,6 +78,7 @@ export default function AdminManager({ admins, currentUserId }: { admins: { id: 
               <TableHead>Name</TableHead>
               <TableHead>Email</TableHead>
               <TableHead>Role</TableHead>
+              <TableHead>Two-factor</TableHead>
               <TableHead>Created</TableHead>
               <TableHead className="text-right">Actions</TableHead>
             </TableRow>
@@ -81,9 +95,26 @@ export default function AdminManager({ admins, currentUserId }: { admins: { id: 
                     {admin.role.toUpperCase()}
                   </span>
                 </TableCell>
+                <TableCell>
+                  {admin.twoFactorEnabled
+                    ? <span className="text-xs font-semibold text-emerald-700">On</span>
+                    : <span className={`text-xs font-semibold ${admin.role === "admin" ? "text-amber-700" : "text-gray-500"}`}>{admin.role === "admin" ? "Not set up (required)" : "Off"}</span>}
+                </TableCell>
                 <TableCell>{new Date(admin.createdAt).toLocaleDateString()}</TableCell>
                 <TableCell className="text-right">
                   {admin.id !== currentUserId ? (
+                    <div className="inline-flex gap-1">
+                    {admin.twoFactorEnabled && (
+                      <button
+                        onClick={() => handleResetTwoFactor(admin.id, admin.email)}
+                        disabled={isSubmitting}
+                        className="p-1.5 text-amber-700 hover:bg-amber-50 rounded disabled:opacity-30"
+                        title="Reset two-factor"
+                        aria-label={`Reset two-factor for ${admin.email}`}
+                      >
+                        <KeyRound size={16} />
+                      </button>
+                    )}
                     <button 
                       onClick={() => handleRemove(admin.id)}
                       disabled={isSubmitting}
@@ -92,6 +123,7 @@ export default function AdminManager({ admins, currentUserId }: { admins: { id: 
                     >
                       <ShieldOff size={16} />
                     </button>
+                    </div>
                   ) : (
                     <span className="text-xs text-gray-500 italic">You</span>
                   )}

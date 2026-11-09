@@ -7,6 +7,7 @@ import { auth } from "@/lib/auth";
 import { publicPitchDeck, mayReadDeck } from "@/lib/pitch-deck-access";
 import { pitchDeckUrlSchema } from "@/lib/validators/pitch-deck.schema";
 import { journalImagePattern } from "@/lib/journal-rich-text";
+import { hasStaffAccess, staffViewer } from "@/lib/staff-access";
 
 export async function GET(
   req: NextRequest,
@@ -31,7 +32,7 @@ export async function GET(
         const shared = await db.founderJournalEntry.findFirst({
           where: { authorId: ownerId, visibility: "PUBLIC", approvedAt: { not: null }, publishedAt: { lte: new Date() }, mediaKeys: { has: key }, startup: { ...publicStartupWhere, founderId: ownerId } }, select: { id: true },
         });
-        const reviewer = session?.user.emailVerified && !session.user.banned && ["admin", "reviewer"].includes(session.user.role ?? "");
+        const reviewer = hasStaffAccess(session);
         const submitted = !shared && reviewer ? await db.founderJournalRevision.findFirst({
           where: {
             status: { in: ["PENDING_REVIEW", "SCHEDULED"] },
@@ -49,7 +50,7 @@ export async function GET(
       const isPublic = profiles.some(profile => publicPitchDeck(profile.metadata) === url);
       if (!isPublic) {
         const session = await auth.api.getSession({ headers: req.headers });
-        if (!mayReadDeck(session?.user, resolvedParams.path[1])) return new NextResponse("Not Found", { status: 404, headers: { "Cache-Control": "private, no-store" } });
+        if (!mayReadDeck(staffViewer(session), resolvedParams.path[1])) return new NextResponse("Not Found", { status: 404, headers: { "Cache-Control": "private, no-store" } });
       }
     }
 

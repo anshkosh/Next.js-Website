@@ -1,17 +1,14 @@
 import Link from "next/link";
-import { headers } from "next/headers";
-import { redirect } from "next/navigation";
-import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { journalPage } from "@/lib/founder-journal";
 import { moderationSource } from "@/lib/moderation-source";
 import { moderationConfig } from "@/lib/moderation-worker";
 import ReviewButtons from "./ReviewButtons";
+import { requireStaffPage } from "@/lib/staff-session";
 
 export const dynamic = "force-dynamic";
 export default async function ContentReviewPage({ searchParams }: { searchParams: Promise<{ page?: string; view?: string }> }) {
-  const session = await auth.api.getSession({ headers: await headers() });
-  if (!session?.user.emailVerified || session.user.banned || !["admin", "reviewer"].includes(session.user.role ?? "")) redirect("/admin/login");
+  await requireStaffPage();
   const params = await searchParams;
   const page = journalPage(params.page);
   const published = params.view === "published";

@@ -1,13 +1,11 @@
 "use server";
-import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
-import { headers } from "next/headers";
 import { revalidatePath } from "next/cache";
 import { lockFounderEntry, publishFounderRevision } from "@/lib/journal-publication";
+import { getStaffSession } from "@/lib/staff-session";
 
 async function reviewer() {
-  const session = await auth.api.getSession({ headers: await headers() });
-  return session?.user.emailVerified && !session.user.banned && ["admin", "reviewer"].includes(session.user.role ?? "") ? session.user : null;
+  return (await getStaffSession())?.user ?? null;
 }
 function refreshJournal() {
   revalidatePath("/"); revalidatePath("/leaderboard");

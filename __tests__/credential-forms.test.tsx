@@ -5,10 +5,11 @@ import RegisterPage from "../app/(auth)/register/page";
 import AdminLoginPage from "../app/(auth)/admin/login/page";
 import ResetPasswordPage from "../app/(auth)/reset-password/page";
 import ForgotPasswordPage from "../app/(auth)/forgot-password/page";
+import AdminTwoFactorPage from "../app/(auth)/admin/login/verify/page";
 vi.mock("next/navigation", () => ({ useSearchParams: () => new URLSearchParams(), useRouter: () => ({ push: vi.fn(), refresh: vi.fn() }) }));
-vi.mock("@/lib/auth-client", () => ({ authClient: {} }));
+vi.mock("@/lib/auth-client", () => ({ authClient: {}, ADMIN_TWO_FACTOR_PATH: "/admin/login/verify" }));
 
-it.each([["login", LoginPage], ["register", RegisterPage], ["admin login", AdminLoginPage], ["reset password", ResetPasswordPage], ["forgot password", ForgotPasswordPage]] as const)("keeps credentials out of URLs before hydration (%s)", (_, Page) => {
+it.each([["login", LoginPage], ["register", RegisterPage], ["admin login", AdminLoginPage], ["reset password", ResetPasswordPage], ["forgot password", ForgotPasswordPage], ["admin two-factor code", AdminTwoFactorPage]] as const)("keeps credentials out of URLs before hydration (%s)", (_, Page) => {
   const host = document.createElement("div");
   host.innerHTML = renderToStaticMarkup(<Page />);
   const form = host.querySelector("form")!;
@@ -21,4 +22,12 @@ it.each([["login", LoginPage], ["register", RegisterPage], ["admin login", Admin
     expect(password.dispatchEvent(paste)).toBe(true);
     expect(password.getAttribute("autocomplete")).toMatch(/password/);
   }
+});
+
+it("asks for the authenticator code as a one-time code", () => {
+  const host = document.createElement("div");
+  host.innerHTML = renderToStaticMarkup(<AdminTwoFactorPage />);
+  const code = host.querySelector<HTMLInputElement>('input[name="code"]')!;
+  expect(code.getAttribute("autocomplete")).toBe("one-time-code");
+  expect(code.getAttribute("inputmode")).toBe("numeric");
 });

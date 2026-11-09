@@ -28,8 +28,15 @@ it("denies direct unauthenticated access to unlinked or private decks", async ()
   expect((await get()).status).toBe(404);
 });
 it.each(["owner", "admin", "reviewer"])("allows a verified active %s to download private decks without caching", async role => {
-  mock.session.mockResolvedValue({ user: { id: role === "owner" ? owner : "other", role, emailVerified: true, banned: false } });
+  mock.session.mockResolvedValue({ user: { id: role === "owner" ? owner : "other", role, emailVerified: true, banned: false, twoFactorEnabled: role === "admin" }, session: { twoFactorVerified: role === "admin" } });
   const response = await get(); expect(response.status).toBe(200); expect(response.headers.get("cache-control")).toBe("private, no-store");
+});
+it.each([
+  { label: "an admin who has not set up two-factor", user: { twoFactorEnabled: false }, session: { twoFactorVerified: false } },
+  { label: "a staff session that skipped the second factor", user: { twoFactorEnabled: true }, session: { twoFactorVerified: false } },
+])("treats $label as an ordinary user", async ({ user, session }) => {
+  mock.session.mockResolvedValue({ user: { id: "other", role: "admin", emailVerified: true, banned: false, ...user }, session });
+  expect((await get()).status).toBe(404);
 });
 it.each([{ id: "other", role: "user", emailVerified: true }, { id: owner, emailVerified: false }, { id: owner, emailVerified: true, banned: true }])("denies unauthorized users %j", async user => {
   mock.session.mockResolvedValue({ user }); expect((await get()).status).toBe(404); expect(mock.send).not.toHaveBeenCalled();

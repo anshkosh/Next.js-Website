@@ -1,16 +1,15 @@
 "use server";
 import { db } from "@/lib/db";
-import { auth } from "@/lib/auth";
-import { headers } from "next/headers";
 import { revalidatePath } from "next/cache";
 import { revisionPatch } from "@/lib/startup-revisions";
 import { mergeStartupMetadata } from "@/lib/startup-metadata";
 import { emailQueue } from "@/lib/jobs/queues";
 import { logger } from "@/lib/logger";
+import { getStaffSession } from "@/lib/staff-session";
 
 export async function reviewRevision(id: string, version: string, decision: "approve" | "reject", notes = "") {
-  const session = await auth.api.getSession({ headers: await headers() });
-  if (!session?.user.emailVerified || session.user.banned || !["admin", "reviewer"].includes(session.user.role || "")) return { error: "Unauthorized" };
+  const session = await getStaffSession();
+  if (!session) return { error: "Unauthorized" };
   if (!["approve", "reject"].includes(decision) || !Number.isFinite(Date.parse(version))) return { error: "Invalid review" };
   if (decision === "reject" && (!notes.trim() || notes.length > 2000)) return { error: "Give a reason, up to 2,000 characters." };
   try {

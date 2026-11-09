@@ -1,19 +1,17 @@
 "use server";
 
-import { auth } from "@/lib/auth";
-import { headers } from "next/headers";
 import { revalidateSavedPath } from "@/lib/cache-after-save";
 import { logger } from "@/lib/logger";
 import {
   FeaturedStartupError, featurePermanentStartup, featureLatestLiveStartup, placePublicStartup,
   removeFeaturedEntry, setFeaturedEntryOrder, reorderFeaturedEntries,
 } from "@/lib/featured-startup-store";
+import { getStaffSession } from "@/lib/staff-session";
 
 type FeaturedResult = { success: true; error?: never } | { error: string; success?: never };
 
 async function moderator() {
-  const session = await auth.api.getSession({ headers: await headers() });
-  return !!session?.user.emailVerified && !session.user.banned && ["admin", "reviewer"].includes(session.user.role ?? "");
+  return !!(await getStaffSession());
 }
 function refreshFeatured() {
   for (const path of ["/admin/featured", "/startup-wall"]) revalidateSavedPath(path);
@@ -34,8 +32,8 @@ export async function addFeaturedStartup(startupId: string, sortOrder?: number):
 }
 
 export async function addAdminWallPlacement(startupId: string): Promise<FeaturedResult> {
-  const session = await auth.api.getSession({ headers: await headers() });
-  if (!session?.user.emailVerified || session.user.banned || session.user.role !== "admin") return { error: "Unauthorized" };
+  const session = await getStaffSession({ adminOnly: true });
+  if (!session) return { error: "Unauthorized" };
   try {
     await placePublicStartup(startupId);
     refreshFeatured();

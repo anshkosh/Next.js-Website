@@ -1,9 +1,7 @@
 import Link from "next/link";
-import { headers } from "next/headers";
-import { redirect } from "next/navigation";
-import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import CommentModerationList from "./CommentModerationList";
+import { requireStaffPage } from "@/lib/staff-session";
 
 export const dynamic = "force-dynamic";
 
@@ -15,8 +13,7 @@ const statuses = [
 ] as const;
 
 export default async function CommentsPage({ searchParams }: { searchParams: Promise<{ status?: string; q?: string; page?: string }> }) {
-  const session = await auth.api.getSession({ headers: await headers() });
-  if (!session?.user.emailVerified || session.user.banned || !["admin", "reviewer"].includes(session.user.role ?? "")) redirect("/admin/login");
+  const session = await requireStaffPage();
 
   const params = await searchParams;
   const status = statuses.some(item => item.value === params.status) ? params.status as typeof statuses[number]["value"] : "PENDING";

@@ -6,13 +6,14 @@ import { headers } from "next/headers";
 import { createFounderSchema, updateFounderSchema } from "@/lib/validators/founder.schema";
 import { startupReadWhere } from "@/lib/startup-read-access";
 import { createTeamFounder, TeamFounderError } from "@/lib/startup-team-store";
+import { staffViewer } from "@/lib/staff-access";
 
 export async function getFounders(startupId: string) {
   if (typeof startupId !== "string" || !startupId || startupId.length > 128) return { error: "Invalid startup ID" };
   try {
     const session = await auth.api.getSession({ headers: await headers() });
     const founders = await db.startupFounder.findMany({
-      where: { startupId, startup: startupReadWhere(session?.user) },
+      where: { startupId, startup: startupReadWhere(staffViewer(session)) },
       orderBy: { sortOrder: "asc" },
       select: { id: true, name: true, role: true, photoUrl: true, linkedinUrl: true, twitterUrl: true, sortOrder: true },
     });

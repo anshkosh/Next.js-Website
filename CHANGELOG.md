@@ -1,5 +1,12 @@
 # Website changelog
 
+## Unreleased — staff two-factor authentication
+
+- Require Google Authenticator (TOTP) two-factor authentication for admins: admins without it are sent to a setup page and cannot use admin pages or actions until they enroll. Reviewers can turn it on from `/admin/security`.
+- Add a code step to admin sign-in (`/admin/login/verify`) with single-use backup codes and no trusted-device skip. Google sign-in and older sessions cannot open `/admin` for accounts with 2FA on.
+- Let admins reset another staff member's two-factor from the Admins page, with an audit record; add `scripts/reset-two-factor.ts` for break-glass recovery.
+- Database: `User.twoFactorEnabled`, `Session.twoFactorVerified`, `TwoFactor` and `AdminTwoFactorResetAudit` (migration `20261109120000_staff_two_factor`).
+
 ## Unreleased — Startup Wall redesign
 
 - Replace the sparse bento grid with a dense, colorful, pixel-inspired startup mosaic. Show startup names/categories and fall back to a startup monogram if its image fails.

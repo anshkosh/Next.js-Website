@@ -1,6 +1,4 @@
-import { auth } from "@/lib/auth";
-import { headers } from "next/headers";
-import { redirect } from "next/navigation";
+import { requireStaffPage } from "@/lib/staff-session";
 import { db } from "@/lib/db";
 import AdminSidebar from "./AdminSidebar";
 import AdminTopbar from "./AdminTopbar";
@@ -12,13 +10,7 @@ export default async function AdminLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const session = await auth.api.getSession({
-    headers: await headers(),
-  });
-
-  if (!session?.user.emailVerified || session.user.banned || (session.user.role !== "admin" && session.user.role !== "reviewer")) {
-    redirect("/admin/login");
-  }
+  const session = await requireStaffPage();
 
   const role = session.user.role;
 

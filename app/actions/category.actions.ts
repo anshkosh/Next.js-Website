@@ -1,21 +1,18 @@
 "use server";
 
 import { db } from "@/lib/db";
-import { auth } from "@/lib/auth";
-import { headers } from "next/headers";
 import { revalidatePath } from "next/cache";
 import { categorySchema } from "@/lib/validators/category.schema";
+import { getStaffSession } from "@/lib/staff-session";
 
 function generateCategorySlug(name: string): string {
   return name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
 }
 
 export async function createCategory(formData: FormData) {
-  const session = await auth.api.getSession({
-    headers: await headers(),
-  });
+  const session = await getStaffSession();
 
-  if (!session || (session.user.role !== "admin" && session.user.role !== "reviewer")) {
+  if (!session) {
     return { error: "Unauthorized" };
   }
 
@@ -66,11 +63,9 @@ export async function createCategory(formData: FormData) {
 }
 
 export async function updateCategory(formData: FormData) {
-  const session = await auth.api.getSession({
-    headers: await headers(),
-  });
+  const session = await getStaffSession();
 
-  if (!session || (session.user.role !== "admin" && session.user.role !== "reviewer")) {
+  if (!session) {
     return { error: "Unauthorized" };
   }
 
@@ -117,11 +112,9 @@ export async function updateCategory(formData: FormData) {
 }
 
 export async function deleteCategory(id: string) {
-  const session = await auth.api.getSession({
-    headers: await headers(),
-  });
+  const session = await getStaffSession();
 
-  if (!session || (session.user.role !== "admin" && session.user.role !== "reviewer")) {
+  if (!session) {
     return { error: "Unauthorized" };
   }
 

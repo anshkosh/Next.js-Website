@@ -1,10 +1,8 @@
 import type { ReactNode } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { headers } from "next/headers";
-import { notFound, redirect } from "next/navigation";
+import { notFound } from "next/navigation";
 import { ArrowLeft, ExternalLink } from "lucide-react";
-import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { safeLaunchUrl } from "@/lib/launch-resources";
 import { publicPitchDeck } from "@/lib/pitch-deck-access";
@@ -13,6 +11,7 @@ import { startupIdSchema } from "@/lib/validators/id.schema";
 import { ownsPitchDeck } from "@/lib/validators/pitch-deck.schema";
 import MediaGallery from "@/components/startup/MediaGallery";
 import StartupReviewActions from "../StartupReviewActions";
+import { requireStaffPage } from "@/lib/staff-session";
 
 function ReviewSection({ title, children }: { title: string; children: ReactNode }) {
   return (
@@ -56,10 +55,7 @@ function ReviewImage({ url, label }: { url: string; label: string }) {
 }
 
 export default async function StartupSubmissionPage({ params }: { params: Promise<{ id: string }> }) {
-  const session = await auth.api.getSession({ headers: await headers() });
-  if (!session?.user.emailVerified || session.user.banned || !["admin", "reviewer"].includes(session.user.role ?? "")) {
-    redirect("/admin/login");
-  }
+  await requireStaffPage();
 
   const { id } = await params;
   if (!startupIdSchema.safeParse(id).success) notFound();

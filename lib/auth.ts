@@ -1,12 +1,15 @@
 import { betterAuth } from "better-auth";
 import { prismaAdapter } from "@better-auth/prisma-adapter";
-import { admin } from "better-auth/plugins";
+import { admin, twoFactor } from "better-auth/plugins";
+import { APIError, createAuthMiddleware, getSessionFromCtx } from "better-auth/api";
 import { db } from "./db";
 import { getTrustedAuthOrigins } from "./auth-origins";
 import { accountAdminOptions } from "./auth-roles";
 import { accountProfileFields } from "./account-profile";
+import { blocksTwoFactorDisable, sessionTwoFactorVerified, TWO_FACTOR_ISSUER } from "./staff-access";
 
 export const auth = betterAuth({
+  appName: TWO_FACTOR_ISSUER,
   trustedOrigins: getTrustedAuthOrigins,
   database: prismaAdapter(db, {
     provider: "postgresql",
@@ -26,6 +29,32 @@ export const auth = betterAuth({
         });
       },
     },
+  },
+  session: {
+    additionalFields: {
+      // No Better Auth default: a rotated session keeps its predecessor's value,
+      // a fresh one gets the database default (false). See sessionTwoFactorVerified.
+      twoFactorVerified: { type: "boolean", required: false, input: false },
+    },
+  },
+  databaseHooks: {
+    session: {
+      create: {
+        before: async (session, ctx) => ({
+          data: { ...session, twoFactorVerified: sessionTwoFactorVerified(ctx?.path, session) },
+        }),
+      },
+    },
+  },
+  hooks: {
+    before: createAuthMiddleware(async (ctx) => {
+      // 2FA is mandatory for admins: they can be reset by another admin, never switch it off themselves.
+      if (ctx.path !== "/two-factor/disable") return;
+      const current = await getSessionFromCtx(ctx);
+      if (blocksTwoFactorDisable(ctx.path, current?.user.role)) {
+        throw new APIError("FORBIDDEN", { message: "Two-factor authentication is required for admin accounts." });
+      }
+    }),
   },
   emailAndPassword: {
     enabled: true,
@@ -63,5 +92,10 @@ export const auth = betterAuth({
   },
   plugins: [
     admin(accountAdminOptions),
+    twoFactor({
+      issuer: TWO_FACTOR_ISSUER,
+      skipVerificationOnEnable: false,
+      backupCodeOptions: { amount: 10 },
+    }),
   ],
 });

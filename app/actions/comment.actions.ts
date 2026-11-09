@@ -24,6 +24,8 @@ import { commenterEmailHash } from "@/lib/commenter-restrictions";
 import { deliverNotification } from "@/lib/notification-outbox";
 import { storeApprovedCommentEmail } from "@/lib/comment-notifications";
 import { z } from "zod";
+import { getStaffSession } from "@/lib/staff-session";
+import { hasStaffAccess } from "@/lib/staff-access";
 
 const COMMENTS_PAGE_SIZE = 10;
 const COMMENT_LIMIT_MESSAGE = "This network has reached its limit of 3 comments per hour. Please try again later.";
@@ -305,8 +307,8 @@ export async function fetchApprovedComments(
 // ──────────────────────────────────────────────────────────────────────────────
 async function changeLegacyCommentStatus(commentId: string, nextStatus: "APPROVED" | "REJECTED") {
   try {
-    const session = await auth.api.getSession({ headers: await headers() });
-    if (!session?.user.emailVerified || session.user.banned || !["admin", "reviewer"].includes(session.user.role ?? "")) return { error: "Unauthorized" };
+    const session = await getStaffSession();
+    if (!session) return { error: "Unauthorized" };
     if (!commentIdSchema.safeParse(commentId).success) return { error: "Invalid comment." };
 
     const result = await db.$transaction(async tx => {
@@ -412,8 +414,7 @@ export async function deleteReply(commentId: string) {
 
     if (!comment) return { error: "Comment not found." };
 
-    const isAdmin =
-      session.user.role === "admin" || session.user.role === "reviewer";
+    const isAdmin = hasStaffAccess(session);
     const isOwner = comment.startup.founderId === session.user.id;
 
     if (!isAdmin && !isOwner) {
