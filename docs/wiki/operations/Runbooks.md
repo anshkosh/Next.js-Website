@@ -62,6 +62,16 @@ Check in this order: `du -sh /var/www/anshkosh-releases/*` (should be about 4 re
 
 `certbot-renew.timer` renews automatically; the current certificate expires 30 Dec 2026. Check with `systemctl status certbot-renew.timer` and `journalctl -u certbot-renew`. Test with `certbot renew --dry-run`.
 
+## Staff member lost their authenticator
+
+Admins must use two-factor authentication; reviewers may. If someone has lost both their phone and their backup codes:
+
+1. Confirm who they are outside the site (a call or a known chat), not by email alone.
+2. Another admin opens `/admin/admins` and clicks the key icon (**Reset two-factor**) on their row, entering the reason. That signs them out everywhere. An admin is then made to set up a new authenticator at their next sign-in.
+3. If no other admin can sign in, run `npx tsx scripts/reset-two-factor.ts --email <staff-email>` on the server with the owner's approval. It prompts for your name, the reason (include the approval reference) and the target email.
+
+Both paths write an `AdminTwoFactorResetAudit` row.
+
 ## Things that always need the owner's approval
 
 - Restoring, resetting or dropping the production database, or running destructive migrations

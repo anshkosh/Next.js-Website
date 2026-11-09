@@ -1,20 +1,12 @@
 import { adminWallStartupWhere, wallStartupWhere } from "@/lib/startup-wall";
 import { db } from "@/lib/db";
-import { auth } from "@/lib/auth";
-import { headers } from "next/headers";
-import { redirect } from "next/navigation";
 import FeaturedManager from "./FeaturedManager";
+import { requireStaffPage } from "@/lib/staff-session";
 
 export const dynamic = "force-dynamic";
 
 export default async function AdminFeaturedPage() {
-  const session = await auth.api.getSession({
-    headers: await headers(),
-  });
-
-  if (!session || (session.user.role !== "admin" && session.user.role !== "reviewer")) {
-    redirect("/login");
-  }
+  const session = await requireStaffPage();
 
   const now = new Date();
   const featuredEntries = await db.featuredStartup.findMany({

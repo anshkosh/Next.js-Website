@@ -1,13 +1,12 @@
 "use server";
 
 import { db } from "@/lib/db";
-import { auth } from "@/lib/auth";
-import { headers } from "next/headers";
 import { revalidatePath } from "next/cache";
 import { logger } from "@/lib/logger";
 import { calculateReadingTime } from "@/lib/journal-reading-time.mjs";
 import { parseJournalSchedule } from "@/lib/journal-scheduling";
 import { sanitizeJournalHtml } from "@/lib/journal-html";
+import { getStaffSession } from "@/lib/staff-session";
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -28,8 +27,8 @@ function generateExcerpt(html: string, maxLength = 160): string {
 }
 
 async function requireAdmin() {
-  const session = await auth.api.getSession({ headers: await headers() });
-  if (!session?.user.emailVerified || session.user.banned || session.user.role !== "admin") {
+  const session = await getStaffSession({ adminOnly: true });
+  if (!session) {
     throw new Error("Unauthorized");
   }
   return session;

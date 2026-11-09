@@ -1,16 +1,13 @@
 import { db } from "@/lib/db";
-import { auth } from "@/lib/auth";
-import { headers } from "next/headers";
-import { redirect } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import JournalCategoryManager from "./JournalCategoryManager";
+import { requireStaffPage } from "@/lib/staff-session";
 
 export const metadata = { title: "Journal Categories — Admin" };
 
 export default async function JournalCategoriesPage() {
-  const session = await auth.api.getSession({ headers: await headers() });
-  if (!session || session.user.role !== "admin") redirect("/admin/dashboard");
+  await requireStaffPage({ adminOnly: true });
 
   const categories = await db.journalCategory.findMany({
     orderBy: { sortOrder: "asc" },

@@ -1,15 +1,14 @@
 "use server";
 
-import { headers } from "next/headers";
-import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { applyModeration, moderationSource } from "@/lib/moderation-source";
 import { revalidateSavedPath } from "@/lib/cache-after-save";
 import { deliverNotification } from "@/lib/notification-outbox";
+import { getStaffSession } from "@/lib/staff-session";
 
 export async function reviewContent(id: string, hash: string, approve: boolean) {
-  const session = await auth.api.getSession({ headers: await headers() });
-  if (!session?.user.emailVerified || session.user.banned || !["admin", "reviewer"].includes(session.user.role ?? "")) return { error: "Reviewer access required." };
+  const session = await getStaffSession();
+  if (!session) return { error: "Reviewer access required." };
   if (typeof id !== "string" || !id || id.length > 100 || typeof hash !== "string" || !/^[a-f0-9]{64}$/.test(hash) || typeof approve !== "boolean") return { error: "Invalid review." };
   try {
     const result = await db.$transaction(async tx => {

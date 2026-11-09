@@ -1,13 +1,11 @@
 import { db } from "@/lib/db";
-import { auth } from "@/lib/auth";
-import { headers } from "next/headers";
-import { redirect } from "next/navigation";
 import Link from "next/link";
 import { Plus, ExternalLink, Clock, Star } from "lucide-react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import JournalAdminActions from "./JournalAdminActions";
 import JournalCategorySelect from "./JournalCategorySelect";
 import { calculateReadingTime } from "@/lib/journal-reading-time.mjs";
+import { requireStaffPage } from "@/lib/staff-session";
 
 export const metadata = { title: "Journal — Admin" };
 
@@ -15,8 +13,7 @@ export default async function AdminJournalPage(props: {
   searchParams: Promise<{ q?: string; status?: string; categoryId?: string; page?: string }>;
 }) {
   const searchParams = await props.searchParams;
-  const session = await auth.api.getSession({ headers: await headers() });
-  if (!session || session.user.role !== "admin") redirect("/admin/dashboard");
+  await requireStaffPage({ adminOnly: true });
 
   const q = searchParams.q ?? "";
   const status = searchParams.status ?? "";

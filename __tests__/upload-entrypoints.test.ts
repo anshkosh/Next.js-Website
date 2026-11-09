@@ -23,7 +23,7 @@ function req(bytes: Buffer = Buffer.from("invalid"), type = "image/png", origin 
 }
 beforeEach(() => {
   vi.clearAllMocks(); mock.eval.mockResolvedValue(1); mock.store.mockResolvedValue({});
-  mock.session.mockResolvedValue({ user: { id: "owner", emailVerified: true, banned: false, role: "admin" } });
+  mock.session.mockResolvedValue({ user: { id: "owner", emailVerified: true, banned: false, role: "admin", twoFactorEnabled: true }, session: { twoFactorVerified: true } });
   mock.qpdf.mockImplementation(async bytes => bytes);
 });
 describe("every upload entry point", () => {

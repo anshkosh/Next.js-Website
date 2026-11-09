@@ -1,20 +1,18 @@
 "use server";
 
 import { randomUUID } from "node:crypto";
-import { headers } from "next/headers";
-import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { deliverNotification } from "@/lib/notification-outbox";
 import { storeApprovedCommentEmail } from "@/lib/comment-notifications";
 import { commenterEmailHash, moderationExpiry, parseModerationDuration } from "@/lib/commenter-restrictions";
 import { revalidateSavedPath } from "@/lib/cache-after-save";
+import { getStaffSession } from "@/lib/staff-session";
 
-const staffRoles = ["admin", "reviewer"];
 type CommentModerationResult = { error: string } | { success: true; notificationPending?: boolean };
 
 async function getModerator() {
-  const session = await auth.api.getSession({ headers: await headers() });
-  if (!session?.user.emailVerified || session.user.banned || !staffRoles.includes(session.user.role ?? "")) return null;
+  const session = await getStaffSession();
+  if (!session) return null;
   return session.user;
 }
 

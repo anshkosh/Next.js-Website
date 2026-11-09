@@ -7,14 +7,15 @@ import { revalidateSavedPath as revalidatePath } from "@/lib/cache-after-save";
 import { createUpdateSchema, updateUpdateSchema } from "@/lib/validators/update.schema";
 import { startupReadWhere } from "@/lib/startup-read-access";
 import { createStartupUpdate, editStartupUpdate, removeStartupUpdate, StartupUpdateError } from "@/lib/startup-update-store";
+import { hasStaffAccess, staffViewer } from "@/lib/staff-access";
 
 export async function getUpdates(startupId: string) {
   if (typeof startupId !== "string" || !startupId || startupId.length > 128) return { error: "Invalid startup ID" };
   try {
     const session = await auth.api.getSession({ headers: await headers() });
     const updates = await db.startupUpdate.findMany({
-      where: { startupId, startup: startupReadWhere(session?.user),
-        OR: [{ status: "APPROVED" }, ...(session?.user.emailVerified && !session.user.banned ? [{ startup: { founderId: session.user.id } }, ...(["admin", "reviewer"].includes(session.user.role ?? "") ? [{}] : [])] : [])] },
+      where: { startupId, startup: startupReadWhere(staffViewer(session)),
+        OR: [{ status: "APPROVED" }, ...(session?.user.emailVerified && !session.user.banned ? [{ startup: { founderId: session.user.id } }, ...(hasStaffAccess(session) ? [{}] : [])] : [])] },
       orderBy: { createdAt: "desc" },
       select: { id: true, title: true, body: true, imageUrl: true, status: true, createdAt: true, updatedAt: true },
     });

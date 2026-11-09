@@ -2,18 +2,15 @@
 import { logger } from "@/lib/logger";
 
 import { db } from "@/lib/db";
-import { auth } from "@/lib/auth";
-import { headers } from "next/headers";
 import { revalidateSavedPath as revalidatePath } from "@/lib/cache-after-save";
 import { storeNotification, deliverNotification } from "@/lib/notification-outbox";
 import { addFeaturedStartup, unfeatureStartupById, setFeaturedStartupSortOrder } from "./featured";
+import { getStaffSession } from "@/lib/staff-session";
 
 export async function approveStartup(id: string) {
-  const session = await auth.api.getSession({
-    headers: await headers(),
-  });
+  const session = await getStaffSession();
 
-  if (!session?.user.emailVerified || session.user.banned || (session.user.role !== "admin" && session.user.role !== "reviewer")) {
+  if (!session) {
     return { error: "Unauthorized" };
   }
 
@@ -52,11 +49,9 @@ export async function approveStartup(id: string) {
 }
 
 export async function rejectStartup(formData: FormData) {
-  const session = await auth.api.getSession({
-    headers: await headers(),
-  });
+  const session = await getStaffSession();
 
-  if (!session?.user.emailVerified || session.user.banned || (session.user.role !== "admin" && session.user.role !== "reviewer")) {
+  if (!session) {
     return { error: "Unauthorized" };
   }
 
@@ -103,11 +98,9 @@ export async function rejectStartup(formData: FormData) {
 }
 
 export async function suspendStartup(id: string) {
-  const session = await auth.api.getSession({
-    headers: await headers(),
-  });
+  const session = await getStaffSession({ adminOnly: true });
 
-  if (!session || session.user.role !== "admin") {
+  if (!session) {
     return { error: "Unauthorized. Admin role required." };
   }
 
@@ -130,11 +123,9 @@ export async function suspendStartup(id: string) {
 }
 
 export async function unsuspendStartup(id: string) {
-  const session = await auth.api.getSession({
-    headers: await headers(),
-  });
+  const session = await getStaffSession({ adminOnly: true });
 
-  if (!session || session.user.role !== "admin") {
+  if (!session) {
     return { error: "Unauthorized. Admin role required." };
   }
 

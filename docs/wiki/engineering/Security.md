@@ -3,6 +3,12 @@
 ## Authentication
 
 - Better Auth (`lib/auth.ts`) with email/password and Google OAuth. Email verification is required before a founder can act; verification mail goes through the email queue.
+- Staff two-factor authentication (Better Auth `twoFactor` plugin, TOTP with Google Authenticator or any authenticator app):
+  - **Admins must use it.** An admin without 2FA can reach only `/admin/setup-2fa`, and every admin page and server action rejects them until they enroll. Admins cannot switch 2FA off: a `hooks.before` guard in `lib/auth.ts` rejects `/two-factor/disable` for the `admin` role.
+  - **Reviewers can opt in** at `/admin/security`, and can turn it off there.
+  - When 2FA is on, only a session created by `/two-factor/verify-totp` or `/two-factor/verify-backup-code` can open `/admin`. That is the `Session.twoFactorVerified` flag, set by the `session.create.before` database hook. Google OAuth sessions and sessions from before enrollment are sent to `/admin/login/verify?reason=reauth`. There is no "trust this device" option.
+  - The rules live in `lib/staff-access.ts` (pure) and `lib/staff-session.ts` (`getStaffSession`, `requireStaffPage`). Staff checks in pages, server actions and staff-elevated reads (pitch decks, journal images, unpublished startups, journal uploads) all go through them. A staff session that fails the 2FA rules is treated as an ordinary user for reads.
+  - Lost authenticator: another admin uses **Reset 2FA** on `/admin/admins`, or, when no admin can sign in, run `npx tsx scripts/reset-two-factor.ts --email <staff-email>`. Both revoke the target's sessions and write `AdminTwoFactorResetAudit`.
 - Trusted origins for auth and uploads come from `lib/auth-origins.ts`: `https://www.anshkosh.com` and `https://anshkosh.com` in production. Upload routes reject requests whose `Origin` is not trusted (CSRF protection).
 
 ## Roles and permissions

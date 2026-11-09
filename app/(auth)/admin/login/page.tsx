@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { authClient } from "@/lib/auth-client";
+import { ADMIN_TWO_FACTOR_PATH, authClient } from "@/lib/auth-client";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Loader2, Mail } from "lucide-react";
@@ -21,12 +21,14 @@ export default function AdminLoginPage() {
     setError("");
 
     try {
-      const { error } = await authClient.signIn.email({
+      const { data, error } = await authClient.signIn.email({
         email,
         password,
       });
 
-      if (error) {
+      if (data && "twoFactorRedirect" in data && data.twoFactorRedirect) {
+        router.push(ADMIN_TWO_FACTOR_PATH);
+      } else if (error) {
         setError(error.message || "Failed to login");
       } else {
         router.push("/admin/dashboard");

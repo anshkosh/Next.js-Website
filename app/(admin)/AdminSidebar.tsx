@@ -14,6 +14,7 @@ import {
   BookOpen,
   MessageSquare,
   ShieldAlert,
+  KeyRound,
 } from "lucide-react";
 import { useState } from "react";
 
@@ -34,6 +35,7 @@ export default function AdminSidebar({ role, pendingReviewCount, pendingCommentC
     { name: "Founder Journal review", href: "/admin/founder-journal", icon: BookOpen, roles: ["admin", "reviewer"] },
     { name: "Settings", href: "/admin/settings", icon: Settings, roles: ["admin"] },
     { name: "Admins", href: "/admin/admins", icon: Users, roles: ["admin"] },
+    { name: "Security", href: "/admin/security", icon: KeyRound, roles: ["admin", "reviewer"] },
   ];
 
   return (

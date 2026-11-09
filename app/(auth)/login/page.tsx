@@ -1,7 +1,7 @@
 "use client";
 
 import { Suspense, useState } from "react";
-import { authClient } from "@/lib/auth-client";
+import { ADMIN_TWO_FACTOR_PATH, authClient } from "@/lib/auth-client";
 import { useRouter, useSearchParams } from "next/navigation";
 import { registerHref, safeReturnPath } from "@/lib/login-return";
 import Link from "next/link";
@@ -29,12 +29,15 @@ function LoginForm() {
     setError("");
 
     try {
-      const { error } = await authClient.signIn.email({
+      const { data, error } = await authClient.signIn.email({
         email: String(fields.get("email") || ""),
         password: String(fields.get("password") || ""),
       });
 
-      if (error) {
+      if (data && "twoFactorRedirect" in data && data.twoFactorRedirect) {
+        // Accounts with two-factor (staff) finish signing in on the code screen.
+        router.push(ADMIN_TWO_FACTOR_PATH);
+      } else if (error) {
         setError(error.message || "Failed to login");
       } else {
         router.push(next);

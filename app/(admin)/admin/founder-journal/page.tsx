@@ -1,14 +1,11 @@
 import Link from "next/link";
-import { headers } from "next/headers";
-import { redirect } from "next/navigation";
-import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { founderEntrySchema, journalPage } from "@/lib/founder-journal";
 import FounderJournalReview from "@/components/admin/FounderJournalReview";
+import { requireStaffPage } from "@/lib/staff-session";
 
 export default async function FounderReviewPage({ searchParams }: { searchParams: Promise<{ page?: string }> }) {
-  const session = await auth.api.getSession({ headers: await headers() });
-  if (!session?.user.emailVerified || session.user.banned || !["admin", "reviewer"].includes(session.user.role ?? "")) redirect("/admin/dashboard");
+  await requireStaffPage();
   const page = journalPage((await searchParams).page);
   const rows = await db.founderJournalRevision.findMany({ where: { status: { in: ["PENDING_REVIEW", "SCHEDULED"] }, entry: { visibility: "PUBLIC" } }, include: { moderations: { where: { kind: "JOURNAL" }, select: { status: true, reasons: true }, take: 1 }, entry: { select: { approvedAt: true, authorId: true, startup: { select: { name: true } } } } }, orderBy: { updatedAt: "asc" }, skip: (page - 1) * 50, take: 51 });
   return <div className="max-w-4xl space-y-6"><h1 className="font-heading text-2xl font-bold">Founder Journal review</h1><p className="text-sm leading-relaxed text-gray-600">Review public submissions and scheduled replacements. Private entries are not included. Requested times use IST. Approval after a requested time has passed returns the entry to its founder with a note.</p>

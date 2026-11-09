@@ -6,8 +6,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { ExternalLink, ShieldAlert, ShieldCheck } from "lucide-react";
 import StartupsClientFilters from "./StartupsClientFilters";
-import { auth } from "@/lib/auth";
-import { headers } from "next/headers";
+import { requireStaffPage } from "@/lib/staff-session";
 import { pageNumber, pageHref, searchText } from "@/lib/pagination";
 
 export default async function AdminStartupsPage(props: {
@@ -22,10 +21,8 @@ export default async function AdminStartupsPage(props: {
   const take = 20;
   const skip = (page - 1) * take;
 
-  const session = await auth.api.getSession({
-    headers: await headers(),
-  });
-  const isAdmin = session?.user.role === "admin";
+  const session = await requireStaffPage();
+  const isAdmin = session.user.role === "admin";
 
   const where: Prisma.StartupWhereInput = {};
   if (q) {

@@ -16,6 +16,7 @@ export default function AdminTopbar({ user }: { user: { name?: string | null; ro
         <span className="text-sm font-medium text-gray-700 hidden sm:inline-block">
           {user.name} ({user.role})
         </span>
+        <Link href="/admin/security" className="inline-flex min-h-11 items-center text-sm font-medium text-gray-700 hover:text-coral-700">Two-factor</Link>
         <Link href="/settings" className="inline-flex min-h-11 items-center text-sm font-medium text-gray-700 hover:text-coral-700">Profile settings</Link>
         <Link href="/logout" prefetch={false} className="flex min-h-11 items-center gap-2 text-sm text-gray-600 hover:text-gray-900">
           <LogOut size={16} /><span className="hidden sm:inline-block">Logout</span>

@@ -31,7 +31,7 @@ describe("feature newest live startup for one day", () => {
   beforeEach(() => {
     vi.useFakeTimers();
     vi.setSystemTime(new Date("2026-10-18T10:00:00.000Z"));
-    mocks.getSession.mockResolvedValue({ user: { role: "admin", emailVerified: true, banned: false } });
+    mocks.getSession.mockResolvedValue({ user: { role: "admin", emailVerified: true, banned: false, twoFactorEnabled: true }, session: { twoFactorVerified: true } });
     mocks.startupFindFirst.mockResolvedValue({ id: "latest", name: "Latest startup" });
     mocks.startupFindUnique.mockResolvedValue({ id: "latest", name: "Latest startup" });
     mocks.featuredAggregate.mockResolvedValue({ _min: { sortOrder: 0 } });

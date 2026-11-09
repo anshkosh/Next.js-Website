@@ -33,7 +33,7 @@ lib/
   faqs.ts, founder-toolkit.ts, launch-resources.ts   Content and toolkit data
 workers/               PM2 entry points: email.ts, notification.ts, sync.ts
 prisma/                schema.prisma, migrations/, seed.ts, search-vector trigger SQL
-scripts/               set-admin-password.ts, verify-seo.mjs
+scripts/               set-admin-password.ts, reset-two-factor.ts, verify-seo.mjs
 deploy/                Deployment receiver, orchestrator, routing helper, systemd units,
                        nginx template (reference only), README
 __tests__/             Vitest unit and integration tests

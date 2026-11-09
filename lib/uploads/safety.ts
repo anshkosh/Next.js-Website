@@ -6,6 +6,7 @@ import { db } from "@/lib/db";
 import { getTrustedAuthOrigins } from "@/lib/auth-origins";
 import { type NextRequest, NextResponse } from "next/server";
 import { isolatedE2E } from "../isolated-e2e";
+import { effectiveRole } from "@/lib/staff-access";
 
 export class UploadError extends Error {
   constructor(message: string, public status = 503) { super(message); }
@@ -45,7 +46,8 @@ export async function authorizeUpload(req: NextRequest, maxBytes: number) {
   if (!session?.user.emailVerified || session.user.banned) throw new UploadError("Sign in with a verified account to upload files.", 401);
   if (Number(req.headers.get("content-length")) > maxBytes + 65536) throw new UploadError("This file exceeds the upload size limit.", 413);
   await limitUploads(session.user.id);
-  return session.user;
+  // Staff whose session skipped required 2FA upload as ordinary users.
+  return { ...session.user, role: effectiveRole(session) };
 }
 export function scanUpload(bytes: Buffer, port = Number(process.env.CLAMAV_PORT || 3310)): Promise<void> {
   // ClamD TCP is unauthenticated. Loopback only, never an Internet listener.
