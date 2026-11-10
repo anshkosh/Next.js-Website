@@ -2,6 +2,7 @@
 
 import { useId, useState } from "react";
 import { useUploadActivity } from "./useUploadActivity";
+import { useHydrated } from "@/components/useHydrated";
 import PhotoEditor from "./PhotoEditor";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
@@ -14,6 +15,8 @@ export default function EditableImageUpload({ kind, value, onChange, onBusyChang
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const inputId = useId();
+  // A photo chosen before the change handler is attached would be dropped silently.
+  const hydrated = useHydrated();
   const busy = loading || !!file;
   useUploadActivity(busy, onBusyChange);
 
@@ -49,7 +52,7 @@ export default function EditableImageUpload({ kind, value, onChange, onBusyChang
   return <div className="space-y-2 rounded-xl border border-gray-200 bg-gray-50 p-3">
     {value && <Image unoptimized width={kind === "gallery" ? 1280 : 80} height={kind === "gallery" ? 720 : 80} src={value} alt={`${label} preview`} className={kind === "gallery" ? "aspect-video w-full rounded-lg object-contain" : "h-20 w-20 rounded-lg object-contain"} />}
     <div className="flex flex-wrap items-center gap-2">
-      <input id={inputId} type="file" accept="image/png,image/jpeg,image/webp,image/gif" disabled={busy || disabled} aria-label={`Upload ${label.toLowerCase()}`} onChange={e => { selectFile(e.target.files?.[0]); e.target.value = ""; }} className="block w-full min-w-0 cursor-pointer text-sm text-gray-600 file:mr-3 file:min-h-10 file:cursor-pointer file:rounded-lg file:border file:border-gray-300 file:bg-white file:px-4 file:text-sm file:font-semibold file:text-gray-800 file:transition-colors hover:file:bg-gray-100 disabled:cursor-not-allowed" />
+      <input id={inputId} type="file" accept="image/png,image/jpeg,image/webp,image/gif" disabled={!hydrated || busy || disabled} aria-label={`Upload ${label.toLowerCase()}`} onChange={e => { selectFile(e.target.files?.[0]); e.target.value = ""; }} className="block w-full min-w-0 cursor-pointer text-sm text-gray-600 file:mr-3 file:min-h-10 file:cursor-pointer file:rounded-lg file:border file:border-gray-300 file:bg-white file:px-4 file:text-sm file:font-semibold file:text-gray-800 file:transition-colors hover:file:bg-gray-100 disabled:cursor-not-allowed" />
       {value && <>
         <Button type="button" size="sm" variant="outline" disabled={busy || disabled} onClick={editExisting}>Edit photo</Button>
         <Button type="button" size="sm" variant="ghost" disabled={busy || disabled} onClick={() => onChange("")} aria-label={`Remove ${label.toLowerCase()}`}>Remove</Button>

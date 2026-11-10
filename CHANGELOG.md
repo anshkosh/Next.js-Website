@@ -1,5 +1,13 @@
 # Website changelog
 
+## Unreleased — staff two-factor follow-ups
+
+- Apply the staff two-factor rules to Better Auth's own admin API (`/api/auth/admin/*`). An admin session that skipped the code, or an admin who has not enrolled, could previously call set-role, set-user-password, impersonate-user and similar endpoints directly.
+- Require a two-factor verified session to create backup codes, read the authenticator secret or turn two-factor off.
+- Key Better Auth's sign-in rate limits on nginx's `X-Real-IP` so visitors arriving with a multi-hop `X-Forwarded-For` no longer share one bucket.
+- Keep photo upload inputs disabled until the page is interactive, so a photo chosen early is not dropped; the browser journey now waits for the input before choosing a file.
+- Keep the two-factor setup and code forms disabled until the page is interactive. The browser journey's admin sign-in now waits for each page's heading instead of the address bar, which could briefly show the dashboard before the redirect to setup.
+
 ## Unreleased — staff two-factor authentication
 
 - Require Google Authenticator (TOTP) two-factor authentication for admins: admins without it are sent to a setup page and cannot use admin pages or actions until they enroll. Reviewers can turn it on from `/admin/security`.

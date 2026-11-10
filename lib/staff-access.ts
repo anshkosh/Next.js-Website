@@ -46,6 +46,39 @@ export function blocksTwoFactorDisable(path: string | undefined, role: string | 
   return path === "/two-factor/disable" && role === "admin";
 }
 
+/** Better Auth endpoints that change or reveal an account's second factor. */
+export const TWO_FACTOR_MANAGE_PATHS = ["/two-factor/disable", "/two-factor/generate-backup-codes", "/two-factor/get-totp-uri"] as const;
+
+/** Better Auth admin-plugin endpoints (/api/auth/admin/*): set-role, set-user-password, impersonate-user, ban-user... */
+export function isAdminApiPath(path: string | undefined): boolean {
+  // An impersonated session is an ordinary user's; it must still be able to end the impersonation.
+  return !!path && path.startsWith("/admin/") && path !== "/admin/stop-impersonating";
+}
+
+/** Whether authEndpointBlock() needs the caller's session for this path. */
+export function isGuardedAuthPath(path: string | undefined): boolean {
+  return isAdminApiPath(path) || (TWO_FACTOR_MANAGE_PATHS as readonly string[]).includes(path ?? "");
+}
+
+/**
+ * Why a Better Auth endpoint call must be refused, or null to let it through.
+ * The pages and server actions use staffAccessState(); this closes the same
+ * gap for Better Auth's own HTTP endpoints, which only check the role.
+ */
+export function authEndpointBlock(path: string | undefined, session: StaffSessionLike): string | null {
+  if (isAdminApiPath(path)) {
+    return hasStaffAccess(session) ? null : "Admin actions need a staff session that passed two-factor authentication.";
+  }
+  if (!(TWO_FACTOR_MANAGE_PATHS as readonly string[]).includes(path ?? "") || !session) return null;
+  if (blocksTwoFactorDisable(path, session.user.role)) return "Two-factor authentication is required for admin accounts.";
+  // A password plus a session that skipped the code (Google sign-in) must not be
+  // enough to read the authenticator secret, mint backup codes or switch 2FA off.
+  if (session.user.twoFactorEnabled === true && session.session.twoFactorVerified !== true) {
+    return "Sign in with your authenticator code to manage two-factor authentication.";
+  }
+  return null;
+}
+
 export function staffAccessState(session: StaffSessionLike, options: { adminOnly?: boolean } = {}): StaffAccessState {
   const user = session?.user;
   if (!user?.emailVerified || user.banned) return "denied";

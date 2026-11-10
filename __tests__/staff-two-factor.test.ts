@@ -1,7 +1,7 @@
 // @vitest-environment node
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import {
-  blocksTwoFactorDisable, effectiveRole, hasStaffAccess, sessionTwoFactorVerified,
+  authEndpointBlock, blocksTwoFactorDisable, effectiveRole, hasStaffAccess, isGuardedAuthPath, sessionTwoFactorVerified,
   staffAccessRedirect, staffAccessState, staffViewer,
 } from "../lib/staff-access";
 
@@ -79,6 +79,39 @@ it("blocks admins, not reviewers, from switching two-factor off", () => {
   expect(blocksTwoFactorDisable("/two-factor/disable", "admin")).toBe(true);
   expect(blocksTwoFactorDisable("/two-factor/disable", "reviewer")).toBe(false);
   expect(blocksTwoFactorDisable("/two-factor/enable", "admin")).toBe(false);
+});
+
+describe("Better Auth endpoint guard", () => {
+  const verified = { twoFactorEnabled: true, twoFactorVerified: true };
+  const adminApi = ["/admin/set-role", "/admin/set-user-password", "/admin/impersonate-user", "/admin/remove-user", "/admin/ban-user", "/admin/list-users"];
+
+  it.each(adminApi)("refuses %s from an admin session that skipped the second factor", path => {
+    expect(isGuardedAuthPath(path)).toBe(true);
+    expect(authEndpointBlock(path, session({ twoFactorEnabled: true }))).toMatch(/two-factor/);   // Google sign-in
+    expect(authEndpointBlock(path, session())).toMatch(/two-factor/);                             // not enrolled yet
+    expect(authEndpointBlock(path, session({ role: "user" }))).toBeTruthy();
+    expect(authEndpointBlock(path, null)).toBeTruthy();
+  });
+  it.each(adminApi)("lets %s through for a two-factor verified admin", path => {
+    expect(authEndpointBlock(path, session(verified))).toBeNull();
+  });
+  it("still lets an impersonated session stop impersonating", () => {
+    expect(isGuardedAuthPath("/admin/stop-impersonating")).toBe(false);
+    expect(authEndpointBlock("/admin/stop-impersonating", session({ role: "user" }))).toBeNull();
+  });
+  it.each(["/two-factor/generate-backup-codes", "/two-factor/get-totp-uri", "/two-factor/disable"])("refuses %s from a session that skipped the code", path => {
+    expect(isGuardedAuthPath(path)).toBe(true);
+    expect(authEndpointBlock(path, session({ role: "reviewer", twoFactorEnabled: true }))).toMatch(/authenticator code/);
+    expect(authEndpointBlock(path, session({ role: "reviewer", ...verified }))).toBeNull();
+  });
+  it("never lets an admin switch two-factor off, and leaves sign-in and enrollment alone", () => {
+    expect(authEndpointBlock("/two-factor/disable", session(verified))).toMatch(/required for admin/);
+    expect(authEndpointBlock("/two-factor/generate-backup-codes", session(verified))).toBeNull();
+    for (const path of ["/sign-in/email", "/two-factor/enable", "/two-factor/verify-totp", "/two-factor/verify-backup-code", "/get-session", undefined]) {
+      expect(isGuardedAuthPath(path)).toBe(false);
+      expect(authEndpointBlock(path, session({ twoFactorEnabled: true }))).toBeNull();
+    }
+  });
 });
 
 describe("staff actions", () => {

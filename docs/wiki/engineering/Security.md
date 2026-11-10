@@ -8,6 +8,7 @@
   - **Reviewers can opt in** at `/admin/security`, and can turn it off there.
   - When 2FA is on, only a session created by `/two-factor/verify-totp` or `/two-factor/verify-backup-code` can open `/admin`. That is the `Session.twoFactorVerified` flag, set by the `session.create.before` database hook. Google OAuth sessions and sessions from before enrollment are sent to `/admin/login/verify?reason=reauth`. There is no "trust this device" option.
   - The rules live in `lib/staff-access.ts` (pure) and `lib/staff-session.ts` (`getStaffSession`, `requireStaffPage`). Staff checks in pages, server actions and staff-elevated reads (pitch decks, journal images, unpublished startups, journal uploads) all go through them. A staff session that fails the 2FA rules is treated as an ordinary user for reads.
+  - Better Auth's own HTTP endpoints get the same rules from the `hooks.before` guard in `lib/auth-staff-guard.ts`. Its admin API (`/api/auth/admin/*`: set-role, set-user-password, impersonate-user, remove-user, ban-user and the rest) is refused unless the caller's session passes the staff rules above; the app itself never calls it. `/two-factor/generate-backup-codes`, `/two-factor/get-totp-uri` and `/two-factor/disable` need a `twoFactorVerified` session once 2FA is on, so a password plus a Google session cannot mint backup codes or read the secret. `__tests__/auth-staff-guard.test.ts` runs these against real Better Auth endpoints.
   - Lost authenticator: another admin uses **Reset 2FA** on `/admin/admins`, or, when no admin can sign in, run `npx tsx scripts/reset-two-factor.ts --email <staff-email>`. Both revoke the target's sessions and write `AdminTwoFactorResetAudit`.
 - Trusted origins for auth and uploads come from `lib/auth-origins.ts`: `https://www.anshkosh.com` and `https://anshkosh.com` in production. Upload routes reject requests whose `Origin` is not trusted (CSRF protection).
 
@@ -44,6 +45,7 @@ bounded first-party logo storage keys and LIVE parents, not remote profile URLs.
 
 ## Abuse controls
 
+- Better Auth's sign-in rate limits key on nginx's `X-Real-IP` (`advanced.ipAddress.ipAddressHeaders` in `lib/auth-staff-guard.ts`), the same header `lib/utils/client-ip.ts` trusts. Its default, `X-Forwarded-For`, is discarded when it holds more than one address, which nginx produces whenever a request already carries that header; those visitors would share one bucket and one of them could throttle sign-in for all.
 - Anonymous votes: one network identity per startup (trusted nginx `X-Real-IP`), with a 10-attempt/hour network budget. User-agent/cookie rotation and client-prepended forwarded headers do not reset it. Shared networks can share identities; this is not one-person verification.
 - Comments and the contact form use Cloudflare Turnstile and Zod validation; comments are moderated before they appear.
 - Comments, contact and beta requests also use the trusted proxy address without user-agent/forwarded-header input for their three-request/hour network limits. Rotating browser headers cannot reset those budgets.
