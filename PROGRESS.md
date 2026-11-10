@@ -1,5 +1,28 @@
 # Progress
 
+## 10 November 2026 — accounts browser photo readiness
+
+Codex reviewed the failed PR #99 main-run trace. The settings page returned
+HTTP 200 and the test set its file, then timed out before the crop dialog or
+upload request. A controlled Chromium probe against the unmodified production
+build at `712158f1` held page scripts during navigation. It confirmed the
+profile fieldset was disabled. Playwright could still programmatically set its
+file and the selection did not open the editor. After scripts loaded and the
+input enabled, selecting the same synthetic PNG opened the preview.
+
+The test helper now waits for the file input to be enabled. This is a
+test-only candidate. The controlled reproduction shows a mechanism consistent
+with the CI trace. The trace did not capture the exact handler attachment
+time. All 32 migrations and the production build passed against disposable
+fixtures. The focused reproduction passed, and the full six-test accounts
+browser group passed with the helper change in 1.3 minutes. Codex stopped and
+removed the disposable database and Redis instances.
+
+Next owner is Codex for branch review and an accounts CI check. The local
+candidate does not clear the production deployment gate.
+[Failed accounts check](https://github.com/anshkosh/Next.js-Website/actions/runs/42643489621/job/129250440715) ·
+[Playwright file action checks](https://playwright.dev/docs/actionability)
+
 ## 8 November 2026 — full startup submission review
 
 Staff can open a pending startup’s full submission from Startups or the Moderation

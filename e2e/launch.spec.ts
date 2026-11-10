@@ -131,7 +131,10 @@ async function privacyCode(to: string, subject: string) {
 }
 async function uploadPhoto(page: Page, label: string) {
   const bytes = await sharp({ create: { width: 900, height: 600, channels: 3, background: "#ec5524" } }).png().toBuffer();
-  await page.getByLabel(label, { exact: true }).setInputFiles({ name: "photo.png", mimeType: "image/png", buffer: bytes });
+  const input = page.getByLabel(label, { exact: true });
+  // setInputFiles can bypass a disabled fieldset before React attaches the change handler.
+  await expect(input).toBeEnabled();
+  await input.setInputFiles({ name: "photo.png", mimeType: "image/png", buffer: bytes });
   const dialog = page.getByRole("dialog").filter({ hasText: "Edit photo" });
   await expect(dialog.getByLabel("Photo crop preview")).toBeVisible();
   await dialog.getByRole("slider", { name: /^Zoom/ }).fill("1.5");
