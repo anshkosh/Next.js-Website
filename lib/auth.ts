@@ -6,7 +6,7 @@ import { db } from "./db";
 import { getTrustedAuthOrigins } from "./auth-origins";
 import { accountAdminOptions } from "./auth-roles";
 import { accountProfileFields } from "./account-profile";
-import { blocksTwoFactorDisable, sessionTwoFactorVerified, TWO_FACTOR_ISSUER } from "./staff-access";
+import { blocksTwoFactorDisable, hasStaffAccess, isBuiltInAdminEndpoint, sessionTwoFactorVerified, TWO_FACTOR_ISSUER } from "./staff-access";
 
 export const auth = betterAuth({
   appName: TWO_FACTOR_ISSUER,
@@ -48,6 +48,14 @@ export const auth = betterAuth({
   },
   hooks: {
     before: createAuthMiddleware(async (ctx) => {
+      // The admin plugin's own endpoints know nothing about twoFactorVerified: hold them to the same rule as /admin.
+      // (Blocks /admin/stop-impersonating too, which is fine: nobody can start impersonating without passing it.)
+      if (isBuiltInAdminEndpoint(ctx.path)) {
+        if (!hasStaffAccess(await getSessionFromCtx(ctx), { adminOnly: true })) {
+          throw new APIError("FORBIDDEN", { message: "A two-factor verified admin session is required." });
+        }
+        return;
+      }
       // 2FA is mandatory for admins: they can be reset by another admin, never switch it off themselves.
       if (ctx.path !== "/two-factor/disable") return;
       const current = await getSessionFromCtx(ctx);

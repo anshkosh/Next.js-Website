@@ -1,7 +1,7 @@
 // @vitest-environment node
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import {
-  blocksTwoFactorDisable, effectiveRole, hasStaffAccess, sessionTwoFactorVerified,
+  blocksTwoFactorDisable, effectiveRole, hasStaffAccess, isBuiltInAdminEndpoint, sessionTwoFactorVerified,
   staffAccessRedirect, staffAccessState, staffViewer,
 } from "../lib/staff-access";
 
@@ -79,6 +79,15 @@ it("blocks admins, not reviewers, from switching two-factor off", () => {
   expect(blocksTwoFactorDisable("/two-factor/disable", "admin")).toBe(true);
   expect(blocksTwoFactorDisable("/two-factor/disable", "reviewer")).toBe(false);
   expect(blocksTwoFactorDisable("/two-factor/enable", "admin")).toBe(false);
+});
+
+it("recognises Better Auth's built-in admin endpoints", () => {
+  for (const path of ["/admin/set-role", "/admin/impersonate-user", "/admin/set-user-password", "/admin"]) {
+    expect(isBuiltInAdminEndpoint(path)).toBe(true);
+  }
+  for (const path of ["/two-factor/verify-totp", "/sign-in/email", "/administrator", undefined]) {
+    expect(isBuiltInAdminEndpoint(path)).toBe(false);
+  }
 });
 
 describe("staff actions", () => {

@@ -46,6 +46,11 @@ export function blocksTwoFactorDisable(path: string | undefined, role: string | 
   return path === "/two-factor/disable" && role === "admin";
 }
 
+/** Better Auth's built-in admin-plugin endpoints (/admin/set-role, /admin/impersonate-user, ...). */
+export function isBuiltInAdminEndpoint(path: string | undefined): boolean {
+  return path === "/admin" || !!path?.startsWith("/admin/");
+}
+
 export function staffAccessState(session: StaffSessionLike, options: { adminOnly?: boolean } = {}): StaffAccessState {
   const user = session?.user;
   if (!user?.emailVerified || user.banned) return "denied";
