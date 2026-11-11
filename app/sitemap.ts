@@ -35,6 +35,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   });
 
   const categories = await db.category.findMany({
+    where: { startups: { some: publicStartupWhere } },
     select: { slug: true, updatedAt: true },
   });
 
