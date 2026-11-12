@@ -5,7 +5,7 @@ import { betterAuth } from "better-auth";
 import { admin, twoFactor } from "better-auth/plugins";
 import { memoryAdapter } from "better-auth/adapters/memory";
 import { accountAdminOptions } from "@/lib/auth-roles";
-import { authIpAddressOptions, staffAuthHooks, staffDatabaseHooks, staffSessionOptions } from "@/lib/auth-staff-guard";
+import { authIpAddressOptions, authRequestHooks, staffDatabaseHooks, staffSessionOptions } from "@/lib/auth-staff-guard";
 
 // Real Better Auth endpoints with the production staff two-factor options.
 type Row = Record<string, unknown>;
@@ -15,7 +15,7 @@ const password = "isolated-fixture-password-only";
 const instance = betterAuth({
   baseURL: origin, secret: "isolated-staff-guard-test-secret-not-production",
   database: memoryAdapter(data), emailAndPassword: { enabled: true },
-  session: staffSessionOptions, databaseHooks: staffDatabaseHooks, hooks: staffAuthHooks,
+  session: staffSessionOptions, databaseHooks: staffDatabaseHooks, hooks: authRequestHooks,
   plugins: [admin(accountAdminOptions), twoFactor({ issuer: "Anshkosh" })],
   rateLimit: { enabled: false }, logger: { disabled: true },
 });

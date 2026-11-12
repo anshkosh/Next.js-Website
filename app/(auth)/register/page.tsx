@@ -9,7 +9,7 @@ import { useSearchParams } from "next/navigation";
 import { Loader2, Mail, User, CheckCircle2 } from "lucide-react";
 import AuthHomeIcon from "@/components/auth/AuthHomeIcon";
 import PasswordField from "@/components/auth/PasswordField";
-import { isStartupSubmissionPath, loginHref, safeReturnPath } from "@/lib/login-return";
+import { isStartupSubmissionPath, loginHref, safeReturnPath, verificationLoginHref } from "@/lib/login-return";
 
 export default function RegisterPage() {
   return <Suspense fallback={<p role="status" className="p-8">Loading registration…</p>}><RegisterForm /></Suspense>;
@@ -56,7 +56,7 @@ function RegisterForm() {
         email,
         password,
         founderMode,
-        callbackURL: next,
+        callbackURL: verificationLoginHref(next),
       });
 
       if (error) {
@@ -92,7 +92,7 @@ function RegisterForm() {
               className="w-full flex justify-center py-2.5 px-4 border border-transparent rounded-lg shadow-sm text-sm font-semibold text-white bg-gray-900 hover:bg-gray-800 transition-colors"
             >
               Return to login
-            </Link><Link href="/resend-verification" className="mt-3 block text-sm text-coral-700 underline">Resend verification email</Link>
+            </Link>
           </div>
         </div>
       </div>
@@ -255,7 +255,6 @@ function RegisterForm() {
             </button>
             </fieldset>
           </form>
-          <Link href="/resend-verification" className="mt-4 inline-flex min-h-11 items-center text-sm text-coral-700 underline">Resend verification email</Link>
 
 
           <div className="mt-8 text-center text-sm">

@@ -11,6 +11,10 @@ export function loginHref(path: string | null | undefined) {
   return `/login?next=${encodeURIComponent(safeReturnPath(path))}`;
 }
 
+export function verificationLoginHref(path: string | null | undefined) {
+  return `${loginHref(path)}&verified=1`;
+}
+
 export function registerHref(path: string | null | undefined) {
   if (!path) return "/register";
   const next = safeReturnPath(path, "");

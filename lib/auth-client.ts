@@ -3,6 +3,7 @@ import { adminClient, inferAdditionalFields, twoFactorClient } from "better-auth
 import type { auth } from "./auth";
 
 export const ADMIN_TWO_FACTOR_PATH = "/admin/login/verify";
+export const VERIFICATION_REQUIRED_MESSAGE = "Check your inbox and spam folder for your verification link. If you don’t see it, wait a minute and sign in again.";
 
 export const authClient = createAuthClient({
   plugins: [
