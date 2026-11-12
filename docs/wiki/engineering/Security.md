@@ -3,6 +3,7 @@
 ## Authentication
 
 - Better Auth (`lib/auth.ts`) with email/password and Google OAuth. Email verification is required before a founder can act; verification mail goes through the email queue.
+- Manual verification resends require a signed-in session and are limited to that account's unverified address. Signed-out users can get a new link by entering the correct password at sign-in. Both resend paths share a 60-second cooldown per account alongside existing IP limits. New registrations receive the initial link automatically. Registration and sign-in verification links take the visitor to sign-in, with guidance when the link has expired.
 - Staff two-factor authentication (Better Auth `twoFactor` plugin, TOTP with Google Authenticator or any authenticator app):
   - **Admins must use it.** An admin without 2FA can reach only `/admin/setup-2fa`, and every admin page and server action rejects them until they enroll. Admins cannot switch 2FA off: a `hooks.before` guard in `lib/auth.ts` rejects `/two-factor/disable` for the `admin` role.
   - **Reviewers can opt in** at `/admin/security`, and can turn it off there.

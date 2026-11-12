@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { ADMIN_TWO_FACTOR_PATH, authClient } from "@/lib/auth-client";
+import { ADMIN_TWO_FACTOR_PATH, VERIFICATION_REQUIRED_MESSAGE, authClient } from "@/lib/auth-client";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Loader2, Mail } from "lucide-react";
@@ -24,12 +24,15 @@ export default function AdminLoginPage() {
       const { data, error } = await authClient.signIn.email({
         email,
         password,
+        fetchOptions: { query: { next: "/admin/dashboard" } },
       });
 
       if (data && "twoFactorRedirect" in data && data.twoFactorRedirect) {
         router.push(ADMIN_TWO_FACTOR_PATH);
       } else if (error) {
-        setError(error.message || "Failed to login");
+        setError(error.code === "EMAIL_NOT_VERIFIED"
+          ? VERIFICATION_REQUIRED_MESSAGE
+          : error.message || "Failed to login");
       } else {
         router.push("/admin/dashboard");
       }

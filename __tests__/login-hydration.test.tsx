@@ -20,6 +20,10 @@ it("keeps native typing through hydration and reads it into the sign-in request"
   await act(async () => root?.render(<Login />));
   expect(email.value).toBe("early@example.test"); expect(password.value).toBe("EarlySynthetic123!");
   await act(async () => container.querySelector("form")!.dispatchEvent(new Event("submit", { bubbles: true, cancelable: true })));
-  expect(m.signIn).toHaveBeenCalledWith({ email: "early@example.test", password: "EarlySynthetic123!" });
+  expect(m.signIn).toHaveBeenCalledWith({
+    email: "early@example.test",
+    password: "EarlySynthetic123!",
+    fetchOptions: { query: { next: "/dashboard" } },
+  });
   expect(m.push).toHaveBeenCalledWith("/dashboard");
 });

@@ -2,8 +2,8 @@ import { APIError, createAuthMiddleware, getSessionFromCtx } from "better-auth/a
 import type { BetterAuthOptions } from "better-auth";
 import { authEndpointBlock, isGuardedAuthPath, sessionTwoFactorVerified } from "./staff-access";
 
-// Better Auth options that enforce the staff two-factor rules. Kept apart from
-// lib/auth.ts (which needs the database) so tests can run the real hooks.
+// Better Auth guards kept apart from lib/auth.ts (which needs the database)
+// so tests can run the real hooks.
 
 export const staffSessionOptions = {
   additionalFields: {
@@ -23,8 +23,15 @@ export const staffDatabaseHooks = {
   },
 } satisfies BetterAuthOptions["databaseHooks"];
 
-export const staffAuthHooks = {
+export const authRequestHooks = {
   before: createAuthMiddleware(async (ctx) => {
+    if (ctx.path === "/send-verification-email") {
+      // Better Auth checks that a signed-in caller can only resend to their own address.
+      if (!await getSessionFromCtx(ctx)) {
+        throw new APIError("UNAUTHORIZED", { message: "Sign in to request a verification email." });
+      }
+      return;
+    }
     // Better Auth's own endpoints check only the role. Apply the staff two-factor
     // rules to its admin API and to the endpoints that manage a second factor.
     if (!isGuardedAuthPath(ctx.path)) return;

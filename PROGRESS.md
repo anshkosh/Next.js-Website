@@ -1,5 +1,13 @@
 # Progress
 
+## 12 November 2026 — verification email recovery
+
+Removed the public resend page and required a session for direct resend requests.
+An unverified account gets a fresh verification link after a correct password
+sign-in, with one resend per minute per account. Registration and sign-in links
+return to sign-in with the intended destination and recovery guidance for expired
+links. The isolated account journey covers concurrent requests and cooldown expiry.
+
 ## 8 November 2026 — full startup submission review
 
 Staff can open a pending startup’s full submission from Startups or the Moderation

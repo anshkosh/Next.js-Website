@@ -6,7 +6,8 @@ import { getTrustedAuthOrigins } from "./auth-origins";
 import { accountAdminOptions } from "./auth-roles";
 import { accountProfileFields } from "./account-profile";
 import { TWO_FACTOR_ISSUER } from "./staff-access";
-import { authIpAddressOptions, staffAuthHooks, staffDatabaseHooks, staffSessionOptions } from "./auth-staff-guard";
+import { authIpAddressOptions, authRequestHooks, staffDatabaseHooks, staffSessionOptions } from "./auth-staff-guard";
+import { sendAccountVerificationEmail } from "./auth-verification-email";
 
 export const auth = betterAuth({
   appName: TWO_FACTOR_ISSUER,
@@ -32,7 +33,7 @@ export const auth = betterAuth({
   },
   session: staffSessionOptions,
   databaseHooks: staffDatabaseHooks,
-  hooks: staffAuthHooks,
+  hooks: authRequestHooks,
   advanced: { ipAddress: authIpAddressOptions },
   emailAndPassword: {
     enabled: true,
@@ -49,18 +50,8 @@ export const auth = betterAuth({
     },
   },
   emailVerification: {
-    sendVerificationEmail: async ({ user, url }) => {
-      // Need to import emailQueue
-      const { emailQueue } = await import("@/lib/jobs/queues");
-      await emailQueue.add("email-verification", {
-        template: "welcome",
-        to: user.email,
-        data: {
-          founderName: user.name,
-          url,
-        }
-      });
-    },
+    sendOnSignIn: true,
+    sendVerificationEmail: sendAccountVerificationEmail,
   },
   socialProviders: {
     google: {

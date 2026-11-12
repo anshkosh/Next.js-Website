@@ -4,6 +4,9 @@ import sharp from "sharp";
 import { createHmac, randomUUID } from "node:crypto";
 import { readFile } from "node:fs/promises";
 import { PDFDocument } from "pdf-lib";
+import { createEmailVerificationToken } from "better-auth/api";
+import { Queue } from "bullmq";
+import Redis from "ioredis";
 import { founderEntryPath } from "../lib/founder-journal-seo";
 
 // The upload route rewrites PDFs and rejects ones pdf-lib cannot parse, so the fixture must be a real document.
@@ -830,6 +833,91 @@ test("founder lesson submission, update feedback and direct sign-out work togeth
   }
 });
 
+
+test("verification recovery needs the correct password and preserves the founder destination", { tag: "@accounts" }, async ({ browser }) => {
+  const context = await isolatedContext(browser, { baseURL: "http://127.0.0.1:3100" });
+  const other = await isolatedContext(browser, { baseURL: "http://127.0.0.1:3100" });
+  const redis = new Redis({ host: "127.0.0.1", port: Number(process.env.REDIS_PORT || 6379), db: 1, maxRetriesPerRequest: 1 });
+  const queue = new Queue("email", { connection: redis });
+  const page = await context.newPage();
+  const accountEmail = `verification-${randomUUID()}@example.test`;
+  const origin = "http://127.0.0.1:3100";
+  try {
+    await enter(page, "/register?next=%2Fstartup%2Fnew");
+    await expect(page.getByRole("link", { name: "Resend verification email" })).toHaveCount(0);
+    await expect(page.getByRole("checkbox", { name: "Enable founder mode" })).toBeChecked();
+    await page.getByLabel("Full Name", { exact: true }).fill("Verification Founder");
+    await page.getByLabel("Email address", { exact: true }).fill(accountEmail);
+    await page.locator("#register-password").fill(password);
+    await page.locator("#terms").check();
+    await page.getByRole("button", { name: "Create Account", exact: true }).click();
+    await expect(page.getByRole("heading", { name: "Check your email" })).toBeVisible();
+    const initialLink = new URL(await emailLink(accountEmail, /verify-email/));
+    expect(initialLink.searchParams.get("callbackURL")).toBe("/login?next=%2Fstartup%2Fnew&verified=1");
+
+    const anonymous = await other.request.post("/api/auth/send-verification-email", {
+      headers: { origin }, data: { email: accountEmail },
+    });
+    expect(anonymous.status()).toBe(401);
+    expect((await other.request.get("/resend-verification")).status()).toBe(404);
+    const expiredLink = new URL(initialLink);
+    expiredLink.searchParams.set("token", await createEmailVerificationToken(process.env.BETTER_AUTH_SECRET!, accountEmail, undefined, -60));
+    await enter(page, expiredLink.href);
+    await expect(page.getByRole("status").filter({ hasText: "This verification link is expired or invalid." })).toBeVisible();
+    await expect(page.getByRole("link", { name: "Resend verification email" })).toHaveCount(0);
+    await page.getByLabel("Email address", { exact: true }).fill(accountEmail);
+    await page.locator("#login-password").fill("IncorrectPassword123!");
+    const submit = () => page.getByRole("button", { name: "Sign In", exact: true }).click();
+    await submit();
+    await expect(page.getByRole("alert").filter({ hasText: "Invalid email or password" })).toBeVisible();
+
+    const user = await db.user.findUniqueOrThrow({ where: { email: accountEmail } });
+    const cooldownId = `verification-resend-${user.id}`;
+    expect(await queue.getDeduplicationJobId(cooldownId)).toBeNull();
+    const requestResend = () => other.request.post("/api/auth/sign-in/email?next=%2Fstartup%2Fnew", {
+      headers: { origin }, data: { email: accountEmail, password },
+    });
+    await page.locator("#login-password").fill(password);
+    const [, concurrent] = await Promise.all([submit(), requestResend()]);
+    expect(concurrent.status()).toBe(403);
+    await expect(page.getByRole("alert").filter({ hasText: "Check your inbox and spam folder" })).toBeVisible();
+
+    const jobId = await queue.getDeduplicationJobId(cooldownId);
+    expect(jobId).toBeTruthy();
+    const resendJob = await queue.getJob(jobId!);
+    await expect.poll(() => resendJob?.getState()).toBe("completed");
+    expect((await requestResend()).status()).toBe(403);
+    const jobs = await queue.getJobs(["waiting", "active", "completed", "delayed", "failed"]);
+    expect(jobs.filter(job => job.name === "email-verification" && job.data.to === accountEmail)).toHaveLength(2);
+
+    const cooldownKey = queue.toKey(`de:${cooldownId}`);
+    const remainingMs = await redis.pttl(cooldownKey);
+    expect(remainingMs).toBeGreaterThan(0);
+    expect(remainingMs).toBeLessThanOrEqual(60_000);
+    await redis.pexpire(cooldownKey, 1);
+    await expect.poll(() => queue.getDeduplicationJobId(cooldownId)).toBeNull();
+    expect((await requestResend()).status()).toBe(403);
+    const nextJobId = await queue.getDeduplicationJobId(cooldownId);
+    expect(nextJobId).toBeTruthy();
+    expect(nextJobId).not.toBe(jobId);
+    const nextJob = await queue.getJob(nextJobId!);
+    await expect.poll(() => nextJob?.getState()).toBe("completed");
+
+    await enter(page, nextJob!.data.data.url);
+    await expect(page.getByRole("status").filter({ hasText: "Email verified. Sign in to continue." })).toBeVisible();
+    expect(await (await context.request.get("/api/auth/get-session")).json()).toBeNull();
+    await page.getByLabel("Email address", { exact: true }).fill(accountEmail);
+    await page.locator("#login-password").fill(password);
+    await submit();
+    await expect(page).toHaveURL(/\/startup\/new$/, { timeout: 30000 });
+    await expect(page.getByRole("heading", { name: "Step 1: Basic Info" })).toBeVisible();
+  } finally {
+    await queue.close();
+    redis.disconnect();
+    await context.close();
+    await other.close();
+  }
+});
 
 test("member registration and profile settings work across modes without losing founder data", { tag: "@accounts" }, async ({ page }) => {
   const memberEmail = `member-${randomUUID()}@example.test`;

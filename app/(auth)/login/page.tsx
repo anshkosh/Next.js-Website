@@ -1,7 +1,7 @@
 "use client";
 
 import { Suspense, useState } from "react";
-import { ADMIN_TWO_FACTOR_PATH, authClient } from "@/lib/auth-client";
+import { ADMIN_TWO_FACTOR_PATH, VERIFICATION_REQUIRED_MESSAGE, authClient } from "@/lib/auth-client";
 import { useRouter, useSearchParams } from "next/navigation";
 import { registerHref, safeReturnPath } from "@/lib/login-return";
 import Link from "next/link";
@@ -17,6 +17,12 @@ function LoginForm() {
   const searchParams = useSearchParams();
   const rawNext = searchParams.get("next");
   const next = safeReturnPath(rawNext);
+  const verificationError = searchParams.get("error");
+  const verificationStatus = searchParams.get("verified") === "1"
+    ? verificationError
+      ? "This verification link is expired or invalid. Sign in to request a new one."
+      : "Email verified. Sign in to continue."
+    : "";
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
   const [error, setError] = useState("");
@@ -32,13 +38,16 @@ function LoginForm() {
       const { data, error } = await authClient.signIn.email({
         email: String(fields.get("email") || ""),
         password: String(fields.get("password") || ""),
+        fetchOptions: { query: { next } },
       });
 
       if (data && "twoFactorRedirect" in data && data.twoFactorRedirect) {
         // Accounts with two-factor (staff) finish signing in on the code screen.
         router.push(ADMIN_TWO_FACTOR_PATH);
       } else if (error) {
-        setError(error.message || "Failed to login");
+        setError(error.code === "EMAIL_NOT_VERIFIED"
+          ? VERIFICATION_REQUIRED_MESSAGE
+          : error.message || "Failed to login");
       } else {
         router.push(next);
         router.refresh();
@@ -111,8 +120,12 @@ function LoginForm() {
             </div>
           </div>
 
-          <Link href="/resend-verification" className="mt-5 inline-flex min-h-11 items-center text-sm font-medium text-coral-700 underline">Resend verification email</Link>
           <form method="post" className="space-y-5 mt-6" onSubmit={handleEmailLogin}>
+            {!error && verificationStatus && (
+              <p role="status" className="bg-gray-50 border border-gray-200 text-gray-700 text-sm p-3 rounded-lg text-center">
+                {verificationStatus}
+              </p>
+            )}
             {error && (
               <div role="alert" className="bg-red-50 border border-red-100 text-red-600 text-sm p-3 rounded-lg text-center">
                 {error}

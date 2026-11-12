@@ -1,5 +1,9 @@
 # Website changelog
 
+## Unreleased — verification email
+
+- Remove public verification resend links and require a session for direct resend requests. Signing in with the correct password sends a new link for an unverified account, subject to a 60-second cooldown. Registration and sign-in verification links return users to sign-in and explain how to recover from an expired link.
+
 ## Unreleased — staff two-factor follow-ups
 
 - Apply the staff two-factor rules to Better Auth's own admin API (`/api/auth/admin/*`). An admin session that skipped the code, or an admin who has not enrolled, could previously call set-role, set-user-password, impersonate-user and similar endpoints directly.
