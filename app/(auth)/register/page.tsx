@@ -82,10 +82,13 @@ function RegisterForm() {
             <h1 className="text-2xl font-bold text-gray-900 mb-2 font-heading">
               Check your email
             </h1>
-            <p className="text-gray-600 mb-8">
+            <p className="text-gray-600 mb-3">
               We&apos;ve sent a verification link to{" "}
               <span className="font-medium text-gray-900">{email}</span>. Please
               verify your email to continue.
+            </p>
+            <p className="text-sm text-gray-600 mb-8">
+              Can&apos;t find the email? Check your spam folder or return to login and sign in with your password to request a new link.
             </p>
             <Link
               href={rawNext ? loginHref(next) : "/login"}
