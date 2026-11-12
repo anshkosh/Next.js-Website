@@ -83,23 +83,27 @@ async function login(page: Page, account: string, secret = password, admin = fal
   await page.getByRole("button", { name: admin ? "Authenticate" : /^Sign in$/i }).click();
   if (admin) {
     // Admins must use two-factor: enroll through the real setup page once, then answer the code step.
-    await expect(page).toHaveURL(/\/admin\/(setup-2fa|login\/verify|dashboard)/, { timeout: 30000 });
-    if (page.url().includes("/admin/setup-2fa")) {
+    // Wait for each page's own heading. The address bar can show /admin/dashboard for a moment
+    // before the redirect to setup lands, so the URL alone does not say which page this is.
+    if (!adminTotpSecret) {
+      await expect(page.getByRole("heading", { name: "Set up two-factor", exact: true })).toBeVisible({ timeout: 30000 });
       await page.locator("#enable-password").fill(secret);
       await page.getByRole("button", { name: "Set up authenticator" }).click();
       await expect(page.getByRole("img", { name: "QR code for your authenticator app" })).toBeVisible({ timeout: 15000 });
       await page.getByText("Can't scan? Enter this key instead").click();
-      adminTotpSecret = (await page.locator("details code").innerText()).trim();
-      expect(adminTotpSecret).toMatch(/^[A-Z2-7]+$/);
-      await page.locator("#setup-code").fill(totp(adminTotpSecret));
+      const key = (await page.locator("details code").innerText()).trim();
+      expect(key).toMatch(/^[A-Z2-7]+$/);
+      await page.locator("#setup-code").fill(totp(key));
       await page.getByRole("button", { name: "Turn on two-factor" }).click();
       await expect(page.getByText("Save these backup codes now.")).toBeVisible({ timeout: 15000 });
+      adminTotpSecret = key;
       await page.getByRole("button", { name: "I've saved my codes" }).click();
-    } else if (page.url().includes("/admin/login/verify")) {
-      expect(adminTotpSecret, "admin enrolled in an earlier login").not.toBe("");
+    } else {
+      await expect(page.getByRole("heading", { name: "Two-factor check", exact: true })).toBeVisible({ timeout: 30000 });
       await page.locator("#two-factor-code").fill(totp(adminTotpSecret));
-      await page.getByRole("button", { name: "Verify" }).click();
+      await page.getByRole("button", { name: "Verify", exact: true }).click();
     }
+    await expect(page.getByRole("heading", { name: "Dashboard Overview", exact: true })).toBeVisible({ timeout: 30000 });
   }
   await expect(page).toHaveURL(admin ? /\/admin\/dashboard/ : /\/dashboard/, { timeout: 30000 });
 }
@@ -131,7 +135,10 @@ async function privacyCode(to: string, subject: string) {
 }
 async function uploadPhoto(page: Page, label: string) {
   const bytes = await sharp({ create: { width: 900, height: 600, channels: 3, background: "#ec5524" } }).png().toBuffer();
-  await page.getByLabel(label, { exact: true }).setInputFiles({ name: "photo.png", mimeType: "image/png", buffer: bytes });
+  const input = page.getByLabel(label, { exact: true });
+  // setInputFiles does not wait for the control; the input is disabled until its change handler is attached.
+  await expect(input).toBeEnabled();
+  await input.setInputFiles({ name: "photo.png", mimeType: "image/png", buffer: bytes });
   const dialog = page.getByRole("dialog").filter({ hasText: "Edit photo" });
   await expect(dialog.getByLabel("Photo crop preview")).toBeVisible();
   await dialog.getByRole("slider", { name: /^Zoom/ }).fill("1.5");

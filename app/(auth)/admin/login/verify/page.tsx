@@ -6,6 +6,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { KeyRound, Loader2 } from "lucide-react";
 import { authClient } from "@/lib/auth-client";
 import AdminAuthShell from "@/components/admin/AdminAuthShell";
+import { useHydrated } from "@/components/useHydrated";
 
 const inputClass = "appearance-none block w-full px-3 py-2.5 border border-gray-600 rounded-lg shadow-sm bg-gray-700 text-white placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 text-base tracking-widest transition-colors";
 const buttonClass = "w-full flex justify-center items-center gap-2 min-h-11 py-2.5 px-4 rounded-lg shadow-lg shadow-indigo-900/50 text-sm font-bold text-white bg-indigo-600 hover:bg-indigo-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-600 focus:ring-offset-gray-900 disabled:opacity-70 transition-colors";
@@ -16,6 +17,7 @@ export default function AdminTwoFactorPage() {
 
 function AdminTwoFactorForm() {
   const router = useRouter();
+  const hydrated = useHydrated();
   const reauth = useSearchParams().get("reason") === "reauth";
   const [useBackup, setUseBackup] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -94,7 +96,7 @@ function AdminTwoFactorForm() {
             />
           </div>
         </div>
-        <button type="submit" disabled={loading} className={buttonClass}>
+        <button type="submit" disabled={!hydrated || loading} className={buttonClass}>
           {loading && <Loader2 size={16} className="animate-spin" />}
           Verify
         </button>

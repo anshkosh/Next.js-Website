@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { Loader2 } from "lucide-react";
 import { authClient } from "@/lib/auth-client";
 import PasswordField from "@/components/auth/PasswordField";
+import { useHydrated } from "@/components/useHydrated";
 import TotpQrCode from "./TotpQrCode";
 
 type Tone = "dark" | "light";
@@ -45,6 +46,8 @@ export default function TwoFactorSettings({ role, enabled, hasPassword, tone = "
   doneHref?: string;
 }) {
   const router = useRouter();
+  // Submitting before the handlers are attached would post the form natively and do nothing.
+  const hydrated = useHydrated();
   const s = styles[tone];
   const [step, setStep] = useState<Step>("idle");
   const [busy, setBusy] = useState("");
@@ -139,7 +142,7 @@ export default function TwoFactorSettings({ role, enabled, hasPassword, tone = "
     <form method="post" onSubmit={onSubmit} className="space-y-3">
       <label htmlFor={id} className={`block text-sm font-medium ${s.text}`}>Current password</label>
       <PasswordField id={id} name="password" label="Current password" autoComplete="current-password" required className={s.input} />
-      <button type="submit" disabled={!!busy} className={`${btn} ${extra || s.primary}`}>
+      <button type="submit" disabled={!hydrated || !!busy} className={`${btn} ${extra || s.primary}`}>
         {busy === action && <Loader2 size={16} className="animate-spin" aria-hidden="true" />}{label}
       </button>
     </form>
@@ -172,7 +175,7 @@ export default function TwoFactorSettings({ role, enabled, hasPassword, tone = "
         <form method="post" onSubmit={confirm} className="space-y-3">
           <label htmlFor="setup-code" className={`block text-sm font-medium ${s.text}`}>6-digit code</label>
           <input id="setup-code" name="code" required autoComplete="one-time-code" inputMode="numeric" pattern="[0-9 ]{6,7}" maxLength={7} placeholder="123456" className={`${s.input} tracking-widest`} />
-          <button type="submit" disabled={!!busy} className={`${btn} w-full ${s.primary}`}>
+          <button type="submit" disabled={!hydrated || !!busy} className={`${btn} w-full ${s.primary}`}>
             {busy === "verify" && <Loader2 size={16} className="animate-spin" aria-hidden="true" />}Turn on two-factor
           </button>
         </form>

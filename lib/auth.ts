@@ -1,12 +1,12 @@
 import { betterAuth } from "better-auth";
 import { prismaAdapter } from "@better-auth/prisma-adapter";
 import { admin, twoFactor } from "better-auth/plugins";
-import { APIError, createAuthMiddleware, getSessionFromCtx } from "better-auth/api";
 import { db } from "./db";
 import { getTrustedAuthOrigins } from "./auth-origins";
 import { accountAdminOptions } from "./auth-roles";
 import { accountProfileFields } from "./account-profile";
-import { blocksTwoFactorDisable, hasStaffAccess, isBuiltInAdminEndpoint, sessionTwoFactorVerified, TWO_FACTOR_ISSUER } from "./staff-access";
+import { TWO_FACTOR_ISSUER } from "./staff-access";
+import { authIpAddressOptions, staffAuthHooks, staffDatabaseHooks, staffSessionOptions } from "./auth-staff-guard";
 
 export const auth = betterAuth({
   appName: TWO_FACTOR_ISSUER,
@@ -30,40 +30,10 @@ export const auth = betterAuth({
       },
     },
   },
-  session: {
-    additionalFields: {
-      // No Better Auth default: a rotated session keeps its predecessor's value,
-      // a fresh one gets the database default (false). See sessionTwoFactorVerified.
-      twoFactorVerified: { type: "boolean", required: false, input: false },
-    },
-  },
-  databaseHooks: {
-    session: {
-      create: {
-        before: async (session, ctx) => ({
-          data: { ...session, twoFactorVerified: sessionTwoFactorVerified(ctx?.path, session) },
-        }),
-      },
-    },
-  },
-  hooks: {
-    before: createAuthMiddleware(async (ctx) => {
-      // The admin plugin's own endpoints know nothing about twoFactorVerified: hold them to the same rule as /admin.
-      // (Blocks /admin/stop-impersonating too, which is fine: nobody can start impersonating without passing it.)
-      if (isBuiltInAdminEndpoint(ctx.path)) {
-        if (!hasStaffAccess(await getSessionFromCtx(ctx), { adminOnly: true })) {
-          throw new APIError("FORBIDDEN", { message: "A two-factor verified admin session is required." });
-        }
-        return;
-      }
-      // 2FA is mandatory for admins: they can be reset by another admin, never switch it off themselves.
-      if (ctx.path !== "/two-factor/disable") return;
-      const current = await getSessionFromCtx(ctx);
-      if (blocksTwoFactorDisable(ctx.path, current?.user.role)) {
-        throw new APIError("FORBIDDEN", { message: "Two-factor authentication is required for admin accounts." });
-      }
-    }),
-  },
+  session: staffSessionOptions,
+  databaseHooks: staffDatabaseHooks,
+  hooks: staffAuthHooks,
+  advanced: { ipAddress: authIpAddressOptions },
   emailAndPassword: {
     enabled: true,
     requireEmailVerification: true,

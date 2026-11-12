@@ -46,9 +46,43 @@ export function blocksTwoFactorDisable(path: string | undefined, role: string | 
   return path === "/two-factor/disable" && role === "admin";
 }
 
+/** Better Auth endpoints that change or reveal an account's second factor. */
+export const TWO_FACTOR_MANAGE_PATHS = ["/two-factor/disable", "/two-factor/generate-backup-codes", "/two-factor/get-totp-uri"] as const;
+
 /** Better Auth's built-in admin-plugin endpoints (/admin/set-role, /admin/impersonate-user, ...). */
 export function isBuiltInAdminEndpoint(path: string | undefined): boolean {
   return path === "/admin" || !!path?.startsWith("/admin/");
+}
+
+/** Admin-plugin endpoints held to the admin 2FA rule. */
+export function isAdminApiPath(path: string | undefined): boolean {
+  // An impersonating admin holds the target user's session; it must still be able to end the impersonation.
+  return isBuiltInAdminEndpoint(path) && path !== "/admin/stop-impersonating";
+}
+
+/** Whether authEndpointBlock() needs the caller's session for this path. */
+export function isGuardedAuthPath(path: string | undefined): boolean {
+  return isAdminApiPath(path) || (TWO_FACTOR_MANAGE_PATHS as readonly string[]).includes(path ?? "");
+}
+
+/**
+ * Why a Better Auth endpoint call must be refused, or null to let it through.
+ * The pages and server actions use staffAccessState(); this closes the same
+ * gap for Better Auth's own HTTP endpoints, which only check the role.
+ */
+export function authEndpointBlock(path: string | undefined, session: StaffSessionLike): string | null {
+  if (isAdminApiPath(path)) {
+    // Same rule as the admin-only pages: an admin with 2FA on whose session passed the code.
+    return hasStaffAccess(session, { adminOnly: true }) ? null : "A two-factor verified admin session is required.";
+  }
+  if (!(TWO_FACTOR_MANAGE_PATHS as readonly string[]).includes(path ?? "") || !session) return null;
+  if (blocksTwoFactorDisable(path, session.user.role)) return "Two-factor authentication is required for admin accounts.";
+  // A password plus a session that skipped the code (Google sign-in) must not be
+  // enough to read the authenticator secret, mint backup codes or switch 2FA off.
+  if (session.user.twoFactorEnabled === true && session.session.twoFactorVerified !== true) {
+    return "Sign in with your authenticator code to manage two-factor authentication.";
+  }
+  return null;
 }
 
 export function staffAccessState(session: StaffSessionLike, options: { adminOnly?: boolean } = {}): StaffAccessState {
