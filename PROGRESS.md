@@ -1,5 +1,11 @@
 # Progress
 
+## 13 November 2026 — startup preview image crawling
+
+Search Console marked five startup preview image URLs as failed under
+“Blocked by robots.txt”. Added a crawl exception for `/api/og/` and updated
+the SEO release check to require the exception and the general API block.
+
 ## 12 November 2026 — verification email recovery
 
 Removed the public resend page and required a session for direct resend requests.

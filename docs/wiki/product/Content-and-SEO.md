@@ -9,7 +9,7 @@ Use `seoMetadata()` from `lib/seo.ts` on every new public page so it gets a titl
 ## Indexing
 
 - `app/sitemap.ts` lists public pages, live startups, categories and journal posts.
-- `app/robots.ts` disallows `/admin/`, `/dashboard/`, `/startup/` (the founder editor), `/api/`, the auth pages and `/search`.
+- `app/robots.ts` disallows `/admin/`, `/dashboard/`, `/startup/` (the founder editor), `/api/`, the auth pages and `/search`. The more specific `/api/og/` rule allows crawlers to fetch public startup preview images.
 - The auth pages also set `robots: noindex` in `app/(auth)/layout.tsx`.
 - Organization and WebSite JSON-LD come from `lib/seo.ts`.
 - Startup JSON-LD describes the business as an `Organization`, with `Person` founders from its published team records. It does not expose the account owner's private identity or treat every business as software.
