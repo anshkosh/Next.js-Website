@@ -8,6 +8,10 @@
 - Keep photo upload inputs disabled until the page is interactive, so a photo chosen early is not dropped; the browser journey now waits for the input before choosing a file.
 - Keep the two-factor setup and code forms disabled until the page is interactive. The browser journey's admin sign-in now waits for each page's heading instead of the address bar, which could briefly show the dashboard before the redirect to setup.
 
+## Unreleased — admin API 2FA gate
+
+- Require a 2FA-verified admin session for Better Auth's built-in `/api/auth/admin/*` endpoints (set-role, impersonate-user, set-user-password, ...), so a Google or pre-enrollment admin session cannot bypass the admin-page 2FA gate through the API.
+
 ## Unreleased — staff two-factor authentication
 
 - Require Google Authenticator (TOTP) two-factor authentication for admins: admins without it are sent to a setup page and cannot use admin pages or actions until they enroll. Reviewers can turn it on from `/admin/security`.

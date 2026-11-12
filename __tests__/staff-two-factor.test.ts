@@ -1,7 +1,7 @@
 // @vitest-environment node
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import {
-  authEndpointBlock, blocksTwoFactorDisable, effectiveRole, hasStaffAccess, isGuardedAuthPath, sessionTwoFactorVerified,
+  authEndpointBlock, blocksTwoFactorDisable, effectiveRole, hasStaffAccess, isBuiltInAdminEndpoint, isGuardedAuthPath, sessionTwoFactorVerified,
   staffAccessRedirect, staffAccessState, staffViewer,
 } from "../lib/staff-access";
 
@@ -81,6 +81,15 @@ it("blocks admins, not reviewers, from switching two-factor off", () => {
   expect(blocksTwoFactorDisable("/two-factor/enable", "admin")).toBe(false);
 });
 
+it("recognises Better Auth's built-in admin endpoints", () => {
+  for (const path of ["/admin/set-role", "/admin/impersonate-user", "/admin/set-user-password", "/admin"]) {
+    expect(isBuiltInAdminEndpoint(path)).toBe(true);
+  }
+  for (const path of ["/two-factor/verify-totp", "/sign-in/email", "/administrator", undefined]) {
+    expect(isBuiltInAdminEndpoint(path)).toBe(false);
+  }
+});
+
 describe("Better Auth endpoint guard", () => {
   const verified = { twoFactorEnabled: true, twoFactorVerified: true };
   const adminApi = ["/admin/set-role", "/admin/set-user-password", "/admin/impersonate-user", "/admin/remove-user", "/admin/ban-user", "/admin/list-users"];
@@ -90,6 +99,7 @@ describe("Better Auth endpoint guard", () => {
     expect(authEndpointBlock(path, session({ twoFactorEnabled: true }))).toMatch(/two-factor/);   // Google sign-in
     expect(authEndpointBlock(path, session())).toMatch(/two-factor/);                             // not enrolled yet
     expect(authEndpointBlock(path, session({ role: "user" }))).toBeTruthy();
+    expect(authEndpointBlock(path, session({ role: "reviewer", twoFactorEnabled: true, twoFactorVerified: true }))).toBeTruthy();
     expect(authEndpointBlock(path, null)).toBeTruthy();
   });
   it.each(adminApi)("lets %s through for a two-factor verified admin", path => {
