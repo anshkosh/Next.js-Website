@@ -57,6 +57,8 @@ assert.ok(urls.every(url => url.startsWith(`${canonicalOrigin}/`)));
 assert.ok(urls.includes(`${canonicalOrigin}/leaderboard`), "Leaderboard included in sitemap");
 const robots = await get("/robots.txt");
 assert.equal(robots.response.status, 200);
+assert.match(robots.text, /^Allow: \/api\/og\/$/m, "Startup preview images are crawlable");
+assert.match(robots.text, /^Disallow: \/api\/$/m, "Other API routes stay excluded from crawling");
 assert.ok(robots.text.includes(`Sitemap: ${canonicalOrigin}/sitemap.xml`));
 const llms = await get("/llms.txt");
 assert.equal(llms.response.status, 200);
