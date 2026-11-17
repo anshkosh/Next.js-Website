@@ -24,6 +24,10 @@ for (const path of publicPaths) {
   assert.equal(document.querySelector('link[rel="canonical"]')?.href, `${canonicalOrigin}${path}`, `${path}: canonical`);
   assert.ok(![...document.querySelectorAll('meta[name="robots"]')].some(meta => meta.content.includes("noindex")), `${path}: indexable`);
   assert.equal(document.querySelector('meta[property="og:image"]')?.content, `${canonicalOrigin}/images/hero-pomegranate-v2.webp`, `${path}: social image`);
+  if (path === "/") {
+    const icons = [...document.querySelectorAll('link[rel="icon"]')];
+    assert.deepEqual(icons.map(icon => icon.getAttribute("href")), ["/favicon.png"], "One stable favicon URL");
+  }
   if (path === "/faq") {
     const faq = [...document.querySelectorAll('script[type="application/ld+json"]')]
       .map(script => JSON.parse(script.textContent)).find(schema => schema["@type"] === "FAQPage");
@@ -47,6 +51,19 @@ for (const path of ["/journal/seo-check-nonexistent-article", "/startups/seo-che
   }
   console.log(`PASS ${path}: 404 + noindex for regular and simulated crawler requests`);
 }
+
+for (const path of ["/favicon.ico", "/favicon.ico?603d046c9a6fdfbb", "/icon.svg", "/icon.svg?2c93d423c2c95545"]) {
+  const response = await fetch(new URL(path, origin), { redirect: "manual" });
+  assert.equal(response.status, 308, path + ": permanent redirect");
+  assert.equal(response.headers.get("location"), "/favicon.png", path + ": clean favicon URL");
+}
+const favicon = await fetch(new URL("/favicon.png", origin), { redirect: "manual" });
+assert.equal(favicon.status, 200, "Favicon is served directly");
+assert.equal(favicon.headers.get("content-type"), "image/png", "Favicon MIME type");
+const faviconBytes = Buffer.from(await favicon.arrayBuffer());
+assert.equal(faviconBytes.subarray(0, 8).toString("hex"), "89504e470d0a1a0a", "Favicon PNG signature");
+assert.deepEqual([faviconBytes.readUInt32BE(16), faviconBytes.readUInt32BE(20)], [96, 96], "Favicon dimensions");
+console.log("PASS legacy favicon redirects and stable PNG");
 
 const sitemap = await get("/sitemap.xml");
 assert.equal(sitemap.response.status, 200);
