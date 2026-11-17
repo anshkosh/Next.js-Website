@@ -24,6 +24,7 @@ export const metadata: Metadata = {
   metadataBase: new URL(BASE_URL),
   alternates: { canonical: "/" },
   robots: { index: true, follow: true },
+  icons: { icon: { url: "/favicon.png", type: "image/png", sizes: "96x96" } },
   openGraph: {
     title: "Anshkosh | Explore Indian Startups and What Founders Are Building",
     description: PILOT_DESCRIPTION,

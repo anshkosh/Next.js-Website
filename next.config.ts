@@ -23,7 +23,6 @@ const nextConfig: NextConfig = {
   },
   async redirects() {
     return [
-      { source: "/favicon.ico", destination: "/icon.svg", permanent: true },
       // Only map legacy campaigns with a verified current equivalent.
       { source: "/campaigns/cane-theory", destination: "/startups/cane-theory", permanent: true },
     ];

@@ -5,12 +5,18 @@ import { contentSecurityPolicy } from "@/lib/content-security-policy";
 // Next.js discovers Proxy beside app/, rather than inside app/.
 // Authentication and ownership checks remain in layouts and server actions.
 export function proxy(request: NextRequest) {
+  const { pathname, search } = request.nextUrl;
+  // Drop old build hashes when forwarding either legacy favicon URL.
+  if (pathname === "/favicon.ico" || pathname === "/icon.svg") {
+    return NextResponse.redirect(new URL("/favicon.png", request.url), 308);
+  }
+
   const nonce = randomBytes(16).toString("base64");
   const policy = contentSecurityPolicy(nonce, process.env.NODE_ENV === "development");
   const requestHeaders = new Headers(request.headers);
   // Overwrite visitor-supplied values before Next.js extracts the SSR nonce.
   requestHeaders.set("x-nonce", nonce);
-  requestHeaders.set("x-anshkosh-path", `${request.nextUrl.pathname}${request.nextUrl.search}`);
+  requestHeaders.set("x-anshkosh-path", `${pathname}${search}`);
   requestHeaders.set("Content-Security-Policy", policy);
   const response = NextResponse.next({ request: { headers: requestHeaders } });
   response.headers.set("Content-Security-Policy", policy);
@@ -20,5 +26,9 @@ export function proxy(request: NextRequest) {
 
 export const config = {
   // API routes keep their own security headers, including PDF sandbox responses.
-  matcher: ["/((?!api(?:/|$)|_next/static|_next/image|favicon.ico|icon.svg|.*\\.(?:png|jpg|jpeg|webp|gif|svg|ico|woff2?|ttf|txt|xml|json)$).*)"],
+  matcher: [
+    "/favicon.ico",
+    "/icon.svg",
+    "/((?!api(?:/|$)|_next/static|_next/image|.*\\.(?:png|jpg|jpeg|webp|gif|svg|ico|woff2?|ttf|txt|xml|json)$).*)",
+  ],
 };
