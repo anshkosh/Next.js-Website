@@ -1,5 +1,29 @@
 # Progress
 
+## 18 November 2026 — picomatch deploy CI review
+
+Owner: Codex, isolated branch `codex/fix-picomatch-ci`, updating PR #108's
+`codex/typography-parser-20261118` from `c9c253c4`. Run 44231819957 failed
+only at the dependency gate; its lint, typecheck and browser groups passed.
+No published picomatch patch exists (latest 4.0.7). Reviewed npm's five
+installed dependency paths and source imports: ESLint/TypeScript lint tooling,
+Vite/Vitest, shadcn/registry/dotenvx CLI. Better Auth's Vitest import is in
+test-utils, which application/worker/script code does not import. No direct
+glob-tool imports were found in those source trees. The exact advisory and
+versions 2.3.2, 4.0.5 and 4.0.7 receive a seven-day exception ending
+2026-11-25 00:00 UTC, with trusted-pattern/registry restrictions documented in
+the security wiki. This is unresolved tooling risk, not a vulnerability patch.
+Removed the old braces exception because the current audit no longer reports it.
+
+Validation: fresh npm ci; lint; typecheck; live dependency gate (23 affected
+package entries, one reviewed advisory, zero policy failures); 912 unit tests
+passed, two skipped; all 14 deployment-script tests passed; diff check passed.
+The initial sandboxed suite's two local TCP scanner failures passed in both
+focused and full reruns outside the sandbox. The current audit fixture also
+rejects exception expiry, a changed nested version and a critical finding.
+No application code, workflow gate, VPS configuration or production data changed.
+Updated PR awaits new isolated browser CI; no merge or deployment authorized.
+
 ## 18 November 2026 — typography parser exception removal
 
 Codex isolated the remaining typography change from the earlier dependency

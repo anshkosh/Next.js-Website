@@ -82,7 +82,33 @@ recipient addresses and provider response bodies.
 - Never commit `.env`, private keys or database dumps. Never paste secret values into issues, PRs, chat or agent messages; refer to the variable name or file path instead.
 - `pm2 jlist`, `pm2 env`, `dump.pm2` and raw logs can contain secrets. Filter them before sharing.
 
-## Dependency remediation and residual risk (18 October 2026)
+## Current dependency review (18 November 2026)
+
+The deploy PR's audit failed on [picomatch GHSA-fc5q-39xc-vjpf](https://github.com/advisories/GHSA-fc5q-39xc-vjpf),
+a denial of service from attacker-supplied repeated extglob patterns. The latest
+published version, 4.0.7, is affected; upstream lists no patched release. The
+typography parser override to 6.1.6 removes its previous advisory. The current
+audit no longer reports the old braces advisory, so its expired exception is
+removed rather than renewed.
+
+`npm explain picomatch` traces the five installed copies (2.3.2, 4.0.5 and 4.0.7)
+to ESLint/TypeScript lint resolution, Vite/Vitest and shadcn/registry/dotenvx CLI
+tooling. Better Auth's optional Vitest peer explains why some of these packages
+are not marked dev-only; source inspection found its Vitest import in
+`better-auth/dist/test-utils/test-instance.mjs`. Application, worker and script
+source does not import those glob tools or the Better Auth test-utils entrypoint.
+Next's bundled matching code is separate from these five npm audit nodes; the
+application does not configure user-supplied image remote patterns.
+
+The exact advisory and installed versions have a temporary exception ending
+**25 November 2026 at 00:00 UTC**. This accepts a bounded tooling risk; it does
+not patch picomatch or claim a clean audit. Only repository-controlled patterns
+may reach these tools. Do not pass request-supplied globs or run component CLI
+tooling against untrusted registries. Reassess if these imports/input boundaries
+change. Replace the exception with a supported upstream fix when one exists.
+CI still rejects new/critical advisories, unreviewed versions and expired reviews.
+
+## Historical dependency remediation (18 October 2026)
 
 Compatible dependency refresh reduced the audit inventory from 27 original package
 entries to 14 (12 high, 2 moderate), with no critical findings. The remaining entries
