@@ -1,5 +1,32 @@
 # Progress
 
+## 18 November 2026 — typography parser exception removal
+
+Codex isolated the remaining typography change from the earlier dependency
+branch onto current main `c1f2dedf`, preserving the shipped dependency and
+favicon fixes. The scoped override updates typography's parser from 6.0.10
+to 6.1.6 and removes its expired exception. Only that dependency changes in
+both lockfile representations. Existing metadata for other dependencies is
+retained. [Parser advisory](https://github.com/advisories/GHSA-rj75-hqrm-r3gf).
+
+Fresh installation and the final lockfile consistency dry run passed. Lint,
+typecheck, production build, 912 unit tests and all 14 deployment-script tests
+passed. Two unit tests were skipped. The build used isolated local auth
+configuration and logged missing optional Google provider credentials.
+
+The first baseline audit request timed out. The retry on the updated source
+completed and reported one remaining policy failure for
+[picomatch GHSA-fc5q-39xc-vjpf](https://github.com/advisories/GHSA-fc5q-39xc-vjpf).
+The report no longer flags the typography parser. Picomatch 2.3.2, 4.0.5 and
+4.0.7 remain in the installed tooling tree. The advisory has no published
+patched version as of this check. A source search found no direct reference
+to picomatch/micromatch/glob tooling in application, worker or script code.
+Full transitive runtime reachability remains unverified.
+
+Status is source complete with the remaining audit failure disclosed for
+independent review. Codex owns the picomatch reachability/remediation review
+and the isolated CI results before any release decision.
+
 ## 13 November 2026 — startup preview image crawling
 
 Search Console marked five startup preview image URLs as failed under
