@@ -1,12 +1,4 @@
 {
-  "reviewedAt": "2026-11-18",
-  "exceptions": [
-    {
-      "package": "picomatch",
-      "advisory": "GHSA-fc5q-39xc-vjpf",
-      "versions": ["2.3.2", "4.0.5", "4.0.7"],
-      "expires": "2026-11-25",
-      "reason": "No published patched version as of 2026-11-18. npm explain traces all five installed copies to ESLint, TypeScript lint tooling, Vite/Vitest and shadcn/dotenvx CLI tooling. Application and worker source do not import these glob matchers or Better Auth test-utils; Better Auth's Vitest import is in its test-utils entrypoint. Glob patterns are repository-controlled lint/test/CLI inputs, not request data. Do not run component registry tooling on untrusted remote registries or pass user-supplied glob patterns to these tools. Seven-day review only; replace with an upstream patch when available. See docs/wiki/engineering/Security.md."
-    }
-  ]
+  "reviewedAt": "2026-11-19",
+  "exceptions": []
 }

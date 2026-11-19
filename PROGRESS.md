@@ -1,5 +1,23 @@
 # Progress
 
+## 19 November 2026 — withdrawn advisory follow-up prepared
+
+Codex rechecked PR #108's exact head `f655888f` during the operating session.
+GitHub withdrew picomatch GHSA-fc5q-39xc-vjpf at 18 November 15:38:56 UTC,
+after that head's CI run. A fresh lockfile-only npm audit reports zero
+findings. Removed the now-unused exception in isolated branch
+`codex/dependency-review-20261119`; package versions, lockfile, application
+code and audit/workflow logic are unchanged. This is an advisory-feed change,
+not a picomatch patch or evidence of general immunity to hostile patterns.
+
+The current gate passes with zero accepted exceptions. Its five existing
+regressions pass against byte-identical evaluator/test files in the installed
+typography worktree. A synthetic replay of the withdrawn advisory is rejected
+by the empty policy; invalid audit data still fails closed. The follow-up is
+locally prepared for PR #108 review, not pushed, merged or deployed. Details,
+current public health, coordination blockers and next owners are in the
+[review record](docs/reviews/2026-11-19-dependency-review.md).
+
 ## 18 November 2026 — picomatch deploy CI review
 
 Owner: Codex, isolated branch `codex/fix-picomatch-ci`, updating PR #108's
