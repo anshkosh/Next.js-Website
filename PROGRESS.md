@@ -1,5 +1,19 @@
 # Progress
 
+## 21 November 2026 — Effect advisory patch prepared
+
+Codex independently confirmed the new Effect advisory reported in Claude #1164.
+Baseline audit has three high affected entries through Prisma 6.19.3's config
+dependency. An override scoped to @prisma/config 6.19.3 selects patched Effect
+3.22.1, retaining Prisma and all unrelated lockfile metadata/versions. No new
+exception was added. Current gate, Prisma validation/generation/config parsing,
+lint, typecheck and six focused regressions pass. Full unit suite: 913 passed,
+two skipped; all 14 deployment-script tests pass. Local build compiled and
+typechecked but page-data collection failed on synthetic local DB credentials.
+The existing isolated CI build/browser checks remain pending; no merge or
+production deployment is authorized.
+[Exact scope and check record](docs/reviews/2026-11-21-effect-patch.md).
+
 ## 19 November 2026 — withdrawn advisory follow-up prepared
 
 Codex rechecked PR #108's exact head `f655888f` during the operating session.
