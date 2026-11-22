@@ -1,5 +1,17 @@
 # Progress
 
+## 22 November 2026 — Journal India-time display correction prepared
+
+The delayed operating session implements the reproduced Journal date defect
+after the 22:00 EOD cutoff. Public article, featured and card dates now share
+an explicit Asia/Kolkata formatter. Stored timestamps and UTC metadata remain
+unchanged. Lint, typecheck and dependency gate passed; 17 focused tests and
+917 full-suite tests passed (two skipped). Three host timezones cover 18
+boundary observations. A disposable-DB browser case is prepared; CI build/
+browser acceptance and independent review remain pending. This branch retains
+reviewed PR #108 as a prerequisite and makes no production or wiki change.
+[Scope, evidence and next owners](docs/reviews/2026-11-22-journal-india-dates.md).
+
 ## 21 November 2026 — Effect advisory patch prepared
 
 Codex independently confirmed the new Effect advisory reported in Claude #1164.

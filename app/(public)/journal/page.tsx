@@ -7,6 +7,7 @@ import { BookOpen } from "lucide-react";
 import PublicPageIntro from "@/components/layout/PublicPageIntro";
 import { calculateReadingTime } from "@/lib/journal-reading-time.mjs";
 import ErrorState, { recoveryLinkClass, secondaryRecoveryLinkClass } from "@/components/site/ErrorState";
+import { formatJournalDate } from "@/lib/journal-dates";
 
 const PER_PAGE = 12;
 export const dynamic = "force-dynamic";
@@ -164,7 +165,7 @@ export default async function JournalPage(props: {
                   <div className="flex items-center gap-4 text-sm text-gray-500">
                     <span className="font-medium text-gray-600">{featuredPost.authorName}</span>
                     {featuredPost.publishedAt && (
-                      <span>{featuredPost.publishedAt.toLocaleDateString("en-IN", { day: "numeric", month: "long", year: "numeric" })}</span>
+                      <span>{formatJournalDate(featuredPost.publishedAt)}</span>
                     )}
                     <span>{calculateReadingTime(featuredPost.contentHtml)}m read</span>
                   </div>

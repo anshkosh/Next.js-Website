@@ -2,6 +2,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { Clock, Star } from "lucide-react";
 import { calculateReadingTime } from "@/lib/journal-reading-time.mjs";
+import { formatJournalDate } from "@/lib/journal-dates";
 
 interface JournalCardProps {
   post: {
@@ -17,10 +18,6 @@ interface JournalCardProps {
     category?: { name: string; slug: string } | null;
     tags: string[];
   };
-}
-
-function formatDate(date: Date) {
-  return date.toLocaleDateString("en-IN", { day: "numeric", month: "long", year: "numeric" });
 }
 
 export default function JournalCard({ post }: JournalCardProps) {
@@ -91,7 +88,7 @@ export default function JournalCard({ post }: JournalCardProps) {
         <div className="flex items-center justify-between text-xs text-gray-500 pt-1 border-t border-gray-100 mt-auto">
           <span className="font-medium text-gray-500">{post.authorName}</span>
           <div className="flex items-center gap-3">
-            {post.updatedAt ? <span>Updated {formatDate(post.updatedAt)}</span> : post.publishedAt && <span>{formatDate(post.publishedAt)}</span>}
+            {post.updatedAt ? <span>Updated {formatJournalDate(post.updatedAt)}</span> : post.publishedAt && <span>{formatJournalDate(post.publishedAt)}</span>}
             <span className="flex items-center gap-1">
               <Clock size={12} /> {calculateReadingTime(post.contentHtml)}m read
             </span>

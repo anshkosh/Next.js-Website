@@ -10,6 +10,7 @@ import { cache } from "react";
 import { DEFAULT_SOCIAL_IMAGE, SITE_URL, absoluteUrl } from "@/lib/seo";
 import { calculateReadingTime } from "@/lib/journal-reading-time.mjs";
 import { publicJournalHtml, showJournalExcerpt, serializeJsonLd } from "@/lib/journal-html";
+import { formatJournalDate } from "@/lib/journal-dates";
 
 const BASE_URL = SITE_URL;
 export const dynamic = "force-dynamic";
@@ -165,7 +166,7 @@ export default async function JournalArticlePage({ params }: Props) {
                 {post.publishedAt && (
                   <span className="flex items-center gap-1.5">
                     <Calendar size={14} />
-                    {post.publishedAt.toLocaleDateString("en-IN", { day: "numeric", month: "long", year: "numeric" })}
+                    {formatJournalDate(post.publishedAt)}
                   </span>
                 )}
                 <span className="flex items-center gap-1.5">
@@ -173,7 +174,7 @@ export default async function JournalArticlePage({ params }: Props) {
                   {calculateReadingTime(post.contentHtml)} min read
                 </span>
                 {post.updatedAt && post.publishedAt && post.updatedAt.getTime() > post.publishedAt.getTime() && (
-                  <span>Updated {post.updatedAt.toLocaleDateString("en-IN", { day: "numeric", month: "long", year: "numeric" })}</span>
+                  <span>Updated {formatJournalDate(post.updatedAt)}</span>
                 )}
                 <ArticleShare title={post.title} url={`${BASE_URL}/journal/${post.slug}`} />
               </div>
