@@ -17,7 +17,10 @@ for (const timeZone of ["America/Denver", "UTC", "Asia/Kolkata"]) {
     const script = `
       import { formatJournalDate } from './lib/journal-dates.ts';
       const instants = ${JSON.stringify(cases.map(([instant]) => instant))};
-      process.stdout.write(JSON.stringify(instants.map(value => formatJournalDate(new Date(value)))));
+      process.stdout.write(JSON.stringify({
+        hostTimeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+        dates: instants.map(value => formatJournalDate(new Date(value))),
+      }));
     `;
     const result = spawnSync(process.execPath, ["--experimental-strip-types", "--input-type=module", "-e", script], {
       cwd: process.cwd(), env: { ...process.env, TZ: timeZone },
@@ -25,7 +28,10 @@ for (const timeZone of ["America/Denver", "UTC", "Asia/Kolkata"]) {
     });
     expect(result.error).toBeUndefined();
     expect(result.status, result.stderr).toBe(0);
-    expect(JSON.parse(result.stdout)).toEqual(cases.map(([, expected]) => expected));
+    expect(JSON.parse(result.stdout)).toEqual({
+      hostTimeZone: new Intl.DateTimeFormat("en-IN", { timeZone }).resolvedOptions().timeZone,
+      dates: cases.map(([, expected]) => expected),
+    });
   }, 15_000);
 }
 

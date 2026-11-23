@@ -764,6 +764,8 @@ test("public Journal dates use India's calendar while structured dates preserve 
     const links = page.locator(`a[href="/journal/${post.slug}"]`);
     await expect(links.filter({ hasText: "✦ Featured" }).getByText("20 November 2030", { exact: true })).toBeVisible();
     await expect(links.filter({ hasText: "Updated 21 November 2030" })).toBeVisible();
+    await enter(page, `/search?q=${encodeURIComponent(post.title)}`);
+    await expect(page.locator(`a[href="/journal/${post.slug}"]`).getByText("Updated 21 November 2030", { exact: true })).toBeVisible();
     expect(await db.journalPost.findUnique({ where: { id: post.id }, select: { publishedAt: true, updatedAt: true } }))
       .toEqual({ publishedAt, updatedAt });
   } finally {

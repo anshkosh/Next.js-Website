@@ -1,5 +1,13 @@
 # Progress
 
+## 23 November 2026 — independent Journal review follow-up
+
+Claude's #1254 CHANGES found the same host-timezone defect in public Journal
+search results. That consumer now uses the shared India-time formatter, and
+the browser regression checks it. Spawned unit checks also verify the actual
+host timezone. The previous head's passing results predate these changes;
+fresh checks and exact-head re-review are pending. No release or wiki write.
+
 ## 22 November 2026 — Journal India-time display correction prepared
 
 The delayed operating session implements the reproduced Journal date defect

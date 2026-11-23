@@ -3,8 +3,9 @@
 Owner: Codex. Branch: `codex/journal-india-dates-20261122`, based on reviewed
 PR #108 head `bda9e3bc`. This delayed operating session started after the
 22 November 22:00 IST EOD cutoff; results carry into the next report.
-Status: implementation prepared; local checks passed; isolated CI and independent
-review pending. No merge or deployment.
+Status: initial head passed local checks and CI; independent review requested a
+search-result follow-up, now prepared. Fresh full-suite/CI and re-review are
+pending on the revised head. No merge or deployment.
 
 ## Defect and bounded change
 
@@ -15,16 +16,18 @@ Locale does not select India's calendar. Its old formatter returns 19 November
 on an America/Denver host.
 
 One shared formatter now explicitly uses `Asia/Kolkata` for public Journal dates:
-article published/updated dates, featured-listing publication date, and cards'
-existing updated/published fallback. No stored timestamp, structured UTC date,
+article published/updated dates, featured-listing publication date, cards'
+existing updated/published fallback, and public Journal search results.
+No stored timestamp, structured UTC date,
 publication/scheduling logic, database schema, content copy or activity treatment
 is changed. Article JSON-LD and Open Graph timestamp serialization stay intact.
 
 Regression coverage includes six instants on three independent host timezones:
 America/Denver, UTC and Asia/Kolkata. Cases cover both sides of IST midnight,
 the observed publication, the next day, year rollover and leap day. A separate
-case checks the input instant is unchanged. A disposable-DB browser case covers
-article, featured listing, card and UTC structured metadata, and reads the
+case checks the input instant is unchanged. Each child also reports its actual
+host timezone, checked against the canonical requested zone. A disposable-DB
+browser case covers article, featured listing, card, search and UTC structured metadata, and reads the
 stored dates back. Its uniquely named future fixture wins the featured slot
 without editing other records and is deleted in a finally block.
 
@@ -45,11 +48,26 @@ without editing other records and is deleted in a finally block.
 - Diff whitespace checks pass. Node is 22.23.2. No dependency versions or lock
   records differ from the reviewed base.
 
-The existing main-target PR CI provides disposable PostgreSQL/Redis and must
-pass the full production builds, database invariants and browser groups. Those
-checks and the independent exact-diff verdict remain pending at commit time.
+The above completed checks describe initial head `3af7a723`. Its CI run
+45052512390 subsequently passed, including all browser groups and the new date
+case. That success does not cover the search follow-up below.
 
 ## Dependency and ownership
+
+The session continued on 23 November in the client calendar. Claude #1254
+requested the additional public Journal date on `/search`; that consumer and
+the browser search assertion were added. The tests now verify actual child
+host timezones as well as formatted dates. The earlier head's local/CI results
+do not cover this follow-up; fresh checks and exact-head re-review are required.
+
+Fresh follow-up checks: lint and typecheck passed, and all four strengthened
+date tests passed. The first full-suite attempt had 916 passes, two skips and
+one failure: the unchanged Effect security test's child process exceeded its
+five-second limit while lint was also running. That exact security test passed
+in isolation afterward (about 2.4 seconds), without a code or timeout change.
+A full-suite rerun without concurrent lint and the new exact-head CI are pending.
+No failure is hidden or accepted as a policy exception. The date review scope
+now touches nine files from `bda9e3bc`; the Effect test is unchanged.
 
 The date change retains PR #108's reviewed dependency patches unchanged. CI is
 configured only for main-target PRs, so this dependent draft targets main and
