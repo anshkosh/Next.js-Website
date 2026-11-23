@@ -743,6 +743,36 @@ test("journal titles and bylines remain readable with and without a cover at nar
   }
 });
 
+test("public Journal dates use India's calendar while structured dates preserve UTC", { tag: "@public" }, async ({ page }) => {
+  // A future fixture wins the featured hero without changing other records.
+  const publishedAt = new Date("2030-11-19T18:30:00.000Z");
+  const updatedAt = new Date("2030-11-20T18:30:00.000Z");
+  const post = await db.journalPost.create({ data: {
+    title: "Journal India-time fixture", slug: `journal-dates-${randomUUID()}`,
+    authorName: "Journal Date Reviewer", contentHtml: "<p>A synthetic date fixture.</p>",
+    status: "PUBLISHED", publishedAt, updatedAt, isFeatured: true, tags: [], metaKeywords: [],
+  } });
+  try {
+    await enter(page, `/journal/${post.slug}`);
+    const header = page.locator("article header");
+    await expect(header.getByText("20 November 2030", { exact: true })).toBeVisible();
+    await expect(header.getByText("Updated 21 November 2030", { exact: true })).toBeVisible();
+    const structured = (await page.locator('script[type="application/ld+json"]').allTextContents())
+      .map(text => JSON.parse(text)).find(value => value["@type"] === "Article");
+    expect(structured).toMatchObject({ datePublished: publishedAt.toISOString(), dateModified: updatedAt.toISOString() });
+    await enter(page, "/journal");
+    const links = page.locator(`a[href="/journal/${post.slug}"]`);
+    await expect(links.filter({ hasText: "✦ Featured" }).getByText("20 November 2030", { exact: true })).toBeVisible();
+    await expect(links.filter({ hasText: "Updated 21 November 2030" })).toBeVisible();
+    await enter(page, `/search?q=${encodeURIComponent(post.title)}`);
+    await expect(page.locator(`a[href="/journal/${post.slug}"]`).getByText("Updated 21 November 2030", { exact: true })).toBeVisible();
+    expect(await db.journalPost.findUnique({ where: { id: post.id }, select: { publishedAt: true, updatedAt: true } }))
+      .toEqual({ publishedAt, updatedAt });
+  } finally {
+    await db.journalPost.delete({ where: { id: post.id } });
+  }
+});
+
 test("an unhydrated login submits credentials in a POST body", { tag: "@public" }, async ({ browser }) => {
   const context = await isolatedContext(browser, { javaScriptEnabled: false });
   try {

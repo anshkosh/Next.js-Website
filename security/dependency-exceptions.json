@@ -1,19 +1,4 @@
 {
-  "reviewedAt": "2026-10-28",
-  "exceptions": [
-    {
-      "package": "braces",
-      "advisory": "GHSA-vfj7-8cjw-p6xm",
-      "versions": ["3.0.3"],
-      "expires": "2026-11-18",
-      "reason": "No upstream patch exists. Reachable through build/lint/component CLI glob tooling, not application request handlers. Do not feed untrusted remote glob patterns to these tools; builds run in bounded CI. Track upstream replacement/patch separately."
-    },
-    {
-      "package": "postcss-selector-parser",
-      "advisory": "GHSA-rj75-hqrm-r3gf",
-      "versions": ["6.0.10"],
-      "expires": "2026-11-18",
-      "reason": "Tailwind typography still requires parser v6. The patch is on v7; forcing that major or downgrading typography is outside compatible remediation. Styles/selectors are trusted build inputs; public journal HTML strips arbitrary style attributes/classes. Review compatible upstream replacement separately."
-    }
-  ]
+  "reviewedAt": "2026-11-19",
+  "exceptions": []
 }
