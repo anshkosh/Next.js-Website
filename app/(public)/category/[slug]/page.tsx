@@ -16,13 +16,23 @@ export const dynamic = "force-dynamic";
 export async function generateMetadata(props: { params: Promise<{ slug: string }> }) {
   if (!process.env.DATABASE_URL) notFound();
   const { slug } = await props.params;
-  const category = await db.category.findUnique({ where: { slug }, select: { name: true, description: true } });
+  const category = await db.category.findUnique({
+    where: { slug },
+    select: {
+      name: true,
+      description: true,
+      startups: { where: publicStartupWhere, select: { id: true }, take: 1 },
+    },
+  });
   if (!category) notFound();
-  return seoMetadata({
+  const metadata = seoMetadata({
     title: `${category.name} Startups — Anshkosh`,
     description: category.description || `Explore ${category.name} startups on Anshkosh.`,
     path: `/category/${slug}`,
   });
+  return category.startups.length > 0
+    ? metadata
+    : { ...metadata, robots: { index: false, follow: true } };
 }
 
 export async function generateStaticParams() {
