@@ -62,12 +62,19 @@ describe("canonical URL policy", () => {
   it("includes only published/live detail content and accurate modification dates", async () => {
     vi.stubEnv("DATABASE_URL", "postgresql://test.example/db");
     const updatedAt = new Date("2026-10-01T00:00:00Z");
-    queries.startup.mockResolvedValue([{ slug: "live-startup", updatedAt }]);
+    queries.startup.mockResolvedValue([
+      ...Array.from({ length: 5 }, (_, index) => ({ slug: `technology-${index}`, updatedAt, categoryId: "tech" })),
+      ...Array.from({ length: 4 }, (_, index) => ({ slug: `gaming-${index}`, updatedAt, categoryId: "games" })),
+    ]);
     queries.category.mockResolvedValue([{ slug: "technology", updatedAt }]);
     queries.journalPost.mockResolvedValue([{ slug: "published-story", updatedAt }]);
     const { default: sitemap } = await import("../app/sitemap");
     const entries = await sitemap();
-    expect(entries).toHaveLength(26);
+    expect(entries).toHaveLength(34);
+    expect(queries.category).toHaveBeenCalledWith(expect.objectContaining({ where: { id: { in: ["tech"] } } }));
+    expect(entries.some(entry => entry.url === absoluteUrl("/category/technology"))).toBe(true);
+    expect(entries.some(entry => entry.url === absoluteUrl("/category/gaming"))).toBe(false);
+    expect(entries.some(entry => entry.url === absoluteUrl("/startups/gaming-0"))).toBe(true);
     expect(queries.startup).toHaveBeenCalledWith(expect.objectContaining({ where: { status: "LIVE", founder: { founderMode: true } } }));
     expect(queries.journalPost).toHaveBeenCalledWith(expect.objectContaining({ where: { status: "PUBLISHED" } }));
     expect(entries.find(entry => entry.url.endsWith("/journal/published-story"))?.lastModified).toEqual(updatedAt);
