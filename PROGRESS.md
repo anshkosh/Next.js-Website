@@ -1,5 +1,88 @@
 # Progress
 
+## 21 November 2026 — Effect advisory patch prepared
+
+Codex independently confirmed the new Effect advisory reported in Claude #1164.
+Baseline audit has three high affected entries through Prisma 6.19.3's config
+dependency. An override scoped to @prisma/config 6.19.3 selects patched Effect
+3.22.1, retaining Prisma and all unrelated lockfile metadata/versions. No new
+exception was added. Current gate, Prisma validation/generation/config parsing,
+lint, typecheck and six focused regressions pass. Full unit suite: 913 passed,
+two skipped; all 14 deployment-script tests pass. Local build compiled and
+typechecked but page-data collection failed on synthetic local DB credentials.
+The existing isolated CI build/browser checks remain pending; no merge or
+production deployment is authorized.
+[Exact scope and check record](docs/reviews/2026-11-21-effect-patch.md).
+
+## 19 November 2026 — withdrawn advisory follow-up prepared
+
+Codex rechecked PR #108's exact head `f655888f` during the operating session.
+GitHub withdrew picomatch GHSA-fc5q-39xc-vjpf at 18 November 15:38:56 UTC,
+after that head's CI run. A fresh lockfile-only npm audit reports zero
+findings. Removed the now-unused exception in isolated branch
+`codex/dependency-review-20261119`; package versions, lockfile, application
+code and audit/workflow logic are unchanged. This is an advisory-feed change,
+not a picomatch patch or evidence of general immunity to hostile patterns.
+
+The current gate passes with zero accepted exceptions. Its five existing
+regressions pass against byte-identical evaluator/test files in the installed
+typography worktree. A synthetic replay of the withdrawn advisory is rejected
+by the empty policy; invalid audit data still fails closed. The follow-up is
+locally prepared for PR #108 review, not pushed, merged or deployed. Details,
+current public health, coordination blockers and next owners are in the
+[review record](docs/reviews/2026-11-19-dependency-review.md).
+
+## 18 November 2026 — picomatch deploy CI review
+
+Owner: Codex, isolated branch `codex/fix-picomatch-ci`, updating PR #108's
+`codex/typography-parser-20261118` from `c9c253c4`. Run 44231819957 failed
+only at the dependency gate; its lint, typecheck and browser groups passed.
+No published picomatch patch exists (latest 4.0.7). Reviewed npm's five
+installed dependency paths and source imports: ESLint/TypeScript lint tooling,
+Vite/Vitest, shadcn/registry/dotenvx CLI. Better Auth's Vitest import is in
+test-utils, which application/worker/script code does not import. No direct
+glob-tool imports were found in those source trees. The exact advisory and
+versions 2.3.2, 4.0.5 and 4.0.7 receive a seven-day exception ending
+2026-11-25 00:00 UTC, with trusted-pattern/registry restrictions documented in
+the security wiki. This is unresolved tooling risk, not a vulnerability patch.
+Removed the old braces exception because the current audit no longer reports it.
+
+Validation: fresh npm ci; lint; typecheck; live dependency gate (23 affected
+package entries, one reviewed advisory, zero policy failures); 912 unit tests
+passed, two skipped; all 14 deployment-script tests passed; diff check passed.
+The initial sandboxed suite's two local TCP scanner failures passed in both
+focused and full reruns outside the sandbox. The current audit fixture also
+rejects exception expiry, a changed nested version and a critical finding.
+No application code, workflow gate, VPS configuration or production data changed.
+Updated PR awaits new isolated browser CI; no merge or deployment authorized.
+
+## 18 November 2026 — typography parser exception removal
+
+Codex isolated the remaining typography change from the earlier dependency
+branch onto current main `c1f2dedf`, preserving the shipped dependency and
+favicon fixes. The scoped override updates typography's parser from 6.0.10
+to 6.1.6 and removes its expired exception. Only that dependency changes in
+both lockfile representations. Existing metadata for other dependencies is
+retained. [Parser advisory](https://github.com/advisories/GHSA-rj75-hqrm-r3gf).
+
+Fresh installation and the final lockfile consistency dry run passed. Lint,
+typecheck, production build, 912 unit tests and all 14 deployment-script tests
+passed. Two unit tests were skipped. The build used isolated local auth
+configuration and logged missing optional Google provider credentials.
+
+The first baseline audit request timed out. The retry on the updated source
+completed and reported one remaining policy failure for
+[picomatch GHSA-fc5q-39xc-vjpf](https://github.com/advisories/GHSA-fc5q-39xc-vjpf).
+The report no longer flags the typography parser. Picomatch 2.3.2, 4.0.5 and
+4.0.7 remain in the installed tooling tree. The advisory has no published
+patched version as of this check. A source search found no direct reference
+to picomatch/micromatch/glob tooling in application, worker or script code.
+Full transitive runtime reachability remains unverified.
+
+Status is source complete with the remaining audit failure disclosed for
+independent review. Codex owns the picomatch reachability/remediation review
+and the isolated CI results before any release decision.
+
 ## 13 November 2026 — startup preview image crawling
 
 Search Console marked five startup preview image URLs as failed under
