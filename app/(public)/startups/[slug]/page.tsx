@@ -17,6 +17,7 @@ import { publicPitchDeck } from "@/lib/pitch-deck-access";
 import { publicFounderEntries } from "@/lib/founder-journal-queries";
 import { journalPage } from "@/lib/founder-journal";
 import FounderJournalSection from "@/components/startup/FounderJournalSection";
+import RelatedStartupLinks from "@/components/startup/RelatedStartupLinks";
 import BetaTesterSignup from "@/components/startup/BetaTesterSignup";
 import { viewerSession } from "@/lib/viewer-session";
 import { getActivitySignals } from "@/lib/leaderboard";
@@ -401,6 +402,13 @@ export default async function StartupDetailPage(props: {
           />
         </div>
 
+        <RelatedStartupLinks
+          startupId={startup.id}
+          startupSlug={startup.slug}
+          categoryId={startup.categoryId}
+          categorySlug={startup.category.slug}
+          city={city}
+        />
       </div>
 
       <script

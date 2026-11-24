@@ -8,7 +8,7 @@ Use `seoMetadata()` from `lib/seo.ts` on every new public page so it gets a titl
 
 ## Indexing
 
-- `app/sitemap.ts` lists public pages, live startups, categories and journal posts.
+- `app/sitemap.ts` lists public pages, live startups, journal posts and category pages with at least five public startups. Smaller categories stay accessible from the directory and startup profiles.
 - `app/robots.ts` disallows `/admin/`, `/dashboard/`, `/startup/` (the founder editor), `/api/`, the auth pages and `/search`. The more specific `/api/og/` rule allows crawlers to fetch public startup preview images.
 - The auth pages also set `robots: noindex` in `app/(auth)/layout.tsx`.
 - Organization and WebSite JSON-LD come from `lib/seo.ts`.
@@ -55,6 +55,12 @@ Articles with cover images use a white header panel with dark title, breadcrumb 
 Reading times use `lib/journal-reading-time.mjs`: visible article text at 200 words per minute, rounded up with a one-minute minimum. Journal cards, featured articles, detail pages, related articles and the admin table calculate from the current body. Create, edit and import operations use the same estimate. Existing articles do not need a database rewrite merely to correct their displayed reading time.
 
 ## Listings and backlinks
+
+Each public startup profile links to up to three other public profiles. It starts
+with startups in the same category and labels any suggestions from other categories
+separately. The profile links to a published Journal story about the startup when
+available, or to a matching sector or city ecosystem article. The Journal and
+Discover links are available on every profile.
 
 Discover paginates matching LIVE startups in batches of 24, filling complete rows
 in both its two-column tablet and three-column desktop grids. Only the final page

@@ -8,6 +8,8 @@ import { founderEntryPath } from "@/lib/founder-journal-seo";
 // Visibility and startup status changes must not leave withdrawn titles cached.
 export const dynamic = "force-dynamic";
 
+const MIN_PUBLIC_STARTUPS_PER_CATEGORY = 5;
+
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const staticRoutes: MetadataRoute.Sitemap = [
     { url: `${SITE_URL}/`, changeFrequency: "daily", priority: 1 },
@@ -31,10 +33,18 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   const startups = await db.startup.findMany({
     where: publicStartupWhere,
-    select: { slug: true, updatedAt: true },
+    select: { slug: true, updatedAt: true, categoryId: true },
   });
+  const publicStartupCounts = new Map<string, number>();
+  for (const { categoryId } of startups) {
+    publicStartupCounts.set(categoryId, (publicStartupCounts.get(categoryId) ?? 0) + 1);
+  }
 
+  const sitemapCategoryIds = [...publicStartupCounts]
+    .filter(([, count]) => count >= MIN_PUBLIC_STARTUPS_PER_CATEGORY)
+    .map(([id]) => id);
   const categories = await db.category.findMany({
+    where: { id: { in: sitemapCategoryIds } },
     select: { slug: true, updatedAt: true },
   });
 
