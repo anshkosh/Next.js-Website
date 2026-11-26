@@ -86,3 +86,16 @@ The welcome curtain, early-access status banner and top scroll-progress strip ar
 ## Reviewed category correction
 
 DroneHire fits the existing Aerospace & Drones category. `scripts/reclassify-dronehire.mjs` previews the change by default. Apply from the installed release environment only after a fresh verified backup, under the deployment lock, with `--apply --backup-state /var/www/anshkosh-shared/state/operations/backup.json --audit-dir /var/www/anshkosh-shared/state/content-audits`. The script changes only the published DroneHire category, stops on unexpected/concurrent edits, records private before/after evidence and is a no-op once corrected. No full seed, profile rewrite or vote change is needed.
+
+## Launch Card search content
+
+The Launch Card route describes the tool in its title, H1 and introduction. It
+includes a server-rendered definition, a labelled fictional example, the two PNG
+sizes and sharing guidance. The example does not prefill or overwrite saved
+founder details. The page links to the existing Launch Kit for announcement copy.
+
+The November Search Console export ends on 22 November and cannot establish the
+result of later releases. Record the actual deployment date and compare complete
+28-day page windows. Track raw counts alongside CTR. The source currently has no
+configured analytics collector, so download and profile outbound-click reporting
+requires a measurement integration before those conversions can be reported.

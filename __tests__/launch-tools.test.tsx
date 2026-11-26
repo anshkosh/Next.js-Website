@@ -10,6 +10,7 @@ import DirectoryCatalogue from "../components/launch/DirectoryCatalogue";
 import DirectoryPage, { metadata as directoryMetadata } from "../app/(public)/launch-support/directories/page";
 import ChecklistPage from "../app/(public)/launch-support/checklist/page";
 import KitPage from "../app/(public)/launch-support/kit/page";
+import LaunchCardPage, { metadata as launchCardMetadata } from "../app/(public)/launch-support/launch-card/page";
 import { FOUNDER_TOOLS } from "../lib/founder-toolkit";
 
 vi.mock("@/lib/auth-client", () => ({ authClient: { useSession: () => ({ data: null, isPending: false }) } }));
@@ -23,6 +24,19 @@ async function mount(element: React.ReactNode) { root = createRoot(container); a
 const profile = { name: "Cane Theory", tagline: "Pressed to Perfection", description: "A sugarcane pilot.", websiteUrl: "https://example.com", targetAudience: "Hyderabad", prototypeStatus: "Preparing a pilot", tractionEvidence: "No sales claimed.", logoUrl: "/images/logo.png", galleryImages: ["https://example.com/image.png", "javascript:alert(1)"], founders: [{ name: "Jai", role: "CEO" }], metadata: { privateDeck: "secret" }, startupPhone: "private-number", adminNotes: "private-notes" };
 
 describe("free launch tools", () => {
+  it("renders launch card guidance and its kit link in the server HTML", () => {
+    const html = renderToStaticMarkup(<LaunchCardPage />);
+    const page = document.createElement("div");
+    page.innerHTML = html;
+    expect(page.querySelectorAll("h1")).toHaveLength(1);
+    expect(page.querySelector("h1")?.textContent).toBe("Free startup launch card maker");
+    expect(page.querySelector("#launch-card-definition")?.textContent).toContain("What is a startup launch card?");
+    expect(page.textContent).toContain("quotedesk.example/demo");
+    expect(page.textContent).toContain("1080 × 1080");
+    expect(page.textContent).toContain("1200 × 630");
+    expect(page.querySelector('section[aria-labelledby="launch-card-example"] a[href="/launch-support/kit"]')?.textContent).toContain("Launch Kit");
+    expect(launchCardMetadata.alternates?.canonical).toBe("https://www.anshkosh.com/launch-support/launch-card");
+  });
   it("labels dropdowns without including their option text", async () => {
     await mount(<Field label="Card format" hint="Choose a size"><select defaultValue="landscape"><option value="landscape">Landscape</option><option value="square">Square</option></select></Field>);
     const select = container.querySelector("select")!;
