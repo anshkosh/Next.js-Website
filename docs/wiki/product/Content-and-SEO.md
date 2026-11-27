@@ -54,6 +54,8 @@ Articles with cover images use a white header panel with dark title, breadcrumb 
 
 Reading times use `lib/journal-reading-time.mjs`: visible article text at 200 words per minute, rounded up with a one-minute minimum. Journal cards, featured articles, detail pages, related articles and the admin table calculate from the current body. Create, edit and import operations use the same estimate. Existing articles do not need a database rewrite merely to correct their displayed reading time.
 
+Journal pagination uses `journalListParams()` and `journalListHref()` for both page links and metadata. Page 2 and later keep their own canonical. Category filters remain in the canonical and page links. Page 1 omits its default page parameter, and tracking parameters are not retained. Malformed or repeated page values fall back to page 1. Repeated category values fall back to the unfiltered list. A valid page number with no matching posts still renders the Journal empty state.
+
 ## Listings and backlinks
 
 Each public startup profile links to up to three other public profiles. It starts
