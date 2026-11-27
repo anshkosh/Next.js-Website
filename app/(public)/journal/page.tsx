@@ -7,22 +7,26 @@ import { BookOpen } from "lucide-react";
 import PublicPageIntro from "@/components/layout/PublicPageIntro";
 import { calculateReadingTime } from "@/lib/journal-reading-time.mjs";
 import ErrorState, { recoveryLinkClass, secondaryRecoveryLinkClass } from "@/components/site/ErrorState";
+import { journalListHref, journalListParams, type JournalSearchParams } from "@/lib/journal-pagination";
 
 const PER_PAGE = 12;
 export const dynamic = "force-dynamic";
 
-export const metadata = seoMetadata({
-  title: "Journal | Anshkosh — Startup Insights & Founder Stories",
-  description: "Explore articles, founder stories, industry trends, and startup insights from the Anshkosh team.",
-  path: "/journal",
-});
+export async function generateMetadata({ searchParams }: {
+  searchParams: Promise<JournalSearchParams>;
+}) {
+  const params = journalListParams(await searchParams);
+  return seoMetadata({
+    title: "Journal | Anshkosh — Startup Insights & Founder Stories",
+    description: "Explore articles, founder stories, industry trends, and startup insights from the Anshkosh team.",
+    path: journalListHref(params),
+  });
+}
 
 export default async function JournalPage(props: {
-  searchParams: Promise<{ category?: string; page?: string }>;
+  searchParams: Promise<JournalSearchParams>;
 }) {
-  const searchParams = await props.searchParams;
-  const categorySlug = searchParams.category ?? "";
-  const page = Math.max(1, parseInt(searchParams.page ?? "1"));
+  const { categorySlug, page } = journalListParams(await props.searchParams);
   const skip = (page - 1) * PER_PAGE;
 
   if (!process.env.DATABASE_URL) {
@@ -78,14 +82,6 @@ export default async function JournalPage(props: {
 
   const totalPages = Math.ceil(totalCount / PER_PAGE);
 
-  const buildPageUrl = (p: number) => {
-    const params = new URLSearchParams();
-    if (categorySlug) params.set("category", categorySlug);
-    if (p > 1) params.set("page", String(p));
-    const qs = params.toString();
-    return `/journal${qs ? `?${qs}` : ""}`;
-  };
-
   return (
     <div className="min-h-screen bg-gray-50/50">
       <PublicPageIntro title="Stories, insights & ideas" description="Founder stories, industry trends, and practical startup insights from the Anshkosh team." />
@@ -108,7 +104,7 @@ export default async function JournalPage(props: {
               {categories.map(cat => (
                 <Link
                   key={cat.slug}
-                  href={`/journal?category=${cat.slug}`}
+                  href={journalListHref({ categorySlug: cat.slug, page: 1 })}
                   className={`shrink-0 px-4 py-1.5 rounded-full text-sm font-medium transition-colors ${
                     categorySlug === cat.slug
                       ? "bg-coral-600 text-white"
@@ -203,14 +199,14 @@ export default async function JournalPage(props: {
         {totalPages > 1 && (
           <div className="flex justify-center gap-2 mt-12">
             {page > 1 && (
-              <Link href={buildPageUrl(page - 1)} className="px-4 py-2 border border-gray-200 rounded-lg text-sm text-gray-600 hover:bg-white transition-colors">
+              <Link href={journalListHref({ categorySlug, page: page - 1 })} className="px-4 py-2 border border-gray-200 rounded-lg text-sm text-gray-600 hover:bg-white transition-colors">
                 ← Previous
               </Link>
             )}
             {Array.from({ length: totalPages }).map((_, i) => (
               <Link
                 key={i}
-                href={buildPageUrl(i + 1)}
+                href={journalListHref({ categorySlug, page: i + 1 })}
                 className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
                   page === i + 1
                     ? "bg-coral-600 text-white"
@@ -221,7 +217,7 @@ export default async function JournalPage(props: {
               </Link>
             ))}
             {page < totalPages && (
-              <Link href={buildPageUrl(page + 1)} className="px-4 py-2 border border-gray-200 rounded-lg text-sm text-gray-600 hover:bg-white transition-colors">
+              <Link href={journalListHref({ categorySlug, page: page + 1 })} className="px-4 py-2 border border-gray-200 rounded-lg text-sm text-gray-600 hover:bg-white transition-colors">
                 Next →
               </Link>
             )}

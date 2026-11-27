@@ -1,5 +1,22 @@
 # Progress
 
+## 27 November 2026 — Journal pagination canonicals
+
+The Journal list now derives pagination links and metadata from one normalized
+category/page helper. Numbered pages keep a self-canonical URL, category filters
+remain attached, page 1 normalizes to the filtered or unfiltered root, and
+tracking parameters are omitted. Malformed or repeated page values use page 1;
+repeated category values use the unfiltered list. Existing out-of-range empty
+states remain unchanged. Added focused metadata, category-query and link
+regressions. The deployment SEO verifier checks rendered page-two self-canonical
+and page-one root normalization.
+
+Validation passed: the focused pagination suite has 9 passing tests, scoped ESLint
+has zero warnings, TypeScript typecheck passed, and the verifier passes
+`node --check`. The HTTP verifier was not run because no preview server was
+available in this isolated workspace. No production edits or deployment were
+made.
+
 ## 21 November 2026 — Effect advisory patch prepared
 
 Codex independently confirmed the new Effect advisory reported in Claude #1164.

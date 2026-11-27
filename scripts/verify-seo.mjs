@@ -42,6 +42,18 @@ for (const path of publicPaths) {
   console.log(`PASS ${path}: status, canonical, metadata, H1, social image`);
 }
 
+for (const [path, canonicalPath] of [
+  ["/journal?page=2", "/journal?page=2"],
+  ["/journal?page=1", "/journal"],
+]) {
+  const { response, document } = await get(path);
+  assert.equal(response.status, 200, `${path}: status`);
+  const canonicals = document.querySelectorAll('link[rel="canonical"]');
+  assert.equal(canonicals.length, 1, `${path}: one canonical`);
+  assert.equal(canonicals[0].href, `${canonicalOrigin}${canonicalPath}`, `${path}: canonical`);
+  console.log(`PASS ${path}: pagination canonical`);
+}
+
 for (const path of ["/journal/seo-check-nonexistent-article", "/startups/seo-check-nonexistent-startup", "/category/seo-check-nonexistent-category", "/seo-check-nonexistent-page"]) {
   for (const agent of [undefined, "Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)"]) {
     const { response, text, document } = await get(path, agent);
